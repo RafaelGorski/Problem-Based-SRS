@@ -26,6 +26,7 @@ Four standalone prompts covering the complete SRS lifecycle:
 ### Documentation
 
 - **[Methodology Guide](docs/METHODOLOGY.md)** - Complete explanation of Problem-Based SRS principles
+- **[Quick Reference](docs/QUICK_REFERENCE.md)** - Cheat sheet for fast lookup
 - **[GitHub Copilot Integration](docs/GITHUB_COPILOT_INTEGRATION.md)** - How to use with GitHub Copilot and Copilot Chat
 - **[Claude Code Integration](docs/CLAUDE_CODE_INTEGRATION.md)** - How to use with Claude AI for coding tasks
 
@@ -217,6 +218,8 @@ Check for completeness, consistency, clarity, and testability.
 ## 🤝 Contributing
 
 Contributions are welcome! This repository aims to stay lightweight and focused on prompts and methodology.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 Ways to contribute:
 - Submit additional examples
