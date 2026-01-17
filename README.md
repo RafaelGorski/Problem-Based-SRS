@@ -30,9 +30,11 @@ Four standalone prompts covering the complete SRS lifecycle:
 - **[GitHub Copilot Integration](docs/GITHUB_COPILOT_INTEGRATION.md)** - How to use with GitHub Copilot and Copilot Chat
 - **[Claude Code Integration](docs/CLAUDE_CODE_INTEGRATION.md)** - How to use with Claude AI for coding tasks
 
-### Examples
+### Templates & Examples
 
+- **[Getting Started Template](TEMPLATE.md)** - Ready-to-use template for your project
 - **[E-Commerce Checkout Example](examples/ecommerce-checkout-example.md)** - Complete walkthrough from problem to validated requirements
+
 
 ## 🚀 Quick Start
 
