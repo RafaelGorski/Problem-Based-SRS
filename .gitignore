@@ -52,3 +52,5 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+Problem-Based SRS.pdf
+docs/Problem-Based-SRS-Paper.md
