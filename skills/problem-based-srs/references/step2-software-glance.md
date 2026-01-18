@@ -30,9 +30,9 @@ A **Software Glance (SG)** is the rough idea of a software solution that emerges
 - Optionally: A simple block diagram showing system interactions
 
 **What a Software Glance is NOT:**
-- Customer Needs (outcomes the software must provide) → use `CN.md`
-- Software Vision (detailed positioning, stakeholders, features, architecture) → use `vision.md`
-- Software Requirements (functional/non-functional specs) → use `FR.md`
+- Customer Needs (outcomes the software must provide) → Step 3
+- Software Vision (detailed positioning, stakeholders, features, architecture) → Step 4
+- Software Requirements (functional/non-functional specs) → Step 5
 
 > **SG vs Software Vision:** The Software Glance is a rough starting point; the Software Vision (Step 4) enhances it with positioning, stakeholder analysis, feature lists, architecture decisions, and environment constraints. Do not add these details here.
 
@@ -207,7 +207,7 @@ Client contact information, feedback records, interaction history, and sales dat
 
 ### GitHub Copilot
 ```
-@workspace /glance
+/glance
 
 Business Context: [paste]
 
@@ -218,7 +218,7 @@ Customer Problems:
 
 ### Claude Code
 ```
-Execute the Software Glance prompt from @prompts/glance.md
+Execute the Software Glance step
 
 Business Context: [paste]
 

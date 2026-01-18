@@ -181,13 +181,11 @@ Generate a Software Vision document (Step 4 of Problem-Based SRS).
 **Required Inputs**:
 - Software Glance: <file_path_or_content>
 - Customer Needs: <file_path_or_content>
-
-Follow prompt: prompts/vision.md
 ```
 
 ### GitHub Copilot Example
 ```
-@workspace /new Using prompts/vision.md, create a Software Vision.
+/vision
 
 Software Glance: docs/glance.md
 Customer Needs: docs/cn.md
@@ -196,8 +194,6 @@ Project: CRM System for Small Business
 
 ### Claude Code Example
 ```
-Read prompts/vision.md
-
 Generate Software Vision (Step 4) using:
 - Software Glance: [paste content from Step 2]
 - Customer Needs: [paste content from Step 3]
@@ -207,7 +203,7 @@ Save output to: docs/software-vision.md
 
 ### Cursor IDE Example
 ```
-Using @prompts/vision.md, generate vision doc.
+Generate vision doc.
 Inputs: @docs/glance.md + @docs/cn.md
 Output: Create docs/software-vision.md
 ```
@@ -215,21 +211,21 @@ Output: Create docs/software-vision.md
 ## Process Integration
 
 ### Upstream Dependencies (Required Before This Step)
-- **Step 1**: Customer Problems document → `CP.md`
-- **Step 2**: Software Glance document → `glance.md`
-- **Step 3**: Customer Needs document → `CN.md`
+- **Step 1**: Customer Problems document
+- **Step 2**: Software Glance document
+- **Step 3**: Customer Needs document
 
 ### Downstream Artifacts (What Uses This Output)
-- **Step 5**: Software Requirements Specification → `FR.md`
+- **Step 5**: Software Requirements Specification
 
-### Related Prompts in This Repository
+### Related Files in This Repository
 ```
-prompts/
-  ├── CP.md    (Step 1)
-  ├── glance.md             (Step 2)
-  ├── CN.md       (Step 3)
-  ├── vision.md         (Step 4) ← YOU ARE HERE
-  └── FR.md (Step 5)
+.github/prompts/
+  ├── cp.prompt.md        (Step 1)
+  ├── glance.prompt.md    (Step 2)
+  ├── cn.prompt.md        (Step 3)
+  ├── vision.prompt.md    (Step 4) ← YOU ARE HERE
+  └── fr.prompt.md        (Step 5)
 ```
 
 ## Key Methodological Notes

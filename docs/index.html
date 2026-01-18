@@ -220,6 +220,16 @@
             font-size: 0.85rem;
             margin: 0.25rem;
         }
+
+        .diagram {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 1.5rem auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fff;
+        }
         
         @media (max-width: 768px) {
             header h1 {
@@ -240,7 +250,12 @@
 <body>
     <header>
         <h1>📄 Problem-Based SRS</h1>
-        <p>A lightweight, prompt-first methodology for software requirements specification designed for AI agents</p>
+        <p>An Agent Skill for Problem-Based Software Requirements Specification - AI-native methodology for better requirements engineering</p>
+        <div style="margin-top: 1rem;">
+            <span class="badge">AgentSkills Standard</span>
+            <span class="badge">GitHub Copilot Compatible</span>
+            <span class="badge">MIT License</span>
+        </div>
     </header>
     
     <nav>
@@ -248,7 +263,7 @@
             <li><a href="#overview">Overview</a></li>
             <li><a href="#methodology">Methodology</a></li>
             <li><a href="#quickstart">Quick Start</a></li>
-            <li><a href="#features">Features</a></li>
+            <li><a href="#features">Usage Patterns</a></li>
             <li><a href="#resources">Resources</a></li>
         </ul>
     </nav>
@@ -256,22 +271,39 @@
     <div class="container">
         <section id="overview">
             <h2>🎯 Overview</h2>
-            <p>Problem-Based SRS is a <strong>continuation of research</strong> by Gorski and Stadzisz on improving software requirements specification quality. The methodology addresses a critical challenge: <strong>accurately capturing business intents of stakeholders</strong>, which remains a major factor in software project failures.</p>
+            <p>An <strong><a href="https://agentskills.io" style="color: #667eea;">Agent Skill</a></strong> following the <strong>Problem-Based Software Requirements Specification (SRS)</strong> methodology. Designed for integration with AI agents like <strong>GitHub Copilot</strong> and <strong>Claude Code</strong>.</p>
             
-            <p style="margin-top: 1rem;">This repository provides <strong>standalone prompts</strong> and guidance for following a Problem-Based Software Requirements Specification methodology, designed for integration with AI agents like <strong>GitHub Copilot</strong> and <strong>Claude Code</strong>.</p>
+            <h3>📄 Background</h3>
+            <p>This repository is a <strong>continuation of research</strong> presented in the paper: <strong>"Problem-Based SRS: A Novel Approach for Software Requirements Specification"</strong> by <strong>Gorski and Stadzisz</strong>.</p>
             
-            <div class="feature-grid" style="margin-top: 2rem;">
+            <p style="margin-top: 1rem;">The methodology addresses a critical challenge: <strong>accurately capturing business intents of stakeholders</strong>, which remains a major factor in software project failures. The Problem-Based SRS methodology consists of five main steps that systematically analyze business context and specify software requirements while considering solution design.</p>
+            
+            <div style="background: #f8f9fa; padding: 1rem; border-left: 4px solid #667eea; margin: 1.5rem 0;">
+                <strong>Supported Formats:</strong> This repository provides <a href="https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files" style="color: #667eea;">GitHub Copilot prompt files</a> (<code>.github/prompts/</code>) and <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> (<code>skills/</code>) for maximum compatibility with AI coding assistants.
+            </div>
+            
+            <h3 style="margin-top: 2rem;">🎯 Purpose</h3>
+            <p>Enable software engineers and requirements analysts to leverage AI agents for better requirements engineering by providing:</p>
+            <div class="feature-grid" style="margin-top: 1.5rem;">
                 <div class="feature-card">
-                    <h3>🧩 Problem-First</h3>
-                    <p>Identify real customer problems before proposing solutions</p>
+                    <h3>📝 Structured Skills</h3>
+                    <p>For each phase of requirements gathering</p>
                 </div>
                 <div class="feature-card">
-                    <h3>🤖 AI-Native</h3>
-                    <p>Designed for consumption by AI agents and assistants</p>
+                    <h3>🧩 Problem-First</h3>
+                    <p>Methodology ensuring requirements solve real needs</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🤖 AI Integration</h3>
+                    <p>Compatible with Claude Code, Claude.ai, and Claude API</p>
                 </div>
                 <div class="feature-card">
                     <h3>⚡ Lightweight</h3>
-                    <p>No heavy frameworks or complex tooling required</p>
+                    <p>No heavy tooling or frameworks required</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📚 Examples & Templates</h3>
+                    <p>Ready for immediate use</p>
                 </div>
             </div>
         </section>
@@ -280,144 +312,239 @@
             <h2>📊 The 5-Step Methodology</h2>
             <p>The Problem-Based SRS methodology consists of five structured steps that systematically analyze business context and specify software requirements:</p>
             
+            <img class="diagram" src="img/5-step-process.png" alt="5-step methodology flowchart">
+            
             <div class="step-flow">
                 <div class="step">
                     <h4>Step 1: Customer Problems (CP)</h4>
-                    <p>Identify and classify customer problems by severity: Obligations (must solve), Expectations (should solve), Hopes (nice to solve)</p>
-                    <span class="badge">prompts/CP.md</span>
+                    <p>Identify the <strong>WHY</strong> - understand and classify customer problems by severity</p>
+                    <span class="badge">/cp</span>
                 </div>
                 
                 <div class="step">
                     <h4>Step 2: Software Glance</h4>
-                    <p>Create a high-level view of the solution approach without detailed design</p>
-                    <span class="badge">prompts/glance.md</span>
+                    <p>Draft the software high-level components and solution approach</p>
+                    <span class="badge">/glance</span>
                 </div>
                 
                 <div class="step">
                     <h4>Step 3: Customer Needs (CN)</h4>
-                    <p>Specify what the system must do to solve the identified problems</p>
-                    <span class="badge">prompts/CN.md</span>
+                    <p>Define the <strong>WHAT</strong> - customer needs that should help solve the problems</p>
+                    <span class="badge">/cn</span>
+                    <span class="badge">/zigzag (validate)</span>
                 </div>
                 
                 <div class="step">
                     <h4>Step 4: Software Vision</h4>
-                    <p>Define features, architecture, and technical constraints</p>
-                    <span class="badge">prompts/vision.md</span>
+                    <p>Detail the software architecture, features, and constraints</p>
+                    <span class="badge">/vision</span>
                 </div>
                 
                 <div class="step">
                     <h4>Step 5: Functional Requirements (FR)</h4>
-                    <p>Generate detailed, traceable functional requirements</p>
-                    <span class="badge">prompts/FR.md</span>
+                    <p>Define the <strong>HOW</strong> - detailed implementation requirements</p>
+                    <span class="badge">/fr</span>
+                    <span class="badge">/zigzag (validate)</span>
                 </div>
             </div>
             
+            <h3 style="margin-top: 2rem;">🔄 Development Workflow Integration</h3>
+            <img class="diagram" src="img/development-workflow.png" alt="Development workflow integration diagram">
+            
             <h3>🔗 Artifact Traceability</h3>
-            <p>Every requirement traces back to ensure it solves real problems:</p>
-            <p style="margin-top: 1rem;"><strong>CP</strong> → <strong>CN</strong> → <strong>FR</strong></p>
-            <p style="margin-top: 0.5rem;">Each artifact is interconnected, ensuring requirements provide suitable answers to real customer business issues.</p>
+            <p>Every requirement traces back to ensure it solves real problems. Each artifact is interconnected:</p>
+            <img class="diagram" src="img/artifact-traceability.png" alt="Artifact traceability diagram">
+            
+            <h3>📊 Problem Classification</h3>
+            <p>Customer Problems are classified by severity to prioritize what must be solved:</p>
+            <img class="diagram" src="img/problem-classification.png" alt="Problem classification diagram">
+            <ul style="margin-top: 1rem; line-height: 2;">
+                <li><strong>Obligation (Must/Required):</strong> High priority - severe consequences if unsolved (legal/contractual)</li>
+                <li><strong>Expectation (Should/Expects):</strong> Medium priority - moderate impact if unsolved (business goals)</li>
+                <li><strong>Hope (Wishes):</strong> Low priority - minimal penalty if unsolved (improvements)</li>
+            </ul>
         </section>
         
         <section id="quickstart">
             <h2>🚀 Quick Start for Engineers</h2>
             
+            <h3>Using GitHub Copilot Prompt Files (Recommended)</h3>
+            <p>The prompts are available as <code>.prompt.md</code> files in <code>.github/prompts/</code>. In VS Code, Visual Studio, or JetBrains IDEs:</p>
+            
+            <pre><code>/cp           # Start with Customer Problems
+/glance       # Create Software Glance
+/cn           # Generate Customer Needs
+/vision       # Build Software Vision
+/fr           # Specify Functional Requirements
+/zigzag       # Validate traceability
+/srs-coordinator  # Full methodology orchestration</code></pre>
+            
+            <h3>Using with Any AI Agent (Universal)</h3>
+            <p>The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).</p>
+            
+            <p><strong>Option 1: AgentSkills (Open Standard)</strong></p>
+            <p>The <code>skills/</code> directory follows the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>, compatible with any tool that implements it.</p>
+            
+            <ul style="margin-top: 1rem; line-height: 2;">
+                <li><strong>For Claude Code:</strong> The skill will auto-discover when this repository is in your workspace.</li>
+                <li><strong>For Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder).</li>
+            </ul>
+            
             <h3>For New Features</h3>
-            <p>When starting a new feature, use the AI agent with each prompt:</p>
+            <p>Simply describe your business context or problem:</p>
             
-            <pre><code>1. Identify Problems
-@workspace Using prompts/CP.md, identify customer problems for [feature name]
-Business Context: [describe current situation]
+            <pre><code>I need to create requirements for [feature name]
 
-2. Design Solution Glance
-@workspace Using prompts/glance.md, create a software glance
-Input: [your CPs from step 1]
-
-3. Specify Needs
-@workspace Using prompts/CN.md, specify customer needs
-Input: [CPs and Software Glance]
-
-4. Define Vision
-@workspace Using prompts/vision.md, create software vision
-Input: [CPs, Glance, CNs]
-
-5. Generate Requirements
-@workspace Using prompts/FR.md, generate functional requirements
-Input: [all previous artifacts]</code></pre>
+Business Context: [describe current situation]</code></pre>
             
-            <h3>Starting from Scratch</h3>
-            <p>If you're new to a project or have only a business idea:</p>
-            <pre><code>@workspace Use prompts/problem-based-SRS.md to guide me through requirements</code></pre>
+            <p style="margin-top: 1rem;">The skill will automatically:</p>
+            <ul style="line-height: 2;">
+                <li>Detect what step you're on</li>
+                <li>Load the appropriate reference guide</li>
+                <li>Walk you through the process</li>
+                <li>Ensure traceability back to business problems</li>
+            </ul>
             
-            <h3>Validating Existing Requirements</h3>
-            <p>To check consistency between artifacts:</p>
-            <pre><code>@workspace Using prompts/zigzag.md, validate traceability between my CPs, CNs, and Requirements</code></pre>
+            <h3>Specific Step Examples</h3>
+            
+            <p><strong>Start with Customer Problems:</strong></p>
+            <pre><code>Help me identify customer problems for my inventory management system</code></pre>
+            
+            <p><strong>Create Software Glance:</strong></p>
+            <pre><code>I have customer problems documented, need to create a software glance</code></pre>
+            
+            <p><strong>Validate Traceability:</strong></p>
+            <pre><code>Check if my requirements properly trace back to customer problems</code></pre>
         </section>
         
         <section id="features">
-            <h2>💡 Key Features</h2>
+            <h2>💡 Usage Patterns</h2>
             
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h3>📝 Structured Prompts</h3>
-                    <p>Ready-to-use prompts for each phase of requirements gathering</p>
+                    <h3>Pattern 1: Full Feature Development</h3>
+                    <p><strong>When:</strong> Building a new feature from business need</p>
+                    <p><strong>Start with:</strong> <code>/srs-coordinator</code></p>
+                    <p><strong>Follow:</strong> All 5 steps sequentially</p>
                 </div>
                 
                 <div class="feature-card">
-                    <h3>🎨 Templates & Examples</h3>
-                    <p>Real-world examples demonstrating the methodology in action</p>
+                    <h3>Pattern 2: Requirements Refinement</h3>
+                    <p><strong>When:</strong> You have draft requirements that need structure</p>
+                    <p><strong>Start with:</strong> <code>/fr</code> in review mode</p>
+                    <p><strong>Then:</strong> Work backwards to validate against CNs and CPs</p>
                 </div>
                 
                 <div class="feature-card">
-                    <h3>✅ Quality Validation</h3>
-                    <p>Zigzag tool to verify traceability and completeness</p>
+                    <h3>Pattern 3: Problem Discovery</h3>
+                    <p><strong>When:</strong> Stakeholders describe solutions, not problems</p>
+                    <p><strong>Start with:</strong> <code>/cp</code> in generation mode</p>
+                    <p><strong>Use:</strong> Discovery questions to elicit actual problems</p>
                 </div>
                 
                 <div class="feature-card">
-                    <h3>🔄 Workflow Integration</h3>
-                    <p>Patterns for sprint planning, design, implementation, and code review</p>
+                    <h3>Pattern 4: Quality Gate</h3>
+                    <p><strong>When:</strong> Validating completeness before implementation</p>
+                    <p><strong>Start with:</strong> <code>/zigzag</code></p>
+                    <p><strong>Verify:</strong> All CPs addressed, all CNs trace to CPs, all FRs trace to CNs</p>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 2rem;">🔧 Integration with Development Workflow</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <div>
+                    <h4 style="color: #667eea;">During Sprint Planning</h4>
+                    <ul style="line-height: 2;">
+                        <li>Use <code>/cp</code> to capture user stories as customer problems</li>
+                        <li>Use <code>/cn</code> to define acceptance criteria</li>
+                        <li>Use <code>/fr</code> to break down into technical requirements</li>
+                    </ul>
                 </div>
                 
-                <div class="feature-card">
-                    <h3>📚 Research-Backed</h3>
-                    <p>Based on peer-reviewed research methodology</p>
+                <div>
+                    <h4 style="color: #667eea;">During Feature Design</h4>
+                    <ul style="line-height: 2;">
+                        <li>Reference <code>/glance</code> for high-level approach</li>
+                        <li>Reference <code>/vision</code> for architectural decisions</li>
+                        <li>Use <code>/zigzag</code> to ensure design addresses all needs</li>
+                    </ul>
                 </div>
                 
-                <div class="feature-card">
-                    <h3>🛠️ Tool-Agnostic</h3>
-                    <p>Works with any AI agent or can be used manually</p>
+                <div>
+                    <h4 style="color: #667eea;">During Implementation</h4>
+                    <ul style="line-height: 2;">
+                        <li>Keep <code>/fr</code> requirements as implementation checklist</li>
+                        <li>Trace each requirement back to CN and CP for context</li>
+                        <li>Update requirements if new problems discovered</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 style="color: #667eea;">During Code Review</h4>
+                    <ul style="line-height: 2;">
+                        <li>Verify implementation satisfies <code>/fr</code> requirements</li>
+                        <li>Check requirements still trace to customer needs</li>
+                        <li>Validate no scope creep beyond identified problems</li>
+                    </ul>
                 </div>
             </div>
         </section>
         
         <section id="resources">
-            <h2>📚 Resources</h2>
+            <h2>📚 Additional Resources</h2>
             
             <h3>Repository Structure</h3>
-            <ul style="line-height: 2;">
-                <li><code>prompts/problem-based-SRS.md</code> - Coordinator prompt (start here)</li>
-                <li><code>prompts/CP.md</code> - Customer Problems identification</li>
-                <li><code>prompts/glance.md</code> - Software Glance creation</li>
-                <li><code>prompts/CN.md</code> - Customer Needs specification</li>
-                <li><code>prompts/vision.md</code> - Software Vision definition</li>
-                <li><code>prompts/FR.md</code> - Functional Requirements generation</li>
-                <li><code>prompts/zigzag.md</code> - Quality validation tool</li>
-                <li><code>docs/</code> - Detailed research paper and methodology</li>
-            </ul>
+            <p>This repository supports multiple formats:</p>
             
-            <h3>Usage Patterns</h3>
-            <ul style="line-height: 2;">
-                <li><strong>Full Feature Development</strong> - Building new features from business needs</li>
-                <li><strong>Requirements Refinement</strong> - Structuring existing draft requirements</li>
-                <li><strong>Problem Discovery</strong> - Eliciting actual problems from stakeholder solutions</li>
-                <li><strong>Quality Gate</strong> - Validating completeness before implementation</li>
-            </ul>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <h4 style="margin-top: 0; color: #667eea;">GitHub Copilot Prompt Files</h4>
+                <p style="margin-bottom: 0.5rem;"><code>.github/prompts/</code> - For VS Code, Visual Studio, and JetBrains IDEs</p>
+                <ul style="line-height: 2;">
+                    <li><code>srs-coordinator.prompt.md</code> - Main orchestrator prompt</li>
+                    <li><code>cp.prompt.md</code> - Step 1: Customer Problems</li>
+                    <li><code>glance.prompt.md</code> - Step 2: Software Glance</li>
+                    <li><code>cn.prompt.md</code> - Step 3: Customer Needs</li>
+                    <li><code>vision.prompt.md</code> - Step 4: Software Vision</li>
+                    <li><code>fr.prompt.md</code> - Step 5: Functional Requirements</li>
+                    <li><code>zigzag.prompt.md</code> - Quality validation tool</li>
+                </ul>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <h4 style="margin-top: 0; color: #667eea;">AgentSkills Format</h4>
+                <p style="margin-bottom: 0.5rem;"><code>skills/problem-based-srs/</code> - For Claude Code and Claude.ai</p>
+                <ul style="line-height: 2;">
+                    <li><code>SKILL.md</code> - Main orchestrator skill</li>
+                    <li><code>references/</code> - Detailed instructions for each step
+                        <ul style="margin-top: 0.5rem;">
+                            <li><code>step1-customer-problems.md</code></li>
+                            <li><code>step2-software-glance.md</code></li>
+                            <li><code>step3-customer-needs.md</code></li>
+                            <li><code>step4-software-vision.md</code></li>
+                            <li><code>step5-functional-requirements.md</code></li>
+                            <li><code>zigzag-validator.md</code></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <h4 style="margin-top: 0; color: #667eea;">Additional Documentation</h4>
+                <ul style="line-height: 2;">
+                    <li><code>docs/</code> - Full methodology and research paper</li>
+                    <li><code>README.md</code> - Quick start guide and examples</li>
+                    <li><code>CONTRIBUTING.md</code> - Contribution guidelines</li>
+                </ul>
+            </div>
         </section>
         
         <section class="cta-section">
             <h2 style="color: white; border: none;">Get Started Today</h2>
             <p style="font-size: 1.15rem; margin: 1.5rem 0;">Ready to improve your requirements engineering with AI-assisted methodology?</p>
-            <a href="https://github.com/YOUR_USERNAME/Problem-Based-SRS" class="cta-button">View on GitHub</a>
-            <a href="https://github.com/YOUR_USERNAME/Problem-Based-SRS/tree/main/prompts" class="cta-button">Browse Prompts</a>
+            <a href="https://github.com/gorski/Problem-Based-SRS" class="cta-button">View on GitHub</a>
+            <a href="https://github.com/gorski/Problem-Based-SRS/tree/main/.github/prompts" class="cta-button">Browse Prompts</a>
+            <a href="https://github.com/gorski/Problem-Based-SRS/tree/main/skills" class="cta-button">View Skills</a>
         </section>
     </div>
     

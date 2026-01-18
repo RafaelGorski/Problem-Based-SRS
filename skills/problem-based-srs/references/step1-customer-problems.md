@@ -1,10 +1,11 @@
 # Customer Problems (CP)
 
-> **Step 1** of the Problem-Based SRS methodology
+> **Step 1** of the Problem-Based SRS methodology  
+> **Domain:** WHY — Explains why the solution is needed
 
 ## Purpose
 
-Guide AI coding agents through identifying, documenting, and validating Customer Problems from business context. Customer Problems are the foundation - all subsequent artifacts (Software Glance, Customer Needs, Software Vision, Requirements) derive from CPs.
+Guide AI coding agents through identifying, documenting, and validating Customer Problems from business context. Customer Problems represent the **WHY domain** — they provide the business justification for why a software solution is needed. All subsequent artifacts (Software Glance, Customer Needs, Software Vision, Requirements) derive from CPs.
 
 ---
 
@@ -265,7 +266,6 @@ Artifacts:
 [List CP-IDs with brief titles]
 
 → Next Step: 2 - Software Glance
-→ Use: prompts/glance.md
 → Input: The CPs documented above
 ```
 
@@ -275,8 +275,7 @@ Artifacts:
 
 ### GitHub Copilot
 ```
-@workspace Generate Customer Problems for [project].
-Use prompts/CP.md
+/cp
 
 Business Context:
 [paste description]
@@ -284,7 +283,7 @@ Business Context:
 
 ### Claude Code
 ```
-Apply CP generation from prompts/CP.md
+Apply CP generation
 
 Project: [name]
 Business Context: [description]
@@ -294,8 +293,7 @@ Business Context: [description]
 
 ## References
 - Problem-Based SRS Paper (Gorski & Stadzisz) - `docs/Problem-Based-SRS-Paper.md`
-- Coordinator Prompt - `prompts/problem-based-SRS.md`
 
 **Version:** 1.0  
 **Step:** 1 of 5  
-**Next:** `glance.md`
+**Next:** Software Glance

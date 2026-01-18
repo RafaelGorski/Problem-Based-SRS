@@ -32,7 +32,7 @@ This prompt is used **during and after** Steps 1, 3, and 5 to validate and refin
 │   │CP.1.2│──────▶│CN.1.2│────────▶│FR.1.2│                              │
 │   └─────┘        └─────┘          └─────┘                               │
 │                                                                         │
-│   "WHAT"         "WHAT"           "HOW"                                 │
+│   "WHY"          "WHAT"           "HOW"                                 │
 │   (Problem)      (Outcome)        (Capability)                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -45,9 +45,9 @@ This prompt adapts the **Zig Zag method** from Axiomatic Design (Suh, 1990) to P
 
 | Axiomatic Design | Problem-Based SRS | Mapping |
 |------------------|-------------------|---------|
-| Customer Domain  | Customer Problems (CP) | What the customer suffers |
-| Functional Domain | Customer Needs (CN) | What the software provides |
-| Physical Domain  | Functional Requirements (FR) | How the system behaves |
+| Customer Domain  | Customer Problems (CP) | **WHY** - Why the solution is needed |
+| Functional Domain | Customer Needs (CN) | **WHAT** - What the software provides |
+| Physical Domain  | Functional Requirements (FR) | **HOW** - How the system behaves |
 
 **Zigzagging Principle:** Decompose hierarchies by alternating between domains. Each level in one domain informs the decomposition in the next.
 
@@ -221,7 +221,7 @@ CP.1: Sales managers must know customer purchase history within 5 minutes
 
 **GitHub Copilot:**
 ```
-@workspace Perform Zig Zag [OPERATION] using prompts/zigzag.md
+/zigzag
 
 Artifacts:
 [Paste CPs, CNs, and/or FRs]
@@ -229,7 +229,7 @@ Artifacts:
 
 **Claude Code:**
 ```
-Apply Zig Zag from prompts/zigzag.md
+Apply Zig Zag
 Operation: [ZAG-MAP | ZIG-VALIDATE | DECOMPOSE | CONSISTENCY-CHECK]
 Domain Focus: [CP→CN | CN→FR | Full]
 Artifacts: [paste]
@@ -295,20 +295,19 @@ Before completing zig zag analysis:
 
 ---
 
-## Related Prompts
+## Related Steps
 
-| Step | Prompt | Relationship |
-|------|--------|--------------|
-| 1 | `CP.md` | Use Zig Zag after generating CPs to plan CN coverage |
-| 3 | `CN.md` | Use Zig Zag to validate CN→CP traceability |
-| 5 | `FR.md` | Use Zig Zag for full consistency check |
+| Step | Description | Relationship |
+|------|-------------|--------------|
+| 1 | Customer Problems | Use Zig Zag after generating CPs to plan CN coverage |
+| 3 | Customer Needs | Use Zig Zag to validate CN→CP traceability |
+| 5 | Functional Requirements | Use Zig Zag for full consistency check |
 
 ---
 
 ## References
 
 - **Axiomatic Design:** Suh, N.P. (1990). *The Principles of Design*. Oxford University Press.
-- **Zig Zag Method:** [MIT Axiom Introduction](https://web.mit.edu/axiom/www/introduction.shtml)
 - **Problem-Based SRS:** Gorski & Stadzisz (2016)
 
 ---
