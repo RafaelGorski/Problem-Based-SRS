@@ -9,6 +9,76 @@ This repository provides standalone prompts and guidance for following a Problem
 3. **AI-Native Design**: Content designed for consumption by AI agents
 4. **Practical Guidance**: Focus on actionable prompts and templates
 
+---
+
+## 🔄 Problem-Based SRS Iteration Guidelines
+
+### Using the Methodology
+
+When analyzing or working with this repository, **use the Problem-Based SRS methodology** to iterate on problems, needs, and requirements (both functional and non-functional).
+
+**Load and follow the methodology from these source files:**
+
+| Step | Prompt File | Skill Reference |
+|------|-------------|-----------------|
+| 1. Customer Problems (WHY) | `.github/prompts/cp.prompt.md` | `skills/problem-based-srs/references/step1-customer-problems.md` |
+| 2. Software Glance | `.github/prompts/glance.prompt.md` | `skills/problem-based-srs/references/step2-software-glance.md` |
+| 3. Customer Needs (WHAT) | `.github/prompts/cn.prompt.md` | `skills/problem-based-srs/references/step3-customer-needs.md` |
+| 4. Software Vision | `.github/prompts/vision.prompt.md` | `skills/problem-based-srs/references/step4-software-vision.md` |
+| 5. Functional Requirements (HOW) | `.github/prompts/fr.prompt.md` | `skills/problem-based-srs/references/step5-functional-requirements.md` |
+| Validation | `.github/prompts/zigzag.prompt.md` | `skills/problem-based-srs/references/zigzag-validator.md` |
+| Orchestrator | `.github/prompts/srs-coordinator.prompt.md` | `skills/problem-based-srs/SKILL.md` |
+
+### Artifact Naming Convention
+
+- **Customer Problems**: `CP.{n}` or `CP.{n}.{m}` (e.g., CP.01, CP.01.1)
+- **Customer Needs**: `CN.{cp}.{n}` (e.g., CN.01.1 traces to CP.01)
+- **Functional Requirements**: `FR.{cp}.{cn}.{n}` (e.g., FR.01.1.1 traces to CN.01.1)
+- **Non-Functional Requirements**: `NFR.{version}.md` (e.g., NFR.1.0.md)
+
+### Storage Location for Iterations
+
+Save all requirement iterations in the `spec/` folder:
+```
+spec/
+├── README.md                    # Test suite overview
+├── NFR.{version}.md             # Non-functional requirements analysis
+├── static/                      # Static validation specs
+├── semantic/                    # Semantic validation specs
+├── integration/                 # Integration test specs
+└── fixtures/                    # Test data (valid/invalid examples)
+```
+
+---
+
+## 🚀 Trunk-Based Development Workflow
+
+This repository follows **trunk-based development**. All changes go directly to `main`.
+
+### Git Workflow for Iterations
+
+When creating or updating requirement artifacts:
+
+```bash
+git add .                                    # Stage all changes
+git commit -m "<type>: <description>"        # Commit with message
+git push origin main                         # Push to trunk
+```
+
+### Commit Message Convention
+
+| Prefix | Use Case | Example |
+|--------|----------|---------|
+| `feat:` | New feature or requirement | `feat: Add CP.02 for mobile access` |
+| `fix:` | Bug fix or correction | `fix: Correct FR.01.2.1 traceability` |
+| `docs:` | Documentation updates | `docs: Update README with new workflow` |
+| `spec:` | Test specifications | `spec: Add traceability validation tests` |
+| `refactor:` | Restructuring without changing behavior | `refactor: Reorganize spec folder` |
+
+**Always confirm with the user before pushing to main.**
+
+---
+
 ## Workflow Guidelines
 
 ### Before Taking Action
@@ -20,21 +90,23 @@ This repository provides standalone prompts and guidance for following a Problem
 4. **Execute**: Only after confirmation, proceed with the changes
 5. **Verify**: Show what was done and confirm completion
 
-**Example workflow:**
+**Example iteration workflow:**
 ```
-User: "Add a new skill for validation"
+User: "Analyze the codebase and identify testing requirements"
 
-AI: "I'll create a new validation skill. Here's my plan:
-     1. Create skills/validation/SKILL.md with frontmatter
-     2. Add reference to main SKILL.md
-     3. Update README.md with new skill info
+AI: "I'll analyze using Problem-Based SRS methodology.
+     Loading: skills/problem-based-srs/SKILL.md
+     
+     [Applies 5-step process from source files]
+     
+     Plan:
+     1. Save analysis to spec/NFR.2.0.md
+     2. git add, commit, push to main
      
      Proceed? (yes/no)"
-
-User: "yes"
-
-AI: [executes changes] "✓ Validation skill created..."
 ```
+
+---
 
 ## When Working on This Repository
 
@@ -52,18 +124,9 @@ AI: [executes changes] "✓ Validation skill created..."
 
 ### File Organization
 - **skills/**: AgentSkills format (Claude Code, Claude.ai)
-  - Each skill is a self-contained directory with SKILL.md
-  - Can include optional subdirectories: scripts/, references/, assets/
 - **.github/prompts/**: GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
-  - Standard `.prompt.md` files with YAML frontmatter
 - **docs/**: Documentation, research papers, methodology guides
-  - **Place all planning documents, tracking, changelogs, and migration guides here**
-  - Keep repository root clean of documentation files
-  - Examples: planning docs, roadmaps, changelogs
-  - **docs/img/**: Image assets for documentation website
-    - Stores rendered PNG diagrams from mermaid sources
-  - **docs/helper/**: PowerShell helper scripts for maintenance tasks
-    - Contains automation scripts for documentation updates
+- **spec/**: Test specifications and requirement iterations
 
 ### Code Style
 - This is primarily a documentation repository
@@ -75,52 +138,30 @@ AI: [executes changes] "✓ Validation skill created..."
 - **Problem-Based**: Requirements methodology that starts with problem identification
 - **Prompt**: A structured instruction designed for AI agent consumption
 - **AI Agent**: Tools like GitHub Copilot, Claude Code, or similar assistants
+- **Trunk-Based Development**: All changes committed directly to main branch
 
 ## Quality Standards
 - Accuracy in requirements engineering concepts
 - Clarity in prompt instructions
 - Completeness in examples and templates
 - Consistency in structure and formatting
+- **Traceability**: Every FR traces to CN, every CN traces to CP
 
-## Helper Scripts
+---
 
-### Rendering Mermaid Diagrams
+## Quick Reference
 
-When updating diagrams in README.md that need to be reflected in docs/index.html:
-
-**Prerequisites:**
-Ensure Mermaid CLI is installed:
-```powershell
-npm install -g @mermaid-js/mermaid-cli
+### Problem-Based SRS Commands
+```
+/cp           # Generate Customer Problems
+/glance       # Create Software Glance
+/cn           # Generate Customer Needs
+/vision       # Build Software Vision
+/fr           # Specify Functional Requirements
+/zigzag       # Validate traceability
+/srs-coordinator  # Full methodology orchestration
 ```
 
-**Procedure:**
-
-1. **Extract mermaid diagrams** from README.md and save as `.mmd` files in `docs/img/`
-   - Create one `.mmd` file per diagram
-   - Use descriptive names (e.g., `5-step-process.mmd`, `artifact-traceability.mmd`)
-
-2. **Render diagrams to PNG:**
-   ```powershell
-   .\docs\helper\render-diagrams.ps1
-   ```
-   - Converts all `.mmd` files in `docs/img/` to PNG with transparent backgrounds
-   - Shows progress and confirms success for each diagram
-
-3. **Clean up temporary files:**
-   ```powershell
-   .\docs\helper\cleanup-mmd.ps1
-   ```
-   - Removes all `.mmd` source files after rendering
-   - Displays remaining files in the img folder
-
-4. **Update docs/index.html** to reference the new PNG files
-
-**Available Scripts:**
-- `docs/helper/render-diagrams.ps1` - Batch render all .mmd files to PNG
-- `docs/helper/cleanup-mmd.ps1` - Remove temporary .mmd files after rendering
-
-**Manual single diagram rendering:**
-```powershell
-mmdc -i docs/img/diagram-name.mmd -o docs/img/diagram-name.png -b transparent
+### Traceability Chain
 ```
+CP (WHY) → CN (WHAT) → FR (HOW)
