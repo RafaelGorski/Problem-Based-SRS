@@ -3,19 +3,19 @@
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An [Agent Skill](https://github.com/agentskills/agentskills) to use **Problem-Based Software Requirements Specification (SRS)** method in your software project. Designed for integration with AI agents like **GitHub Copilot** and **Claude Code**.
+An [Agent Skill](https://github.com/agentskills/agentskills) to use **Problem-Based Software Requirements Specification (SRS)** method in your software project. Designed for integration with AI agents like GitHub Copilot, Claude, and others.
 
 ## 📄 Background
 
 This repository is a **continuation of the work** presented in the research paper: **"Problem-Based SRS: A Novel Approach for Software Requirements Specification"** by **Gorski and Stadzisz**
 
 This is a novel approach to improving software requirements specification quality by constructing knowledge about software requirements from knowledge about customer problems. 
-The Problem-Based SRS methodology consists of an organization of activities and outcome objects through a process with five main steps, aiming to systematically analyze business context and specify software requirements while considering solution design.
+The Problem-Based SRS methodology consists of an organization of activities and outcome objects through a process with five main steps, aiming to systematically analyze business context and specify requirements.
 
 The key insight from the research: **accurately capturing business intents of stakeholders remains a major challenge and factor in software project failures**. 
 This methodology addresses this by ensuring requirements provide suitable answers to real customer business issues.
 
-> **Supported Formats:** This repository provides [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) (`.github/prompts/`) and [AgentSkills](https://agentskills.io) (`skills/`) for maximum compatibility with AI coding assistants.
+> **Supported Formats:** This repository provides [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) (`.github/prompts/`) and [AgentSkills](https://agentskills.io) format (`skills/`).
 
 ## 🎯 Purpose
 
@@ -27,13 +27,12 @@ Enable software engineers and requirements analysts to leverage AI agents for be
 - **Lightweight approach** with no heavy tooling or frameworks
 - **Examples and templates** for immediate use
 
-
 ## 📁 Repository Structure
 
 This repository supports multiple formats:
 - **`.github/prompts/`** - [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) for VS Code, Visual Studio, and JetBrains IDEs
 - **`skills/`** - [AgentSkills](https://agentskills.io) format for Claude Code and Claude.ai
-```
+``
 .github/prompts/            # GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
 ├── srs-coordinator.prompt.md  # Main orchestrator prompt
 ├── cp.prompt.md               # Step 1: Customer Problems
@@ -57,7 +56,6 @@ skills/problem-based-srs/   # AgentSkills format (Claude Code, Claude.ai)
 This repository supports two formats:
 - **`.github/prompts/`** - [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) for VS Code, Visual Studio, and JetBrains IDEs
 - **`skills/`** - [AgentSkills](https://agentskills.io) format for Claude Code and Claude.ai
-
 
 ## 📊 Methodology Overview
 
@@ -84,8 +82,6 @@ graph LR
     style F fill:#ffeaa7
 ```
 
-
-
 ### Development Workflow Integration
 
 ```mermaid
@@ -105,7 +101,6 @@ graph LR
     subgraph "SWE Construction"
         I2[Code]
     end
-
     
     SP2 --> D1
     SP3 --> I1
@@ -119,6 +114,293 @@ graph LR
     style I1 fill:#ffeaa7
     style D3 fill:#a29bfe
 ```
+
+## 🛠️ Getting Started
+
+This section guides developers new to AI agents through setting up and using the Problem-Based SRS methodology with GitHub Copilot and Claude.
+
+---
+
+### Prerequisites
+
+Before using these prompts, ensure you have the following:
+
+#### For GitHub Copilot (Recommended for IDE users)
+
+| Requirement | Description | Installation |
+|-------------|-------------|--------------|
+| **GitHub Account** | Required for Copilot access | [Sign up](https://github.com/signup) |
+| **GitHub Copilot Subscription** | Individual, Business, or Enterprise | [Get Copilot](https://github.com/features/copilot) |
+| **Supported IDE** | VS Code, Visual Studio, or JetBrains IDE | See below |
+| **Copilot Extension** | IDE extension for your editor | See below |
+
+**IDE Setup:**
+
+<details>
+<summary><strong>VS Code</strong></summary>
+
+1. Install [VS Code](https://code.visualstudio.com/)
+2. Open Extensions (Ctrl+Shift+X / Cmd+Shift+X)
+3. Search and install **"GitHub Copilot"**
+4. Search and install **"GitHub Copilot Chat"**
+5. Sign in with your GitHub account when prompted
+6. Verify Copilot icon appears in status bar
+
+</details>
+
+<details>
+<summary><strong>Visual Studio</strong></summary>
+
+1. Install [Visual Studio 2022](https://visualstudio.microsoft.com/) (v17.6+)
+2. Go to Extensions → Manage Extensions
+3. Search and install **"GitHub Copilot"**
+4. Restart Visual Studio
+5. Sign in with your GitHub account
+
+</details>
+
+<details>
+<summary><strong>JetBrains IDEs</strong></summary>
+
+1. Install your preferred JetBrains IDE (IntelliJ IDEA, PyCharm, WebStorm, etc.)
+2. Go to Settings → Plugins
+3. Search and install **"GitHub Copilot"**
+4. Restart the IDE
+5. Sign in with your GitHub account
+
+</details>
+
+#### For Claude (Recommended for web/conversation-based work)
+
+| Requirement | Description | How to Get |
+|-------------|-------------|------------|
+| **Anthropic Account** | Required for Claude access | [Sign up](https://claude.ai) |
+| **Claude Pro** (optional) | Extended context and usage | [Upgrade](https://claude.ai/settings) |
+| **Claude Code** (optional) | Terminal-based Claude for coding | [Install Guide](https://docs.anthropic.com/en/docs/claude-code) |
+
+---
+
+### Installation
+
+#### Method 1: Clone the Repository (Recommended)
+
+Clone this repository to include the prompts in your project:
+
+```bash
+# Clone the repository
+git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
+
+# Or add as a submodule to your existing project
+git submodule add https://github.com/RafaelGorski/Problem-Based-SRS.git .srs-methodology
+```
+
+#### Method 2: Copy Specific Files
+
+Copy only the files you need:
+
+**For GitHub Copilot:**
+```
+Copy .github/prompts/ → your-project/.github/prompts/
+```
+
+**For Claude Code:**
+```
+Copy skills/problem-based-srs/ → your-project/skills/problem-based-srs/
+```
+
+---
+
+### Usage Guide
+
+#### Using with GitHub Copilot (VS Code, Visual Studio, JetBrains)
+
+GitHub Copilot automatically discovers `.prompt.md` files in your `.github/prompts/` directory.
+
+**Step 1: Open Copilot Chat**
+- **VS Code**: Press `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Shift+I` (Mac)
+- **Visual Studio**: View → GitHub Copilot Chat
+- **JetBrains**: Right-click → GitHub Copilot → Open Chat
+
+**Step 2: Use a Prompt Command**
+
+Type the prompt command in the chat. Available commands:
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/cp` | Customer Problems | Start here! Identify the WHY behind your project |
+| `/glance` | Software Glance | Create high-level system overview |
+| `/cn` | Customer Needs | Define WHAT outcomes software should provide |
+| `/vision` | Software Vision | Document scope and architecture boundaries |
+| `/fr` | Functional Requirements | Specify HOW the system will behave |
+| `/zigzag` | Validate Traceability | Check consistency between CP → CN → FR |
+| `/srs-coordinator` | Full Orchestration | Let the AI guide you through all 5 steps |
+
+**Step 3: Provide Context**
+
+When prompted, provide:
+```
+/cp
+
+Business Context: We're building an inventory management system for a 
+warehouse that currently tracks everything in spreadsheets. They have 
+3 warehouse locations and 50 employees.
+```
+
+**Example Session:**
+```
+You: /cp
+
+Copilot: I'll help you identify Customer Problems. Please describe your 
+business context...
+
+You: Our retail company loses $50k/month due to inventory discrepancies 
+between physical stock and system records. Warehouse staff use paper 
+forms that get lost or entered late.
+
+Copilot: Based on your context, here are the identified Customer Problems:
+
+### CP-001: Inventory Data Accuracy
+**Statement:** The company must maintain accurate inventory records 
+that match physical stock otherwise loses $50k monthly in discrepancies.
+**Classification:** Obligation
+...
+```
+
+#### Using with Claude.ai (Web Interface)
+
+**Step 1: Start a New Conversation**
+
+Go to [claude.ai](https://claude.ai) and start a new chat.
+
+**Step 2: Upload the Skill**
+
+1. Click the attachment/upload icon
+2. Upload the `skills/problem-based-srs/SKILL.md` file
+3. Also upload the files from `skills/problem-based-srs/references/` folder
+
+**Step 3: Start Your Session**
+```
+I've uploaded the Problem-Based SRS methodology. I need help creating 
+requirements for [your project description].
+
+Let's start with Step 1: Customer Problems.
+```
+
+**Alternative: Copy-Paste Approach**
+
+If you prefer not to upload files:
+
+1. Open the specific step file you need (e.g., `.github/prompts/cp.prompt.md`)
+2. Copy the entire content
+3. Paste it at the start of your Claude conversation
+4. Provide your business context
+
+#### Using with Claude Code (Terminal)
+
+Claude Code automatically discovers skills in your workspace.
+
+**Step 1: Install Claude Code**
+```bash
+# macOS
+brew install anthropic/tap/claude-code
+
+# Or via npm
+npm install -g @anthropic-ai/claude-code
+```
+
+**Step 2: Navigate to Your Project**
+```bash
+cd your-project
+# Ensure skills/problem-based-srs/ exists in your project
+```
+
+**Step 3: Start Claude Code**
+```bash
+claude
+```
+
+**Step 4: Use the Methodology**
+
+The skill auto-discovers. Just describe what you need:
+```
+> Help me create requirements for my inventory management system. 
+  The warehouse currently tracks everything in spreadsheets.
+```
+
+Claude Code will detect you need to start at Step 1 and guide you through the process.
+
+---
+
+### Workflow Examples
+
+#### Example 1: New Project from Scratch
+
+```mermaid
+sequenceDiagram
+    participant You
+    participant AI as GitHub Copilot / Claude
+    
+    You->>AI: /cp with business context
+    AI->>You: Customer Problems (CP-001, CP-002...)
+    
+    You->>AI: /glance with CPs
+    AI->>You: Software Glance document
+    
+    You->>AI: /cn with CPs + Glance
+    AI->>You: Customer Needs (CN-001, CN-002...)
+    
+    You->>AI: /zigzag to validate CN→CP traceability
+    AI->>You: Validation report
+    
+    You->>AI: /vision with CNs + Glance
+    AI->>You: Software Vision document
+    
+    You->>AI: /fr with CNs + Vision
+    AI->>You: Functional Requirements (FR-001...)
+    
+    You->>AI: /zigzag to validate FR→CN→CP traceability
+    AI->>You: Final validation report
+```
+
+#### Example 2: Validating Existing Requirements
+
+If you already have requirements that need structure:
+```
+/fr
+
+I have these existing requirements that need to be validated and 
+structured. Please review them and ensure they trace to customer needs:
+
+1. User shall be able to log in
+2. System shall display inventory levels
+3. Admin shall generate reports
+...
+```
+
+---
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Prompts not appearing in Copilot** | Ensure `.github/prompts/` folder is in your workspace root. Restart your IDE. |
+| **"Command not found" error** | Verify Copilot Chat extension is installed and you're signed in. |
+| **Claude doesn't follow methodology** | Re-upload the SKILL.md file or copy-paste the specific prompt at the start of your message. |
+| **Outputs are too generic** | Provide more specific business context. Include numbers, constraints, and stakeholder details. |
+| **Traceability validation fails** | Use `/zigzag` to identify gaps, then revisit the step with missing traceability. |
+---
+
+### Tips for New AI Agent Users
+
+1. **Be Specific**: The more context you provide, the better the output. Include business domain, constraints, numbers, and stakeholder roles.
+
+2. **Iterate**: Don't expect perfect results on the first try. Refine and ask for adjustments.
+
+3. **Maintain Artifacts**: Save each step's output in a markdown file for future reference and traceability.
+
+4. **Validate Often**: Use `/zigzag` between major steps to catch issues early.
+
+5. **Trust the Process**: The 5-step methodology is designed to prevent common requirements pitfalls. Don't skip steps.
 
 ## 🚀 Quick Start for Engineers
 
@@ -152,13 +434,11 @@ Upload the skill from `skills/problem-based-srs/` (including the references fold
 ### For New Features
 
 Simply describe your business context or problem:
-
 ```
 I need to create requirements for [feature name]
 
 Business Context: [describe current situation]
 ```
-
 The skill will automatically:
 1. Detect what step you're on
 2. Load the appropriate reference guide
@@ -191,7 +471,6 @@ graph TD
     style EX fill:#ffa502
     style HO fill:#ffeaa7
 ```
-
 
 **Create Software Glance:**
 ```
