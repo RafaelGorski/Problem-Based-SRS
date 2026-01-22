@@ -10,12 +10,109 @@ An [Agent Skill](https://github.com/agentskills/agentskills) to use **Problem-Ba
 This repository is a **continuation of the work** presented in the research paper: **"Problem-Based SRS: A Novel Approach for Software Requirements Specification"** by **Gorski and Stadzisz**
 
 This is a novel approach to improving software requirements specification quality by constructing knowledge about software requirements from knowledge about customer problems. 
-The Problem-Based SRS methodology consists of an organization of activities and outcome objects through a process with five main steps, aiming to systematically analyze business context and specify requirements.
+The Problem-Based SRS methodology consists of an organization of activities and outcome objects through a process with five main steps, aiming to systematically analyze business context and specify software requirements that truly address customer needs.
 
 The key insight from the research: **accurately capturing business intents of stakeholders remains a major challenge and factor in software project failures**. 
 This methodology addresses this by ensuring requirements provide suitable answers to real customer business issues.
 
-> **Supported Formats:** This repository provides [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) (`.github/prompts/`) and [AgentSkills](https://agentskills.io) format (`skills/`).
+> **Supported Formats:** This repository provides [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) (`.github/prompts/`) and [AgentSkills](https://agentskills.io) format (`skills/`) for maximum compatibility.
+
+## 🚀 How to Use
+
+The easiest way to get started is to **ask your AI agent to install and use this skill directly**.
+
+### Quick Start (Recommended)
+
+#### With GitHub Copilot
+
+Open GitHub Copilot Chat in your IDE or on GitHub.com and ask:
+
+```
+Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS repository
+```
+
+Once installed, launch the methodology by typing:
+
+```
+/problem-based-srs
+```
+
+Then simply **talk with the agent about the business problems you are trying to solve**. The AI will guide you through the 5-step process automatically.
+
+#### With Claude
+
+In Claude.ai or Claude Code, ask:
+
+```
+Install the AgentSkill from https://github.com/RafaelGorski/Problem-Based-SRS
+```
+
+Or for Claude Code, you can also say:
+
+```
+Add the problem-based-srs skill to my project from RafaelGorski/Problem-Based-SRS
+```
+
+### What Happens Next?
+
+After installation, you can start a conversation like:
+
+```
+I need to create requirements for a new inventory management system.
+Our warehouse currently tracks everything in spreadsheets and we're
+losing $50k/month due to inventory discrepancies.
+```
+
+The AI agent will:
+1. **Detect your starting point** - Whether you have existing requirements or need to start from scratch
+2. **Guide you through the 5 steps** - From Customer Problems (CP) to Functional Requirements (FR)
+3. **Ensure traceability** - Every requirement traces back to a real business problem
+4. **Validate quality** - Using the zigzag validation to check consistency
+
+### Available Commands
+
+Once the skill is active, you can use these commands:
+
+| Command | Description |
+|---------|-------------|
+| `/problem-based-srs` | Start the full guided methodology |
+| `/cp` | Step 1: Identify Customer Problems (the WHY) |
+| `/glance` | Step 2: Create Software Glance (high-level view) |
+| `/cn` | Step 3: Define Customer Needs (the WHAT) |
+| `/vision` | Step 4: Document Software Vision (architecture) |
+| `/fr` | Step 5: Specify Functional Requirements (the HOW) |
+| `/zigzag` | Validate traceability between artifacts |
+
+### Example Conversation Flow
+
+```
+You: /problem-based-srs
+
+AI: I'll guide you through the Problem-Based SRS methodology.
+    Let's start by understanding your business context.
+    What problem are you trying to solve?
+
+You: Our retail company has 3 warehouse locations. Staff use paper
+     forms to track inventory, which often get lost or entered late.
+     This causes stock discrepancies.
+
+AI: I've identified the following Customer Problems:
+
+    ### CP-001: Inventory Data Accuracy
+    **Statement:** The company must maintain accurate inventory
+    records that match physical stock...
+
+    Would you like to continue to the Software Glance, or refine
+    these Customer Problems first?
+```
+
+### Tips for Best Results
+
+1. **Provide rich context** - Include numbers, constraints, stakeholder roles, and business impact
+2. **Follow the process** - Don't skip steps; each builds on the previous
+3. **Use `/zigzag` often** - Validate traceability between major steps
+4. **Iterate** - Refine outputs before moving to the next step
+5. **Save artifacts** - Keep each step's output in markdown files for reference
 
 ## 🎯 Purpose
 
@@ -32,7 +129,7 @@ Enable software engineers and requirements analysts to leverage AI agents for be
 This repository supports multiple formats:
 - **`.github/prompts/`** - [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) for VS Code, Visual Studio, and JetBrains IDEs
 - **`skills/`** - [AgentSkills](https://agentskills.io) format for Claude Code and Claude.ai
-``
+```
 .github/prompts/            # GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
 ├── srs-coordinator.prompt.md  # Main orchestrator prompt
 ├── cp.prompt.md               # Step 1: Customer Problems
@@ -241,8 +338,8 @@ When prompted, provide:
 ```
 /cp
 
-Business Context: We're building an inventory management system for a 
-warehouse that currently tracks everything in spreadsheets. They have 
+Business Context: We're building an inventory management system for a
+warehouse that currently tracks everything in spreadsheets. They have
 3 warehouse locations and 50 employees.
 ```
 
@@ -250,17 +347,17 @@ warehouse that currently tracks everything in spreadsheets. They have
 ```
 You: /cp
 
-Copilot: I'll help you identify Customer Problems. Please describe your 
+Copilot: I'll help you identify Customer Problems. Please describe your
 business context...
 
-You: Our retail company loses $50k/month due to inventory discrepancies 
-between physical stock and system records. Warehouse staff use paper 
+You: Our retail company loses $50k/month due to inventory discrepancies
+between physical stock and system records. Warehouse staff use paper
 forms that get lost or entered late.
 
 Copilot: Based on your context, here are the identified Customer Problems:
 
 ### CP-001: Inventory Data Accuracy
-**Statement:** The company must maintain accurate inventory records 
+**Statement:** The company must maintain accurate inventory records
 that match physical stock otherwise loses $50k monthly in discrepancies.
 **Classification:** Obligation
 ...
@@ -280,7 +377,7 @@ Go to [claude.ai](https://claude.ai) and start a new chat.
 
 **Step 3: Start Your Session**
 ```
-I've uploaded the Problem-Based SRS methodology. I need help creating 
+I've uploaded the Problem-Based SRS methodology. I need help creating
 requirements for [your project description].
 
 Let's start with Step 1: Customer Problems.
@@ -323,7 +420,7 @@ claude
 
 The skill auto-discovers. Just describe what you need:
 ```
-> Help me create requirements for my inventory management system. 
+> Help me create requirements for my inventory management system.
   The warehouse currently tracks everything in spreadsheets.
 ```
 
@@ -338,7 +435,7 @@ Claude Code will detect you need to start at Step 1 and guide you through the pr
 ```mermaid
 sequenceDiagram
     participant You
-    participant AI as GitHub Copilot / Claude
+    participant AI as GitHub Copilot / Claude    
     
     You->>AI: /cp with business context
     AI->>You: Customer Problems (CP-001, CP-002...)
@@ -368,7 +465,7 @@ If you already have requirements that need structure:
 ```
 /fr
 
-I have these existing requirements that need to be validated and 
+I have these existing requirements that need to be validated and
 structured. Please review them and ensure they trace to customer needs:
 
 1. User shall be able to log in
@@ -420,7 +517,7 @@ The prompts are available as `.prompt.md` files in `.github/prompts/`. In VS Cod
 
 ### Using with Any AI Agent (Universal)
 
-The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.). 
+The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).  
 
 **Option 1: AgentSkills (Open Standard)**
 The `skills/` directory follows the [AgentSkills standard](https://agentskills.io), compatible with any tool that implements it.
