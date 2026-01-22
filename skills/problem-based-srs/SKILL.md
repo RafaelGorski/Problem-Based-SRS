@@ -1,10 +1,10 @@
 ---
 name: problem-based-srs
-description: Complete Problem-Based Software Requirements Specification methodology following Gorski & Stadzisz research. Use when you need to perform requirements engineering from business problems through functional requirements, when starting a new software project, when working on requirements analysis, or when users mention "customer problems", "software requirements", "SRS", or need help with structured requirements. Guides through a 5-step process with problem-first thinking.
+description: Complete Problem-Based Software Requirements Specification methodology following Gorski & Stadzisz research. Use when you need to perform requirements engineering from business problems to functional requirements with full traceability.
 license: MIT
 metadata:
   author: rafael-gorski
-  version: "1.0"
+  version: "1.1"
   methodology: problem-based-srs
 ---
 
@@ -52,21 +52,116 @@ Business Context
 | **WHAT** | Customer Needs (CN) | What outcomes must the software provide? |
 | **HOW** | Functional Requirements (FR) | How will the system behave? |
 
+## 📁 Saving Progress (IMPORTANT)
+
+**CRITICAL:** At each step, you MUST save the produced artifacts to files. Progress is NOT automatically saved.
+
+### First Time Setup
+
+When starting a new project, ask the user:
+
+```
+Before we begin, where would you like to save your SRS artifacts?
+
+Options:
+1. `docs/srs/` (recommended - keeps SRS separate from code docs)
+2. `docs/requirements/` (alternative)
+3. Custom path: [specify your preferred location]
+
+All artifacts will be saved in this folder with consistent naming.
+```
+
+### Artifact File Structure
+
+Create the following files as you progress through each step:
+
+```
+[chosen-folder]/                    # e.g., docs/srs/
+├── 00-context.md                   # Business context and project overview
+├── 01-customer-problems.md         # Step 1: CPs (WHY)
+├── 02-software-glance.md           # Step 2: High-level solution view
+├── 03-customer-needs.md            # Step 3: CNs (WHAT)
+├── 04-software-vision.md           # Step 4: Architecture and scope
+├── 05-functional-requirements.md   # Step 5: FRs (HOW)
+├── 06-non-functional-requirements.md # NFRs (quality attributes)
+└── traceability-matrix.md          # CP → CN → FR mapping
+```
+
+### Save After Each Step
+
+**After completing each step, ALWAYS:**
+
+1. **Create or update** the corresponding file
+2. **Confirm with user** that the file was saved
+3. **Show the file path** for reference
+
+Example handoff:
+
+```
+✅ Step 1 Complete: Customer Problems Specified
+
+📁 Saved to: docs/srs/01-customer-problems.md
+
+Contents:
+- CP-001: [Obligation] Company must...
+- CP-002: [Expectation] Users expect...
+- CP-003: [Hope] Management hopes...
+
+→ Next: Step 2 - Software Glance
+→ Will save to: docs/srs/02-software-glance.md
+```
+
+### Context File (00-context.md)
+
+Create this file at the start of every project:
+
+```markdown
+# Project Context: [Project Name]
+
+## Business Domain
+[Description of the business area]
+
+## Current Situation
+[Description of current state/problems]
+
+## Stakeholders
+| Role | Name/Group | Interest |
+|------|------------|----------|
+| [Role] | [Who] | [What they care about] |
+
+## Scope
+- **In Scope:** [What's included]
+- **Out of Scope:** [What's excluded]
+
+## Constraints
+- [Constraint 1]
+- [Constraint 2]
+
+---
+*Created: [Date]*
+*Last Updated: [Date]*
+```
+
 ## How to Use This Skill
 
 ### Starting Fresh
 When user provides business context or problem description:
-1. Detect current step (see Detection Heuristics below)
-2. Load the appropriate reference file
-3. Follow instructions from that reference
-4. Guide user through the process
+1. **Ask where to save artifacts** (if not already specified)
+2. **Create 00-context.md** with the business context
+3. Detect current step (see Detection Heuristics below)
+4. Load the appropriate reference file
+5. Follow instructions from that reference
+6. **Save output to the corresponding file**
+7. Guide user through the process
 
 ### Continuing Work
 If user has existing artifacts (CPs, CNs, etc.):
-1. Identify what they have
-2. Jump to appropriate step
-3. Load that step's reference file
-4. Continue from there
+1. **Check for existing SRS folder** (docs/srs/, docs/requirements/, etc.)
+2. **Read existing files** to understand current state
+3. Identify what they have
+4. Jump to appropriate step
+5. Load that step's reference file
+6. Continue from there, **updating files as needed**
 
 ### Validation
 At any point, use references/zigzag-validator.md to check consistency.
@@ -75,13 +170,13 @@ At any point, use references/zigzag-validator.md to check consistency.
 
 Determine current step by checking what artifacts exist:
 
-| If user has... | Current Step | Load Reference |
-|----------------|--------------|----------------|
-| Nothing / business idea only | 1 | step1-customer-problems.md |
-| Customer Problems (CPs) | 2 | step2-software-glance.md |
-| CPs + Software Glance | 3 | step3-customer-needs.md |
-| CPs + SG + Customer Needs | 4 | step4-software-vision.md |
-| CPs + CNs + Software Vision | 5 | step5-functional-requirements.md |
+| If user has... | Current Step | Load Reference | Save To |
+|----------------|--------------|----------------|---------|
+| Nothing / business idea only | 1 | step1-customer-problems.md | 01-customer-problems.md |
+| Customer Problems (CPs) | 2 | step2-software-glance.md | 02-software-glance.md |
+| CPs + Software Glance | 3 | step3-customer-needs.md | 03-customer-needs.md |
+| CPs + CNs + Software Vision | 4 | step4-software-vision.md | 04-software-vision.md |
+| CPs + CNs + Software Vision | 5 | step5-functional-requirements.md | 05-functional-requirements.md |
 
 ## The 5 Steps (Quick Reference)
 
@@ -90,12 +185,14 @@ Determine current step by checking what artifacts exist:
 **Input:** Business context  
 **Output:** List of CPs classified as Obligation/Expectation/Hope  
 **Syntax:** `[Subject] [must/expects/hopes] [Object] [Penalty]`  
+**Save to:** `01-customer-problems.md`  
 **Details:** See [step1-customer-problems.md](references/step1-customer-problems.md)
 
 ### Step 2: Software Glance (SG)
 **Purpose:** Create initial abstract solution view  
 **Input:** Customer Problems  
 **Output:** High-level system description with boundaries and components  
+**Save to:** `02-software-glance.md`  
 **Details:** See [step2-software-glance.md](references/step2-software-glance.md)
 
 ### Step 3: Customer Needs (CN)
@@ -103,12 +200,14 @@ Determine current step by checking what artifacts exist:
 **Input:** CPs + Software Glance  
 **Output:** CNs with outcome classes (Information/Control/Construction/Entertainment)  
 **Syntax:** `[Subject] needs [system] to [Verb] [Object] [Condition]`  
+**Save to:** `03-customer-needs.md`  
 **Details:** See [step3-customer-needs.md](references/step3-customer-needs.md)
 
 ### Step 4: Software Vision (SV)
 **Purpose:** Define high-level scope and positioning  
 **Input:** CNs + Software Glance  
 **Output:** Vision document with stakeholders, features, architecture  
+**Save to:** `04-software-vision.md`  
 **Details:** See [step4-software-vision.md](references/step4-software-vision.md)
 
 ### Step 5: Functional Requirements (FR)
@@ -116,6 +215,7 @@ Determine current step by checking what artifacts exist:
 **Input:** CNs + Software Vision  
 **Output:** Functional requirements with traceability  
 **Syntax:** `The [System] shall [Verb] [Object] [Constraint] [Condition]`  
+**Save to:** `05-functional-requirements.md`  
 **Details:** See [step5-functional-requirements.md](references/step5-functional-requirements.md)
 
 ## Quality Gates
@@ -126,16 +226,19 @@ Determine current step by checking what artifacts exist:
 - [ ] All CPs use structured notation
 - [ ] Classifications assigned (Obligation/Expectation/Hope)
 - [ ] No solutions embedded in problem statements
+- [ ] **File saved:** `01-customer-problems.md`
 
 ### After Step 2 (SG)
 - [ ] System boundaries defined
 - [ ] Main actors and interfaces identified
 - [ ] High-level components described
+- [ ] **File saved:** `02-software-glance.md`
 
 ### After Step 3 (CNs)
 - [ ] Every CP has at least one CN
 - [ ] All CNs use structured notation
 - [ ] Outcome classes assigned
+- [ ] **File saved:** `03-customer-needs.md`
 - [ ] **MANDATORY: Run zigzag validation**
   - Load [references/zigzag-validator.md](references/zigzag-validator.md)
   - Perform ZAG-MAP operation: CP → CN
@@ -148,11 +251,14 @@ Determine current step by checking what artifacts exist:
 - [ ] Positioning statement clear
 - [ ] All stakeholders identified
 - [ ] Major features listed
+- [ ] **File saved:** `04-software-vision.md`
 
 ### After Step 5 (FRs)
 - [ ] Every CN has at least one FR
 - [ ] All FRs use "shall" or "should"
 - [ ] Traceability matrix complete (FR → CN → CP)
+- [ ] **File saved:** `05-functional-requirements.md`
+- [ ] **Update:** `traceability-matrix.md`
 - [ ] **MANDATORY: Run zigzag validation**
   - Load [references/zigzag-validator.md](references/zigzag-validator.md)
   - Perform CONSISTENCY-CHECK operation: Full audit
@@ -192,14 +298,17 @@ Before we design [mentioned solution], help me understand:
 
 When completing each step:
 
-1. **Summary** of outputs produced
-2. **Validation** that gate criteria are met
-3. **Next step** recommendation
-4. **Required inputs** for next step
+1. **Save** outputs to the appropriate file
+2. **Summary** of outputs produced
+3. **Validation** that gate criteria are met
+4. **Next step** recommendation
+5. **Required inputs** for next step
 
 Example:
 ```
 ✅ Step 1 Complete: Customer Problems Specified
+
+📁 Saved to: docs/srs/01-customer-problems.md
 
 Outputs:
 - CP-001: [Obligation] Company must...
@@ -210,22 +319,27 @@ Gate Check:
 - [x] All CPs use structured notation
 - [x] Classifications assigned
 - [x] Consequences documented
+- [x] File saved
 
 → Next: Step 2 - Software Glance
 → Loading: references/step2-software-glance.md
-→ Input: The CPs above
+→ Will save to: docs/srs/02-software-glance.md
+→ Input: The CPs documented above
 ```
 
 ## Usage Patterns
 
 ### Pattern 1: Full Process (New Project)
 Start with Step 1 and progress through all 5 steps sequentially.
+**Remember:** Ask where to save files, create context file first.
 
 ### Pattern 2: Jump In (Existing Artifacts)
 Detect what artifacts exist, skip completed steps, resume at current step.
+**Remember:** Check for existing SRS folder and read current files.
 
 ### Pattern 3: Iterative Refinement
 Complete initial pass, then iterate on specific steps as understanding improves.
+**Remember:** Update existing files rather than creating new ones.
 
 ### Pattern 4: Validation Only
 Use zigzag-validator.md to check existing artifacts without generating new ones.
