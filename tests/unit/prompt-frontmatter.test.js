@@ -130,9 +130,9 @@ describe('Prompt File YAML Frontmatter Validation', () => {
         const duplicates = [];
         
         for (const line of lines) {
-          const keyMatch = line.match(/^(\w+):/);
+          const keyMatch = line.match(/^([^:]+):/);
           if (keyMatch) {
-            const key = keyMatch[1];
+            const key = keyMatch[1].trim();
             if (keys.has(key)) {
               duplicates.push(key);
             }

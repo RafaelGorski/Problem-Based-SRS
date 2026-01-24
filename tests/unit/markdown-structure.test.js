@@ -9,14 +9,18 @@ const {
 const path = require('path');
 
 describe('Markdown Structure Validation', () => {
-  describe('Heading Hierarchy', () => {
-    let allFiles;
+  // Shared file discovery for all tests
+  let allFiles;
+  let skillFiles;
+  let promptFiles;
 
-    beforeAll(async () => {
-      const skills = await findSkillFiles();
-      const prompts = await findPromptFiles();
-      allFiles = [...skills, ...prompts];
-    });
+  beforeAll(async () => {
+    skillFiles = await findSkillFiles();
+    promptFiles = await findPromptFiles();
+    allFiles = [...skillFiles, ...promptFiles];
+  });
+
+  describe('Heading Hierarchy', () => {
 
     test('Each file should have exactly one H1 heading', async () => {
       const results = [];
@@ -83,14 +87,6 @@ describe('Markdown Structure Validation', () => {
   });
 
   describe('Code Blocks', () => {
-    let allFiles;
-
-    beforeAll(async () => {
-      const skills = await findSkillFiles();
-      const prompts = await findPromptFiles();
-      allFiles = [...skills, ...prompts];
-    });
-
     test('Most code blocks should have language tags', async () => {
       const results = [];
       
@@ -129,14 +125,7 @@ describe('Markdown Structure Validation', () => {
   });
 
   describe('Internal Links', () => {
-    let allFiles;
     const projectRoot = path.join(__dirname, '../..');
-
-    beforeAll(async () => {
-      const skills = await findSkillFiles();
-      const prompts = await findPromptFiles();
-      allFiles = [...skills, ...prompts];
-    });
 
     test('Internal links should point to existing files', async () => {
       const results = [];
@@ -182,12 +171,6 @@ describe('Markdown Structure Validation', () => {
   });
 
   describe('SKILL.md Specific Structure', () => {
-    let skillFiles;
-
-    beforeAll(async () => {
-      skillFiles = await findSkillFiles();
-    });
-
     test('SKILL.md should have H1 matching skill purpose', async () => {
       for (const filePath of skillFiles) {
         const content = readFile(filePath);
@@ -202,12 +185,6 @@ describe('Markdown Structure Validation', () => {
   });
 
   describe('Prompt File Specific Structure', () => {
-    let promptFiles;
-
-    beforeAll(async () => {
-      promptFiles = await findPromptFiles();
-    });
-
     test('Prompt files should have clear role or purpose section', async () => {
       const results = [];
       

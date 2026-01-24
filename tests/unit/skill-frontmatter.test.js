@@ -64,9 +64,7 @@ describe('SKILL.md YAML Frontmatter Validation', () => {
         `\n${f.file}:\n  - ${f.errors.join('\n  - ')}`
       ).join('\n');
       
-      if (failures.length > 0) {
-        throw new Error(`SKILL.md frontmatter validation failed:${errorMessage}`);
-      }
+      throw new Error(`SKILL.md frontmatter validation failed:${errorMessage}`);
     }
 
     expect(failures.length).toBe(0);
