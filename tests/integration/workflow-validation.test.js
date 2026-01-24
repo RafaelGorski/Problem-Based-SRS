@@ -3,6 +3,9 @@ const { extractFrontmatter } = require('../helpers/yamlParser');
 const { hasSections } = require('../helpers/markdownParser');
 
 describe('Problem-Based SRS Workflow Integration', () => {
+  // Regex pattern for traceability notation
+  const TRACEABILITY_PATTERN = /fr\.\w+\s*[→>]\s*cn\.\w+/i;
+
   describe('Step Coordination', () => {
     let promptFiles;
     const expectedSteps = {
@@ -122,10 +125,9 @@ describe('Problem-Based SRS Workflow Integration', () => {
       expect(frFile).toBeDefined();
       
       const content = readFile(frFile);
-      const contentLower = content.toLowerCase();
       
       // Should mention the FR.X → CN.Y notation
-      expect(contentLower).toMatch(/fr\.\w+\s*→\s*cn\.\w+|fr\.\w+\s*->\s*cn\.\w+/);
+      expect(content).toMatch(TRACEABILITY_PATTERN);
     });
 
     test('Customer Needs prompt should enforce traceability to Customer Problems', async () => {

@@ -12,8 +12,6 @@ describe('SKILL.md YAML Frontmatter Validation', () => {
     expect(skillFiles.length).toBeGreaterThan(0);
   });
 
-
-
   // Generate tests dynamically for each file
   test('All SKILL.md files have valid frontmatter', async () => {
     const results = [];
