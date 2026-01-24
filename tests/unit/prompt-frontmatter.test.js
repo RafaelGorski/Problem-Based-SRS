@@ -46,7 +46,6 @@ describe('Prompt File YAML Frontmatter Validation', () => {
 
     if (results.length > 0) {
       const message = results.map(r => `${r.file}: ${r.error}`).join('\n');
-      expect(results).toEqual([]);
       throw new Error(`Prompt files with frontmatter issues:\n${message}`);
     }
 
@@ -89,7 +88,6 @@ describe('Prompt File YAML Frontmatter Validation', () => {
       const message = results.map(r => 
         `${r.file}:\n  - ${r.errors.join('\n  - ')}`
       ).join('\n');
-      expect(results).toEqual([]);
       throw new Error(`Prompt files with structure issues:\n${message}`);
     }
 
@@ -112,7 +110,6 @@ describe('Prompt File YAML Frontmatter Validation', () => {
     }
 
     if (results.length > 0) {
-      expect(results).toEqual([]);
       throw new Error(`Prompt files missing description:\n${results.join('\n')}`);
     }
 
@@ -156,7 +153,6 @@ describe('Prompt File YAML Frontmatter Validation', () => {
       const message = results.map(r => 
         `${r.file}: duplicate keys [${r.duplicates.join(', ')}]`
       ).join('\n');
-      expect(results).toEqual([]);
       throw new Error(`Prompt files with duplicate YAML keys:\n${message}`);
     }
 

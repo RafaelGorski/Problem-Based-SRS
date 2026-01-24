@@ -64,8 +64,6 @@ describe('SKILL.md YAML Frontmatter Validation', () => {
         `\n${f.file}:\n  - ${f.errors.join('\n  - ')}`
       ).join('\n');
       
-      expect(failures).toEqual([]);
-      // If it reaches here with failures, show detailed message
       if (failures.length > 0) {
         throw new Error(`SKILL.md frontmatter validation failed:${errorMessage}`);
       }
@@ -91,10 +89,9 @@ describe('SKILL.md YAML Frontmatter Validation', () => {
         `${r.file}: ${r.lines} lines (max 500)`
       ).join('\n');
       
-      expect(results).toEqual([]);
-      if (results.length > 0) {
-        throw new Error(`SKILL.md files exceed line limit:\n${message}`);
-      }
+      throw new Error(`SKILL.md files exceed line limit:\n${message}`);
     }
+
+    expect(results.length).toBe(0);
   });
 });

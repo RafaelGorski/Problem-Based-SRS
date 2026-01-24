@@ -49,7 +49,6 @@ describe('Markdown Structure Validation', () => {
         const message = results.map(r => 
           `${r.file}: ${r.h1Count} H1 headings (expected 1)`
         ).join('\n');
-        expect(results).toEqual([]);
         throw new Error(`Files with incorrect H1 count:\n${message}`);
       }
 
@@ -122,7 +121,6 @@ describe('Markdown Structure Validation', () => {
         const message = results.map(r => 
           `${r.file}: ${r.count}/${r.totalBlocks} blocks missing language tags (>30% threshold)`
         ).join('\n');
-        expect(results).toEqual([]);
         throw new Error(`Files with too many unlabeled code blocks:\n${message}`);
       }
 
