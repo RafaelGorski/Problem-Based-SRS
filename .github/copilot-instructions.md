@@ -27,7 +27,7 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 | 4. Software Vision | `.github/prompts/vision.prompt.md` | `skills/problem-based-srs/references/step4-software-vision.md` |
 | 5. Functional Requirements (HOW) | `.github/prompts/fr.prompt.md` | `skills/problem-based-srs/references/step5-functional-requirements.md` |
 | Validation | `.github/prompts/zigzag.prompt.md` | `skills/problem-based-srs/references/zigzag-validator.md` |
-| Orchestrator | `.github/prompts/srs-coordinator.prompt.md` | `skills/problem-based-srs/SKILL.md` |
+| Orchestrator | `.github/prompts/problem-based-srs.md` | `skills/problem-based-srs/SKILL.md` |
 
 ### Artifact Naming Convention
 
@@ -159,7 +159,7 @@ AI: "I'll analyze using Problem-Based SRS methodology.
 /vision       # Build Software Vision
 /fr           # Specify Functional Requirements
 /zigzag       # Validate traceability
-/srs-coordinator  # Full methodology orchestration
+/problem-based-srs  # Full methodology orchestration
 ```
 
 ### Traceability Chain

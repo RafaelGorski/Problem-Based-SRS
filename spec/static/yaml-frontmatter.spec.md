@@ -74,7 +74,7 @@ description: <optional, string>
 | `.github/prompts/glance.prompt.md` | PASS |
 | `.github/prompts/vision.prompt.md` | PASS |
 | `.github/prompts/zigzag.prompt.md` | PASS |
-| `.github/prompts/srs-coordinator.prompt.md` | PASS |
+| `.github/prompts/problem-based-srs.md` | PASS |
 
 ---
 
