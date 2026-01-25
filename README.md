@@ -131,7 +131,7 @@ This repository supports multiple formats:
 - **`skills/`** - [AgentSkills](https://agentskills.io) format for Claude Code and Claude.ai
 ```
 .github/prompts/            # GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
-├── srs-coordinator.prompt.md  # Main orchestrator prompt
+├── problem-based-srs.md       # Main orchestrator prompt
 ├── cp.prompt.md               # Step 1: Customer Problems
 ├── glance.prompt.md           # Step 2: Software Glance
 ├── cn.prompt.md               # Step 3: Customer Needs
@@ -330,7 +330,7 @@ Type the prompt command in the chat. Available commands:
 | `/vision` | Software Vision | Document scope and architecture boundaries |
 | `/fr` | Functional Requirements | Specify HOW the system will behave |
 | `/zigzag` | Validate Traceability | Check consistency between CP → CN → FR |
-| `/srs-coordinator` | Full Orchestration | Let the AI guide you through all 5 steps |
+| `/problem-based-srs` | Full Orchestration | Let the AI guide you through all 5 steps |
 
 **Step 3: Provide Context**
 
@@ -512,7 +512,7 @@ The prompts are available as `.prompt.md` files in `.github/prompts/`. In VS Cod
 /vision       # Build Software Vision
 /fr           # Specify Functional Requirements
 /zigzag       # Validate traceability
-/srs-coordinator  # Full methodology orchestration
+/problem-based-srs  # Full methodology orchestration
 ```
 
 ### Using with Any AI Agent (Universal)
@@ -602,7 +602,7 @@ graph LR
 
 ### Pattern 1: Full Feature Development
 **When:** Building a new feature from business need  
-**Start with:** `/srs-coordinator` prompt  
+**Start with:** `/problem-based-srs` prompt  
 **Follow:** All 5 steps sequentially
 
 ### Pattern 2: Requirements Refinement
