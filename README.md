@@ -642,8 +642,52 @@ graph LR
 2. Check that requirements still trace to customer needs
 3. Validate no scope creep beyond identified problems
 
+## 🧪 Testing & Quality Assurance
+
+This repository includes comprehensive testing to ensure the Problem-Based SRS methodology works correctly with AI agents.
+
+### Test Coverage
+
+✅ **57 of 58 tests passing (98.3%)**
+
+```bash
+# Install test dependencies
+pip install pytest strictyaml
+
+# Run all tests
+pytest tests/ -v
+
+# Run specific test categories
+pytest tests/test_parser.py -v      # YAML and markdown parsing
+pytest tests/test_validator.py -v   # Validation rules
+pytest tests/test_repository.py -v  # Repository structure
+```
+
+### What We Test
+
+| Category | Description | Status |
+|----------|-------------|--------|
+| **YAML Frontmatter** | Validates AgentSkills and prompt file metadata | ✅ |
+| **Markdown Structure** | Ensures consistent heading hierarchy | ✅ |
+| **Traceability IDs** | Validates CP.XX → CN.XX.X → FR.XX.X.X format | ✅ |
+| **Skill Validation** | Checks skill names, descriptions, structure | ✅ |
+| **Repository Structure** | Verifies expected files and directories exist | ✅ |
+
+### For Contributors
+
+When contributing to this repository:
+
+1. **Run tests before committing**: `pytest tests/ -v`
+2. **Add tests for new features**: See `TESTING.md` for guidelines
+3. **Maintain traceability**: All changes should trace to a Customer Problem
+
+For detailed testing documentation, see **[TESTING.md](TESTING.md)**.
+
 ## 📚 Additional Resources
 
+- **Testing Guide:** See `TESTING.md` for comprehensive testing documentation
+- **Test Specifications:** See `spec/` for detailed test specifications and NFRs
+- **Customer Problems:** See `spec/customer-problems.md` for testing-related CPs
 - **Full Methodology:** See `docs/` for detailed research paper
 - **GitHub Copilot Prompts:** See `.github/prompts/` for prompt files
 - **AgentSkills:** See `skills/problem-based-srs/` for Claude Code integration
