@@ -68,7 +68,7 @@ Examples:
 Each FR file MUST follow this template:
 
 ```markdown
-# FR-[NNN]: [Brief Title]
+## FR-[NNN]: [Brief Title]
 
 ## Requirement
 
@@ -115,7 +115,7 @@ The [System] shall [verb] [object] [constraint] [condition].
 Each NFR file MUST follow this template:
 
 ```markdown
-# NFR-[NNN]: [Brief Title]
+## NFR-[NNN]: [Brief Title]
 
 ## Requirement
 
@@ -163,7 +163,7 @@ The [System] shall [quality attribute] [measurable target] [condition].
 Create an index file for quick navigation:
 
 ```markdown
-# Functional Requirements Index
+## Functional Requirements Index
 
 ## Summary
 
@@ -276,7 +276,7 @@ For each NFR, create a file NFR-NNN-name.md with:
 ### Example FR File: FR-001-client-registration.md
 
 ```markdown
-# FR-001: Client Registration
+## FR-001: Client Registration
 
 ## Requirement
 
@@ -321,7 +321,7 @@ The CRM system shall allow the Account Manager to register a new client in the d
 ### Example NFR File: NFR-001-response-time.md
 
 ```markdown
-# NFR-001: Response Time
+## NFR-001: Response Time
 
 ## Requirement
 
