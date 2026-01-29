@@ -1,6 +1,5 @@
 """Tests for validator module."""
 
-from pathlib import Path
 from tests.validator import (
     validate_skill,
     validate_prompt,

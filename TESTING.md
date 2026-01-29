@@ -200,8 +200,8 @@ Example ID patterns:
 | Category | Target | Current | Status |
 |----------|--------|---------|--------|
 | Static Tests | 100% | 100% | ✅ |
-| Semantic Tests | 90% | 85% | 🔄 |
-| Integration Tests | 80% | 75% | 🔄 |
+| Semantic Tests | 90% | 40% | 🔄 |
+| Integration Tests | 80% | 0% | ⏸️ |
 | Repository Tests | 95% | 98% | ✅ |
 
 ## Troubleshooting

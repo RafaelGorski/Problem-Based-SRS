@@ -50,7 +50,7 @@ def validate_skill(skill_dir: Path) -> List[str]:
                 errors.append(f"Skill name '{name}' must match skill directory name '{skill_dir.name}'")
             
             # Check name format (lowercase, hyphens, no special chars)
-            if not name.islower() and not all(c.islower() or c == '-' or c.isdigit() for c in name):
+            if not all(c.islower() or c == '-' or c.isdigit() for c in name):
                 errors.append(f"Skill name '{name}' must be lowercase with hyphens")
             
             # Check for leading/trailing hyphens
@@ -169,7 +169,7 @@ def validate_markdown_structure(file_path: Path) -> List[str]:
         # Check heading hierarchy (no level skips)
         prev_level = 0
         for level, heading in headings:
-            if level > prev_level + 1 and prev_level > 0:
+            if level > prev_level + 1:
                 errors.append(f"Heading level skip detected: H{prev_level} → H{level} ('{heading}')")
             prev_level = level
         

@@ -1,7 +1,6 @@
 """Tests for parser module."""
 
 import pytest
-from pathlib import Path
 
 from tests.parser import (
     ParseError,
