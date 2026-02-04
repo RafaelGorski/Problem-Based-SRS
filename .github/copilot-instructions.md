@@ -133,12 +133,93 @@ AI: "I'll analyze using Problem-Based SRS methodology.
   - Each skill is a self-contained directory with SKILL.md
   - Can include optional subdirectories: scripts/, references/, assets/
 - **docs/**: Documentation, research papers, methodology guides
+- **docs/references/**: Reference documentation for AgentSkills development
 - **spec/**: Test specifications and requirement iterations
 
 ### Code Style
 - This is primarily a documentation repository
 - Any code examples should be language-agnostic where possible
 - Use clear, readable formatting in examples
+
+---
+
+## 🛠️ AgentSkills Development Guidelines
+
+When creating or modifying skills in the `skills/` directory, **always follow the AgentSkills specification and best practices**.
+
+### Required References
+
+**Before modifying any skill, load and follow these reference documents:**
+
+| Reference | Path | Purpose |
+|-----------|------|---------|
+| **Specification** | `docs/references/agentskills-specification.md` | SKILL.md format, required fields, directory structure |
+| **Best Practices** | `docs/references/agentskills-best-practices.md` | Content organization, naming, descriptions, patterns |
+
+### Key Requirements for Skills
+
+#### SKILL.md Frontmatter (Required)
+```yaml
+---
+name: skill-name           # Max 64 chars, lowercase + hyphens only
+description: What and when # Max 1024 chars, written in THIRD PERSON
+license: MIT               # Optional but recommended
+metadata:                  # Optional additional fields
+  author: author-name
+  version: "1.0"
+---
+```
+
+#### Critical Rules
+
+1. **Name must match directory name** - `skills/my-skill/SKILL.md` requires `name: my-skill`
+2. **Description in third person** - "Processes files" NOT "I process files" or "You can use this"
+3. **Description includes WHAT and WHEN** - Help agents discover when to use the skill
+4. **Keep SKILL.md under 500 lines** - Move detailed content to `references/` directory
+5. **File references one level deep** - Don't nest reference → reference → reference
+
+#### Directory Structure
+```
+skills/skill-name/
+├── SKILL.md              # Required: instructions + metadata
+├── references/           # Optional: detailed documentation
+│   ├── guide.md
+│   └── examples.md
+├── scripts/              # Optional: executable code
+└── assets/               # Optional: templates, resources
+```
+
+### Skill Modification Checklist
+
+When modifying a skill, verify:
+
+- [ ] `name` field is lowercase, max 64 chars, no consecutive hyphens
+- [ ] `name` field matches the parent directory name
+- [ ] `description` is 1-1024 chars and written in third person
+- [ ] `description` explains both WHAT the skill does and WHEN to use it
+- [ ] SKILL.md body is under 500 lines
+- [ ] Reference files are one level deep (not nested)
+- [ ] Longer reference files (100+ lines) have table of contents
+- [ ] No time-sensitive information in content
+- [ ] Consistent terminology throughout
+
+### Example: Good vs Bad Descriptions
+
+**Good (specific, third person, includes when):**
+```yaml
+description: Orchestrates requirements engineering using the Problem-Based SRS methodology. Use when performing requirements analysis, creating customer problems, needs, or functional requirements with full traceability.
+```
+
+**Bad (vague, first person):**
+```yaml
+description: I help with requirements.
+```
+
+### External Resources
+
+- **Official Specification**: [agentskills.io/specification](https://agentskills.io/specification)
+- **Best Practices**: [platform.claude.com/.../best-practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+- **Example Skills**: [github.com/anthropics/skills](https://github.com/anthropics/skills)
 
 ## Terminology
 - **SRS**: Software Requirements Specification
