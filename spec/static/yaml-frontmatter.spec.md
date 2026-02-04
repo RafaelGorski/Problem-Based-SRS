@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Validate that all prompt and skill files contain correctly structured YAML frontmatter for AI agent parsing.
+Validate that all skill files contain correctly structured YAML frontmatter for AI agent parsing.
 
 ---
 
@@ -43,46 +43,11 @@ metadata:
 
 ---
 
-### TC-YAML-002: Prompt File Frontmatter
-
-**Description**: Verify .prompt.md files contain valid frontmatter
-
-**Requirement**: FR.01.1.2
-
-**Input**: All files matching `.github/prompts/*.prompt.md`
-
-**Expected Structure**:
-```yaml
----
-mode: <optional, enum: agent|edit|insert>
-tools: <optional, array>
-description: <optional, string>
----
-```
-
-**Pass Criteria**:
-- [ ] Frontmatter section exists (between `---` markers)
-- [ ] YAML is syntactically valid
-- [ ] If `mode` exists, value is one of: agent, edit, insert
-
-**Test Data**:
-| File | Expected Result |
-|------|-----------------|
-| `.github/prompts/cp.prompt.md` | PASS |
-| `.github/prompts/cn.prompt.md` | PASS |
-| `.github/prompts/fr.prompt.md` | PASS |
-| `.github/prompts/glance.prompt.md` | PASS |
-| `.github/prompts/vision.prompt.md` | PASS |
-| `.github/prompts/zigzag.prompt.md` | PASS |
-| `.github/prompts/problem-based-srs.md` | PASS |
-
----
-
-### TC-YAML-003: No Duplicate Keys
+### TC-YAML-002: No Duplicate Keys
 
 **Description**: Verify YAML frontmatter has no duplicate keys
 
-**Requirement**: FR.01.1.1, FR.01.1.2
+**Requirement**: FR.01.1.1
 
 **Pass Criteria**:
 - [ ] No YAML key appears more than once

@@ -15,7 +15,6 @@ fixtures/
 These files demonstrate correct formatting and structure:
 
 - **SKILL.md** - Valid AgentSkills SKILL.md file with all required fields
-- **example.prompt.md** - Valid GitHub Copilot prompt file
 
 ## Invalid Examples
 

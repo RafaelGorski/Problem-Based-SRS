@@ -220,12 +220,15 @@ Output: Create docs/software-vision.md
 
 ### Related Files in This Repository
 ```
-.github/prompts/
-  ├── cp.prompt.md        (Step 1)
-  ├── glance.prompt.md    (Step 2)
-  ├── cn.prompt.md        (Step 3)
-  ├── vision.prompt.md    (Step 4) ← YOU ARE HERE
-  └── fr.prompt.md        (Step 5)
+skills/problem-based-srs/
+  ├── SKILL.md                                    (Main orchestrator)
+  └── references/
+      ├── step1-customer-problems.md     (Step 1)
+      ├── step2-software-glance.md       (Step 2)
+      ├── step3-customer-needs.md        (Step 3)
+      ├── step4-software-vision.md       (Step 4) ← YOU ARE HERE
+      ├── step5-functional-requirements.md (Step 5)
+      └── zigzag-validator.md            (Validation)
 ```
 
 ## Key Methodological Notes
