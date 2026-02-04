@@ -135,6 +135,9 @@ Each FR file follows this template:
 
 [Any additional context, assumptions, or dependencies]
 
+<!-- ⚠️ NO CODE SNIPPETS: Do not include code examples, SQL, or implementation details here.
+     Construction details belong in design/ folder (see design/implementation-notes/) -->
+
 ---
 *Created: [Date]*
 *Last Updated: [Date]*
@@ -169,6 +172,9 @@ Each FR file follows this template:
 ## Measurement Method
 
 [How this NFR will be verified/tested]
+
+<!-- ⚠️ NO CODE SNIPPETS: Do not include code examples or implementation details here.
+     Technical specifications belong in design/ folder -->
 
 ---
 *Created: [Date]*
@@ -348,6 +354,8 @@ Determine current step by checking what artifacts exist:
 - [ ] Each NFR saved as individual file in `non-functional-requirements/`
 - [ ] Index files created (`_index.md`)
 - [ ] Traceability matrix complete (FR → CN → CP)
+- [ ] No code snippets or programming examples in FR/NFR files
+- [ ] Construction details in separate `design/` folder (not in FR/NFR files)
 - [ ] **File saved:** `traceability-matrix.md`
 - [ ] **MANDATORY: Run zigzag validation** (full chain verification)
 
