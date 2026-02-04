@@ -254,6 +254,40 @@ Where:
 - **Unambiguous**: Use precise language, avoid vague terms
 - **Measurable**: NFRs must have quantifiable targets
 
+## Content Restrictions (CRITICAL)
+
+**NO CODE SNIPPETS:** FR and NFR files MUST NOT contain:
+- Programming code examples
+- Code blocks with implementation logic
+- Pseudo-code implementations
+- SQL queries, API calls, or technical syntax
+
+**NO CONSTRUCTION DETAILS:** FR and NFR files MUST NOT include:
+- Database schemas or table definitions
+- API endpoint specifications
+- Class diagrams or implementation architecture
+- Technology stack decisions
+- Configuration details
+
+**WHERE TO PUT CONSTRUCTION DETAILS:**
+Construction and implementation details belong in separate design documents:
+```
+[srs-folder]/
+├── functional-requirements/     # FR files (WHAT - no code)
+├── non-functional-requirements/ # NFR files (WHAT - no code)
+└── design/                      # Construction details (HOW)
+    ├── architecture.md          # System architecture
+    ├── data-model.md            # Database schemas
+    ├── api-specification.md     # API endpoints
+    └── implementation-notes/    # Technical notes per FR
+```
+
+This separation ensures:
+1. Requirements stay technology-agnostic
+2. Engineers can change implementation without changing requirements
+3. Requirements documents remain readable by non-technical stakeholders
+4. Traceability is maintained between requirements and design
+
 ## Output Format
 
 For each FR, create a file FR-NNN-name.md with:
@@ -374,6 +408,8 @@ Before finalizing, verify:
 - [ ] Index file (_index.md) created with all FRs listed
 - [ ] NFRs have measurable targets (not vague terms)
 - [ ] No implementation/design details in requirements (WHAT not HOW)
+- [ ] No code snippets or programming examples in FR/NFR files
+- [ ] Construction details deferred to separate design files
 
 ---
 
@@ -387,6 +423,8 @@ Before finalizing, verify:
 | "The system shall be fast" | "The system shall return search results within 2 seconds" |
 | All FRs in one file | Each FR in separate file for independent development |
 | Vague NFR: "good performance" | Measurable NFR: "< 2 second response time" |
+| Code snippet in FR file | Reference design docs for implementation details |
+| Database schema in NFR | Keep schemas in design/data-model.md |
 
 ---
 

@@ -103,7 +103,9 @@ The CRM system shall allow the Account Manager to search for clients by name or 
 ❌ Define implementation details (database type, architecture)  
 ❌ Specify non-functional requirements (covered separately)  
 ❌ Create Customer Needs (use /cn prompt)  
-❌ Define Software Vision (use /vision prompt)
+❌ Define Software Vision (use /vision prompt)  
+❌ Include code snippets or programming examples  
+❌ Include construction/implementation details (handle in separate design files)
 
 ## Quality Checklist
 
@@ -115,6 +117,8 @@ Before finalizing, verify:
 - [ ] All FRs are testable with clear acceptance criteria
 - [ ] All FRs stay within Software Vision boundaries
 - [ ] No implementation/design details in requirements (WHAT not HOW)
+- [ ] No code snippets or programming examples in FR files
+- [ ] Construction details deferred to separate design/implementation files
 - [ ] Language is precise—no vague terms like "user-friendly", "fast", "flexible"
 
 ## Handoff
