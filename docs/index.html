@@ -279,7 +279,7 @@
             <p style="margin-top: 1rem;">The methodology addresses a critical challenge: <strong>accurately capturing business intents of stakeholders</strong>, which remains a major factor in software project failures. The Problem-Based SRS methodology consists of five main steps that systematically analyze business context and specify software requirements while considering solution design.</p>
             
             <div style="background: #f8f9fa; padding: 1rem; border-left: 4px solid #667eea; margin: 1.5rem 0;">
-                <strong>Supported Formats:</strong> This repository provides <a href="https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files" style="color: #667eea;">GitHub Copilot prompt files</a> (<code>.github/prompts/</code>) and <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> (<code>skills/</code>) for maximum compatibility with AI coding assistants.
+                <strong>Format:</strong> This repository provides <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> (<code>skills/</code>) for compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents.
             </div>
             
             <h3 style="margin-top: 2rem;">🎯 Purpose</h3>
@@ -368,8 +368,8 @@
         <section id="quickstart">
             <h2>🚀 Quick Start for Engineers</h2>
             
-            <h3>Using GitHub Copilot Prompt Files (Recommended)</h3>
-            <p>The prompts are available as <code>.prompt.md</code> files in <code>.github/prompts/</code>. In VS Code, Visual Studio, or JetBrains IDEs:</p>
+            <h3>Using Skills (All AI Agents)</h3>
+            <p>The skill is available in <code>skills/problem-based-srs/</code>. In VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
             
             <pre><code>/cp           # Start with Customer Problems
 /glance       # Create Software Glance
@@ -382,10 +382,11 @@
             <h3>Using with Any AI Agent (Universal)</h3>
             <p>The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).</p>
             
-            <p><strong>Option 1: AgentSkills (Open Standard)</strong></p>
+            <p><strong>AgentSkills (Open Standard)</strong></p>
             <p>The <code>skills/</code> directory follows the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>, compatible with any tool that implements it.</p>
             
             <ul style="margin-top: 1rem; line-height: 2;">
+                <li><strong>For GitHub Copilot:</strong> The skill will auto-discover from the skills directory.</li>
                 <li><strong>For Claude Code:</strong> The skill will auto-discover when this repository is in your workspace.</li>
                 <li><strong>For Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder).</li>
             </ul>
@@ -495,25 +496,11 @@ Business Context: [describe current situation]</code></pre>
             <h2>📚 Additional Resources</h2>
             
             <h3>Repository Structure</h3>
-            <p>This repository supports multiple formats:</p>
-            
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-                <h4 style="margin-top: 0; color: #667eea;">GitHub Copilot Prompt Files</h4>
-                <p style="margin-bottom: 0.5rem;"><code>.github/prompts/</code> - For VS Code, Visual Studio, and JetBrains IDEs</p>
-                <ul style="line-height: 2;">
-                    <li><code>problem-based-srs.md</code> - Main orchestrator prompt</li>
-                    <li><code>cp.prompt.md</code> - Step 1: Customer Problems</li>
-                    <li><code>glance.prompt.md</code> - Step 2: Software Glance</li>
-                    <li><code>cn.prompt.md</code> - Step 3: Customer Needs</li>
-                    <li><code>vision.prompt.md</code> - Step 4: Software Vision</li>
-                    <li><code>fr.prompt.md</code> - Step 5: Functional Requirements</li>
-                    <li><code>zigzag.prompt.md</code> - Quality validation tool</li>
-                </ul>
-            </div>
+            <p>This repository provides the AgentSkills format:</p>
             
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
                 <h4 style="margin-top: 0; color: #667eea;">AgentSkills Format</h4>
-                <p style="margin-bottom: 0.5rem;"><code>skills/problem-based-srs/</code> - For Claude Code and Claude.ai</p>
+                <p style="margin-bottom: 0.5rem;"><code>skills/problem-based-srs/</code> - For GitHub Copilot, Claude Code, Claude.ai, and other AI agents</p>
                 <ul style="line-height: 2;">
                     <li><code>SKILL.md</code> - Main orchestrator skill</li>
                     <li><code>references/</code> - Detailed instructions for each step
@@ -543,7 +530,6 @@ Business Context: [describe current situation]</code></pre>
             <h2 style="color: white; border: none;">Get Started Today</h2>
             <p style="font-size: 1.15rem; margin: 1.5rem 0;">Ready to improve your requirements engineering with AI-assisted methodology?</p>
             <a href="https://github.com/gorski/Problem-Based-SRS" class="cta-button">View on GitHub</a>
-            <a href="https://github.com/gorski/Problem-Based-SRS/tree/main/.github/prompts" class="cta-button">Browse Prompts</a>
             <a href="https://github.com/gorski/Problem-Based-SRS/tree/main/skills" class="cta-button">View Skills</a>
         </section>
     </div>

@@ -57,7 +57,6 @@ Each CP includes:
 
 **Valid Examples**:
 - `SKILL.md` - Correctly formatted AgentSkills file
-- `example.prompt.md` - Valid GitHub Copilot prompt
 
 **Invalid Examples**:
 - `no-frontmatter.md` - Missing YAML frontmatter

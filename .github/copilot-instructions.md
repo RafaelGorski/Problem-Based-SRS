@@ -1,13 +1,15 @@
 # GitHub Copilot Instructions for Problem-Based SRS
 
 ## Project Overview
-This repository provides standalone prompts and guidance for following a Problem-Based Software Requirements Specification (SRS) methodology. The focus is on enabling AI-assisted requirements engineering through structured, problem-first approaches.
+This repository provides AgentSkills for following a Problem-Based Software Requirements Specification (SRS) methodology. The focus is on enabling AI-assisted requirements engineering through structured, problem-first approaches.
+
+The repository follows the **[AgentSkills](https://agentskills.io)** standard - an open format for giving agents new capabilities and expertise.
 
 ## Core Principles
 1. **Problem-First Thinking**: Always identify the problem before proposing solutions
 2. **Lightweight Methodology**: Favor simplicity over complex frameworks
-3. **AI-Native Design**: Content designed for consumption by AI agents
-4. **Practical Guidance**: Focus on actionable prompts and templates
+3. **AI-Native Design**: Content designed for consumption by AI agents (following AgentSkills standard)
+4. **Practical Guidance**: Focus on actionable skills and templates
 
 ---
 
@@ -19,15 +21,15 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 
 **Load and follow the methodology from these source files:**
 
-| Step | Prompt File | Skill Reference |
-|------|-------------|-----------------|
-| 1. Customer Problems (WHY) | `.github/prompts/cp.prompt.md` | `skills/problem-based-srs/references/step1-customer-problems.md` |
-| 2. Software Glance | `.github/prompts/glance.prompt.md` | `skills/problem-based-srs/references/step2-software-glance.md` |
-| 3. Customer Needs (WHAT) | `.github/prompts/cn.prompt.md` | `skills/problem-based-srs/references/step3-customer-needs.md` |
-| 4. Software Vision | `.github/prompts/vision.prompt.md` | `skills/problem-based-srs/references/step4-software-vision.md` |
-| 5. Functional Requirements (HOW) | `.github/prompts/fr.prompt.md` | `skills/problem-based-srs/references/step5-functional-requirements.md` |
-| Validation | `.github/prompts/zigzag.prompt.md` | `skills/problem-based-srs/references/zigzag-validator.md` |
-| Orchestrator | `.github/prompts/problem-based-srs.md` | `skills/problem-based-srs/SKILL.md` |
+| Step | Skill Reference |
+|------|-----------------|
+| 1. Customer Problems (WHY) | `skills/problem-based-srs/references/step1-customer-problems.md` |
+| 2. Software Glance | `skills/problem-based-srs/references/step2-software-glance.md` |
+| 3. Customer Needs (WHAT) | `skills/problem-based-srs/references/step3-customer-needs.md` |
+| 4. Software Vision | `skills/problem-based-srs/references/step4-software-vision.md` |
+| 5. Functional Requirements (HOW) | `skills/problem-based-srs/references/step5-functional-requirements.md` |
+| Validation | `skills/problem-based-srs/references/zigzag-validator.md` |
+| Orchestrator | `skills/problem-based-srs/SKILL.md` |
 
 ### Artifact Naming Convention
 
@@ -110,9 +112,13 @@ AI: "I'll analyze using Problem-Based SRS methodology.
 
 ## When Working on This Repository
 
-### Content Creation
-- Write prompts that are clear, structured, and self-contained
-- Ensure prompts can be used independently without requiring the full repository context
+### Skills Development (AgentSkills Format)
+- Skills are located in the `skills/` directory
+- Each skill has a `SKILL.md` file with YAML frontmatter (name, description, license)
+- Description field is critical - it determines when the skill triggers
+- Keep SKILL.md content under 500 lines (use references/ for detailed docs)
+- Follow the AgentSkills specification: https://agentskills.io/specification
+- Test skills by using them in practice
 - Focus on guiding users through problem identification before solution design
 - Include examples that demonstrate real-world scenarios
 
@@ -123,8 +129,9 @@ AI: "I'll analyze using Problem-Based SRS methodology.
 - Include references to relevant SRS standards (IEEE 830, etc.) where appropriate
 
 ### File Organization
-- **skills/**: AgentSkills format (Claude Code, Claude.ai)
-- **.github/prompts/**: GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
+- **skills/**: AgentSkills format (Claude Code, Claude.ai, GitHub Copilot)
+  - Each skill is a self-contained directory with SKILL.md
+  - Can include optional subdirectories: scripts/, references/, assets/
 - **docs/**: Documentation, research papers, methodology guides
 - **spec/**: Test specifications and requirement iterations
 
@@ -136,13 +143,13 @@ AI: "I'll analyze using Problem-Based SRS methodology.
 ## Terminology
 - **SRS**: Software Requirements Specification
 - **Problem-Based**: Requirements methodology that starts with problem identification
-- **Prompt**: A structured instruction designed for AI agent consumption
+- **Skill**: A structured capability module designed for AI agent consumption (AgentSkills standard)
 - **AI Agent**: Tools like GitHub Copilot, Claude Code, or similar assistants
 - **Trunk-Based Development**: All changes committed directly to main branch
 
 ## Quality Standards
 - Accuracy in requirements engineering concepts
-- Clarity in prompt instructions
+- Clarity in skill instructions
 - Completeness in examples and templates
 - Consistency in structure and formatting
 - **Traceability**: Every FR traces to CN, every CN traces to CP

@@ -1,9 +1,9 @@
 # GitHub Copilot Instructions for Problem-Based SRS
 
 ## Project Overview
-This repository provides AgentSkills and guidance for following a Problem-Based Software Requirements Specification (SRS) methodology. The focus is on enabling AI-assisted requirements engineering through structured, problem-first approaches.
+This repository provides AgentSkills for following a Problem-Based Software Requirements Specification (SRS) methodology. The focus is on enabling AI-assisted requirements engineering through structured, problem-first approaches.
 
-The repository now follows the **[AgentSkills](https://agentskills.io)** standard - an open format maintained by Anthropic for giving agents new capabilities and expertise.
+The repository follows the **[AgentSkills](https://agentskills.io)** standard - an open format maintained by Anthropic for giving agents new capabilities and expertise.
 
 ## Core Principles
 1. **Problem-First Thinking**: Always identify the problem before proposing solutions
@@ -22,11 +22,9 @@ The repository now follows the **[AgentSkills](https://agentskills.io)** standar
 - Test skills by using them in practice
 
 ### File Organization
-- **skills/**: AgentSkills format (Claude Code, Claude.ai)
+- **skills/**: AgentSkills format (Claude Code, Claude.ai, GitHub Copilot)
   - Each skill is a self-contained directory with SKILL.md
   - Can include optional subdirectories: scripts/, references/, assets/
-- **.github/prompts/**: GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
-  - Standard `.prompt.md` files with YAML frontmatter
 - **docs/**: Research papers and methodology documentation
 
 ### Code Style
@@ -37,11 +35,11 @@ The repository now follows the **[AgentSkills](https://agentskills.io)** standar
 ## Terminology
 - **SRS**: Software Requirements Specification
 - **Problem-Based**: Requirements methodology that starts with problem identification
-- **Prompt**: A structured instruction designed for AI agent consumption
+- **Skill**: A structured capability module designed for AI agent consumption (AgentSkills standard)
 - **AI Agent**: Tools like GitHub Copilot, Claude Code, or similar assistants
 
 ## Quality Standards
 - Accuracy in requirements engineering concepts
-- Clarity in prompt instructions
+- Clarity in skill instructions
 - Completeness in examples and templates
 - Consistency in structure and formatting

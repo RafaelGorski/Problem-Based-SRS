@@ -15,7 +15,7 @@ The Problem-Based SRS methodology consists of an organization of activities and 
 The key insight from the research: **accurately capturing business intents of stakeholders remains a major challenge and factor in software project failures**. 
 This methodology addresses this by ensuring requirements provide suitable answers to real customer business issues.
 
-> **Supported Formats:** This repository provides [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) (`.github/prompts/`) and [AgentSkills](https://agentskills.io) format (`skills/`) for maximum compatibility.
+> **Format:** This repository provides [AgentSkills](https://agentskills.io) format (`skills/`) for compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents.
 
 ## 🚀 How to Use
 
@@ -126,20 +126,10 @@ Enable software engineers and requirements analysts to leverage AI agents for be
 
 ## 📁 Repository Structure
 
-This repository supports multiple formats:
-- **`.github/prompts/`** - [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) for VS Code, Visual Studio, and JetBrains IDEs
-- **`skills/`** - [AgentSkills](https://agentskills.io) format for Claude Code and Claude.ai
-```
-.github/prompts/            # GitHub Copilot prompt files (VS Code, Visual Studio, JetBrains)
-├── problem-based-srs.md       # Main orchestrator prompt
-├── cp.prompt.md               # Step 1: Customer Problems
-├── glance.prompt.md           # Step 2: Software Glance
-├── cn.prompt.md               # Step 3: Customer Needs
-├── vision.prompt.md           # Step 4: Software Vision
-├── fr.prompt.md               # Step 5: Functional Requirements
-└── zigzag.prompt.md           # Quality validation tool
+This repository provides the [AgentSkills](https://agentskills.io) format for compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents.
 
-skills/problem-based-srs/   # AgentSkills format (Claude Code, Claude.ai)
+```
+skills/problem-based-srs/   # AgentSkills format (GitHub Copilot, Claude Code, Claude.ai)
 ├── SKILL.md                # Main orchestrator skill
 └── references/             # Detailed instructions for each step
     ├── step1-customer-problems.md
@@ -149,10 +139,6 @@ skills/problem-based-srs/   # AgentSkills format (Claude Code, Claude.ai)
     ├── step5-functional-requirements.md
     └── zigzag-validator.md
 ```
-
-This repository supports two formats:
-- **`.github/prompts/`** - [GitHub Copilot prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files) for VS Code, Visual Studio, and JetBrains IDEs
-- **`skills/`** - [AgentSkills](https://agentskills.io) format for Claude Code and Claude.ai
 
 ## 📊 Methodology Overview
 
@@ -220,7 +206,7 @@ This section guides developers new to AI agents through setting up and using the
 
 ### Prerequisites
 
-Before using these prompts, ensure you have the following:
+Before using this skill, ensure you have the following:
 
 #### For GitHub Copilot (Recommended for IDE users)
 
@@ -281,7 +267,7 @@ Before using these prompts, ensure you have the following:
 
 #### Method 1: Clone the Repository (Recommended)
 
-Clone this repository to include the prompts in your project:
+Clone this repository to include the skill in your project:
 
 ```bash
 # Clone the repository
@@ -296,7 +282,7 @@ After cloning, copy the skill to the appropriate location for your agent:
 | Agent | Skills directory (macOS/Linux) | Skills directory (Windows) |
 |-------|-------------------------------|---------------------------|
 | Claude Code | `~/.claude/skills/` | `%USERPROFILE%\.claude\skills\` |
-| VS Code and GitHub Copilot | `~/.copilot/skills/` | `%USERPROFILE%\.copilot\skills\` |
+| GitHub Copilot | `~/.copilot/skills/` | `%USERPROFILE%\.copilot\skills\` |
 | Gemini CLI | `~/.gemini/skills/` | `%USERPROFILE%\.gemini\skills\` |
 | Cline | `~/.cline/skills/` | `%USERPROFILE%\.cline\skills\` |
 | Goose | `~/.config/goose/skills/` | `%USERPROFILE%\.config\goose\skills\` |
@@ -328,14 +314,8 @@ Copy-Item -Recurse Problem-Based-SRS\skills\problem-based-srs $env:USERPROFILE\.
 
 #### Method 2: Copy Specific Files
 
-Copy only the files you need:
+Copy only the skill files you need:
 
-**For GitHub Copilot:**
-```
-Copy .github/prompts/ → your-project/.github/prompts/
-```
-
-**For Claude Code:**
 ```
 Copy skills/problem-based-srs/ → your-project/skills/problem-based-srs/
 ```
@@ -346,16 +326,16 @@ Copy skills/problem-based-srs/ → your-project/skills/problem-based-srs/
 
 #### Using with GitHub Copilot (VS Code, Visual Studio, JetBrains)
 
-GitHub Copilot automatically discovers `.prompt.md` files in your `.github/prompts/` directory.
+GitHub Copilot automatically discovers skills from the skills directory.
 
 **Step 1: Open Copilot Chat**
 - **VS Code**: Press `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Shift+I` (Mac)
 - **Visual Studio**: View → GitHub Copilot Chat
 - **JetBrains**: Right-click → GitHub Copilot → Open Chat
 
-**Step 2: Use a Prompt Command**
+**Step 2: Use a Command**
 
-Type the prompt command in the chat. Available commands:
+Type the command in the chat. Available commands:
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
@@ -422,7 +402,7 @@ Let's start with Step 1: Customer Problems.
 
 If you prefer not to upload files:
 
-1. Open the specific step file you need (e.g., `.github/prompts/cp.prompt.md`)
+1. Open the specific step file you need (e.g., `skills/problem-based-srs/references/step1-customer-problems.md`)
 2. Copy the entire content
 3. Paste it at the start of your Claude conversation
 4. Provide your business context
@@ -515,9 +495,9 @@ structured. Please review them and ensure they trace to customer needs:
 
 | Issue | Solution |
 |-------|----------|
-| **Prompts not appearing in Copilot** | Ensure `.github/prompts/` folder is in your workspace root. Restart your IDE. |
+| **Skill not found** | Ensure `skills/problem-based-srs/` folder is in your workspace or skills directory. Restart your IDE. |
 | **"Command not found" error** | Verify Copilot Chat extension is installed and you're signed in. |
-| **Claude doesn't follow methodology** | Re-upload the SKILL.md file or copy-paste the specific prompt at the start of your message. |
+| **Claude doesn't follow methodology** | Re-upload the SKILL.md file or copy-paste the specific step content at the start of your message. |
 | **Outputs are too generic** | Provide more specific business context. Include numbers, constraints, and stakeholder details. |
 | **Traceability validation fails** | Use `/zigzag` to identify gaps, then revisit the step with missing traceability. |
 ---
@@ -536,9 +516,9 @@ structured. Please review them and ensure they trace to customer needs:
 
 ## 🚀 Quick Start for Engineers
 
-### Using GitHub Copilot Prompt Files (Recommended)
+### Using Skills (All AI Agents)
 
-The prompts are available as `.prompt.md` files in `.github/prompts/`. In VS Code, Visual Studio, or JetBrains IDEs:
+The skill is available in `skills/problem-based-srs/`. In VS Code, Visual Studio, JetBrains IDEs, or Claude:
 
 ```
 /cp           # Start with Customer Problems
@@ -554,7 +534,7 @@ The prompts are available as `.prompt.md` files in `.github/prompts/`. In VS Cod
 
 The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).  
 
-**Option 1: AgentSkills (Open Standard)**
+**AgentSkills (Open Standard)**
 The `skills/` directory follows the [AgentSkills standard](https://agentskills.io), compatible with any tool that implements it.
 
 **For Claude Code:**
@@ -702,7 +682,7 @@ pytest tests/test_repository.py -v  # Repository structure
 
 | Category | Description | Status |
 |----------|-------------|--------|
-| **YAML Frontmatter** | Validates AgentSkills and prompt file metadata | ✅ |
+| **YAML Frontmatter** | Validates AgentSkills metadata | ✅ |
 | **Markdown Structure** | Ensures consistent heading hierarchy | ✅ |
 | **Traceability IDs** | Validates CP.XX → CN.XX.X → FR.XX.X.X format | ✅ |
 | **Skill Validation** | Checks skill names, descriptions, structure | ✅ |
@@ -724,6 +704,5 @@ For detailed testing documentation, see **[TESTING.md](TESTING.md)**.
 - **Test Specifications:** See `spec/` for detailed test specifications and NFRs
 - **Customer Problems:** See `spec/customer-problems.md` for testing-related CPs
 - **Full Methodology:** See `docs/` for detailed research paper
-- **GitHub Copilot Prompts:** See `.github/prompts/` for prompt files
-- **AgentSkills:** See `skills/problem-based-srs/` for Claude Code integration
-- **Examples:** Each prompt file contains real-world examples
+- **AgentSkills:** See `skills/problem-based-srs/` for skill integration with any AI agent
+- **Examples:** Each reference file in `skills/problem-based-srs/references/` contains real-world examples

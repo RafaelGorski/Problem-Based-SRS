@@ -2,32 +2,26 @@
 
 Thank you for your interest in contributing! We aim to make the **Problem-Based SRS** methodology accessible to every software engineer, regardless of which AI agent or tool they use.
 
-We welcome contributions that improve existing prompts, add new skills, or verify compatibility with different AI models.
+We welcome contributions that improve existing skills, add new skills, or verify compatibility with different AI models.
 
 ## 🤝 Ways to Contribute
 
 ### 1. Agent Compatibility & Testing
-Since AI models behave differently, we need help verifying our prompts across the ecosystem.
-- **Test existing prompts** with models like DeepSeek, Llama 3, GPT-4, Gemini, etc.
+Since AI models behave differently, we need help verifying our skills across the ecosystem.
+- **Test existing skills** with models like DeepSeek, Llama 3, GPT-4, Gemini, etc.
 - Report issues or improvements needed for specific models.
-- Add "Tested with [Model Name]" metadata to prompts if you've verified them.
+- Add "Tested with [Model Name]" metadata to skills if you've verified them.
 
-### 2. Improving Prompts
+### 2. Improving Skills
 - Refine instructions for better clarity.
-- Add more real-world examples to the prompt files.
-- Optimize prompts to use fewer tokens while maintaining quality.
+- Add more real-world examples to the skill files.
+- Optimize skills to use fewer tokens while maintaining quality.
 
 ### 3. Adding New Skills
 - Implement new [AgentSkills](https://agentskills.io) for specific requirements engineering tasks.
 - Create skills for specific domains (e.g., `srs-healthcare`, `srs-fintech`).
 
 ## 📋 Guidelines
-
-### Universal Prompts (`prompts/` directory)
-These files should remain **model-agnostic**.
-- Avoid syntax specific to a single tool unless wrapped in a specific section.
-- Focus on clear, natural language instructions.
-- Use standard Markdown.
 
 ### AgentSkills (`skills/` directory)
 Follow the [AgentSkills Specification](https://agentskills.io/specification).

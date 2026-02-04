@@ -91,9 +91,8 @@ spec/
 | ID | Functional Requirement | Traces to |
 |----|----------------------|-----------|
 | FR.01.1.1 | The YAML frontmatter validator SHALL verify `name`, `description`, `license` fields exist in SKILL.md files | CN.01.1 |
-| FR.01.1.2 | The YAML frontmatter validator SHALL verify `.prompt.md` files contain valid frontmatter | CN.01.1 |
-| FR.01.1.3 | The markdown linter SHALL verify consistent heading levels (H1 for title, H2 for sections) | CN.01.2 |
-| FR.01.1.4 | The file organization validator SHALL verify the repository structure matches documented layout | CN.01.2 |
+| FR.01.1.2 | The markdown linter SHALL verify consistent heading levels (H1 for title, H2 for sections) | CN.01.2 |
+| FR.01.1.3 | The file organization validator SHALL verify the repository structure matches documented layout | CN.01.2 |
 
 ### FR.01.2.x - Semantic Content Tests
 
@@ -137,11 +136,10 @@ CP.01 (Core Problem - AI Agent Compatibility)
 │
 ├── CP.01.1 (Inconsistent formatting breaks AI interpretation)
 │   ├── CN.01.1 (Validate YAML frontmatter)
-│   │   ├── FR.01.1.1 (SKILL.md fields validation)
-│   │   └── FR.01.1.2 (.prompt.md validation)
+│   │   └── FR.01.1.1 (SKILL.md fields validation)
 │   └── CN.01.2 (Verify markdown structure)
-│       ├── FR.01.1.3 (Heading levels)
-│       └── FR.01.1.4 (File organization)
+│       ├── FR.01.1.2 (Heading levels)
+│       └── FR.01.1.3 (File organization)
 │
 ├── CP.01.2 (Different AI models interpret differently)
 │   └── CN.01.5 (Multi-model test scenarios)
