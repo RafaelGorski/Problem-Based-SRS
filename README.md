@@ -1,5 +1,6 @@
 # Problem-Based SRS
 
+[![Version](https://img.shields.io/badge/version-1.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -706,3 +707,17 @@ For detailed testing documentation, see **[TESTING.md](TESTING.md)**.
 - **Full Methodology:** See `docs/` for detailed research paper
 - **AgentSkills:** See `skills/problem-based-srs/` for skill integration with any AI agent
 - **Examples:** Each reference file in `skills/problem-based-srs/references/` contains real-world examples
+
+## 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
+
+### Version 1.0 (February 2026)
+
+This is the first stable release of Problem-Based SRS, featuring:
+
+- **AgentSkills Format**: Full compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents following the [AgentSkills standard](https://agentskills.io)
+- **Complete 5-Step Methodology**: Customer Problems → Software Glance → Customer Needs → Software Vision → Functional Requirements
+- **Traceability Validation**: ZigZag validator ensures all requirements trace back to real business problems
+- **Python Test Infrastructure**: 57+ tests validating YAML frontmatter, markdown structure, and traceability IDs
+- **Comprehensive Documentation**: Detailed reference guides for each methodology step
