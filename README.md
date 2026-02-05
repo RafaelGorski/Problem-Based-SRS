@@ -49,6 +49,28 @@ The AI will guide you through the 5-step process automatically.
 | `/fr` | Step 5: Specify Functional Requirements (the HOW) |
 | `/zigzag` | Validate traceability between artifacts |
 
+### Understanding Customer Problems (`/cp`)
+
+Customer Problems are classified by severity to help prioritize requirements:
+
+```mermaid
+graph TD
+    CP[Customer Problem] --> O{Classification}
+    O -->|Must, Required| OB[Obligation<br/>High Priority<br/>Legal/Contractual]
+    O -->|Expects, Should| EX[Expectation<br/>Medium Priority<br/>Business Goal]
+    O -->|Hopes, Wishes| HO[Hope<br/>Low Priority<br/>Improvement]
+    
+    OB --> I1[Severe consequences<br/>if unsolved]
+    EX --> I2[Moderate impact<br/>if unsolved]
+    HO --> I3[Minimal penalty<br/>if unsolved]
+    
+    style OB fill:#ff6b6b
+    style EX fill:#ffa502
+    style HO fill:#ffeaa7
+```
+
+This classification helps teams understand which problems are critical and must be solved versus nice-to-have improvements.
+
 ## 📊 Methodology Overview
 
 ### The 5-Step Process
