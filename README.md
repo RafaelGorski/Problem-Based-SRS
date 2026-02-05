@@ -12,7 +12,7 @@ This repository continues the work from the research paper **"Problem-Based SRS:
 
 The methodology helps create better software requirements by starting with customer problems instead of jumping to solutions. It uses a structured 5-step process to analyze business needs and ensure requirements actually solve real customer problems.
 
-**Why this matters:** Many software projects fail because teams don't accurately capture what stakeholders really need. This methodology fixes that by connecting every requirement back to a specific business problem.
+**Why this matters:** Research shows that accurately capturing what stakeholders need is a major challenge in software development and a leading cause of project failures. This methodology addresses that by systematically connecting every requirement back to a specific business problem, ensuring teams build what customers actually need.
 
 > This repository uses the [AgentSkills](https://agentskills.io) format, making it compatible with GitHub Copilot, Claude, and other AI agents.
 
