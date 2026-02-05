@@ -8,15 +8,13 @@ An [Agent Skill](https://github.com/agentskills/agentskills) to use **Problem-Ba
 
 ## 📄 Background
 
-This repository is a **continuation of the work** presented in the research paper: **"Problem-Based SRS: A Novel Approach for Software Requirements Specification"** by **Gorski and Stadzisz**
+This repository continues the work from the research paper **"Problem-Based SRS: A Novel Approach for Software Requirements Specification"** by Gorski and Stadzisz.
 
-This is a novel approach to improving software requirements specification quality by constructing knowledge about software requirements from knowledge about customer problems. 
-The Problem-Based SRS methodology consists of an organization of activities and outcome objects through a process with five main steps, aiming to systematically analyze business context and specify software requirements that truly address customer needs.
+The methodology helps create better software requirements by starting with customer problems instead of jumping to solutions. It uses a structured 5-step process to analyze business needs and ensure requirements actually solve real customer problems.
 
-The key insight from the research: **accurately capturing business intents of stakeholders remains a major challenge and factor in software project failures**. 
-This methodology addresses this by ensuring requirements provide suitable answers to real customer business issues.
+**Why this matters:** Many software projects fail because teams don't accurately capture what stakeholders really need. This methodology fixes that by connecting every requirement back to a specific business problem.
 
-> **Format:** This repository provides [AgentSkills](https://agentskills.io) format (`skills/`) for compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents.
+> This repository uses the [AgentSkills](https://agentskills.io) format, making it compatible with GitHub Copilot, Claude, and other AI agents.
 
 ## 🚀 Quick Start
 
