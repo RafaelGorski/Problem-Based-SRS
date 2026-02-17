@@ -118,7 +118,7 @@ cp -r Problem-Based-SRS/skills/problem-based-srs ~/.claude/skills/
 cp -r Problem-Based-SRS/skills/problem-based-srs ~/.copilot/skills/
 ```
 
-**Skills directories by agent:**
+**User-level skills directories by agent:**
 
 | Agent | macOS/Linux | Windows |
 |-------|-------------|---------|
@@ -127,6 +127,39 @@ cp -r Problem-Based-SRS/skills/problem-based-srs ~/.copilot/skills/
 | Gemini CLI | `~/.gemini/skills/` | `%USERPROFILE%\.gemini\skills\` |
 | Cline | `~/.cline/skills/` | `%USERPROFILE%\.cline\skills\` |
 | Goose | `~/.config/goose/skills/` | `%USERPROFILE%\.config\goose\skills\` |
+
+### Option 3: Project-Level Installation (Recommended for Teams)
+
+Install the skill directly into your project repository so every team member and CI agent gets it automatically via version control.
+
+**Using the skills CLI:**
+```bash
+npx skills add RafaelGorski/Problem-Based-SRS
+```
+
+The CLI will prompt you to select which agent directories to install into (e.g., `.github/skills/`, `.claude/skills/`).
+
+**Manual project-level install:**
+```bash
+# Clone
+git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
+
+# For GitHub Copilot (project-level)
+cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.github/skills/
+
+# For Claude Code (project-level)
+cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.claude/skills/
+```
+
+**Project-level skills directories by agent:**
+
+| Agent | Project Directory |
+|-------|-------------------|
+| GitHub Copilot | `.github/skills/` |
+| Claude Code | `.claude/skills/` |
+| Cursor | `.cursor/skills/` |
+
+> **Tip:** Project-level skills are version-controlled with your repo, ensuring the whole team shares the same methodology. Commit the installed skill directory to your repository.
 
 
 ## 💡 Usage Examples
