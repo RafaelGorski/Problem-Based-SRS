@@ -239,15 +239,78 @@ Artifacts: [paste]
 
 ## Output Templates
 
-### Coverage Matrix
+### Coverage Matrix with Completeness Levels
+
+Use **C** (Complete) and **P** (Partial) markers to indicate how well each element addresses its source:
+
+```markdown
+## CP → CN Coverage Matrix
+
+|      | CN.1 | CN.2 | CN.3 | CN.4 |
+|------|------|------|------|------|
+| CP.1 | C    |      |      |      |
+| CP.2 |      | C    | P    |      |
+| CP.3 |      |      |      | C    |
+
+**Legend:**
+- **C** = Complete — CN fully addresses the CP
+- **P** = Partial — CN helps but doesn't fully solve the CP
+- (blank) = No relationship
+
+**Coverage Summary:**
+- CP.1: Fully covered by CN.1 ✅
+- CP.2: Covered by CN.2 (complete) + CN.3 (partial) ✅
+- CP.3: Fully covered by CN.4 ✅
+```
+
+### Two-Stage Validation Process
+
+**Stage 1: CP → CN Analysis**
+```markdown
+## Stage 1: Problem Coverage Analysis
+
+| CP | CNs Mapped | Completeness | Status |
+|----|------------|--------------|--------|
+| CP.1 | CN.1 | C | ✅ Covered |
+| CP.2 | CN.2, CN.3 | C + P = C | ✅ Covered |
+| CP.3 | — | — | ❌ Gap |
+
+**Issues:** CP.3 has no CN — generate CN using step3.
+```
+
+**Stage 2: CN → FR Analysis**
+```markdown
+## Stage 2: Need Coverage Analysis
+
+| CN | FRs Mapped | Completeness | Status |
+|----|------------|--------------|--------|
+| CN.1 | FR.1, FR.2 | P + P = C | ✅ Covered |
+| CN.2 | FR.3 | C | ✅ Covered |
+| CN.3 | FR.4 | C | ✅ Covered |
+| CN.4 | — | — | ❌ Gap |
+
+**Issues:** CN.4 has no FR — generate FR using step5.
+```
+
+### Completeness Rules
+
+| Scenario | Interpretation |
+|----------|----------------|
+| Single **C** | Fully covered |
+| Multiple **P** that together address all aspects | Fully covered (P + P = C) |
+| Single **P** with no other coverage | Partially covered — review needed |
+| No markers in row | Gap — element not addressed |
+| No markers in column | Orphan — element has no source justification |
+
+### Full Coverage Matrix
 
 ```markdown
 ## CP → CN → FR Coverage Matrix
 
 | CP | CNs | FRs | Coverage |
 |----|-----|-----|----------|
-| CP.1 | CN.1, CN.2 | FR.1, FR.2, FR.3 | ✅ Full |
-| CP.2 | CN.3 | FR.4 | ✅ Full |
+| CP.1 | CN.1 (C) | FR.1, FR.2 | ✅ Full |
+| CP.2 | CN.2 (C), CN.3 (P) | FR.3, FR.4 | ✅ Full |
 | CP.3 | — | — | ❌ Gap |
 
 ### Summary

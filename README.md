@@ -48,6 +48,16 @@ The AI will guide you through the 5-step process automatically.
 | `/vision` | Step 4: Document Software Vision (architecture) |
 | `/fr` | Step 5: Specify Functional Requirements (the HOW) |
 | `/zigzag` | Validate traceability between artifacts |
+| `/complexity` | **Optional:** Axiomatic Design quality analysis |
+
+### Optional: Complexity Analysis (`/complexity`)
+
+For deeper quality analysis on critical systems, you can explicitly call `/complexity` to:
+- Analyze specification independence (coupled vs. uncoupled)
+- Use C/P (Complete/Partial) completeness markers
+- Apply Axiomatic Design principles
+
+This is **not** part of the standard flow—use it when you need formal quality gates.
 
 ### Understanding Customer Problems (`/cp`)
 
@@ -212,13 +222,21 @@ See [TESTING.md](TESTING.md) for detailed testing documentation.
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **docs/** - Research paper and methodology details
 - **skills/problem-based-srs/** - AgentSkills format for AI agents
+  - `references/crm-example.md` - Complete CRM case study walkthrough
+  - `references/microer-example.md` - Renewable energy system walkthrough
+  - `references/complexity-analysis.md` - Optional Axiomatic Design analysis
 - **spec/** - Test specifications and requirements
 
-## 📋 Version 1.0 (February 2026)
+## 📋 Version 1.1 (February 2026)
 
-First stable release featuring:
+Latest release featuring:
 
+- **NEW:** `/complexity` command for optional Axiomatic Design quality analysis
+- **NEW:** Condensed case study examples (CRM and MicroER)
+- **NEW:** C/P (Complete/Partial) completeness markers in traceability
+- **NEW:** Problem decomposition guidance with heuristics
+- **NEW:** Expanded CN outcome class examples (Control, Construction, Entertainment)
+- **NEW:** Agile/sprint integration patterns
 - AgentSkills format compatible with GitHub Copilot, Claude, and other AI agents
 - Complete 5-step methodology with traceability validation
 - 57+ tests for quality assurance
-- Comprehensive documentation and examples

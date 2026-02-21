@@ -224,6 +224,69 @@ Ensure each CP:
 
 ---
 
+## Problem Decomposition
+
+### When to Decompose
+
+Decompose a CP into sub-CPs when:
+
+| Trigger | Example |
+|---------|---------|
+| Multiple distinct facets | CP.1 has communication AND frequency aspects |
+| Different subjects affected | CP.1 affects both company AND customers |
+| Independent penalties | Failure of one aspect doesn't cause all penalties |
+| Separate solutions likely | Each facet could be solved by different FRs |
+
+### Numbering Convention
+
+```
+CP.1        → Main problem
+CP.1.1      → First sub-problem of CP.1
+CP.1.2      → Second sub-problem of CP.1
+CP.1.2.1    → Sub-sub-problem (rarely needed)
+```
+
+### Decomposition Example
+
+**Before decomposition:**
+```
+CP.1: The company must ensure effective communication with customers, 
+      otherwise it loses customers affecting marketing and sales.
+```
+
+**After decomposition:**
+```
+CP.1: The company must ensure effective communication with customers, 
+      otherwise it loses customers affecting marketing and sales.
+
+CP.1.1: The company must ensure it can contact all customers 
+        (having valid contact information).
+
+CP.1.2: The company must ensure each customer is contacted regularly 
+        (frequency of communication).
+```
+
+**Why decompose?** CP.1 has two distinct facets:
+- **Ability** to contact (CP.1.1) — solved by contact database
+- **Regularity** of contact (CP.1.2) — solved by scheduling/reminders
+
+### When NOT to Decompose
+
+- Problem is already atomic (single concern)
+- Sub-problems would be trivial or obvious
+- Decomposition creates artificial complexity
+- All aspects share the same solution
+
+### Decomposition Checklist
+
+- [ ] Parent CP captures the overall problem
+- [ ] Each sub-CP addresses a distinct facet
+- [ ] Sub-CPs together fully cover the parent
+- [ ] Sub-CPs use consistent numbering (CP.n.m)
+- [ ] Sub-CPs have their own classifications (may differ from parent)
+
+---
+
 ## Anti-Patterns to Avoid
 
 | ❌ Wrong | ✅ Correct |
