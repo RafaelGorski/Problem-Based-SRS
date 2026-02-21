@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version](https://img.shields.io/badge/version-1.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0)
+[![Version](https://img.shields.io/badge/version-1.1-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -72,6 +72,7 @@ Once installed, use these commands to work with different parts of the methodolo
 | `/vision` | Planning architecture | Documents software architecture and vision |
 | `/fr` | Writing requirements | Specifies detailed functional requirements (HOW) |
 | `/zigzag` | Quality check | Validates that all requirements trace to problems |
+| `/complexity` | Deep analysis (optional) | Axiomatic Design quality analysis for critical systems |
 
 **Common scenarios:**
 
@@ -245,10 +246,16 @@ pip install pytest strictyaml
 pytest tests/ -v
 ```
 
-## 📋 Version 1.0
+## 📋 Version 1.1
 
 Released February 2026 with:
 
+- **NEW:** `/complexity` command for optional Axiomatic Design quality analysis
+- **NEW:** Condensed case study examples (CRM and MicroER systems)
+- **NEW:** C/P (Complete/Partial) completeness markers in traceability
+- **NEW:** Problem decomposition guidance with heuristics
+- **NEW:** Expanded CN outcome class examples (Control, Construction, Entertainment)
+- **NEW:** Agile/sprint integration patterns
 - Complete 5-step methodology with traceability validation
 - AgentSkills format for GitHub Copilot, Claude, and other AI agents
 - 57+ automated tests for quality assurance

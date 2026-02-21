@@ -87,4 +87,5 @@ This release includes contributions from the following PRs:
 - PR #9: Remove prompts, consolidate to AgentSkills format only
 - PR #10: Add AgentSkills reference documentation and update copilot instructions
 
+[1.1]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1
 [1.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0
