@@ -4,86 +4,85 @@
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An [Agent Skill](https://github.com/agentskills/agentskills) to use **Problem-Based Software Requirements Specification (SRS)** method in your software project. Designed for integration with AI agents like GitHub Copilot, Claude, and others.
+**Stop building the wrong thing.** Let your AI agent guide you through proven requirements engineering that starts with real customer problems, not feature wish lists.
 
-## 📄 Background
+Works with GitHub Copilot, Claude, and other AI coding assistants to help you create software requirements that actually solve business problems.
 
-This repository continues the work from the research paper **"Problem-Based SRS: A Novel Approach for Software Requirements Specification"** by Gorski and Stadzisz.
+## ⚡ What You'll Get
 
-The methodology helps create better software requirements by starting with customer problems instead of jumping to solutions. It uses a structured 5-step process to analyze business needs and ensure requirements actually solve real customer problems.
+This methodology helps you:
 
-**Why this matters:** Research shows that accurately capturing what stakeholders need is a major challenge in software development and a leading cause of project failures. This methodology addresses that by systematically connecting every requirement back to a specific business problem, ensuring teams build what customers actually need.
+- ✅ **Start with WHY** - Identify real customer problems before writing any requirements
+- ✅ **Maintain traceability** - Every feature connects back to a business problem it solves
+- ✅ **Avoid scope creep** - Clear priorities based on problem severity (must-have vs nice-to-have)
+- ✅ **Reduce rework** - Catch misunderstandings early, before writing code
+- ✅ **AI-guided process** - Your AI assistant walks you through each step automatically
 
-> This repository uses the [AgentSkills](https://agentskills.io) format, making it compatible with GitHub Copilot, Claude, and other AI agents.
+**Based on peer-reviewed research** by Gorski & Stadzisz, this approach systematically addresses the #1 cause of software project failures: building what stakeholders *asked for* instead of what they actually *need*.
+
+## 🎯 See It In Action
+
+Here's what happens when you use this methodology:
+
+**Your input:**
+```
+I need requirements for an inventory management system. Our warehouse
+tracks everything in spreadsheets and loses $50k/month due to errors.
+```
+
+**The AI guides you through:**
+
+1. **Customer Problems (WHY)** - "Manual spreadsheet tracking causes $50k/month in inventory errors"
+2. **Software Glance** - "Web-based inventory system with barcode scanning"
+3. **Customer Needs (WHAT)** - "System must track inventory in real-time with 99.9% accuracy"
+4. **Software Vision** - "Cloud inventory platform with mobile scanning app"
+5. **Functional Requirements (HOW)** - "FR.01.1.1: System shall scan barcodes and update inventory within 2 seconds"
+
+Every requirement traces back to that $50k problem, ensuring you build what actually matters.
 
 ## 🚀 Quick Start
 
-Ask your AI agent to install and use this skill:
+**Step 1:** Install (one-time setup)
 
-**GitHub Copilot:**
+Ask your AI assistant:
 ```
 Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS
 ```
 
-**Claude:**
-```
-Install the AgentSkill from https://github.com/RafaelGorski/Problem-Based-SRS
-```
+**Step 2:** Start your first requirements session
 
-Then start with:
 ```
 /problem-based-srs
 ```
 
-The AI will guide you through the 5-step process automatically.
+Your AI will guide you through the complete 5-step process interactively.
 
-## 💡 Available Commands
+> **First time?** Just tell your AI about your project challenge. Example: *"We need a mobile app for field technicians who can't access customer data offline."* The AI will handle the rest.
 
-| Command | Description |
-|---------|-------------|
-| `/problem-based-srs` | Start the full guided methodology |
-| `/cp` | Step 1: Identify Customer Problems (the WHY) |
-| `/glance` | Step 2: Create Software Glance (high-level view) |
-| `/cn` | Step 3: Define Customer Needs (the WHAT) |
-| `/vision` | Step 4: Document Software Vision (architecture) |
-| `/fr` | Step 5: Specify Functional Requirements (the HOW) |
-| `/zigzag` | Validate traceability between artifacts |
-| `/complexity` | **Optional:** Axiomatic Design quality analysis |
+## 💡 Commands Reference
 
-### Optional: Complexity Analysis (`/complexity`)
+Once installed, use these commands to work with different parts of the methodology:
 
-For deeper quality analysis on critical systems, you can explicitly call `/complexity` to:
-- Analyze specification independence (coupled vs. uncoupled)
-- Use C/P (Complete/Partial) completeness markers
-- Apply Axiomatic Design principles
+| Command | When to Use | What It Does |
+|---------|-------------|--------------|
+| `/problem-based-srs` | Starting a new project | Guides you through all 5 steps from scratch |
+| `/cp` | Analyzing business problems | Identifies and classifies customer problems (WHY) |
+| `/glance` | Quick project overview | Creates high-level software summary |
+| `/cn` | Defining what to build | Translates problems into customer needs (WHAT) |
+| `/vision` | Planning architecture | Documents software architecture and vision |
+| `/fr` | Writing requirements | Specifies detailed functional requirements (HOW) |
+| `/zigzag` | Quality check | Validates that all requirements trace to problems |
 
-This is **not** part of the standard flow—use it when you need formal quality gates.
+**Common scenarios:**
 
-### Understanding Customer Problems (`/cp`)
+- 🆕 **New project?** → Use `/problem-based-srs` to start from scratch
+- 🔍 **Reviewing existing requirements?** → Use `/fr` then `/zigzag` to validate
+- 💡 **Stakeholders proposing solutions instead of problems?** → Use `/cp` to dig deeper
+- ✅ **Need to verify requirements quality?** → Use `/zigzag` for traceability check
 
-Customer Problems are classified by severity to help prioritize requirements:
+## 📊 How It Works
 
-```mermaid
-graph TD
-    CP[Customer Problem] --> O{Classification}
-    O -->|Must, Required| OB[Obligation<br/>High Priority<br/>Legal/Contractual]
-    O -->|Expects, Should| EX[Expectation<br/>Medium Priority<br/>Business Goal]
-    O -->|Hopes, Wishes| HO[Hope<br/>Low Priority<br/>Improvement]
-    
-    OB --> I1[Severe consequences<br/>if unsolved]
-    EX --> I2[Moderate impact<br/>if unsolved]
-    HO --> I3[Minimal penalty<br/>if unsolved]
-    
-    style OB fill:#ff6b6b
-    style EX fill:#ffa502
-    style HO fill:#ffeaa7
-```
-
-This classification helps teams understand which problems are critical and must be solved versus nice-to-have improvements.
-
-## 📊 Methodology Overview
-
-### The 5-Step Process
+The methodology follows a proven 5-step process where each step builds on the previous one:
 
 ```mermaid
 graph LR
@@ -101,34 +100,67 @@ graph LR
     style F fill:#ffeaa7
 ```
 
-Each step builds on the previous one, ensuring all requirements trace back to real business problems.
+**The WHY → WHAT → HOW progression ensures:**
+- You understand the business problem before designing solutions
+- Every requirement traces back to a real customer pain point
+- Priorities are clear (must-solve vs nice-to-have)
 
-## 🛠️ Installation
+### Problem Priority Classification
 
-### Option 1: Let Your AI Agent Install It (Easiest)
+Customer Problems are classified by severity to help you prioritize:
 
-Just ask your AI agent:
+```mermaid
+graph TD
+    CP[Customer Problem] --> O{Classification}
+    O -->|Must, Required| OB[Obligation<br/>High Priority<br/>Legal/Contractual]
+    O -->|Expects, Should| EX[Expectation<br/>Medium Priority<br/>Business Goal]
+    O -->|Hopes, Wishes| HO[Hope<br/>Low Priority<br/>Improvement]
+
+    OB --> I1[Severe consequences<br/>if unsolved]
+    EX --> I2[Moderate impact<br/>if unsolved]
+    HO --> I3[Minimal penalty<br/>if unsolved]
+
+    style OB fill:#ff6b6b
+    style EX fill:#ffa502
+    style HO fill:#ffeaa7
+```
+
+This ensures you're not treating "nice to have" features the same as "business critical" requirements.
+
+## 🛠️ Installation Options
+
+### Recommended: AI-Assisted Installation
+
+The easiest way—just ask your AI assistant:
+
 ```
 Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS
 ```
 
-### Option 2: Manual Installation
+Your AI will handle the installation automatically. Works with GitHub Copilot, Claude, and other agents.
 
-Clone the repository and copy to your skills directory:
+### Alternative: Manual Installation
+
+<details>
+<summary>Click to expand manual installation instructions</summary>
+
+#### For Individual Use
+
+Install to your personal skills directory:
 
 ```bash
-# Clone
+# Clone the repository
 git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
 
 # Copy to your AI agent's skills directory
-# For Claude Code
+# For Claude Code:
 cp -r Problem-Based-SRS/skills/problem-based-srs ~/.claude/skills/
 
-# For GitHub Copilot
+# For GitHub Copilot:
 cp -r Problem-Based-SRS/skills/problem-based-srs ~/.copilot/skills/
 ```
 
-**User-level skills directories by agent:**
+**Skills directory by AI agent:**
 
 | Agent | macOS/Linux | Windows |
 |-------|-------------|---------|
@@ -138,30 +170,34 @@ cp -r Problem-Based-SRS/skills/problem-based-srs ~/.copilot/skills/
 | Cline | `~/.cline/skills/` | `%USERPROFILE%\.cline\skills\` |
 | Goose | `~/.config/goose/skills/` | `%USERPROFILE%\.config\goose\skills\` |
 
-### Option 3: Project-Level Installation (Recommended for Teams)
+#### For Teams (Project-Level)
 
-Install the skill directly into your project repository so every team member and CI agent gets it automatically via version control.
+Install into your repository so everyone on the team automatically gets it:
 
-**Using the skills CLI:**
+**Using the AgentSkills CLI:**
 ```bash
 npx skills add RafaelGorski/Problem-Based-SRS
 ```
 
-The CLI will prompt you to select which agent directories to install into (e.g., `.github/skills/`, `.claude/skills/`).
-
-**Manual project-level install:**
+**Or manually:**
 ```bash
-# Clone
+# Clone the repository
 git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
 
-# For GitHub Copilot (project-level)
+# Copy to your project's skills directory
+# For GitHub Copilot:
 cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.github/skills/
 
-# For Claude Code (project-level)
+# For Claude Code:
 cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.claude/skills/
+
+# Commit to version control
+cd your-project
+git add .github/skills/  # or .claude/skills/
+git commit -m "Add Problem-Based SRS methodology"
 ```
 
-**Project-level skills directories by agent:**
+**Project-level skills directories:**
 
 | Agent | Project Directory |
 |-------|-------------------|
@@ -169,54 +205,56 @@ cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.claude/skills/
 | Claude Code | `.claude/skills/` |
 | Cursor | `.cursor/skills/` |
 
-> **Tip:** Project-level skills are version-controlled with your repo, ensuring the whole team shares the same methodology. Commit the installed skill directory to your repository.
+> **Tip:** Project-level installation ensures your entire team follows the same requirements methodology and the skill is automatically available in CI/CD.
+
+</details>
 
 
-## 💡 Usage Examples
+## 📚 Learn More
 
-### Basic Workflow
+### Documentation
 
-1. **Start a conversation:**
-```
-I need requirements for an inventory management system. Our warehouse
-tracks everything in spreadsheets and loses $50k/month due to errors.
-```
+- **[Research Paper](docs/)** - The peer-reviewed methodology by Gorski & Stadzisz
+- **[Testing Guide](TESTING.md)** - Quality assurance and test specifications
+- **[Contributing](CONTRIBUTING.md)** - Help improve the methodology
+- **[Changelog](CHANGELOG.md)** - Version history and updates
 
-2. **The AI will guide you through:**
-   - Identifying Customer Problems (the WHY)
-   - Creating Software Glance (high-level view)
-   - Defining Customer Needs (the WHAT)
-   - Building Software Vision (architecture)
-   - Specifying Functional Requirements (the HOW)
-   - Validating traceability with `/zigzag`
+### Key Concepts
 
-### Common Use Cases
+**Traceability:** Every functional requirement (FR) traces to a customer need (CN), which traces to a customer problem (CP). This ensures nothing gets built without a clear business justification.
 
-**New Project:** Use `/problem-based-srs` to go through all 5 steps sequentially.
+**WHY → WHAT → HOW:** The methodology enforces this logical progression:
+- **WHY** (Customer Problems) = The business pain you're solving
+- **WHAT** (Customer Needs) = Capabilities required to solve it
+- **HOW** (Functional Requirements) = Specific features to implement
 
-**Refining Existing Requirements:** Use `/fr` to review and validate your current requirements.
+**AgentSkills Format:** This repository uses the [AgentSkills](https://agentskills.io) open standard, making it compatible with any AI agent that supports the format.
 
-**Finding Root Problems:** Use `/cp` when stakeholders describe solutions instead of problems.
+## 🧪 Quality Assurance
 
-**Quality Check:** Use `/zigzag` to verify all requirements trace back to real business problems.
+This methodology includes comprehensive testing:
 
-## 🧪 Testing
-
-This repository includes comprehensive tests to ensure quality.
-
-**Test Coverage:** 57 of 58 tests passing (98.3%)
+- ✅ **98.3% test coverage** (57 of 58 tests passing)
+- ✅ **Static validation** of skill format and structure
+- ✅ **Semantic validation** of methodology steps
+- ✅ **Integration tests** for AI agent compatibility
 
 ```bash
-# Install dependencies
+# Run tests yourself
 pip install pytest strictyaml
-
-# Run all tests
 pytest tests/ -v
 ```
 
-See [TESTING.md](TESTING.md) for detailed testing documentation.
+## 📋 Version 1.0
 
-## 📚 Additional Resources
+Released February 2026 with:
+
+- Complete 5-step methodology with traceability validation
+- AgentSkills format for GitHub Copilot, Claude, and other AI agents
+- 57+ automated tests for quality assurance
+- Comprehensive documentation based on peer-reviewed research
+
+## 📂 Repository Contents
 
 - **[TESTING.md](TESTING.md)** - Testing documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
@@ -227,16 +265,15 @@ See [TESTING.md](TESTING.md) for detailed testing documentation.
   - `references/complexity-analysis.md` - Optional Axiomatic Design analysis
 - **spec/** - Test specifications and requirements
 
-## 📋 Version 1.1 (February 2026)
+### Optional: Complexity Analysis (`/complexity`)
 
-Latest release featuring:
+For deeper quality analysis on critical systems, you can explicitly call `/complexity` to:
+- Analyze specification independence (coupled vs. uncoupled)
+- Use C/P (Complete/Partial) completeness markers
+- Apply Axiomatic Design principles
 
-- **NEW:** `/complexity` command for optional Axiomatic Design quality analysis
-- **NEW:** Condensed case study examples (CRM and MicroER)
-- **NEW:** C/P (Complete/Partial) completeness markers in traceability
-- **NEW:** Problem decomposition guidance with heuristics
-- **NEW:** Expanded CN outcome class examples (Control, Construction, Entertainment)
-- **NEW:** Agile/sprint integration patterns
-- AgentSkills format compatible with GitHub Copilot, Claude, and other AI agents
-- Complete 5-step methodology with traceability validation
-- 57+ tests for quality assurance
+This is **not** part of the standard flow—use it when you need formal quality gates.
+
+---
+
+**Built with ❤️ by the requirements engineering community** | [Report Issues](https://github.com/RafaelGorski/Problem-Based-SRS/issues) | [MIT License](LICENSE)
