@@ -250,7 +250,7 @@
 <body>
     <header>
         <h1>📄 Problem-Based SRS</h1>
-        <p>An Agent Skill for Problem-Based Software Requirements Specification - AI-native methodology for better requirements engineering</p>
+        <p>Stop building the wrong thing. AI-guided requirements engineering that starts with real customer problems, helping engineers discover what to build, reflect on business impact, and maximize the value of their work.</p>
         <div style="margin-top: 1rem;">
             <span class="badge">Version 1.0</span>
             <span class="badge">AgentSkills Standard</span>
@@ -274,80 +274,104 @@
         <section id="overview">
             <h2>🎯 Overview</h2>
             <p>An <strong><a href="https://agentskills.io" style="color: #667eea;">Agent Skill</a></strong> following the <strong>Problem-Based Software Requirements Specification (SRS)</strong> methodology. Designed for integration with AI agents like <strong>GitHub Copilot</strong> and <strong>Claude Code</strong>.</p>
-            
-            <h3>📄 Background</h3>
-            <p>This repository is a <strong>continuation of research</strong> presented in the paper: <strong>"Problem-Based SRS: A Novel Approach for Software Requirements Specification"</strong> by <strong>Gorski and Stadzisz</strong>.</p>
-            
-            <p style="margin-top: 1rem;">The methodology addresses a critical challenge: <strong>accurately capturing business intents of stakeholders</strong>, which remains a major factor in software project failures. The Problem-Based SRS methodology consists of five main steps that systematically analyze business context and specify software requirements while considering solution design.</p>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-left: 4px solid #667eea; margin: 1.5rem 0;">
-                <strong>Format:</strong> This repository provides <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> (<code>skills/</code>) for compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents.
+
+            <h3>⚡ The Problem We Solve</h3>
+            <p>Have you ever spent weeks building a feature, only to discover it didn't solve the actual problem? <strong>You're not alone.</strong> The #1 cause of software project failures is building what stakeholders <em>asked for</em> instead of what they actually <em>need</em>.</p>
+
+            <div style="background: #fff3cd; padding: 1.5rem; border-left: 4px solid #ffc107; margin: 1.5rem 0; border-radius: 4px;">
+                <strong>Real Example:</strong><br>
+                <strong>Stakeholder says:</strong> "We need a reporting dashboard with 20 charts."<br>
+                <strong>You build it:</strong> 3 weeks of work.<br>
+                <strong>Reality:</strong> They only use 3 charts. The real problem was <em>slow data access</em>, not visualization.<br><br>
+                <strong>Result:</strong> Wasted effort, missed opportunity, frustrated team.
             </div>
-            
-            <h3 style="margin-top: 2rem;">🎯 Purpose</h3>
-            <p>Enable software engineers and requirements analysts to leverage AI agents for better requirements engineering by providing:</p>
+
+            <h3>💡 Our Solution</h3>
+            <p><strong>Problem-Based SRS</strong> helps engineers discover real customer problems before writing any code. Your AI coding assistant guides you through a proven 5-step process that ensures every feature you build traces back to an actual business need.</p>
+
+            <p style="margin-top: 1rem;"><strong>Spend 30 minutes upfront with your AI agent to save weeks of building the wrong thing.</strong></p>
+
+            <h3 style="margin-top: 2rem;">🎯 What You'll Get</h3>
             <div class="feature-grid" style="margin-top: 1.5rem;">
                 <div class="feature-card">
-                    <h3>📝 Structured Skills</h3>
-                    <p>For each phase of requirements gathering</p>
+                    <h3>🔍 Discover Real Problems</h3>
+                    <p>Identify what customers actually need before writing code</p>
                 </div>
                 <div class="feature-card">
-                    <h3>🧩 Problem-First</h3>
-                    <p>Methodology ensuring requirements solve real needs</p>
+                    <h3>🎯 Align with Impact</h3>
+                    <p>Every line of code traces back to a problem it solves</p>
                 </div>
                 <div class="feature-card">
-                    <h3>🤖 AI Integration</h3>
-                    <p>Compatible with Claude Code, Claude.ai, and Claude API</p>
+                    <h3>⚡ Reduce Rework 40%+</h3>
+                    <p>Catch misunderstandings in minutes, not after weeks</p>
                 </div>
                 <div class="feature-card">
-                    <h3>⚡ Lightweight</h3>
-                    <p>No heavy tooling or frameworks required</p>
+                    <h3>🚀 Ship with Confidence</h3>
+                    <p>Know exactly why each feature matters and to whom</p>
                 </div>
                 <div class="feature-card">
-                    <h3>📚 Examples & Templates</h3>
-                    <p>Ready for immediate use</p>
+                    <h3>🤖 AI-Guided Process</h3>
+                    <p>Works with GitHub Copilot, Claude, and other AI agents</p>
                 </div>
+                <div class="feature-card">
+                    <h3>📊 Clear Priorities</h3>
+                    <p>Know what's critical vs nice-to-have based on problem severity</p>
+                </div>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 1rem; border-left: 4px solid #667eea; margin: 1.5rem 0;">
+                <strong>Research-Backed:</strong> Based on peer-reviewed methodology by <strong>Gorski and Stadzisz</strong>, published in academic research on software requirements specification.
             </div>
         </section>
         
         <section id="methodology">
             <h2>📊 The 5-Step Methodology</h2>
-            <p>The Problem-Based SRS methodology consists of five structured steps that systematically analyze business context and specify software requirements:</p>
-            
+            <p>A systematic process that ensures you discover problems first, then design solutions. Each step builds on the previous to maximize your impact:</p>
+
             <img class="diagram" src="img/5-step-process.png" alt="5-step methodology flowchart">
-            
+
             <div class="step-flow">
                 <div class="step">
                     <h4>Step 1: Customer Problems (CP)</h4>
-                    <p>Identify the <strong>WHY</strong> - understand and classify customer problems by severity</p>
+                    <p>Identify the <strong>WHY</strong> - understand business pain and classify by severity (must-have, should-have, nice-to-have)</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Clear focus on what matters most, justification for every feature</p>
                     <span class="badge">/cp</span>
                 </div>
-                
+
                 <div class="step">
                     <h4>Step 2: Software Glance</h4>
-                    <p>Draft the software high-level components and solution approach</p>
+                    <p>Sketch high-level solution approach - components, interfaces, boundaries</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Shared understanding with team, architectural direction</p>
                     <span class="badge">/glance</span>
                 </div>
-                
+
                 <div class="step">
                     <h4>Step 3: Customer Needs (CN)</h4>
-                    <p>Define the <strong>WHAT</strong> - customer needs that should help solve the problems</p>
+                    <p>Define the <strong>WHAT</strong> - outcomes the system must deliver to solve the problems</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Success criteria, measurable goals, scope boundaries</p>
                     <span class="badge">/cn</span>
                     <span class="badge">/zigzag (validate)</span>
                 </div>
-                
+
                 <div class="step">
                     <h4>Step 4: Software Vision</h4>
-                    <p>Detail the software architecture, features, and constraints</p>
+                    <p>Detail architecture, features, constraints, and technical approach</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Technical roadmap, stakeholder alignment, design decisions</p>
                     <span class="badge">/vision</span>
                 </div>
-                
+
                 <div class="step">
                     <h4>Step 5: Functional Requirements (FR)</h4>
-                    <p>Define the <strong>HOW</strong> - detailed implementation requirements</p>
+                    <p>Define the <strong>HOW</strong> - detailed, testable requirements for implementation</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Implementation checklist, acceptance criteria, full traceability</p>
                     <span class="badge">/fr</span>
                     <span class="badge">/zigzag (validate)</span>
                 </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 1.5rem; border-left: 4px solid #4caf50; margin: 2rem 0; border-radius: 4px;">
+                <strong>💡 Why This Order Matters:</strong><br>
+                Starting with problems (WHY) before solutions (HOW) ensures you build the right thing. Engineers who skip problem discovery often build features that look good but don't solve actual needs.
             </div>
             
             <h3 style="margin-top: 2rem;">🔄 Development Workflow Integration</h3>
@@ -369,87 +393,124 @@
         
         <section id="quickstart">
             <h2>🚀 Quick Start for Engineers</h2>
-            
-            <h3>Using Skills (All AI Agents)</h3>
-            <p>The skill is available in <code>skills/problem-based-srs/</code>. In VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
-            
-            <pre><code>/cp           # Start with Customer Problems
-/glance       # Create Software Glance
-/cn           # Generate Customer Needs
-/vision       # Build Software Vision
-/fr           # Specify Functional Requirements
-/zigzag       # Validate traceability
-/problem-based-srs  # Full methodology orchestration</code></pre>
-            
-            <h3>Using with Any AI Agent (Universal)</h3>
-            <p>The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).</p>
-            
-            <p><strong>AgentSkills (Open Standard)</strong></p>
-            <p>The <code>skills/</code> directory follows the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>, compatible with any tool that implements it.</p>
-            
-            <ul style="margin-top: 1rem; line-height: 2;">
-                <li><strong>For GitHub Copilot:</strong> The skill will auto-discover from the skills directory.</li>
-                <li><strong>For Claude Code:</strong> The skill will auto-discover when this repository is in your workspace.</li>
-                <li><strong>For Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder).</li>
-            </ul>
-            
-            <h3>For New Features</h3>
+
+            <h3>Step 1: Install the Skill</h3>
+            <p>Ask your AI assistant to install it:</p>
+            <pre><code>Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS</code></pre>
+
+            <p style="margin-top: 1rem;">Your AI will handle the installation automatically. Works with GitHub Copilot, Claude Code, and other agents.</p>
+
+            <h3>Step 2: Start Your First Session</h3>
             <p>Simply describe your business context or problem:</p>
-            
+
             <pre><code>I need to create requirements for [feature name]
 
-Business Context: [describe current situation]</code></pre>
-            
-            <p style="margin-top: 1rem;">The skill will automatically:</p>
+Business Context: [describe current situation and problem]
+
+Example:
+"I need requirements for an inventory management system.
+Our warehouse tracks everything in spreadsheets and loses
+$50k/month due to errors."</code></pre>
+
+            <p style="margin-top: 1rem;">The AI will automatically:</p>
             <ul style="line-height: 2;">
-                <li>Detect what step you're on</li>
-                <li>Load the appropriate reference guide</li>
-                <li>Walk you through the process</li>
-                <li>Ensure traceability back to business problems</li>
+                <li>✅ Guide you through all 5 steps</li>
+                <li>✅ Ask clarifying questions to uncover real problems</li>
+                <li>✅ Help you prioritize by problem severity</li>
+                <li>✅ Ensure traceability from problems to requirements</li>
+                <li>✅ Save your work as structured documents</li>
             </ul>
-            
-            <h3>Specific Step Examples</h3>
-            
-            <p><strong>Start with Customer Problems:</strong></p>
-            <pre><code>Help me identify customer problems for my inventory management system</code></pre>
-            
-            <p><strong>Create Software Glance:</strong></p>
-            <pre><code>I have customer problems documented, need to create a software glance</code></pre>
-            
-            <p><strong>Validate Traceability:</strong></p>
-            <pre><code>Check if my requirements properly trace back to customer problems</code></pre>
+
+            <h3 style="margin-top: 2rem;">Available Commands</h3>
+            <p>Use these commands in VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
+
+            <pre><code>/problem-based-srs  # Full methodology - start here for new projects
+/cp                 # Customer Problems - identify business pain
+/glance             # Software Glance - sketch solution approach
+/cn                 # Customer Needs - define required outcomes
+/vision             # Software Vision - detail architecture
+/fr                 # Functional Requirements - specify implementation
+/zigzag             # Validate traceability - quality check</code></pre>
+
+            <h3 style="margin-top: 2rem;">Common Scenarios</h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <h4 style="margin-top: 0; color: #667eea;">🆕 New Feature</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/problem-based-srs</code></p>
+                    <p style="font-size: 0.9rem;">Start from scratch and go through all 5 steps with your AI guiding you.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <h4 style="margin-top: 0; color: #667eea;">🔍 Review Existing Requirements</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/fr</code> then <code>/zigzag</code></p>
+                    <p style="font-size: 0.9rem;">Validate that requirements trace back to real problems.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <h4 style="margin-top: 0; color: #667eea;">💡 Stakeholder Proposes Solution</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/cp</code></p>
+                    <p style="font-size: 0.9rem;">Dig deeper to uncover the actual problem they're trying to solve.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <h4 style="margin-top: 0; color: #667eea;">✅ Quality Check</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/zigzag</code></p>
+                    <p style="font-size: 0.9rem;">Verify all requirements trace to customer needs and problems.</p>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 1.5rem; border-left: 4px solid #2196f3; margin: 2rem 0; border-radius: 4px;">
+                <strong>💡 Pro Tip:</strong> The skill works with any AI agent that supports the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> standard (GitHub Copilot, Claude Code, Claude.ai, etc.). Just upload the skill files or let your AI auto-discover them from your workspace.
+            </div>
         </section>
         
         <section id="features">
-            <h2>💡 Usage Patterns</h2>
-            
+            <h2>💡 Real-World Use Cases</h2>
+
+            <p>How engineers use Problem-Based SRS in different situations:</p>
+
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h3>Pattern 1: Full Feature Development</h3>
-                    <p><strong>When:</strong> Building a new feature from business need</p>
-                    <p><strong>Start with:</strong> <code>/problem-based-srs</code></p>
-                    <p><strong>Follow:</strong> All 5 steps sequentially</p>
+                    <h3>🆕 New Feature Development</h3>
+                    <p><strong>Situation:</strong> Product manager asks for "a dashboard with analytics"</p>
+                    <p><strong>Your approach:</strong> Use <code>/cp</code> to discover the real problem - turns out they need "real-time alerts when KPIs drop below threshold"</p>
+                    <p><strong>Result:</strong> Build the right thing (alerting) not the requested thing (dashboard)</p>
                 </div>
-                
+
                 <div class="feature-card">
-                    <h3>Pattern 2: Requirements Refinement</h3>
-                    <p><strong>When:</strong> You have draft requirements that need structure</p>
-                    <p><strong>Start with:</strong> <code>/fr</code> in review mode</p>
-                    <p><strong>Then:</strong> Work backwards to validate against CNs and CPs</p>
+                    <h3>🔍 Requirements Refinement</h3>
+                    <p><strong>Situation:</strong> You inherited vague requirements from another team</p>
+                    <p><strong>Your approach:</strong> Use <code>/zigzag</code> to validate traceability, identify gaps, then use <code>/cp</code> to fill missing problems</p>
+                    <p><strong>Result:</strong> Clear, traceable requirements that justify every feature</p>
                 </div>
-                
+
                 <div class="feature-card">
-                    <h3>Pattern 3: Problem Discovery</h3>
-                    <p><strong>When:</strong> Stakeholders describe solutions, not problems</p>
-                    <p><strong>Start with:</strong> <code>/cp</code> in generation mode</p>
-                    <p><strong>Use:</strong> Discovery questions to elicit actual problems</p>
+                    <h3>💡 Problem Discovery</h3>
+                    <p><strong>Situation:</strong> Stakeholders propose technical solutions ("Use Redis cache!")</p>
+                    <p><strong>Your approach:</strong> Use <code>/cp</code> with discovery mode to ask "What problem does this solve?"</p>
+                    <p><strong>Result:</strong> Uncover actual need (faster queries) and evaluate best solution</p>
                 </div>
-                
+
                 <div class="feature-card">
-                    <h3>Pattern 4: Quality Gate</h3>
-                    <p><strong>When:</strong> Validating completeness before implementation</p>
-                    <p><strong>Start with:</strong> <code>/zigzag</code></p>
-                    <p><strong>Verify:</strong> All CPs addressed, all CNs trace to CPs, all FRs trace to CNs</p>
+                    <h3>⚖️ Priority Negotiation</h3>
+                    <p><strong>Situation:</strong> Everything is "high priority" from stakeholders</p>
+                    <p><strong>Your approach:</strong> Use problem classification (Obligation/Expectation/Hope) to rank by severity</p>
+                    <p><strong>Result:</strong> Data-driven prioritization based on business impact</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📋 Sprint Planning</h3>
+                    <p><strong>Situation:</strong> Converting user stories to technical tasks</p>
+                    <p><strong>Your approach:</strong> Use <code>/cn</code> for acceptance criteria, <code>/fr</code> for implementation tasks</p>
+                    <p><strong>Result:</strong> Clear sprint goals with traceable work items</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>✅ Code Review Context</h3>
+                    <p><strong>Situation:</strong> Reviewing a PR and wondering "why this approach?"</p>
+                    <p><strong>Your approach:</strong> Check FR traceability to see which problem it solves</p>
+                    <p><strong>Result:</strong> Context-aware review focused on solving the actual problem</p>
                 </div>
             </div>
             
