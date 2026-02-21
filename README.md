@@ -16,7 +16,7 @@ This methodology helps engineers:
 - ✅ **Align your work with business impact** - Every line of code traces back to a problem it solves
 - ✅ **Avoid wasted effort** - Stop building "nice-to-have" features disguised as critical requirements
 - ✅ **Ship with confidence** - Know exactly why each feature matters and to whom
-- ✅ **Reduce rework by 40%+** - Catch misunderstandings in minutes, not after weeks of coding
+- ✅ **Reduce rework** - Catch misunderstandings early, before weeks of coding are invested
 - ✅ **AI-guided process** - Your coding assistant walks you through each step automatically
 
 **Based on peer-reviewed research** by Gorski & Stadzisz, this approach systematically addresses the #1 cause of software project failures: building what stakeholders *asked for* instead of what they actually *need*.
