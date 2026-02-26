@@ -55,15 +55,15 @@ tracks everything in spreadsheets and loses $50k/month due to errors.
    - "Web-based inventory system with barcode scanning and real-time sync"
 
 3. **Customer Needs (WHAT)**
-   - CN.01: "Warehouse needs system to track inventory with 99.9% accuracy"
-   - CN.02: "Staff needs system to scan items and update inventory within 2 seconds"
+   - CN.01.1: "Warehouse needs system to track inventory with 99.9% accuracy"
+   - CN.02.1: "Staff needs system to scan items and update inventory within 2 seconds"
 
 4. **Software Vision**
    - "Cloud inventory platform with mobile scanning app for 50 concurrent users"
 
 5. **Functional Requirements (HOW)**
-   - FR.01.1: "System shall scan barcodes and update inventory database within 2 seconds"
-   - FR.01.2: "System shall maintain 99.9% accuracy in inventory counts"
+   - FR.01.1.1: "System shall maintain 99.9% accuracy in inventory counts"
+   - FR.02.1.1: "System shall scan barcodes and update inventory database within 2 seconds"
 
 **Result:** Every requirement traces back to the $50k problem. You build only what solves the actual business need. No wasted features.
 
