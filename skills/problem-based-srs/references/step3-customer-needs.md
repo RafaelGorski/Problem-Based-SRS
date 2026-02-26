@@ -43,11 +43,68 @@ Where:
 - **Condition**: Constraints on the object (period, accuracy, scope)
 
 ## Four Outcome Classes
-Every CN must provide ONE of these:
-1. **Information** — reports, data tables, graphs, alarms, warnings, light signs
-2. **Control** — continuous supervising of running logic
-3. **Construction** — means to construct digital things (texts, models, drafts, images, videos)
-4. **Entertainment** — music, video, games
+
+Every CN must provide ONE of these outcomes. The software delivers VALUE through these categories:
+
+### 1. Information
+**What it is:** Data, knowledge, awareness delivered to the user
+
+**Common verbs:** know, be aware, be informed, be reminded, see, view, receive
+
+**Examples:**
+| Domain | CN Statement |
+|--------|--------------|
+| CRM | "The manager needs a CRM to know customer feedback statistics monthly." |
+| HR | "The HR director wants an HR system to be aware of employee absenteeism weekly." |
+| Finance | "The accountant needs the system to know overdue invoices daily." |
+| IoT | "The homeowner needs the app to be informed when energy usage exceeds threshold." |
+
+### 2. Control
+**What it is:** Continuous supervision, automatic regulation, or active management of processes
+
+**Common verbs:** control, regulate, manage, supervise, maintain, adjust, ensure
+
+**Examples:**
+| Domain | CN Statement |
+|--------|--------------|
+| Energy | "The user needs MicroER to control energy distribution based on consumption profiles." |
+| Aerospace | "The astronaut needs the system to control cabin pressure continuously." |
+| Manufacturing | "The operator needs the system to regulate temperature within ±2°C." |
+| Smart Home | "The homeowner needs the system to manage HVAC based on occupancy." |
+
+### 3. Construction
+**What it is:** Means to create, build, or produce digital artifacts
+
+**Common verbs:** create, build, compose, generate, design, draft, edit, produce
+
+**Examples:**
+| Domain | CN Statement |
+|--------|--------------|
+| CRM | "The marketing team needs the system to create email campaigns." |
+| Architecture | "The architect needs the system to create floor plans in CAD format." |
+| Reporting | "The manager needs the system to generate monthly performance reports." |
+| Content | "The user needs the system to compose responses to customer feedback." |
+
+### 4. Entertainment
+**What it is:** Enjoyment, leisure, or recreational value
+
+**Common verbs:** play, enjoy, experience, watch, listen
+
+**Examples:**
+| Domain | CN Statement |
+|--------|--------------|
+| Gaming | "The player needs the game to provide multiplayer battles." |
+| Media | "The user needs the app to play music based on mood." |
+| Streaming | "The viewer needs the platform to recommend shows based on history." |
+
+### Outcome Class Distribution by Domain
+
+| Domain Type | Typical Distribution |
+|-------------|---------------------|
+| Business/Enterprise | 70% Information, 20% Construction, 10% Control |
+| IoT/Embedded | 50% Information, 40% Control, 10% Construction |
+| Creative Tools | 60% Construction, 30% Information, 10% Control |
+| Entertainment | 70% Entertainment, 20% Information, 10% Construction |
 
 ## Output Format
 For each CN, provide:

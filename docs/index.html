@@ -252,7 +252,7 @@
         <h1>📄 Problem-Based SRS</h1>
         <p>Stop building the wrong thing. AI-guided requirements engineering that starts with real customer problems, helping engineers discover what to build, reflect on business impact, and maximize the value of their work.</p>
         <div style="margin-top: 1rem;">
-            <span class="badge">Version 1.0</span>
+            <span class="badge">Version 1.1</span>
             <span class="badge">AgentSkills Standard</span>
             <span class="badge">GitHub Copilot Compatible</span>
             <span class="badge">MIT License</span>
@@ -266,7 +266,7 @@
             <li><a href="#quickstart">Quick Start</a></li>
             <li><a href="#features">Usage Patterns</a></li>
             <li><a href="#resources">Resources</a></li>
-            <li><a href="#release">Release 1.0</a></li>
+            <li><a href="#release">Release 1.1</a></li>
         </ul>
     </nav>
     
@@ -402,6 +402,32 @@
             <p>If your agent does not install it automatically, follow the <a href="https://github.com/RafaelGorski/Problem-Based-SRS#installation-options">Installation Options</a> in the README to copy the skill manually or use the AgentSkills CLI.</p>
 
             <h3>Step 2: Start Your First Session</h3>
+            
+            <h3>Using Skills (All AI Agents)</h3>
+            <p>The skill is available in <code>skills/problem-based-srs/</code>. In VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
+            
+            <pre><code>/cp           # Start with Customer Problems
+/glance       # Create Software Glance
+/cn           # Generate Customer Needs
+/vision       # Build Software Vision
+/fr           # Specify Functional Requirements
+/zigzag       # Validate traceability
+/complexity   # Optional: Axiomatic Design analysis
+/problem-based-srs  # Full methodology orchestration</code></pre>
+            
+            <h3>Using with Any AI Agent (Universal)</h3>
+            <p>The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).</p>
+            
+            <p><strong>AgentSkills (Open Standard)</strong></p>
+            <p>The <code>skills/</code> directory follows the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>, compatible with any tool that implements it.</p>
+            
+            <ul style="margin-top: 1rem; line-height: 2;">
+                <li><strong>For GitHub Copilot:</strong> The skill will auto-discover from the skills directory.</li>
+                <li><strong>For Claude Code:</strong> The skill will auto-discover when this repository is in your workspace.</li>
+                <li><strong>For Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder).</li>
+            </ul>
+            
+            <h3>For New Features</h3>
             <p>Simply describe your business context or problem:</p>
 
             <pre><code>I need to create requirements for [feature name]
@@ -569,12 +595,15 @@ $50k/month due to errors."</code></pre>
                     <li><code>SKILL.md</code> - Main orchestrator skill</li>
                     <li><code>references/</code> - Detailed instructions for each step
                         <ul style="margin-top: 0.5rem;">
-                            <li><code>step1-customer-problems.md</code></li>
-                            <li><code>step2-software-glance.md</code></li>
-                            <li><code>step3-customer-needs.md</code></li>
-                            <li><code>step4-software-vision.md</code></li>
-                            <li><code>step5-functional-requirements.md</code></li>
-                            <li><code>zigzag-validator.md</code></li>
+                            <li><code>step1-customer-problems.md</code> - CP generation</li>
+                            <li><code>step2-software-glance.md</code> - Software Glance design</li>
+                            <li><code>step3-customer-needs.md</code> - CN specification</li>
+                            <li><code>step4-software-vision.md</code> - Software Vision design</li>
+                            <li><code>step5-functional-requirements.md</code> - FR/NFR generation</li>
+                            <li><code>zigzag-validator.md</code> - Traceability validation</li>
+                            <li><code>complexity-analysis.md</code> - <em>Optional:</em> Axiomatic Design analysis</li>
+                            <li><code>crm-example.md</code> - Complete CRM walkthrough</li>
+                            <li><code>microer-example.md</code> - Energy system walkthrough</li>
                         </ul>
                     </li>
                 </ul>
@@ -595,14 +624,35 @@ $50k/month due to errors."</code></pre>
             <p style="font-size: 1.15rem; margin: 1.5rem 0;">Ready to improve your requirements engineering with AI-assisted methodology?</p>
             <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="cta-button">View on GitHub</a>
             <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/skills" class="cta-button">View Skills</a>
-            <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0" class="cta-button">Release 1.0</a>
+            <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1" class="cta-button">Release 1.1</a>
         </section>
         
         <section id="release">
-            <h2>🎉 Release 1.0 (February 2026)</h2>
-            <p>We're excited to announce the first stable release of Problem-Based SRS!</p>
+            <h2>🎉 Release 1.1 (February 2026)</h2>
+            <p>We're excited to announce version 1.1 with Complexity Analysis and enhanced methodology features!</p>
             
-            <h3>What's Included</h3>
+            <h3>🆕 What's New in 1.1</h3>
+            <ul style="line-height: 2; margin-top: 1rem;">
+                <li><strong>Complexity Analysis (<code>/complexity</code>):</strong> Optional Axiomatic Design-based quality analysis for critical systems
+                    <ul style="margin-top: 0.5rem;">
+                        <li>Independence axiom analysis (coupled/redundant/ideal specifications)</li>
+                        <li>Design matrix evaluation</li>
+                        <li>Information content assessment</li>
+                    </ul>
+                </li>
+                <li><strong>Case Study Examples:</strong> Condensed walkthroughs for learning
+                    <ul style="margin-top: 0.5rem;">
+                        <li><code>crm-example.md</code> - CRM system from business context to requirements</li>
+                        <li><code>microer-example.md</code> - Renewable energy system (technical domain)</li>
+                    </ul>
+                </li>
+                <li><strong>C/P Completeness Markers:</strong> Enhanced traceability with Complete/Partial indicators</li>
+                <li><strong>Problem Decomposition Guidance:</strong> When and how to break down Customer Problems</li>
+                <li><strong>Expanded CN Outcome Classes:</strong> Detailed examples for Information, Control, Construction, Entertainment</li>
+                <li><strong>Agile Integration Patterns:</strong> Sprint 0 planning, per-feature CP→CN→FR chains, minimal viable SRS</li>
+            </ul>
+            
+            <h3 style="margin-top: 2rem;">📦 Included from 1.0</h3>
             <ul style="line-height: 2; margin-top: 1rem;">
                 <li><strong>AgentSkills Format:</strong> Full compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents</li>
                 <li><strong>Complete 5-Step Methodology:</strong> Customer Problems → Software Glance → Customer Needs → Software Vision → Functional Requirements</li>

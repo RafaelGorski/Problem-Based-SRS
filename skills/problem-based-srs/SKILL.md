@@ -440,6 +440,21 @@ Use zigzag-validator.md to check existing artifacts without generating new ones.
 After Step 5, engineers can pick up individual FR files and develop independently.
 Each FR file contains all context needed (traceability, acceptance criteria).
 
+### Pattern 6: Agile/Sprint Integration
+Use Problem-Based SRS iteratively within agile workflows:
+- **Sprint 0:** Steps 1-2 (CPs + Software Glance) for product vision
+- **Sprint 1+:** Steps 3-5 for specific feature sets
+- **Per Feature:** Complete CP→CN→FR chain for one feature at a time
+- **Validation:** Run zigzag after each sprint to ensure traceability
+
+### Pattern 7: Minimal Viable SRS
+For quick prototypes or MVPs:
+1. Identify 2-3 core CPs (Obligations only)
+2. Create minimal Software Glance
+3. Derive essential CNs
+4. Generate only critical FRs
+5. Skip detailed validation until expansion
+
 ## When to Load Each Reference
 
 - **Step 1 (CP):** User has business context but no structured problems
@@ -448,5 +463,24 @@ Each FR file contains all context needed (traceability, acceptance criteria).
 - **Step 4 (SV):** User has CNs and needs detailed vision document
 - **Step 5 (FR/NFR):** User has CNs + SV and needs functional requirements
 - **Validation:** User needs to check traceability or consistency
+- **Complexity (Optional):** User explicitly requests Axiomatic Design analysis
+
+## Optional: Complexity Analysis
+
+For deeper quality analysis, users can explicitly invoke:
+- **Reference:** [complexity-analysis.md](references/complexity-analysis.md)
+- **Purpose:** Axiomatic Design-based specification quality analysis
+- **When to use:** Critical systems, large specifications, formal reviews
+
+This is **NOT** part of the standard flow. It provides:
+- Independence analysis (coupled vs. uncoupled specifications)
+- Completeness levels (C/P markers for traceability)
+- Information content assessment
+
+## Examples
+
+For complete walkthroughs, see:
+- [CRM Example](references/crm-example.md) — Business domain (Customer Relationship Management)
+- [MicroER Example](references/microer-example.md) — Technical domain (Renewable Energy System)
 
 **Always load only one reference at a time** based on current step to minimize context usage.

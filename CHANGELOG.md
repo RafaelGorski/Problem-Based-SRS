@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1] - 2026-02-20
+
+### Added
+
+- **Complexity Analysis (`/complexity`)**: Optional Axiomatic Design-based quality analysis
+  - Independence axiom analysis (coupled/redundant/ideal specifications)
+  - Design matrix evaluation
+  - Information content assessment
+  - This is an optional command, not part of the standard flow
+- **Case Study Examples**: Condensed walkthroughs for learning
+  - `crm-example.md` - CRM system from business context to requirements
+  - `microer-example.md` - Renewable energy system (technical domain)
+- **C/P Completeness Markers**: Enhanced traceability with Complete/Partial indicators
+  - Two-stage validation (CP→CN and CN→FR)
+  - Completeness rules for better coverage analysis
+- **Problem Decomposition Guidance**: When and how to break down CPs
+  - Decomposition triggers and heuristics
+  - Numbering conventions (CP.1 → CP.1.1, CP.1.2)
+  - Real examples from case studies
+- **Expanded CN Outcome Classes**: Detailed examples for all four classes
+  - Information (most common)
+  - Control (supervisory systems)
+  - Construction (artifact creation)
+  - Entertainment (games, media)
+- **Agile Integration Patterns**: New usage patterns for sprint workflows
+  - Sprint 0 planning with CPs + Software Glance
+  - Per-feature CP→CN→FR chains
+  - Minimal viable SRS approach
+
+### Changed
+
+- Updated `zigzag-validator.md` with C/P completeness notation
+- Updated `step1-customer-problems.md` with decomposition section
+- Updated `step3-customer-needs.md` with expanded outcome examples
+- Updated `SKILL.md` with new patterns and complexity reference
+- Updated `docs/index.html` with new commands and resources
+- Updated `README.md` with new features and version info
+
 ## [1.0] - 2026-02-04
 
 ### Added
@@ -49,4 +87,5 @@ This release includes contributions from the following PRs:
 - PR #9: Remove prompts, consolidate to AgentSkills format only
 - PR #10: Add AgentSkills reference documentation and update copilot instructions
 
+[1.1]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1
 [1.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0

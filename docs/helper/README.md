@@ -1,8 +1,87 @@
 # Documentation Helper Scripts
 
-This folder contains PowerShell helper scripts for maintaining the Problem-Based SRS documentation.
+This folder contains helper scripts for maintaining the Problem-Based SRS documentation.
 
 ## Available Scripts
+
+### extract-pdf.py
+
+Extracts text and images from PDF files to Markdown format.
+
+**Usage:**
+```bash
+python docs/helper/extract-pdf.py <input_pdf> <output_md> [--img-dir <img_directory>]
+```
+
+**Example:**
+```bash
+python docs/helper/extract-pdf.py docs/document.pdf docs/output.md --img-dir docs/img
+```
+
+**Prerequisites:**
+- Python 3.x
+- Required packages: `pip install pdfplumber pillow`
+
+**What it does:**
+1. Opens the PDF file
+2. Extracts text content page by page
+3. Extracts all images and saves them to the specified directory
+4. Creates a Markdown file with page markers and image references
+
+---
+
+### translate-md.py
+
+Translates a Markdown file from Portuguese to English while preserving formatting.
+
+**Usage:**
+```bash
+python docs/helper/translate-md.py <input_md> <output_md>
+```
+
+**Example:**
+```bash
+python docs/helper/translate-md.py docs/document_PT.md docs/document_EN.md
+```
+
+**Prerequisites:**
+- Python 3.x
+- Required packages: `pip install deep_translator`
+
+**What it does:**
+1. Reads the Portuguese Markdown file
+2. Translates text content while preserving:
+   - Page markers (<!-- Page N -->)
+   - Image references
+   - Markdown formatting
+3. Writes the translated content to a new file
+
+---
+
+### split-md-sections.py
+
+Splits a large markdown document into smaller files based on chapter/section structure.
+
+**Usage:**
+```bash
+python docs/helper/split-md-sections.py <input_md> <output_dir>
+```
+
+**Example:**
+```bash
+python docs/helper/split-md-sections.py docs/document_EN.md docs/dissertation-en
+```
+
+**Prerequisites:**
+- Python 3.x (no additional packages required)
+
+**What it does:**
+1. Parses the markdown file using page markers
+2. Splits content into logical sections (chapters, appendices, etc.)
+3. Creates numbered markdown files with headers
+4. Generates a README.md index linking all sections
+
+---
 
 ### render-diagrams.ps1
 
