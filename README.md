@@ -1,6 +1,7 @@
 # Problem-Based SRS
 
 [![Version](https://img.shields.io/badge/version-1.1-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/docs/en/plugins.md)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -130,7 +131,24 @@ This ensures you're not treating "nice to have" features the same as "business c
 
 ## 🛠️ Installation Options
 
-### Recommended: AI-Assisted Installation
+### Claude Code Plugin (Recommended)
+
+Install directly as a Claude Code plugin:
+
+```bash
+# Test locally during development
+claude --plugin-dir ./Problem-Based-SRS
+
+# Or install from repository
+/plugin install https://github.com/RafaelGorski/Problem-Based-SRS
+```
+
+After installation, skills are available with the `problem-based-srs:` namespace:
+- `/problem-based-srs:cp` - Customer Problems
+- `/problem-based-srs:cn` - Customer Needs
+- `/problem-based-srs:fr` - Functional Requirements
+
+### AI-Assisted Installation
 
 The easiest way—just ask your AI assistant:
 
@@ -229,7 +247,7 @@ git commit -m "Add Problem-Based SRS methodology"
 - **WHAT** (Customer Needs) = Capabilities required to solve it
 - **HOW** (Functional Requirements) = Specific features to implement
 
-**AgentSkills Format:** This repository uses the [AgentSkills](https://agentskills.io) open standard, making it compatible with any AI agent that supports the format.
+**AgentSkills Format:** This repository uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Plugins](https://code.claude.com/docs/en/plugins.md) format, making it compatible with Claude Code, Claude.ai, GitHub Copilot, and other AI agents.
 
 ## 🧪 Quality Assurance
 
@@ -263,13 +281,52 @@ Released February 2026 with:
 
 ## 📂 Repository Contents
 
+This repository follows the [Claude Code plugins standard](https://code.claude.com/docs/en/plugins-reference.md):
+
+```
+Problem-Based-SRS/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest
+├── agents/
+│   └── problem-based-srs/       # Agent orchestrator
+│       └── AGENT.md
+├── skills/
+│   ├── problem-based-srs/       # Main SRS methodology skill
+│   │   ├── SKILL.md
+│   │   └── references/          # Examples only
+│   │       ├── crm-example.md
+│   │       └── microer-example.md
+│   ├── customer-problems/       # Step 1: WHY
+│   │   └── SKILL.md
+│   ├── software-glance/         # Step 2: High-level view
+│   │   └── SKILL.md
+│   ├── customer-needs/          # Step 3: WHAT
+│   │   └── SKILL.md
+│   ├── software-vision/         # Step 4: Architecture
+│   │   └── SKILL.md
+│   ├── functional-requirements/ # Step 5: HOW
+│   │   └── SKILL.md
+│   ├── zigzag-validator/        # Traceability validation
+│   │   └── SKILL.md
+│   └── complexity-analysis/     # Optional: Axiomatic Design
+│       └── SKILL.md
+├── hooks/
+│   └── hooks.json               # Hook configurations
+├── settings.json                # Default plugin settings
+├── docs/                        # Research paper and methodology
+├── spec/                        # Test specifications
+└── tests/                       # Automated tests
+```
+
+### Key Files
+
 - **[TESTING.md](TESTING.md)** - Testing documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **docs/** - Research paper and methodology details
-- **skills/problem-based-srs/** - AgentSkills format for AI agents
-  - `references/crm-example.md` - Complete CRM case study walkthrough
-  - `references/microer-example.md` - Renewable energy system walkthrough
-  - `references/complexity-analysis.md` - Optional Axiomatic Design analysis
+- **agents/problem-based-srs/** - Agent orchestrator for AI agents
+- **skills/** - Individual skills for each methodology step
+  - `problem-based-srs/references/crm-example.md` - Complete CRM case study walkthrough
+  - `problem-based-srs/references/microer-example.md` - Renewable energy system walkthrough
 - **spec/** - Test specifications and requirements
 
 ### Optional: Complexity Analysis (`/complexity`)

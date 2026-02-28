@@ -18,27 +18,27 @@ Orchestrate requirements engineering using the Problem-Based SRS methodology (Go
 Business Context
        ↓
 ┌──────────────────┐
-│ Step 1: CP       │ → See references/step1-customer-problems.md
+│ Step 1: CP       │ → Use skill: customer-problems
 │ Customer Problems│
 └────────┬─────────┘
          ↓
 ┌──────────────────┐
-│ Step 2: SG       │ → See references/step2-software-glance.md
+│ Step 2: SG       │ → Use skill: software-glance
 │ Software Glance  │
 └────────┬─────────┘
          ↓
 ┌──────────────────┐
-│ Step 3: CN       │ → See references/step3-customer-needs.md
+│ Step 3: CN       │ → Use skill: customer-needs
 │ Customer Needs   │
 └────────┬─────────┘
          ↓
 ┌──────────────────┐
-│ Step 4: SV       │ → See references/step4-software-vision.md
+│ Step 4: SV       │ → Use skill: software-vision
 │ Software Vision  │
 └────────┬─────────┘
          ↓
 ┌──────────────────┐
-│ Step 5: FR/NFR   │ → See references/step5-functional-requirements.md
+│ Step 5: FR/NFR   │ → Use skill: functional-requirements
 │ Requirements     │
 └──────────────────┘
 ```
@@ -51,6 +51,20 @@ Business Context
 | **WHY** | Customer Problems (CP) | Why is the solution needed? (Business justification) |
 | **WHAT** | Customer Needs (CN) | What outcomes must the software provide? |
 | **HOW** | Functional Requirements (FR) | How will the system behave? |
+
+## Available Skills
+
+This orchestrator coordinates the following skills:
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| `customer-problems` | `/cp` | Step 1: Identify and classify customer problems |
+| `software-glance` | `/glance` | Step 2: Create high-level solution view |
+| `customer-needs` | `/cn` | Step 3: Specify customer needs (outcomes) |
+| `software-vision` | `/vision` | Step 4: Define software vision and architecture |
+| `functional-requirements` | `/fr` | Step 5: Generate functional requirements |
+| `zigzag-validator` | `/zigzag` | Validate traceability across domains |
+| `complexity-analysis` | `/complexity` | Optional: Axiomatic Design quality analysis |
 
 ## 📁 Saving Progress (CRITICAL)
 
@@ -249,8 +263,8 @@ When user provides business context or problem description:
 1. **Ask where to save artifacts** (if not already specified)
 2. **Create 00-context.md** with the business context
 3. Detect current step (see Detection Heuristics below)
-4. Load the appropriate reference file
-5. Follow instructions from that reference
+4. Invoke the appropriate skill
+5. Follow instructions from that skill
 6. **Save output to the corresponding file(s)**
 7. Guide user through the process
 
@@ -260,23 +274,23 @@ If user has existing artifacts (CPs, CNs, etc.):
 2. **Read existing files** to understand current state
 3. Identify what they have
 4. Jump to appropriate step
-5. Load that step's reference file
+5. Invoke that step's skill
 6. Continue from there, **updating files as needed**
 
 ### Validation
-At any point, use references/zigzag-validator.md to check consistency.
+At any point, use zigzag-validator skill to check consistency.
 
 ## Detection Heuristics
 
 Determine current step by checking what artifacts exist:
 
-| If user has... | Current Step | Load Reference | Save To |
-|----------------|--------------|----------------|---------|
-| Nothing / business idea only | 1 | step1-customer-problems.md | 01-customer-problems.md |
-| Customer Problems (CPs) | 2 | step2-software-glance.md | 02-software-glance.md |
-| CPs + Software Glance | 3 | step3-customer-needs.md | 03-customer-needs.md |
-| CPs + CNs + Software Glance | 4 | step4-software-vision.md | 04-software-vision.md |
-| CPs + CNs + Software Vision | 5 | step5-functional-requirements.md | functional-requirements/*.md |
+| If user has... | Current Step | Use Skill | Save To |
+|----------------|--------------|-----------|---------|
+| Nothing / business idea only | 1 | customer-problems | 01-customer-problems.md |
+| Customer Problems (CPs) | 2 | software-glance | 02-software-glance.md |
+| CPs + Software Glance | 3 | customer-needs | 03-customer-needs.md |
+| CPs + CNs + Software Glance | 4 | software-vision | 04-software-vision.md |
+| CPs + CNs + Software Vision | 5 | functional-requirements | functional-requirements/*.md |
 
 ## The 5 Steps (Quick Reference)
 
@@ -286,14 +300,14 @@ Determine current step by checking what artifacts exist:
 **Output:** List of CPs classified as Obligation/Expectation/Hope  
 **Syntax:** `[Subject] [must/expects/hopes] [Object] [Penalty]`  
 **Save to:** `01-customer-problems.md`  
-**Details:** See [step1-customer-problems.md](references/step1-customer-problems.md)
+**Skill:** customer-problems
 
 ### Step 2: Software Glance (SG)
 **Purpose:** Create initial abstract solution view  
 **Input:** Customer Problems  
 **Output:** High-level system description with boundaries and components  
 **Save to:** `02-software-glance.md`  
-**Details:** See [step2-software-glance.md](references/step2-software-glance.md)
+**Skill:** software-glance
 
 ### Step 3: Customer Needs (CN)
 **Purpose:** Specify outcomes software must provide  
@@ -301,14 +315,14 @@ Determine current step by checking what artifacts exist:
 **Output:** CNs with outcome classes (Information/Control/Construction/Entertainment)  
 **Syntax:** `[Subject] needs [system] to [Verb] [Object] [Condition]`  
 **Save to:** `03-customer-needs.md`  
-**Details:** See [step3-customer-needs.md](references/step3-customer-needs.md)
+**Skill:** customer-needs
 
 ### Step 4: Software Vision (SV)
 **Purpose:** Define high-level scope and positioning  
 **Input:** CNs + Software Glance  
 **Output:** Vision document with stakeholders, features, architecture  
 **Save to:** `04-software-vision.md`  
-**Details:** See [step4-software-vision.md](references/step4-software-vision.md)
+**Skill:** software-vision
 
 ### Step 5: Functional Requirements (FR) & Non-Functional Requirements (NFR)
 **Purpose:** Generate detailed requirements  
@@ -316,11 +330,11 @@ Determine current step by checking what artifacts exist:
 **Output:** Individual FR and NFR files with traceability  
 **Syntax FR:** `The [System] shall [Verb] [Object] [Constraint] [Condition]`  
 **Save to:** `functional-requirements/FR-XXX.md` and `non-functional-requirements/NFR-XXX.md`  
-**Details:** See [step5-functional-requirements.md](references/step5-functional-requirements.md)
+**Skill:** functional-requirements
 
 ## Quality Gates
 
-**IMPORTANT:** Zigzag validation using [references/zigzag-validator.md](references/zigzag-validator.md) is **MANDATORY** after Steps 3 and 5 to verify traceability and identify gaps.
+**IMPORTANT:** Zigzag validation using zigzag-validator skill is **MANDATORY** after Steps 3 and 5 to verify traceability and identify gaps.
 
 ### After Step 1 (CPs)
 - [ ] All CPs use structured notation
@@ -434,7 +448,7 @@ Complete initial pass, then iterate on specific steps as understanding improves.
 **Remember:** Update existing files rather than creating new ones.
 
 ### Pattern 4: Validation Only
-Use zigzag-validator.md to check existing artifacts without generating new ones.
+Use zigzag-validator skill to check existing artifacts without generating new ones.
 
 ### Pattern 5: Independent Development
 After Step 5, engineers can pick up individual FR files and develop independently.
@@ -445,7 +459,7 @@ Use Problem-Based SRS iteratively within agile workflows:
 - **Sprint 0:** Steps 1-2 (CPs + Software Glance) for product vision
 - **Sprint 1+:** Steps 3-5 for specific feature sets
 - **Per Feature:** Complete CP→CN→FR chain for one feature at a time
-- **Validation:** Run zigzag after each sprint to ensure traceability
+- **Validation:** Run zigzag-validator after each sprint to ensure traceability
 
 ### Pattern 7: Minimal Viable SRS
 For quick prototypes or MVPs:
@@ -455,20 +469,20 @@ For quick prototypes or MVPs:
 4. Generate only critical FRs
 5. Skip detailed validation until expansion
 
-## When to Load Each Reference
+## When to Use Each Skill
 
-- **Step 1 (CP):** User has business context but no structured problems
-- **Step 2 (SG):** User has CPs and needs high-level solution view
-- **Step 3 (CN):** User has CPs + SG and needs to specify outcomes
-- **Step 4 (SV):** User has CNs and needs detailed vision document
-- **Step 5 (FR/NFR):** User has CNs + SV and needs functional requirements
-- **Validation:** User needs to check traceability or consistency
-- **Complexity (Optional):** User explicitly requests Axiomatic Design analysis
+- **customer-problems:** User has business context but no structured problems
+- **software-glance:** User has CPs and needs high-level solution view
+- **customer-needs:** User has CPs + SG and needs to specify outcomes
+- **software-vision:** User has CNs and needs detailed vision document
+- **functional-requirements:** User has CNs + SV and needs functional requirements
+- **zigzag-validator:** User needs to check traceability or consistency
+- **complexity-analysis:** User explicitly requests Axiomatic Design analysis
 
 ## Optional: Complexity Analysis
 
 For deeper quality analysis, users can explicitly invoke:
-- **Reference:** [complexity-analysis.md](references/complexity-analysis.md)
+- **Skill:** complexity-analysis
 - **Purpose:** Axiomatic Design-based specification quality analysis
 - **When to use:** Critical systems, large specifications, formal reviews
 
@@ -483,4 +497,4 @@ For complete walkthroughs, see:
 - [CRM Example](references/crm-example.md) — Business domain (Customer Relationship Management)
 - [MicroER Example](references/microer-example.md) — Technical domain (Renewable Energy System)
 
-**Always load only one reference at a time** based on current step to minimize context usage.
+**Use skills individually** based on current step to minimize context usage.

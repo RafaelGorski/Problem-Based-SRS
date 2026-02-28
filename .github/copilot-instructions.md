@@ -3,7 +3,21 @@
 ## Project Overview
 This repository provides AgentSkills for following a Problem-Based Software Requirements Specification (SRS) methodology. The focus is on enabling AI-assisted requirements engineering through structured, problem-first approaches.
 
-The repository follows the **[AgentSkills](https://agentskills.io)** standard - an open format for giving agents new capabilities and expertise.
+The repository follows the **[AgentSkills](https://agentskills.io)** standard and the **Claude Code Plugins** layout. Compatibility priority is **GitHub Copilot first**, then **Claude Code/Claude.ai**.
+
+### Plugin Standards
+
+**This repository follows the Claude Code plugins specification:**
+- **Plugins Guide**: https://code.claude.com/docs/en/plugins.md
+- **Plugins Reference**: https://code.claude.com/docs/en/plugins-reference.md
+
+When modifying this repository structure, ensure compliance with these plugin standards.
+
+### Compatibility Priority (GHCP → Claude)
+
+1. **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
+2. **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
+3. **Consistency over time**: Keep this file and `AGENTS.md` aligned when compatibility guidance changes.
 
 ## Core Principles
 1. **Problem-First Thinking**: Always identify the problem before proposing solutions
@@ -19,17 +33,19 @@ The repository follows the **[AgentSkills](https://agentskills.io)** standard - 
 
 When analyzing or working with this repository, **use the Problem-Based SRS methodology** to iterate on problems, needs, and requirements (both functional and non-functional).
 
-**Load and follow the methodology from these source files:**
+**Load and follow the methodology from these skills:**
 
-| Step | Skill Reference |
-|------|-----------------|
-| 1. Customer Problems (WHY) | `skills/problem-based-srs/references/step1-customer-problems.md` |
-| 2. Software Glance | `skills/problem-based-srs/references/step2-software-glance.md` |
-| 3. Customer Needs (WHAT) | `skills/problem-based-srs/references/step3-customer-needs.md` |
-| 4. Software Vision | `skills/problem-based-srs/references/step4-software-vision.md` |
-| 5. Functional Requirements (HOW) | `skills/problem-based-srs/references/step5-functional-requirements.md` |
-| Validation | `skills/problem-based-srs/references/zigzag-validator.md` |
+| Step | Skill |
+|------|-------|
+| 1. Customer Problems (WHY) | `skills/customer-problems/SKILL.md` |
+| 2. Software Glance | `skills/software-glance/SKILL.md` |
+| 3. Customer Needs (WHAT) | `skills/customer-needs/SKILL.md` |
+| 4. Software Vision | `skills/software-vision/SKILL.md` |
+| 5. Functional Requirements (HOW) | `skills/functional-requirements/SKILL.md` |
+| Validation | `skills/zigzag-validator/SKILL.md` |
+| Complexity (Optional) | `skills/complexity-analysis/SKILL.md` |
 | Orchestrator | `skills/problem-based-srs/SKILL.md` |
+| Agent | `agents/problem-based-srs/AGENT.md` |
 
 ### Artifact Naming Convention
 
@@ -112,6 +128,36 @@ AI: "I'll analyze using Problem-Based SRS methodology.
 
 ## When Working on This Repository
 
+### Plugin Structure (Claude Code Standard)
+
+This repository is structured as a Claude Code plugin:
+
+```
+Problem-Based-SRS/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest (name, version, metadata)
+├── agents/
+│   └── problem-based-srs/       # Agent orchestrator
+│       └── AGENT.md
+├── skills/
+│   ├── problem-based-srs/       # Main skill for SRS methodology
+│   │   ├── SKILL.md
+│   │   └── references/          # Examples only
+│   ├── customer-problems/       # Step 1: WHY
+│   ├── software-glance/         # Step 2: High-level view
+│   ├── customer-needs/          # Step 3: WHAT
+│   ├── software-vision/         # Step 4: Architecture
+│   ├── functional-requirements/ # Step 5: HOW
+│   ├── zigzag-validator/        # Traceability validation
+│   └── complexity-analysis/     # Optional: Axiomatic Design
+├── hooks/
+│   └── hooks.json               # Hook configurations
+├── settings.json                # Default plugin settings
+├── docs/                        # Documentation
+├── spec/                        # Specifications
+└── tests/                       # Tests
+```
+
 ### Skills Development (AgentSkills Format)
 - Skills are located in the `skills/` directory
 - Each skill has a `SKILL.md` file with YAML frontmatter (name, description, license)
@@ -129,12 +175,15 @@ AI: "I'll analyze using Problem-Based SRS methodology.
 - Include references to relevant SRS standards (IEEE 830, etc.) where appropriate
 
 ### File Organization
-- **skills/**: AgentSkills format (Claude Code, Claude.ai, GitHub Copilot)
+- **`.claude-plugin/`**: Plugin manifest (plugin.json) defining plugin metadata
+- **`skills/`**: AgentSkills (Claude Code, Claude.ai, GitHub Copilot)
   - Each skill is a self-contained directory with SKILL.md
   - Can include optional subdirectories: scripts/, references/, assets/
-- **docs/**: Documentation, research papers, methodology guides
-- **docs/references/**: Reference documentation for AgentSkills development
-- **spec/**: Test specifications and requirement iterations
+- **`hooks/`**: Hook configurations for event handlers (hooks.json)
+- **`settings.json`**: Default plugin settings
+- **`docs/`**: Documentation, research papers, methodology guides
+- **`docs/references/`**: Reference documentation for AgentSkills development
+- **`spec/`**: Test specifications and requirement iterations
 
 ### Code Style
 - This is primarily a documentation repository

@@ -1,0 +1,20 @@
+{
+  "name": "problem-based-srs",
+  "version": "1.1.0",
+  "description": "Problem-Based Software Requirements Specification methodology for AI-assisted requirements engineering. Provides structured approach to capture Customer Problems (WHY), Customer Needs (WHAT), and Functional Requirements (HOW) with full traceability.",
+  "author": {
+    "name": "Rafael Gorski",
+    "url": "https://github.com/rafaelgorski"
+  },
+  "homepage": "https://github.com/rafaelgorski/Problem-Based-SRS",
+  "repository": "https://github.com/rafaelgorski/Problem-Based-SRS",
+  "license": "MIT",
+  "keywords": [
+    "requirements",
+    "srs",
+    "software-requirements",
+    "problem-based",
+    "requirements-engineering",
+    "traceability"
+  ]
+}

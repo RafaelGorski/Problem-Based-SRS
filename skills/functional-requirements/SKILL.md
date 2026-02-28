@@ -1,4 +1,15 @@
-# Functional Requirements (FR) & Non-Functional Requirements (NFR) Generation
+---
+name: functional-requirements
+description: Generate Functional Requirements (FR) and Non-Functional Requirements (NFR) from Customer Needs and Software Vision. Creates individual requirement files with traceability. Step 5 of Problem-Based SRS methodology.
+license: MIT
+metadata:
+  author: rafael-gorski
+  version: "1.2"
+  methodology: problem-based-srs
+  step: 5
+---
+
+# Functional Requirements (FR) & Non-Functional Requirements (NFR)
 
 > **Step 5 of 5** in Problem-Based SRS methodology  
 > **Previous:** Customer Needs → Software Vision  
@@ -20,12 +31,29 @@ Step 1: Customer Problems → Step 2: Software Glance → Step 3: Customer Needs
 
 ## Required Inputs
 
-Before running this prompt, ensure you have completed artifacts from previous steps:
+Before running this skill, ensure you have completed artifacts from previous steps:
 
-- [ ] **Customer Needs (CNs)** — from Step 3 (CN Generation prompt)
-- [ ] **Software Vision** — from Step 4 (Software Vision prompt)
+- [ ] **Customer Needs (CNs)** — from customer-needs skill
+- [ ] **Software Vision** — from software-vision skill
 
 **⚠ Warning**: Do not proceed without these inputs. FRs cannot be generated independently—they must trace to Customer Needs and respect Software Vision boundaries.
+
+---
+
+## Definition
+
+**Functional Requirements (FR):** Define WHAT the software system SHALL DO to fulfill Customer Needs. FRs describe specific capabilities, behaviors, and functions—not how they are implemented.
+
+**Non-Functional Requirements (NFR):** Define quality attributes and constraints on HOW WELL the system performs. NFRs specify performance, security, usability, reliability, and other quality characteristics.
+
+## Your Task
+
+For each CN:
+1. Generate FR statements that specify the system capabilities required
+2. Identify any NFRs needed (quality attributes)
+3. **Save each FR as an individual file** in functional-requirements/
+4. **Save each NFR as an individual file** in non-functional-requirements/
+5. Create index files (_index.md) for both folders
 
 ---
 
@@ -60,6 +88,37 @@ Examples:
 - `FR-002-client-data-modification.md`
 - `NFR-001-response-time.md`
 - `NFR-002-data-encryption.md`
+
+---
+
+## FR Structured Notation
+
+Each FR MUST follow this grammar:
+
+```
+The [Subject] shall [Verb] [Object] [Constraint] [Condition]
+```
+
+Where:
+- **Subject**: The software system (e.g., "The CRM system", "The Invoice System")
+- **Verb**: "shall" (mandatory) or "should" (desirable)
+- **Object**: The specific action or capability
+- **Constraint**: Limitations or quality attributes (optional)
+- **Condition**: When/where this applies (optional)
+
+## NFR Structured Notation
+
+Each NFR MUST follow this grammar:
+
+```
+The [Subject] shall [Quality Attribute] [Measurable Target] [Condition]
+```
+
+Where:
+- **Subject**: The software system
+- **Quality Attribute**: Performance, security, usability, etc.
+- **Measurable Target**: Specific, quantifiable criteria
+- **Condition**: When/where this applies (optional)
 
 ---
 
@@ -158,96 +217,15 @@ The [System] shall [quality attribute] [measurable target] [condition].
 
 ---
 
-## Index File Template (_index.md)
-
-Create an index file for quick navigation:
-
-```markdown
-## Functional Requirements Index
-
-## Summary
-
-- **Total FRs:** [N]
-- **Must Have:** [N]
-- **Should Have:** [N]
-- **Could Have:** [N]
-
-## Requirements List
-
-| ID | Title | Priority | Status | Traces To |
-|----|-------|----------|--------|-----------|
-| [FR-001](FR-001-name.md) | Title | Must | Draft | CN-001 |
-| [FR-002](FR-002-name.md) | Title | Should | Draft | CN-001, CN-002 |
-| ... | ... | ... | ... | ... |
-
-## By Customer Need
-
-### CN-001: [CN Title]
-- [FR-001](FR-001-name.md): [Title]
-- [FR-002](FR-002-name.md): [Title]
-
-### CN-002: [CN Title]
-- [FR-003](FR-003-name.md): [Title]
-```
-
----
-
-## Prompt
-
-```
-You are generating Functional Requirements (FR) and Non-Functional Requirements (NFR) for a Problem-Based Software Requirements Specification.
-
-## Definition
-
-**Functional Requirements (FR):** Define WHAT the software system SHALL DO to fulfill Customer Needs. FRs describe specific capabilities, behaviors, and functions—not how they are implemented.
-
-**Non-Functional Requirements (NFR):** Define quality attributes and constraints on HOW WELL the system performs. NFRs specify performance, security, usability, reliability, and other quality characteristics.
-
-## Required Inputs
-I will provide:
-1. Customer Needs (CNs) — outcomes the software must provide
-2. Software Vision — scope, positioning, and boundaries
-
-## Your Task
-For each CN:
-1. Generate FR statements that specify the system capabilities required
-2. Identify any NFRs needed (quality attributes)
-3. **Save each FR as an individual file** in functional-requirements/
-4. **Save each NFR as an individual file** in non-functional-requirements/
-5. Create index files (_index.md) for both folders
-
-## FR Structured Notation
-
-Each FR MUST follow this grammar:
-
-The [Subject] shall [Verb] [Object] [Constraint] [Condition]
-
-Where:
-- **Subject**: The software system (e.g., "The CRM system", "The Invoice System")
-- **Verb**: "shall" (mandatory) or "should" (desirable)
-- **Object**: The specific action or capability
-- **Constraint**: Limitations or quality attributes (optional)
-- **Condition**: When/where this applies (optional)
-
-## NFR Structured Notation
-
-Each NFR MUST follow this grammar:
-
-The [Subject] shall [Quality Attribute] [Measurable Target] [Condition]
-
-Where:
-- **Subject**: The software system
-- **Quality Attribute**: Performance, security, usability, etc.
-- **Measurable Target**: Specific, quantifiable criteria
-- **Condition**: When/where this applies (optional)
-
 ## Traceability Rule (CRITICAL)
+
 - Every FR MUST trace to at least one Customer Need (FR.X → CN.Y)
 - Every NFR should trace to CNs or indicate which FRs it applies to
 - One CN typically requires MULTIPLE FRs
 - Every CN must be addressed by at least one FR
 
 ## Quality Rules (per ISO/IEC/IEEE 29148)
+
 - **Complete**: All customer needs must be met by requirements
 - **Correct**: All requirements must meet some customer need
 - **Testable**: Each FR must have verifiable acceptance criteria
@@ -280,27 +258,6 @@ Construction and implementation details belong in separate design documents:
     ├── data-model.md            # Database schemas
     ├── api-specification.md     # API endpoints
     └── implementation-notes/    # Technical notes per FR
-```
-
-This separation ensures:
-1. Requirements stay technology-agnostic
-2. Engineers can change implementation without changing requirements
-3. Requirements documents remain readable by non-technical stakeholders
-4. Traceability is maintained between requirements and design
-
-## Output Format
-
-For each FR, create a file FR-NNN-name.md with:
-- Full requirement statement
-- Traceability (CN → CP)
-- 3+ Acceptance Criteria (testable)
-- Priority and Status
-
-For each NFR, create a file NFR-NNN-name.md with:
-- Full requirement statement
-- Category (Performance/Security/etc.)
-- Measurement criteria
-- Traceability
 ```
 
 ---
@@ -338,17 +295,8 @@ The CRM system shall allow the Account Manager to register a new client in the d
 - [ ] System displays confirmation message after registration
 - [ ] System logs registration timestamp and user
 
-## Implementation Notes
-
-<!-- Engineers add notes here -->
-
-## Test Cases
-
-<!-- QA adds test cases here -->
-
 ---
 *Created: 2024-01-15*  
-*Last Updated: 2024-01-15*  
 *Author: Requirements Team*
 ```
 
@@ -389,8 +337,7 @@ The CRM system shall return client search results within 2 seconds under normal 
 - [ ] Response time logged for monitoring
 
 ---
-*Created: 2024-01-15*  
-*Last Updated: 2024-01-15*
+*Created: 2024-01-15*
 ```
 
 ---
@@ -409,7 +356,6 @@ Before finalizing, verify:
 - [ ] NFRs have measurable targets (not vague terms)
 - [ ] No implementation/design details in requirements (WHAT not HOW)
 - [ ] No code snippets or programming examples in FR/NFR files
-- [ ] Construction details deferred to separate design files
 
 ---
 
@@ -424,7 +370,6 @@ Before finalizing, verify:
 | All FRs in one file | Each FR in separate file for independent development |
 | Vague NFR: "good performance" | Measurable NFR: "< 2 second response time" |
 | Code snippet in FR file | Reference design docs for implementation details |
-| Database schema in NFR | Keep schemas in design/data-model.md |
 
 ---
 
@@ -436,27 +381,27 @@ After completing this step:
 ✅ Step 5 Complete: Requirements Specified
 
 📁 Created: functional-requirements/
-   ├── _index.md (8 FRs total)
-   ├── FR-001-client-registration.md → CN-001
-   ├── FR-002-client-modification.md → CN-001
-   ├── FR-003-client-view.md → CN-001
-   ├── FR-004-client-search.md → CN-001
-   ├── FR-005-report-generation.md → CN-002
-   ├── FR-006-export-data.md → CN-002
-   ├── FR-007-filter-clients.md → CN-003
-   └── FR-008-sort-results.md → CN-003
+   ├── _index.md (N FRs total)
+   ├── FR-001-*.md → CN-001
+   ├── FR-002-*.md → CN-001
+   └── ...
 
 📁 Created: non-functional-requirements/
-   ├── _index.md (3 NFRs total)
-   ├── NFR-001-response-time.md
-   ├── NFR-002-data-encryption.md
-   └── NFR-003-availability.md
+   ├── _index.md (N NFRs total)
+   └── NFR-001-*.md
 
 📁 Updated: traceability-matrix.md
 
-Engineers can now:
-1. Browse functional-requirements/ for available work
-2. Pick individual FR files to implement
-3. Update status in each file as work progresses
-4. Add implementation notes directly to the FR file
+→ MANDATORY: Run zigzag-validator skill for full chain verification
+→ Engineers can now pick individual FR files to implement
 ```
+
+---
+
+## Reference
+
+Based on Problem-Based SRS methodology (Gorski & Stadzisz, 2016)
+
+**Version:** 1.2  
+**Step:** 5 of 5  
+**Validation:** zigzag-validator skill

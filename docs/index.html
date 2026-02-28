@@ -499,26 +499,30 @@ Business Context: [describe current situation]</code></pre>
             <h2>📚 Additional Resources</h2>
             
             <h3>Repository Structure</h3>
-            <p>This repository provides the AgentSkills format:</p>
+            <p>This repository provides both agents and skills in the AgentSkills format:</p>
             
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-                <h4 style="margin-top: 0; color: #667eea;">AgentSkills Format</h4>
-                <p style="margin-bottom: 0.5rem;"><code>skills/problem-based-srs/</code> - For GitHub Copilot, Claude Code, Claude.ai, and other AI agents</p>
+                <h4 style="margin-top: 0; color: #667eea;">Agents</h4>
+                <p style="margin-bottom: 0.5rem;"><code>agents/problem-based-srs/</code> - Orchestrator agent for full methodology</p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <h4 style="margin-top: 0; color: #667eea;">Skills (Individual Steps)</h4>
+                <p style="margin-bottom: 0.5rem;">For GitHub Copilot, Claude Code, Claude.ai, and other AI agents:</p>
                 <ul style="line-height: 2;">
-                    <li><code>SKILL.md</code> - Main orchestrator skill</li>
-                    <li><code>references/</code> - Detailed instructions for each step
+                    <li><code>skills/problem-based-srs/</code> - Main orchestrator skill
                         <ul style="margin-top: 0.5rem;">
-                            <li><code>step1-customer-problems.md</code> - CP generation</li>
-                            <li><code>step2-software-glance.md</code> - Software Glance design</li>
-                            <li><code>step3-customer-needs.md</code> - CN specification</li>
-                            <li><code>step4-software-vision.md</code> - Software Vision design</li>
-                            <li><code>step5-functional-requirements.md</code> - FR/NFR generation</li>
-                            <li><code>zigzag-validator.md</code> - Traceability validation</li>
-                            <li><code>complexity-analysis.md</code> - <em>Optional:</em> Axiomatic Design analysis</li>
-                            <li><code>crm-example.md</code> - Complete CRM walkthrough</li>
-                            <li><code>microer-example.md</code> - Energy system walkthrough</li>
+                            <li><code>references/crm-example.md</code> - Complete CRM walkthrough</li>
+                            <li><code>references/microer-example.md</code> - Energy system walkthrough</li>
                         </ul>
                     </li>
+                    <li><code>skills/customer-problems/</code> - Step 1: CP generation</li>
+                    <li><code>skills/software-glance/</code> - Step 2: Software Glance design</li>
+                    <li><code>skills/customer-needs/</code> - Step 3: CN specification</li>
+                    <li><code>skills/software-vision/</code> - Step 4: Software Vision design</li>
+                    <li><code>skills/functional-requirements/</code> - Step 5: FR/NFR generation</li>
+                    <li><code>skills/zigzag-validator/</code> - Traceability validation</li>
+                    <li><code>skills/complexity-analysis/</code> - <em>Optional:</em> Axiomatic Design analysis</li>
                 </ul>
             </div>
             

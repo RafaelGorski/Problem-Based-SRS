@@ -1,3 +1,13 @@
+---
+name: complexity-analysis
+description: Analyze specification quality using Axiomatic Design principles. Optional advanced validation for critical systems. Evaluates independence, completeness, and information content of requirements.
+license: MIT
+metadata:
+  author: rafael-gorski
+  version: "1.2"
+  methodology: problem-based-srs
+---
+
 # Complexity Analysis
 
 > **OPTIONAL Advanced Validation Tool** for Problem-Based SRS methodology  
@@ -6,7 +16,7 @@
 
 ---
 
-## ⚠️ Optional Command
+## ⚠️ Optional Skill
 
 This is **NOT** part of the standard Problem-Based SRS flow. Use it when you want to:
 - Verify specification independence (no coupled requirements)
@@ -14,9 +24,9 @@ This is **NOT** part of the standard Problem-Based SRS flow. Use it when you wan
 - Identify redundancies or gaps in your specification
 - Apply rigorous engineering quality checks
 
-**Standard Flow:** `/cp` → `/sg` → `/cn` → `/sv` → `/fr` → `/zigzag`
+**Standard Flow:** customer-problems → software-glance → customer-needs → software-vision → functional-requirements → zigzag-validator
 
-**Optional:** `/complexity` (call explicitly when needed)
+**Optional:** complexity-analysis (call explicitly when needed)
 
 ---
 
@@ -162,7 +172,7 @@ Overlap: 100% → High probability of success → Low IC ✅
 
 ## Output Template
 
-When running `/complexity`, produce:
+When running complexity analysis, produce:
 
 ```markdown
 ## Complexity Analysis Report
@@ -259,6 +269,6 @@ CP.5     [ ]   [ ]   [ ]   [ ]   [ ]   [C]
 
 ---
 
-**Version:** 1.0  
+**Version:** 1.2  
 **Type:** Optional Advanced Validation Tool  
 **Command:** `/complexity`

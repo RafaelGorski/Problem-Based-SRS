@@ -1,3 +1,14 @@
+---
+name: customer-problems
+description: Identify and document Customer Problems (CP) from business context. Use when starting requirements engineering or when stakeholders describe solutions instead of problems. Step 1 of Problem-Based SRS methodology.
+license: MIT
+metadata:
+  author: rafael-gorski
+  version: "1.2"
+  methodology: problem-based-srs
+  step: 1
+---
+
 # Customer Problems (CP)
 
 > **Step 1** of the Problem-Based SRS methodology  
@@ -13,10 +24,10 @@ Guide AI coding agents through identifying, documenting, and validating Customer
 
 | Aspect | Boundary |
 |--------|----------|
-| **This prompt does** | Discover problems from context, normalize statements, and validate quality |
-| **This prompt does NOT** | Define solutions or derive requirements |
+| **This skill does** | Discover problems from context, normalize statements, and validate quality |
+| **This skill does NOT** | Define solutions or derive requirements |
 | **Input from** | Business context OR draft CP statements |
-| **Output to** | Step 2: Software Glance (`glance.md`) |
+| **Output to** | Step 2: Software Glance (software-glance skill) |
 
 ---
 
@@ -266,25 +277,6 @@ CP.1.2: The company must ensure each customer is contacted regularly
         (frequency of communication).
 ```
 
-**Why decompose?** CP.1 has two distinct facets:
-- **Ability** to contact (CP.1.1) — solved by contact database
-- **Regularity** of contact (CP.1.2) — solved by scheduling/reminders
-
-### When NOT to Decompose
-
-- Problem is already atomic (single concern)
-- Sub-problems would be trivial or obvious
-- Decomposition creates artificial complexity
-- All aspects share the same solution
-
-### Decomposition Checklist
-
-- [ ] Parent CP captures the overall problem
-- [ ] Each sub-CP addresses a distinct facet
-- [ ] Sub-CPs together fully cover the parent
-- [ ] Sub-CPs use consistent numbering (CP.n.m)
-- [ ] Sub-CPs have their own classifications (may differ from parent)
-
 ---
 
 ## Anti-Patterns to Avoid
@@ -329,34 +321,15 @@ Artifacts:
 [List CP-IDs with brief titles]
 
 → Next Step: 2 - Software Glance
+→ Use skill: software-glance
 → Input: The CPs documented above
 ```
 
 ---
 
-## Usage
-
-### GitHub Copilot
-```
-/cp
-
-Business Context:
-[paste description]
-```
-
-### Claude Code
-```
-Apply CP generation
-
-Project: [name]
-Business Context: [description]
-```
-
----
-
 ## References
-- Problem-Based SRS Paper (Gorski & Stadzisz) - `docs/Problem-Based-SRS-Paper.md`
+- Problem-Based SRS Paper (Gorski & Stadzisz)
 
-**Version:** 1.0  
+**Version:** 1.2  
 **Step:** 1 of 5  
-**Next:** Software Glance
+**Next:** software-glance skill

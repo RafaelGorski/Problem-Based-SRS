@@ -1,5 +1,7 @@
 """Integration tests for the actual repository structure."""
 
+import json
+import re
 import pytest
 from pathlib import Path
 
@@ -38,34 +40,76 @@ class TestSkillDirectory:
 
 
 class TestReferenceFiles:
-    """Tests for reference documentation files."""
+    """Tests for reference documentation files (examples only)."""
     
     @pytest.mark.parametrize("ref_file", [
-        "step1-customer-problems.md",
-        "step2-software-glance.md",
-        "step3-customer-needs.md",
-        "step4-software-vision.md",
-        "step5-functional-requirements.md",
-        "zigzag-validator.md",
+        "crm-example.md",
+        "microer-example.md",
     ])
     def test_reference_file_exists(self, ref_file):
-        """Test that all reference files exist."""
+        """Test that all example reference files exist."""
         ref_path = REPO_ROOT / "skills" / "problem-based-srs" / "references" / ref_file
         assert ref_path.exists(), f"Reference file not found: {ref_file}"
     
     @pytest.mark.parametrize("ref_file", [
-        "step1-customer-problems.md",
-        "step2-software-glance.md",
-        "step3-customer-needs.md",
-        "step4-software-vision.md",
-        "step5-functional-requirements.md",
-        "zigzag-validator.md",
+        "crm-example.md",
+        "microer-example.md",
     ])
     def test_reference_file_structure(self, ref_file):
         """Test that reference files have proper markdown structure."""
         ref_path = REPO_ROOT / "skills" / "problem-based-srs" / "references" / ref_file
         errors = validate_markdown_structure(ref_path)
         assert errors == [], f"Markdown structure errors in {ref_file}: {errors}"
+
+
+class TestIndividualSkills:
+    """Tests for individual methodology skills."""
+    
+    @pytest.mark.parametrize("skill_name", [
+        "customer-problems",
+        "software-glance",
+        "customer-needs",
+        "software-vision",
+        "functional-requirements",
+        "zigzag-validator",
+        "complexity-analysis",
+    ])
+    def test_skill_exists(self, skill_name):
+        """Test that all methodology skills exist."""
+        skill_dir = REPO_ROOT / "skills" / skill_name
+        assert skill_dir.exists(), f"Skill directory not found: {skill_name}"
+        assert skill_dir.is_dir(), f"{skill_name} should be a directory"
+        
+        skill_md = skill_dir / "SKILL.md"
+        assert skill_md.exists(), f"SKILL.md not found in {skill_name}"
+    
+    @pytest.mark.parametrize("skill_name", [
+        "customer-problems",
+        "software-glance",
+        "customer-needs",
+        "software-vision",
+        "functional-requirements",
+        "zigzag-validator",
+        "complexity-analysis",
+    ])
+    def test_skill_valid(self, skill_name):
+        """Test that all methodology skills are valid."""
+        skill_dir = REPO_ROOT / "skills" / skill_name
+        errors = validate_skill(skill_dir)
+        assert errors == [], f"Skill validation errors for {skill_name}: {errors}"
+
+
+class TestAgents:
+    """Tests for agent orchestrators."""
+    
+    def test_problem_based_srs_agent_exists(self):
+        """Test that the problem-based-srs agent exists."""
+        agent_dir = REPO_ROOT / "agents" / "problem-based-srs"
+        assert agent_dir.exists(), "problem-based-srs agent directory not found"
+        assert agent_dir.is_dir(), "problem-based-srs agent should be a directory"
+        
+        agent_md = agent_dir / "AGENT.md"
+        assert agent_md.exists(), "AGENT.md not found in problem-based-srs agent"
 
 
 class TestSpecificationFiles:
@@ -96,6 +140,30 @@ class TestSpecificationFiles:
         errors = validate_markdown_structure(nfr_file)
         # NFR file has complex structure, just check it doesn't crash
         assert isinstance(errors, list)
+
+
+class TestCompatibilityGuardrails:
+    """Tests that keep GHCP-first and Claude plugin compatibility consistent."""
+
+    def test_plugin_manifest_required_fields(self):
+        """Test Claude plugin manifest required fields and semantic version."""
+        manifest = REPO_ROOT / ".claude-plugin" / "plugin.json"
+        assert manifest.exists(), ".claude-plugin/plugin.json not found"
+
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        assert data.get("name"), "plugin.json must define name"
+        assert data.get("version"), "plugin.json must define version"
+        assert re.match(r"^\d+\.\d+\.\d+$", data["version"]), "plugin.json version must use semantic versioning"
+
+    @pytest.mark.parametrize("path", [
+        REPO_ROOT / ".github" / "copilot-instructions.md",
+        REPO_ROOT / "AGENTS.md",
+    ])
+    def test_instruction_files_enforce_ghcp_first_priority(self, path):
+        """Test instruction files keep GHCP-first compatibility guidance."""
+        content = path.read_text(encoding="utf-8")
+        assert "GitHub Copilot first" in content
+        assert "Claude" in content
 
 
 class TestRepositoryStructure:
