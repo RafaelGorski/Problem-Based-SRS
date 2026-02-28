@@ -273,6 +273,7 @@ git commit -m "Add Problem-Based SRS methodology"
 ### Documentation
 
 - **[Research Paper](docs/)** - The peer-reviewed methodology by Gorski & Stadzisz
+  - **DOI:** [10.21529/RESI.2016.1502002](https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230)
 - **[Testing Guide](TESTING.md)** - Quality assurance and test specifications
 - **[Contributing](CONTRIBUTING.md)** - Help improve the methodology
 - **[Changelog](CHANGELOG.md)** - Version history and updates
