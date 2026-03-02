@@ -36,7 +36,7 @@ Problem-Based-SRS/
 │   ├── zigzag-validator/        # Traceability validation
 │   └── complexity-analysis/     # Optional: Axiomatic Design
 ├── docs/                        # Research papers and methodology
-└── tests/                       # Automated tests
+└── hooks/                       # Hook configurations
 ```
 
 ## When Working on This Repository

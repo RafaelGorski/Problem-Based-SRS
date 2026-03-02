@@ -292,7 +292,6 @@ git commit -m "Add Problem-Based SRS methodology"
 
 - **[Research Paper](docs/)** - The peer-reviewed methodology by Gorski & Stadzisz
   - **DOI:** [10.21529/RESI.2016.1502002](https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230)
-- **[Testing Guide](TESTING.md)** - Quality assurance and test specifications
 - **[Contributing](CONTRIBUTING.md)** - Help improve the methodology
 - **[Changelog](CHANGELOG.md)** - Version history and updates
 
@@ -309,21 +308,6 @@ git commit -m "Add Problem-Based SRS methodology"
 
 **AgentSkills Format:** This repository uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Plugins](https://code.claude.com/docs/en/plugins.md) format, making it compatible with Claude Code, Claude.ai, GitHub Copilot, and other AI agents.
 
-## 🧪 Quality Assurance
-
-This methodology includes comprehensive testing:
-
-- ✅ **98.3% test coverage** (57 of 58 tests passing)
-- ✅ **Static validation** of skill format and structure
-- ✅ **Semantic validation** of methodology steps
-- ✅ **Integration tests** for AI agent compatibility
-
-```bash
-# Run tests yourself
-pip install pytest strictyaml
-pytest tests/ -v
-```
-
 ## 📋 Version 1.1
 
 Released February 2026 with:
@@ -336,7 +320,6 @@ Released February 2026 with:
 - **NEW:** Agile/sprint integration patterns
 - Complete 5-step methodology with traceability validation
 - AgentSkills format for GitHub Copilot, Claude, and other AI agents
-- 57+ automated tests for quality assurance
 - Comprehensive documentation based on peer-reviewed research
 
 ## 📂 Repository Contents
@@ -373,23 +356,18 @@ Problem-Based-SRS/
 ├── hooks/
 │   └── hooks.json               # Hook configurations
 ├── settings.json                # Default plugin settings
-├── docs/                        # Research paper and methodology
-├── spec/                        # Test specifications
-└── tests/                       # Automated tests
+└── docs/                        # Research paper and methodology
 ```
 
 ### Key Files
 
-- **[TESTING.md](TESTING.md)** - Testing documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
 - **docs/** - Research paper and methodology details
 - **agents/problem-based-srs/** - Agent orchestrator for AI agents
 - **skills/** - Individual skills for each methodology step
   - `problem-based-srs/references/crm-example.md` - Complete CRM case study walkthrough
   - `problem-based-srs/references/microer-example.md` - Renewable energy system walkthrough
-- **spec/** - Test specifications and requirements
-
-### Optional: Complexity Analysis (`/complexity`)
+### Optional:Complexity Analysis (`/complexity`)
 
 For deeper quality analysis on critical systems, you can explicitly call `/complexity` to:
 - Analyze specification independence (coupled vs. uncoupled)

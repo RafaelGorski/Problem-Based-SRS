@@ -55,11 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Step 4: Software Vision - Architecture and constraints
   - Step 5: Functional Requirements (FR) - Specify the HOW
 - **ZigZag Validator**: Traceability validation ensuring all requirements trace back to business problems
-- **Python Test Infrastructure**: 57+ tests for validating:
-  - YAML frontmatter in AgentSkills
-  - Markdown structure and heading hierarchy
-  - Traceability ID format (CP.XX → CN.XX.X → FR.XX.X.X)
-  - Repository structure compliance
+- **Python Test Infrastructure**: Tests for validating skills are maintained in the [isolated tests repository](https://github.com/RafaelGorski/Problem-Based-SRS-Isolated-Tests)
 - **Reference Documentation**: Detailed guides for each methodology step in `skills/problem-based-srs/references/`
 - **AgentSkills Best Practices**: Documentation on creating and maintaining skills following the open standard
 - **Multi-Agent Support**: Installation instructions for GitHub Copilot, Claude Code, Claude.ai, Gemini CLI, Cline, Goose, and Codex
@@ -80,7 +76,7 @@ This release includes contributions from the following PRs:
 - PR #1: Add Problem-Based SRS prompts and AI agent integration
 - PR #2: Move copilot instructions to standard .github location
 - PR #4: Rename srs-coordinator.prompt.md to problem-based-srs.md
-- PR #5: Add Python test infrastructure for AgentSkills validation
+- PR #5: Add Python test infrastructure for AgentSkills validation (moved to [isolated tests repo](https://github.com/RafaelGorski/Problem-Based-SRS-Isolated-Tests))
 - PR #6: Restore README documentation and integrate new installation tips
 - PR #7: Ensure step5 reference uses single H1 for valid markdown structure
 - PR #8: Add content restrictions to FR/NFR file generation

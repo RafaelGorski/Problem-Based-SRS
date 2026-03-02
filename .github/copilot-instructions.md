@@ -54,19 +54,6 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 - **Functional Requirements**: `FR.{cp}.{cn}.{n}` (e.g., FR.01.1.1 traces to CN.01.1)
 - **Non-Functional Requirements**: `NFR.{version}.md` (e.g., NFR.1.0.md)
 
-### Storage Location for Iterations
-
-Save all requirement iterations in the `spec/` folder:
-```
-spec/
-├── README.md                    # Test suite overview
-├── NFR.{version}.md             # Non-functional requirements analysis
-├── static/                      # Static validation specs
-├── semantic/                    # Semantic validation specs
-├── integration/                 # Integration test specs
-└── fixtures/                    # Test data (valid/invalid examples)
-```
-
 ---
 
 ## 🚀 Trunk-Based Development Workflow
@@ -90,8 +77,7 @@ git push origin main                         # Push to trunk
 | `feat:` | New feature or requirement | `feat: Add CP.02 for mobile access` |
 | `fix:` | Bug fix or correction | `fix: Correct FR.01.2.1 traceability` |
 | `docs:` | Documentation updates | `docs: Update README with new workflow` |
-| `spec:` | Test specifications | `spec: Add traceability validation tests` |
-| `refactor:` | Restructuring without changing behavior | `refactor: Reorganize spec folder` |
+| `refactor:` | Restructuring without changing behavior | `refactor: Reorganize skills` |
 
 **Always confirm with the user before pushing to main.**
 
@@ -153,9 +139,7 @@ Problem-Based-SRS/
 ├── hooks/
 │   └── hooks.json               # Hook configurations
 ├── settings.json                # Default plugin settings
-├── docs/                        # Documentation
-├── spec/                        # Specifications
-└── tests/                       # Tests
+└── docs/                        # Documentation
 ```
 
 ### Skills Development (AgentSkills Format)
@@ -183,7 +167,6 @@ Problem-Based-SRS/
 - **`settings.json`**: Default plugin settings
 - **`docs/`**: Documentation, research papers, methodology guides
 - **`docs/references/`**: Reference documentation for AgentSkills development
-- **`spec/`**: Test specifications and requirement iterations
 
 ### Code Style
 - This is primarily a documentation repository
