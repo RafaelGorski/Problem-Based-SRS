@@ -54,6 +54,7 @@ For each CN:
 3. **Save each FR as an individual file** in functional-requirements/
 4. **Save each NFR as an individual file** in non-functional-requirements/
 5. Create index files (_index.md) for both folders
+6. **AFTER creating files, present ALL FR statements in your response** (see Response Format below)
 
 ---
 
@@ -375,7 +376,7 @@ Before finalizing, verify:
 
 ## Response Format (CRITICAL — DO NOT SKIP)
 
-**⚠ MANDATORY:** Your response MUST contain the actual FR requirement statements written out in full—not just a summary table or list of file names. If you only show a summary, the output is INVALID.
+**⚠ MANDATORY:** After creating all FR files, your FINAL response message MUST contain the actual FR requirement statements written out in full. This is NOT optional — a response that only describes file creation actions without showing the actual requirements is INVALID and INCOMPLETE.
 
 **Every FR in the response MUST include:**
 
