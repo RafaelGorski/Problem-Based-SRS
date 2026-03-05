@@ -373,43 +373,48 @@ Before finalizing, verify:
 
 ---
 
-## Response Format (CRITICAL)
+## Response Format (CRITICAL — DO NOT SKIP)
 
-When presenting results, your response MUST include the actual requirement content—not just a summary of files created. Specifically:
+**⚠ MANDATORY:** Your response MUST contain the actual FR requirement statements written out in full—not just a summary table or list of file names. If you only show a summary, the output is INVALID.
 
-1. **Show each FR statement** using "shall" or "should" notation inline:
-   - Example: `FR-001: The CRM system shall allow the Account Manager to register a new client.`
-2. **Show traceability** for each FR back to its Customer Need (CN):
-   - Example: `FR-001 → CN-001 (Client data management)`
-3. **Show acceptance criteria** for each FR:
-   - Example: `Acceptance Criteria: [ ] System validates required fields before submission`
-4. **Use markdown headings** like `## Functional Requirements` and `## Acceptance Criteria`
+**Every FR in the response MUST include:**
 
-**DO NOT** return only a file listing or summary table. The response must contain the full requirement statements so they are visible in the conversation.
+1. **The "shall" statement** — written out explicitly using the grammar: `The [System] shall [verb] [object]`
+2. **CN traceability** — each FR must show which CN it traces to (e.g., `→ CN-001`)
+3. **Acceptance criteria** — at least 2 testable criteria per FR
 
-### Response Structure
+**Example of CORRECT response format:**
 
 ```markdown
 ## Functional Requirements
 
-### FR-001: [Title]
-**Traces to:** CN-001 — [CN description]
+### FR-001: Client Registration
+**Traces to:** CN-001 — Client data management
 
-The [System] shall [verb] [object] [constraint].
-
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-### FR-002: [Title]
-**Traces to:** CN-002 — [CN description]
-
-The [System] shall [verb] [object] [constraint].
+The CRM system shall allow the Account Manager to register a new client in the database.
 
 **Acceptance Criteria:**
-- [ ] Criterion 1
-...
+- [ ] System accepts client name, contact info, and company details
+- [ ] System assigns unique client ID upon successful registration
+
+### FR-002: Client Data Update
+**Traces to:** CN-001 — Client data management
+
+The CRM system shall allow the Account Manager to update existing client records.
+
+**Acceptance Criteria:**
+- [ ] System validates modified fields before saving
+- [ ] System logs update timestamp
 ```
+
+**Example of WRONG response (DO NOT do this):**
+```
+| CN | Functional Requirements |
+|----|------------------------|
+| CN.1 | FR-001 Registration, FR-002 Update |
+```
+
+The wrong format above lacks "shall" statements, acceptance criteria, and proper traceability.
 
 ---
 
