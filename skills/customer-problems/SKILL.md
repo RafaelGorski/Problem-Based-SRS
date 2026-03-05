@@ -117,12 +117,14 @@ Classify each CP by severity:
 
 ## Output Format
 
+**⚠ ID Format:** Always use `CP-` with a dash (e.g., `CP-001`, `CP-002`). Do NOT use dots (e.g., `CP.01`).
+
 ### For Mode 1 (Generation)
 
 For each identified problem, produce:
 
 ```markdown
-### CP-[ID]: [Brief Title]
+### CP-001: [Brief Title]
 
 **Statement:** [Subject] [Verb] [Object] [Penalty]
 
