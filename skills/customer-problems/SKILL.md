@@ -146,7 +146,7 @@ For each identified problem, produce:
 
 | CP ID | Normalized Statement | Class | Missing Info |
 |-------|----------------------|-------|--------------|
-| CP.1 | [Subject] [Verb] [Object] [Penalty] | [Obligation/Expectation/Hope] | [None or list] |
+| CP-[ID] | [Subject] [Verb] [Object] [Penalty] | [Obligation/Expectation/Hope] | [None or list] |
 
 ## Clarification Questions (if any)
 - [Question 1]
@@ -243,37 +243,37 @@ Decompose a CP into sub-CPs when:
 
 | Trigger | Example |
 |---------|---------|
-| Multiple distinct facets | CP.1 has communication AND frequency aspects |
-| Different subjects affected | CP.1 affects both company AND customers |
+| Multiple distinct facets | CP-001 has communication AND frequency aspects |
+| Different subjects affected | CP-001 affects both company AND customers |
 | Independent penalties | Failure of one aspect doesn't cause all penalties |
 | Separate solutions likely | Each facet could be solved by different FRs |
 
 ### Numbering Convention
 
 ```
-CP.1        → Main problem
-CP.1.1      → First sub-problem of CP.1
-CP.1.2      → Second sub-problem of CP.1
-CP.1.2.1    → Sub-sub-problem (rarely needed)
+CP-001        → Main problem
+CP-001.1      → First sub-problem of CP-001
+CP-001.2      → Second sub-problem of CP-001
+CP-001.2.1    → Sub-sub-problem (rarely needed)
 ```
 
 ### Decomposition Example
 
 **Before decomposition:**
 ```
-CP.1: The company must ensure effective communication with customers, 
+CP-001: The company must ensure effective communication with customers, 
       otherwise it loses customers affecting marketing and sales.
 ```
 
 **After decomposition:**
 ```
-CP.1: The company must ensure effective communication with customers, 
+CP-001: The company must ensure effective communication with customers, 
       otherwise it loses customers affecting marketing and sales.
 
-CP.1.1: The company must ensure it can contact all customers 
+CP-001.1: The company must ensure it can contact all customers 
         (having valid contact information).
 
-CP.1.2: The company must ensure each customer is contacted regularly 
+CP-001.2: The company must ensure each customer is contacted regularly 
         (frequency of communication).
 ```
 
