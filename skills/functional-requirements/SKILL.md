@@ -373,6 +373,46 @@ Before finalizing, verify:
 
 ---
 
+## Response Format (CRITICAL)
+
+When presenting results, your response MUST include the actual requirement content—not just a summary of files created. Specifically:
+
+1. **Show each FR statement** using "shall" or "should" notation inline:
+   - Example: `FR-001: The CRM system shall allow the Account Manager to register a new client.`
+2. **Show traceability** for each FR back to its Customer Need (CN):
+   - Example: `FR-001 → CN-001 (Client data management)`
+3. **Show acceptance criteria** for each FR:
+   - Example: `Acceptance Criteria: [ ] System validates required fields before submission`
+4. **Use markdown headings** like `## Functional Requirements` and `## Acceptance Criteria`
+
+**DO NOT** return only a file listing or summary table. The response must contain the full requirement statements so they are visible in the conversation.
+
+### Response Structure
+
+```markdown
+## Functional Requirements
+
+### FR-001: [Title]
+**Traces to:** CN-001 — [CN description]
+
+The [System] shall [verb] [object] [constraint].
+
+**Acceptance Criteria:**
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+### FR-002: [Title]
+**Traces to:** CN-002 — [CN description]
+
+The [System] shall [verb] [object] [constraint].
+
+**Acceptance Criteria:**
+- [ ] Criterion 1
+...
+```
+
+---
+
 ## Handoff to Engineering
 
 After completing this step:

@@ -145,10 +145,19 @@ Use text-based diagrams or descriptions:
 5. **Architecture ≠ Design**: Show major subsystems, not detailed architecture
 6. **Scope Guard**: This document guards Step 5 from scope creep
 
-### Output Format
+### Output Format (CRITICAL)
 
-Provide the vision as a structured markdown document with:
-- Clear section headings
+Provide the vision as a structured markdown document **directly in the response**. The full document content MUST be visible in the conversation—do NOT return only a summary or file listing.
+
+**Required markdown headings** (use these exact headings):
+- `## Vision` or `## Positioning` — the positioning statement section
+- `## Stakeholders` — list of stakeholders
+- `## Product Overview` — purpose, scope, benefits
+- `## High-Level Features` — feature table
+- `## Environment and Constraints` — deployment, technical constraints
+- `## High-Level Architecture` — architecture blocks
+
+Additional formatting:
 - Tables for structured data (features, stakeholders)
 - Diagrams where helpful (ASCII or description)
 - Concise, scannable content
