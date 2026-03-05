@@ -49,12 +49,56 @@ Before running this skill, ensure you have completed artifacts from previous ste
 ## Your Task
 
 For each CN:
-1. Generate FR statements that specify the system capabilities required
+1. Generate FR statements using "shall/should" notation
 2. Identify any NFRs needed (quality attributes)
-3. **Save each FR as an individual file** in functional-requirements/
-4. **Save each NFR as an individual file** in non-functional-requirements/
-5. Create index files (_index.md) for both folders
-6. **AFTER creating files, present ALL FR statements in your response** (see Response Format below)
+3. Save each FR/NFR as an individual file (see File Output section)
+4. Create index files (_index.md) for both folders
+5. **Present ALL FR statements in your response** (see Response Format immediately below)
+
+---
+
+## Response Format (CRITICAL — DO NOT SKIP)
+
+**⚠ MANDATORY:** Your response MUST contain the actual FR requirement statements written out in full. This is NOT optional — a response that only describes file creation actions without showing the actual requirements is INVALID and INCOMPLETE.
+
+**Every FR in the response MUST include:**
+
+1. **The "shall" statement** — written out explicitly using the grammar: `The [System] shall [verb] [object]`
+2. **CN traceability** — each FR must show which CN it traces to (e.g., `→ CN-001`)
+3. **Acceptance criteria** — at least 2 testable criteria per FR
+
+**Example of CORRECT response format:**
+
+```markdown
+## Functional Requirements
+
+### FR-001: Client Registration
+**Traces to:** CN-001 — Client data management
+
+The CRM system shall allow the Account Manager to register a new client in the database.
+
+**Acceptance Criteria:**
+- [ ] System accepts client name, contact info, and company details
+- [ ] System assigns unique client ID upon successful registration
+
+### FR-002: Client Data Update
+**Traces to:** CN-001 — Client data management
+
+The CRM system shall allow the Account Manager to update existing client records.
+
+**Acceptance Criteria:**
+- [ ] System validates modified fields before saving
+- [ ] System logs update timestamp
+```
+
+**Example of WRONG response (DO NOT do this):**
+```
+| CN | Functional Requirements |
+|----|------------------------|
+| CN.1 | FR-001 Registration, FR-002 Update |
+```
+
+The wrong format above lacks "shall" statements, acceptance criteria, and proper traceability.
 
 ---
 
@@ -373,49 +417,6 @@ Before finalizing, verify:
 | Code snippet in FR file | Reference design docs for implementation details |
 
 ---
-
-## Response Format (CRITICAL — DO NOT SKIP)
-
-**⚠ MANDATORY:** After creating all FR files, your FINAL response message MUST contain the actual FR requirement statements written out in full. This is NOT optional — a response that only describes file creation actions without showing the actual requirements is INVALID and INCOMPLETE.
-
-**Every FR in the response MUST include:**
-
-1. **The "shall" statement** — written out explicitly using the grammar: `The [System] shall [verb] [object]`
-2. **CN traceability** — each FR must show which CN it traces to (e.g., `→ CN-001`)
-3. **Acceptance criteria** — at least 2 testable criteria per FR
-
-**Example of CORRECT response format:**
-
-```markdown
-## Functional Requirements
-
-### FR-001: Client Registration
-**Traces to:** CN-001 — Client data management
-
-The CRM system shall allow the Account Manager to register a new client in the database.
-
-**Acceptance Criteria:**
-- [ ] System accepts client name, contact info, and company details
-- [ ] System assigns unique client ID upon successful registration
-
-### FR-002: Client Data Update
-**Traces to:** CN-001 — Client data management
-
-The CRM system shall allow the Account Manager to update existing client records.
-
-**Acceptance Criteria:**
-- [ ] System validates modified fields before saving
-- [ ] System logs update timestamp
-```
-
-**Example of WRONG response (DO NOT do this):**
-```
-| CN | Functional Requirements |
-|----|------------------------|
-| CN.1 | FR-001 Registration, FR-002 Update |
-```
-
-The wrong format above lacks "shall" statements, acceptance criteria, and proper traceability.
 
 ---
 
