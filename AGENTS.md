@@ -28,6 +28,7 @@ Problem-Based-SRS/
 │   ├── problem-based-srs/       # Main orchestrator skill
 │   │   ├── SKILL.md
 │   │   └── references/          # Examples only
+│   ├── business-context/        # Step 0: Business context and principles
 │   ├── customer-problems/       # Step 1: WHY
 │   ├── software-glance/         # Step 2: High-level view
 │   ├── customer-needs/          # Step 3: WHAT

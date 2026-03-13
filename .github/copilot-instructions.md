@@ -37,6 +37,7 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 
 | Step | Skill |
 |------|-------|
+| 0. Business Context (CONTEXT) | `skills/business-context/SKILL.md` |
 | 1. Customer Problems (WHY) | `skills/customer-problems/SKILL.md` |
 | 2. Software Glance | `skills/software-glance/SKILL.md` |
 | 3. Customer Needs (WHAT) | `skills/customer-needs/SKILL.md` |
@@ -129,6 +130,7 @@ Problem-Based-SRS/
 │   ├── problem-based-srs/       # Main skill for SRS methodology
 │   │   ├── SKILL.md
 │   │   └── references/          # Examples only
+│   ├── business-context/        # Step 0: Business context and principles
 │   ├── customer-problems/       # Step 1: WHY
 │   ├── software-glance/         # Step 2: High-level view
 │   ├── customer-needs/          # Step 3: WHAT
@@ -273,6 +275,7 @@ description: I help with requirements.
 
 ### Problem-Based SRS Commands
 ```
+/bc           # Establish Business Context
 /cp           # Generate Customer Problems
 /glance       # Create Software Glance
 /cn           # Generate Customer Needs

@@ -15,8 +15,13 @@ Orchestrate requirements engineering using the Problem-Based SRS methodology (Go
 ## Methodology Overview
 
 ```
-Business Context
+Stakeholder Input
        ↓
+┌──────────────────┐
+│ Step 0: BC       │ → Use skill: business-context
+│ Business Context │
+└────────┬─────────┘
+         ↓
 ┌──────────────────┐
 │ Step 1: CP       │ → Use skill: customer-problems
 │ Customer Problems│
@@ -58,6 +63,7 @@ This orchestrator coordinates the following skills:
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
+| `business-context` | `/bc` | Step 0: Establish structured business context and principles |
 | `customer-problems` | `/cp` | Step 1: Identify and classify customer problems |
 | `software-glance` | `/glance` | Step 2: Create high-level solution view |
 | `customer-needs` | `/cn` | Step 3: Specify customer needs (outcomes) |
@@ -91,7 +97,7 @@ Create the following folder structure as you progress through each step:
 
 ```
 [chosen-folder]/                      # e.g., docs/srs/
-├── 00-context.md                     # Business context and project overview
+├── 00-business-context.md            # Step 0: Business context, principles, and constraints
 ├── 01-customer-problems.md           # Step 1: CPs (WHY)
 ├── 02-software-glance.md             # Step 2: High-level solution view
 ├── 03-customer-needs.md              # Step 3: CNs (WHAT)
@@ -225,48 +231,26 @@ Engineers can now work on individual requirements independently.
 Each FR file contains full context and acceptance criteria.
 ```
 
-### Context File (00-context.md)
+### Business Context File (00-business-context.md)
 
-Create this file at the start of every project:
+Create this file at the start of every project using the `business-context` skill.
 
-```markdown
-# Project Context: [Project Name]
+The business context captures: project identity, business principles (Mandatory/Guiding/Aspirational), stakeholders with influence levels, current situation (process, pain points, existing systems), domain boundaries, constraints with impact assessment, and measurable success criteria.
 
-## Business Domain
-[Description of the business area]
-
-## Current Situation
-[Description of current state/problems]
-
-## Stakeholders
-| Role | Name/Group | Interest |
-|------|------------|----------|
-| [Role] | [Who] | [What they care about] |
-
-## Scope
-- **In Scope:** [What's included]
-- **Out of Scope:** [What's excluded]
-
-## Constraints
-- [Constraint 1]
-- [Constraint 2]
-
----
-*Created: [Date]*
-*Last Updated: [Date]*
-```
+> **Use the `business-context` skill** for the full template, discovery questions, and examples.
 
 ## How to Use This Skill
 
 ### Starting Fresh
 When user provides business context or problem description:
 1. **Ask where to save artifacts** (if not already specified)
-2. **Create 00-context.md** with the business context
-3. Detect current step (see Detection Heuristics below)
-4. Invoke the appropriate skill
-5. Follow instructions from that skill
-6. **Save output to the corresponding file(s)**
-7. Guide user through the process
+2. **Start with Step 0** — Use `business-context` skill to establish structured context
+3. **Save `00-business-context.md`** with the structured business context
+4. Detect current step (see Detection Heuristics below)
+5. Invoke the appropriate skill
+6. Follow instructions from that skill
+7. **Save output to the corresponding file(s)**
+8. Guide user through the process
 
 ### Continuing Work
 If user has existing artifacts (CPs, CNs, etc.):
@@ -286,20 +270,28 @@ Determine current step by checking what artifacts exist:
 
 | If user has... | Current Step | Use Skill | Save To |
 |----------------|--------------|-----------|---------|
-| Nothing / business idea only | 1 | customer-problems | 01-customer-problems.md |
+| Nothing / business idea only | 0 | business-context | 00-business-context.md |
+| Business Context (BC) | 1 | customer-problems | 01-customer-problems.md |
 | Customer Problems (CPs) | 2 | software-glance | 02-software-glance.md |
 | CPs + Software Glance | 3 | customer-needs | 03-customer-needs.md |
 | CPs + CNs + Software Glance | 4 | software-vision | 04-software-vision.md |
 | CPs + CNs + Software Vision | 5 | functional-requirements | functional-requirements/*.md |
 
-## The 5 Steps (Quick Reference)
+## The Steps (Quick Reference)
+
+### Step 0: Business Context (BC)
+**Purpose:** Establish structured business context and project principles
+**Input:** Stakeholder conversations, project briefs, existing documentation
+**Output:** Business context document with identity, principles, stakeholders, boundaries, constraints, success criteria
+**Save to:** `00-business-context.md`
+**Skill:** business-context
 
 ### Step 1: Customer Problems (CP)
-**Purpose:** Identify and document business problems  
-**Input:** Business context  
-**Output:** List of CPs classified as Obligation/Expectation/Hope  
-**Syntax:** `[Subject] [must/expects/hopes] [Object] [Penalty]`  
-**Save to:** `01-customer-problems.md`  
+**Purpose:** Identify and document business problems
+**Input:** Business Context (Step 0)
+**Output:** List of CPs classified as Obligation/Expectation/Hope
+**Syntax:** `[Subject] [must/expects/hopes] [Object] [Penalty]`
+**Save to:** `01-customer-problems.md`
 **Skill:** customer-problems
 
 ### Step 2: Software Glance (SG)
@@ -335,6 +327,16 @@ Determine current step by checking what artifacts exist:
 ## Quality Gates
 
 **IMPORTANT:** Zigzag validation using zigzag-validator skill is **MANDATORY** after Steps 3 and 5 to verify traceability and identify gaps.
+
+### After Step 0 (BC)
+- [ ] Project identity complete (name, domain, purpose)
+- [ ] Business principles defined and classified (Mandatory/Guiding/Aspirational)
+- [ ] Stakeholders identified with roles and influence
+- [ ] Current situation documented
+- [ ] Domain boundaries defined
+- [ ] Constraints documented
+- [ ] Success criteria measurable
+- [ ] **File saved:** `00-business-context.md`
 
 ### After Step 1 (CPs)
 - [ ] All CPs use structured notation
@@ -384,11 +386,13 @@ If user attempts to skip to solutions, redirect:
 I notice you're describing a solution. Let's first understand the problem.
 
 Before we design [mentioned solution], help me understand:
-1. What business obligation, expectation, or hope drives this need?
-2. What negative consequences occur without this?
-3. Who is impacted?
+1. What is the business context? (→ business-context skill)
+2. What business obligation, expectation, or hope drives this need?
+3. What negative consequences occur without this?
+4. Who is impacted?
 
-→ Loading: references/step1-customer-problems.md
+→ Loading: business-context skill (if no BC exists)
+→ Loading: customer-problems skill (if BC exists)
 ```
 
 ## Quick Syntax Reference
@@ -436,8 +440,8 @@ Gate Check:
 ## Usage Patterns
 
 ### Pattern 1: Full Process (New Project)
-Start with Step 1 and progress through all 5 steps sequentially.
-**Remember:** Ask where to save files, create context file first.
+Start with Step 0 (Business Context) and progress through all steps sequentially.
+**Remember:** Ask where to save files, establish business context first.
 
 ### Pattern 2: Jump In (Existing Artifacts)
 Detect what artifacts exist, skip completed steps, resume at current step.
@@ -456,7 +460,7 @@ Each FR file contains all context needed (traceability, acceptance criteria).
 
 ### Pattern 6: Agile/Sprint Integration
 Use Problem-Based SRS iteratively within agile workflows:
-- **Sprint 0:** Steps 1-2 (CPs + Software Glance) for product vision
+- **Sprint 0:** Steps 0-2 (BC + CPs + Software Glance) for product vision
 - **Sprint 1+:** Steps 3-5 for specific feature sets
 - **Per Feature:** Complete CP→CN→FR chain for one feature at a time
 - **Validation:** Run zigzag-validator after each sprint to ensure traceability
@@ -471,6 +475,7 @@ For quick prototypes or MVPs:
 
 ## When to Use Each Skill
 
+- **business-context:** User is starting a new project and needs to establish structured context
 - **customer-problems:** User has business context but no structured problems
 - **software-glance:** User has CPs and needs high-level solution view
 - **customer-needs:** User has CPs + SG and needs to specify outcomes
@@ -481,15 +486,7 @@ For quick prototypes or MVPs:
 
 ## Optional: Complexity Analysis
 
-For deeper quality analysis, users can explicitly invoke:
-- **Skill:** complexity-analysis
-- **Purpose:** Axiomatic Design-based specification quality analysis
-- **When to use:** Critical systems, large specifications, formal reviews
-
-This is **NOT** part of the standard flow. It provides:
-- Independence analysis (coupled vs. uncoupled specifications)
-- Completeness levels (C/P markers for traceability)
-- Information content assessment
+For deeper quality analysis, users can explicitly invoke the `complexity-analysis` skill for Axiomatic Design-based specification quality analysis. Use for critical systems, large specifications, or formal reviews. This is **NOT** part of the standard flow.
 
 ## Examples
 
