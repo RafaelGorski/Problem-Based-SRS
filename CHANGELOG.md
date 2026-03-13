@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2] - 2026-03-13
+
+### Added
+
+- **Business Context (`/bc`)**: New Step 0 of the Problem-Based SRS methodology
+  - Establishes structured business context before problem discovery
+  - Captures project identity, business principles, stakeholders, domain boundaries, constraints, and success criteria
+  - Business principles classified as Mandatory/Guiding/Aspirational
+  - Includes versioned document with amendment tracking
+  - Inspired by the project constitution concept from [spec-kit](https://github.com/github/spec-kit)
+  - Enhances and replaces the previous minimal `00-context.md` template
+
+### Changed
+
+- Updated methodology flow from 5 steps to Step 0 + 5 steps (BC → CP → SG → CN → SV → FR)
+- Updated `problem-based-srs` orchestrator skill with Step 0 integration
+- Updated `problem-based-srs` agent with Step 0 detection heuristics and quality gates
+- Updated `customer-problems` skill to reference Business Context as preferred input
+- Updated `.github/copilot-instructions.md` with Step 0 skill reference and `/bc` command
+- Updated `AGENTS.md` with business-context in repository structure
+- Updated `README.md` with Step 0 in methodology flow, commands, and diagrams
+
 ## [1.1] - 2026-02-20
 
 ### Added
@@ -83,5 +105,6 @@ This release includes contributions from the following PRs:
 - PR #9: Remove prompts, consolidate to AgentSkills format only
 - PR #10: Add AgentSkills reference documentation and update copilot instructions
 
+[1.2]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2
 [1.1]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1
 [1.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0

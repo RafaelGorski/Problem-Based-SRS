@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version](https://img.shields.io/badge/version-1.1-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1)
+[![Version](https://img.shields.io/badge/version-1.2-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/docs/en/plugins.md)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -47,6 +47,11 @@ tracks everything in spreadsheets and loses $50k/month due to errors.
 ```
 
 **The AI guides you through:**
+
+0. **Business Context (CONTEXT)**
+   - Project: "InventoryPro" — Warehouse logistics
+   - Principle: "Inventory data must reflect physical reality within 0.1% tolerance" (Mandatory)
+   - Success: "Reduce inventory discrepancy from $50k to $5k/month"
 
 1. **Customer Problems (WHY)**
    - CP.01: "Warehouse must track inventory accurately otherwise $50k/month lost to errors"
@@ -99,7 +104,7 @@ Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS
 /problem-based-srs
 ```
 
-Your AI will guide you through the complete 5-step process interactively.
+Your AI will guide you through the complete process interactively.
 
 > **First time?** Just tell your AI about your project challenge. Example: *"We need a mobile app for field technicians who can't access customer data offline."* The AI will handle the rest.
 
@@ -109,7 +114,8 @@ Once installed, use these commands to work with different parts of the methodolo
 
 | Command | When to Use | What It Does |
 |---------|-------------|--------------|
-| `/problem-based-srs` | Starting a new project | Guides you through all 5 steps from scratch |
+| `/problem-based-srs` | Starting a new project | Guides you through all steps from scratch |
+| `/bc` | Establishing project context | Captures business context, principles, and constraints (CONTEXT) |
 | `/cp` | Analyzing business problems | Identifies and classifies customer problems (WHY) |
 | `/glance` | Quick project overview | Creates high-level software summary |
 | `/cn` | Defining what to build | Translates problems into customer needs (WHAT) |
@@ -120,24 +126,27 @@ Once installed, use these commands to work with different parts of the methodolo
 
 **Common scenarios:**
 
-- 🆕 **New project?** → Use `/problem-based-srs` to start from scratch
+- 🆕 **New project?** → Use `/problem-based-srs` to start from scratch (begins with `/bc`)
+- 📋 **Need structured context?** → Use `/bc` to establish business principles and boundaries
 - 🔍 **Reviewing existing requirements?** → Use `/fr` then `/zigzag` to validate
 - 💡 **Stakeholders proposing solutions instead of problems?** → Use `/cp` to dig deeper
 - ✅ **Need to verify requirements quality?** → Use `/zigzag` for traceability check
 
 ## 📊 How It Works
 
-The methodology follows a proven 5-step process that ensures you discover problems first, then design solutions:
+The methodology follows a proven process that ensures you discover problems first, then design solutions:
 
 ```mermaid
 graph LR
-    A[Business Context] --> B[Step 1: Customer Problems - WHY]
+    A[Stakeholder Input] --> B0[Step 0: Business Context - CONTEXT]
+    B0 --> B[Step 1: Customer Problems - WHY]
     B --> C[Step 2: Software Glance]
     C --> D[Step 3: Customer Needs - WHAT]
     D --> E[Step 4: Software Vision]
     E --> F[Step 5: Functional Requirements - HOW]
     F --> G[Ready to Code]
 
+    style B0 fill:#dda0dd
     style B fill:#ff6b6b
     style C fill:#4ecdc4
     style D fill:#45b7d1
@@ -153,6 +162,7 @@ graph LR
 - ✅ Stakeholders see their problems reflected in your work
 
 **Each step builds on the previous:**
+0. **CONTEXT (Business Context)** → Establish principles and boundaries ("What governs this project?")
 1. **WHY (Customer Problems)** → Identify business pain ("What's broken?")
 2. **Software Glance** → Sketch solution approach ("What might help?")
 3. **WHAT (Customer Needs)** → Define required outcomes ("What must it do?")
@@ -315,10 +325,11 @@ Released February 2026 with:
 - **NEW:** `/complexity` command for optional Axiomatic Design quality analysis
 - **NEW:** Condensed case study examples (CRM and MicroER systems)
 - **NEW:** C/P (Complete/Partial) completeness markers in traceability
+- **NEW:** Business Context step (`/bc`) for structured project context and principles
 - **NEW:** Problem decomposition guidance with heuristics
 - **NEW:** Expanded CN outcome class examples (Control, Construction, Entertainment)
 - **NEW:** Agile/sprint integration patterns
-- Complete 5-step methodology with traceability validation
+- Complete methodology (Step 0-5) with traceability validation
 - AgentSkills format for GitHub Copilot, Claude, and other AI agents
 - Comprehensive documentation based on peer-reviewed research
 
@@ -339,6 +350,8 @@ Problem-Based-SRS/
 │   │   └── references/          # Examples only
 │   │       ├── crm-example.md
 │   │       └── microer-example.md
+│   ├── business-context/        # Step 0: Business context and principles
+│   │   └── SKILL.md
 │   ├── customer-problems/       # Step 1: WHY
 │   │   └── SKILL.md
 │   ├── software-glance/         # Step 2: High-level view

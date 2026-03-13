@@ -4,13 +4,13 @@ description: Complete Problem-Based Software Requirements Specification methodol
 license: MIT
 metadata:
   author: rafael-gorski
-  version: "1.2"
+  version: "1.3"
   methodology: problem-based-srs
 ---
 
 # Problem-Based SRS Agent
 
-Orchestrate requirements engineering using the Problem-Based SRS methodology (Gorski & Stadzisz). This agent coordinates a 5-step process that ensures every requirement traces back to a real business problem.
+Orchestrate requirements engineering using the Problem-Based SRS methodology (Gorski & Stadzisz). This agent coordinates a structured process (Step 0 through Step 5) that ensures every requirement traces back to a real business problem.
 
 ## Methodology Overview
 
