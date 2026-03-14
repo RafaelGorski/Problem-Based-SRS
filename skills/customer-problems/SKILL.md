@@ -12,11 +12,14 @@ metadata:
 # Customer Problems (CP)
 
 > **Step 1** of the Problem-Based SRS methodology  
-> **Domain:** WHY — Explains why the solution is needed
+> **Domain:** WHY — Explains why the solution is needed  
+> **Prerequisite:** Step 0 — Business Context (business-context skill)
 
 ## Purpose
 
 Guide AI coding agents through identifying, documenting, and validating Customer Problems from business context. Customer Problems represent the **WHY domain** — they provide the business justification for why a software solution is needed. All subsequent artifacts (Software Glance, Customer Needs, Software Vision, Requirements) derive from CPs.
+
+**Best input:** A structured Business Context (Step 0) with project identity, business principles, stakeholders, current situation, and domain boundaries. If no Business Context exists, consider running the `business-context` skill first.
 
 ---
 
@@ -26,7 +29,7 @@ Guide AI coding agents through identifying, documenting, and validating Customer
 |--------|----------|
 | **This skill does** | Discover problems from context, normalize statements, and validate quality |
 | **This skill does NOT** | Define solutions or derive requirements |
-| **Input from** | Business context OR draft CP statements |
+| **Input from** | Step 0: Business Context (preferred) OR ad-hoc business context |
 | **Output to** | Step 2: Software Glance (software-glance skill) |
 
 ---
@@ -47,7 +50,8 @@ Use when you have **draft CP statements** that need quality review and formattin
 Analyze the provided business context and generate Customer Problem statements.
 
 ### Input Required
-- **Business Context:** Description of the business domain, current situation, and scope
+- **Business Context (preferred):** Step 0 output (`00-business-context.md`) with project identity, principles, stakeholders, current situation, and domain boundaries
+- **Alternative:** Description of the business domain, current situation, and scope (if Step 0 was skipped)
 - **Stakeholder Information:** Who experiences the problems (optional but helpful)
 
 ### Discovery Questions

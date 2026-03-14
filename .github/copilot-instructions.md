@@ -37,6 +37,7 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 
 | Step | Skill |
 |------|-------|
+| 0. Business Context (CONTEXT) | `skills/business-context/SKILL.md` |
 | 1. Customer Problems (WHY) | `skills/customer-problems/SKILL.md` |
 | 2. Software Glance | `skills/software-glance/SKILL.md` |
 | 3. Customer Needs (WHAT) | `skills/customer-needs/SKILL.md` |
@@ -129,6 +130,7 @@ Problem-Based-SRS/
 │   ├── problem-based-srs/       # Main skill for SRS methodology
 │   │   ├── SKILL.md
 │   │   └── references/          # Examples only
+│   ├── business-context/        # Step 0: Business context and principles
 │   ├── customer-problems/       # Step 1: WHY
 │   ├── software-glance/         # Step 2: High-level view
 │   ├── customer-needs/          # Step 3: WHAT
@@ -273,13 +275,14 @@ description: I help with requirements.
 
 ### Problem-Based SRS Commands
 ```
-/cp           # Generate Customer Problems
-/glance       # Create Software Glance
-/cn           # Generate Customer Needs
-/vision       # Build Software Vision
-/fr           # Specify Functional Requirements
-/zigzag       # Validate traceability
-/problem-based-srs  # Full methodology orchestration
+/business-context          # Establish Business Context
+/customer-problems        # Generate Customer Problems
+/software-glance          # Create Software Glance
+/customer-needs           # Generate Customer Needs
+/software-vision          # Build Software Vision
+/functional-requirements  # Specify Functional Requirements
+/zigzag-validator         # Validate traceability
+/problem-based-srs        # Full methodology orchestration
 ```
 
 ### Traceability Chain

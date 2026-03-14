@@ -4,19 +4,24 @@ description: Complete Problem-Based Software Requirements Specification methodol
 license: MIT
 metadata:
   author: rafael-gorski
-  version: "1.2"
+  version: "1.3"
   methodology: problem-based-srs
 ---
 
 # Problem-Based SRS Agent
 
-Orchestrate requirements engineering using the Problem-Based SRS methodology (Gorski & Stadzisz). This agent coordinates a 5-step process that ensures every requirement traces back to a real business problem.
+Orchestrate requirements engineering using the Problem-Based SRS methodology (Gorski & Stadzisz). This agent coordinates a structured process (Step 0 through Step 5) that ensures every requirement traces back to a real business problem.
 
 ## Methodology Overview
 
 ```
-Business Context
+Stakeholder Input
        ↓
+┌──────────────────┐
+│ Step 0: BC       │ → Use skill: business-context
+│ Business Context │
+└────────┬─────────┘
+         ↓
 ┌──────────────────┐
 │ Step 1: CP       │ → Use skill: customer-problems
 │ Customer Problems│
@@ -58,24 +63,26 @@ This agent orchestrates the following skills:
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| `customer-problems` | `/cp` | Step 1: Identify and classify customer problems |
-| `software-glance` | `/glance` | Step 2: Create high-level solution view |
-| `customer-needs` | `/cn` | Step 3: Specify customer needs (outcomes) |
-| `software-vision` | `/vision` | Step 4: Define software vision and architecture |
-| `functional-requirements` | `/fr` | Step 5: Generate functional requirements |
-| `zigzag-validator` | `/zigzag` | Validate traceability across domains |
-| `complexity-analysis` | `/complexity` | Optional: Axiomatic Design quality analysis |
+| `business-context` | `/business-context` | Step 0: Establish structured business context and principles |
+| `customer-problems` | `/customer-problems` | Step 1: Identify and classify customer problems |
+| `software-glance` | `/software-glance` | Step 2: Create high-level solution view |
+| `customer-needs` | `/customer-needs` | Step 3: Specify customer needs (outcomes) |
+| `software-vision` | `/software-vision` | Step 4: Define software vision and architecture |
+| `functional-requirements` | `/functional-requirements` | Step 5: Generate functional requirements |
+| `zigzag-validator` | `/zigzag-validator` | Validate traceability across domains |
+| `complexity-analysis` | `/complexity-analysis` | Optional: Axiomatic Design quality analysis |
 
 ## How to Use This Agent
 
 ### Starting Fresh
 When user provides business context or problem description:
 1. **Ask where to save artifacts** (if not already specified)
-2. **Create context file** with the business context
-3. Detect current step (see Detection Heuristics below)
-4. Invoke the appropriate skill
-5. Guide user through the process
-6. **Save output to the corresponding file(s)**
+2. **Start with Step 0** — Use `business-context` skill to establish structured context
+3. **Save `00-business-context.md`** with the structured business context
+4. Detect current step (see Detection Heuristics below)
+5. Invoke the appropriate skill
+6. Guide user through the process
+7. **Save output to the corresponding file(s)**
 
 ### Continuing Work
 If user has existing artifacts (CPs, CNs, etc.):
@@ -95,7 +102,8 @@ Determine current step by checking what artifacts exist:
 
 | If user has... | Current Step | Invoke Skill | Save To |
 |----------------|--------------|--------------|---------|
-| Nothing / business idea only | 1 | customer-problems | 01-customer-problems.md |
+| Nothing / business idea only | 0 | business-context | 00-business-context.md |
+| Business Context (BC) | 1 | customer-problems | 01-customer-problems.md |
 | Customer Problems (CPs) | 2 | software-glance | 02-software-glance.md |
 | CPs + Software Glance | 3 | customer-needs | 03-customer-needs.md |
 | CPs + CNs + Software Glance | 4 | software-vision | 04-software-vision.md |
@@ -104,6 +112,14 @@ Determine current step by checking what artifacts exist:
 ## Quality Gates
 
 **IMPORTANT:** Zigzag validation using `zigzag-validator` skill is **MANDATORY** after Steps 3 and 5 to verify traceability and identify gaps.
+
+### After Step 0 (BC)
+- [ ] Project identity complete (name, domain, purpose)
+- [ ] Business principles defined and classified
+- [ ] Stakeholders identified with roles and influence
+- [ ] Current situation documented
+- [ ] Domain boundaries and constraints defined
+- [ ] Success criteria measurable
 
 ### After Step 1 (CPs)
 - [ ] All CPs use structured notation
@@ -132,17 +148,19 @@ If user attempts to skip to solutions, redirect:
 I notice you're describing a solution. Let's first understand the problem.
 
 Before we design [mentioned solution], help me understand:
-1. What business obligation, expectation, or hope drives this need?
-2. What negative consequences occur without this?
-3. Who is impacted?
+1. What is the business context? (→ business-context skill)
+2. What business obligation, expectation, or hope drives this need?
+3. What negative consequences occur without this?
+4. Who is impacted?
 
-→ Invoking: customer-problems skill
+→ Invoking: business-context skill (if no BC exists)
+→ Invoking: customer-problems skill (if BC exists)
 ```
 
 ## Usage Patterns
 
 ### Pattern 1: Full Process (New Project)
-Start with Step 1 and progress through all 5 steps sequentially.
+Start with Step 0 (Business Context) and progress through all steps sequentially.
 
 ### Pattern 2: Jump In (Existing Artifacts)
 Detect what artifacts exist, skip completed steps, resume at current step.
@@ -154,7 +172,7 @@ Complete initial pass, then iterate on specific steps as understanding improves.
 Use zigzag-validator skill to check existing artifacts without generating new ones.
 
 ### Pattern 5: Agile/Sprint Integration
-- **Sprint 0:** Steps 1-2 (CPs + Software Glance) for product vision
+- **Sprint 0:** Steps 0-2 (BC + CPs + Software Glance) for product vision
 - **Sprint 1+:** Steps 3-5 for specific feature sets
 - **Per Feature:** Complete CP→CN→FR chain for one feature at a time
 

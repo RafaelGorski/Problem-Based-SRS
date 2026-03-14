@@ -21,7 +21,7 @@ metadata:
 |--------|----------|
 | **This skill does** | Design the first abstract representation of a software solution |
 | **This skill does NOT** | Specify Customer Needs, define Software Vision, or write Requirements |
-| **Input from** | Step 1: Customer Problems (customer-problems skill) |
+| **Input from** | Step 0: Business Context (business-context skill) + Step 1: Customer Problems (customer-problems skill) |
 | **Output to** | Step 3: Customer Needs (customer-needs skill) |
 
 ---
@@ -47,12 +47,12 @@ A **Software Glance (SG)** is the rough idea of a software solution that emerges
 
 > **SG vs Software Vision:** The Software Glance is a rough starting point; the Software Vision (Step 4) enhances it with positioning, stakeholder analysis, feature lists, architecture decisions, and environment constraints. Do not add these details here.
 
-## Input (from Step 1)
+## Input (from Steps 0 and 1)
 
-This skill expects output from the **customer-problems** skill:
+This skill expects output from the **business-context** skill and the **customer-problems** skill:
 
-### 1. Business Context
-A statement describing the business domain, scope, and situation motivating the software solution.
+### 1. Business Context (from Step 0)
+The structured business context document (`00-business-context.md`) containing project identity, business principles, stakeholders, domain boundaries, constraints, and success criteria. This provides the foundational understanding for designing the solution.
 
 ### 2. Customer Problems (CPs)
 Problems expressed using this notation: `[Noun] [Verb] [Object] [Penalty]`
@@ -231,6 +231,7 @@ Before accepting the Software Glance output:
 
 | Step | Skill | Status |
 |------|-------|--------|
+| 0 | business-context | ← Input |
 | 1 | customer-problems | ← Input |
 | **2** | **software-glance** | **Current** |
 | 3 | customer-needs | → Next |
