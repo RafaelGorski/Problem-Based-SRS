@@ -288,3 +288,173 @@ description: I help with requirements.
 ### Traceability Chain
 ```
 CP (WHY) → CN (WHAT) → FR (HOW)
+```
+
+---
+
+## 📦 Release Process
+
+This repository uses **GitHub Actions** for creating releases. The process is automated but requires manual triggering with specific inputs.
+
+### Step-by-Step Release Process
+
+#### 1. Update Version and CHANGELOG
+
+**Before creating a release**, update these files:
+
+**a. Update `.claude-plugin/plugin.json`:**
+```json
+{
+  "name": "problem-based-srs",
+  "version": "X.Y.0",  // Update this version
+  ...
+}
+```
+
+**b. Update `CHANGELOG.md`:**
+
+Add a new section at the top following the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
+
+```markdown
+## [X.Y] - YYYY-MM-DD
+
+### Added
+- New features or capabilities
+- New skills or commands
+
+### Changed
+- Updates to existing features
+- Renamed items
+
+### Fixed
+- Bug fixes
+
+### Removed
+- Deprecated features
+
+[X.Y]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/vX.Y
+```
+
+**c. Commit and push changes:**
+```bash
+git add .claude-plugin/plugin.json CHANGELOG.md
+git commit -m "chore: Bump version to X.Y"
+git push origin main
+```
+
+#### 2. Prepare Release Notes
+
+Copy the release notes from `CHANGELOG.md` for the version you're releasing. The release notes should:
+
+- Start with `## 🎉 Version X.Y - Release Name`
+- Include all sections from CHANGELOG (Added, Changed, Fixed, Removed)
+- Use markdown formatting
+- Include the full changelog link at the end
+
+**Example format:**
+```markdown
+## 🎉 Version 1.3 - Enhanced Traceability
+
+This release introduces enhanced traceability features...
+
+### ✨ Added
+
+- Feature 1
+- Feature 2
+
+### 🔄 Changed
+
+- Change 1
+- Change 2
+
+### 📚 Full Changelog
+
+See [CHANGELOG.md](https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md) for complete details.
+```
+
+#### 3. Trigger GitHub Actions Workflow
+
+**Navigate to GitHub Actions:**
+1. Go to the repository on GitHub
+2. Click on **Actions** tab
+3. Select **"Create Release"** workflow from the left sidebar
+4. Click **"Run workflow"** button (top right)
+
+**Fill in the workflow inputs:**
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **version** | Release version number (X.Y format, without 'v' prefix) | `1.3` |
+| **release_name** | Short descriptive name for the release | `Enhanced Traceability` |
+| **release_body** | Full release notes from CHANGELOG.md (markdown format) | Copy from CHANGELOG.md |
+
+**Important notes:**
+- The version should match the version in `plugin.json` (without the trailing `.0`)
+- The workflow will automatically add the `v` prefix to create tag `vX.Y`
+- The release_body supports full markdown formatting
+- Escape any special characters if needed
+
+#### 4. Verify the Release
+
+After the workflow completes:
+
+1. Go to **Releases** section in GitHub
+2. Verify the new release appears with correct:
+   - Tag name (e.g., `v1.3`)
+   - Release title (e.g., `🎉 Version 1.3 - Enhanced Traceability`)
+   - Release notes content
+3. Check that the release is not marked as draft or pre-release
+
+### Workflow File Location
+
+The release workflow is defined in:
+```
+.github/workflows/create-release.yml
+```
+
+### Version Numbering
+
+This project follows [Semantic Versioning](https://semver.org/):
+
+- **Major version (X.0.0)**: Breaking changes or major methodology updates
+- **Minor version (X.Y.0)**: New features, new skills, backward-compatible changes
+- **Patch version (X.Y.Z)**: Bug fixes only (rarely used, we typically increment minor)
+
+**Current practice**: Use `X.Y` format (e.g., 1.2, 1.3) for releases, storing as `X.Y.0` in plugin.json.
+
+### Troubleshooting
+
+**Workflow fails with permissions error:**
+- Ensure the `contents: write` permission is set in the workflow file
+- Check repository settings → Actions → General → Workflow permissions
+
+**Release notes formatting is broken:**
+- Check for unescaped backticks or special characters
+- Ensure newlines are preserved in the release_body input
+- Test markdown rendering in a GitHub comment first
+
+**Tag already exists:**
+- Delete the existing tag if it was created in error: `git push --delete origin vX.Y`
+- Delete the release from GitHub UI if needed
+- Re-run the workflow
+
+### Example: Creating Release v1.3
+
+```bash
+# 1. Update version files
+# Edit .claude-plugin/plugin.json: "version": "1.3.0"
+# Edit CHANGELOG.md: Add ## [1.3] - 2026-03-15 section
+
+# 2. Commit and push
+git add .claude-plugin/plugin.json CHANGELOG.md
+git commit -m "chore: Bump version to 1.3"
+git push origin main
+
+# 3. Go to GitHub Actions → Create Release → Run workflow
+# Fill in:
+#   version: 1.3
+#   release_name: Enhanced Traceability
+#   release_body: [Copy from CHANGELOG.md section 1.3]
+
+# 4. Verify release appears at:
+# https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.3

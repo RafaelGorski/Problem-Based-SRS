@@ -1,7 +1,20 @@
-name: Create Release v1.2
+name: Create Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.3)'
+        required: true
+        type: string
+      release_name:
+        description: 'Release name (e.g., Enhanced Traceability)'
+        required: true
+        type: string
+      release_body:
+        description: 'Release notes (markdown format, from CHANGELOG.md)'
+        required: true
+        type: string
 
 jobs:
   create-release:
@@ -9,46 +22,17 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Create Release v1.2
+      - name: Create Release v${{ inputs.version }}
         uses: actions/github-script@v7
         with:
           script: |
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: 'v1.2',
+              tag_name: 'v${{ inputs.version }}',
               target_commitish: 'main',
-              name: '🎉 Version 1.2 - Business Context Iteration',
-              body: `## 🎉 Version 1.2 - Business Context Iteration
-
-            This release introduces **Business Context (\`/business-context\`)** as the new **Step 0** of the Problem-Based SRS methodology, helping engineers and PMs discuss overall business outcomes for initial software glance and customer problem identification.
-
-            ### ✨ Added
-
-            - **Business Context (\`/business-context\`)**: New Step 0 of the methodology
-              - Establishes structured business context before problem discovery
-              - Captures project identity, business principles, stakeholders, domain boundaries, constraints, and success criteria
-              - Business principles classified as **Mandatory/Guiding/Aspirational**
-              - Includes versioned document with amendment tracking
-              - Inspired by the project constitution concept from [spec-kit](https://github.com/github/spec-kit)
-
-            ### 🔄 Changed
-
-            - Updated methodology flow from 5 steps to **Step 0 + 5 steps** (BC → CP → SG → CN → SV → FR)
-            - Renamed commands to full names for clarity:
-              - \`/cp\` → \`/customer-problems\`
-              - \`/cn\` → \`/customer-needs\`
-              - \`/fr\` → \`/functional-requirements\`
-              - \`/glance\` → \`/software-glance\`
-              - \`/vision\` → \`/software-vision\`
-              - \`/zigzag\` → \`/zigzag-validator\`
-              - \`/complexity\` → \`/complexity-analysis\`
-            - Updated all skills to reference Business Context as input
-            - Updated documentation across README, AGENTS.md, and copilot-instructions.md
-
-            ### 📚 Full Changelog
-
-            See [CHANGELOG.md](https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md) for complete details.`,
+              name: '🎉 Version ${{ inputs.version }} - ${{ inputs.release_name }}',
+              body: `${{ inputs.release_body }}`,
               draft: false,
               prerelease: false
             });

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **GitHub Actions Release Workflow**: Made generic with input parameters
+  - Workflow now accepts `version`, `release_name`, and `release_body` as inputs
+  - Removed hardcoded v1.2 release information
+  - Renamed workflow from "Create Release v1.2" to "Create Release"
+- **Release Process Documentation**: Added comprehensive release instructions
+  - Step-by-step guide added to `.github/copilot-instructions.md`
+  - Quick reference added to `AGENTS.md`
+  - Includes version numbering, troubleshooting, and examples
+
 ## [1.2] - 2026-03-13
 
 ### Added
@@ -16,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Includes versioned document with amendment tracking
   - Inspired by the project constitution concept from [spec-kit](https://github.com/github/spec-kit)
   - Enhances and replaces the previous minimal `00-context.md` template
+- **GitHub Actions Release Workflow**: Automated release creation via workflow_dispatch
 
 ### Changed
 

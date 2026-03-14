@@ -74,3 +74,36 @@ Problem-Based-SRS/
 - Clarity in skill instructions
 - Completeness in examples and templates
 - Consistency in structure and formatting
+
+---
+
+## 📦 Release Process
+
+### Quick Reference
+
+When asked to create a release:
+
+1. **Update version files**:
+   - `.claude-plugin/plugin.json` → `"version": "X.Y.0"`
+   - `CHANGELOG.md` → Add new `## [X.Y] - YYYY-MM-DD` section
+
+2. **Commit changes**:
+   ```bash
+   git add .claude-plugin/plugin.json CHANGELOG.md
+   git commit -m "chore: Bump version to X.Y"
+   git push origin main
+   ```
+
+3. **Trigger GitHub Actions workflow**:
+   - Go to **Actions** → **"Create Release"** → **"Run workflow"**
+   - Fill in:
+     - `version`: X.Y (e.g., 1.3)
+     - `release_name`: Short name (e.g., Enhanced Traceability)
+     - `release_body`: Copy from CHANGELOG.md (markdown format)
+
+4. **Verify**: Check the release appears at `/releases/tag/vX.Y`
+
+### Detailed Documentation
+
+For complete step-by-step instructions, see the **Release Process** section in `.github/copilot-instructions.md`.
+
