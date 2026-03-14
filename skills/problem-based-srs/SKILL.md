@@ -63,7 +63,7 @@ This orchestrator coordinates the following skills:
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| `business-context` | `/bc` | Step 0: Establish structured business context and principles |
+| `business-context` | `/business-context` | Step 0: Establish structured business context and principles |
 | `customer-problems` | `/cp` | Step 1: Identify and classify customer problems |
 | `software-glance` | `/glance` | Step 2: Create high-level solution view |
 | `customer-needs` | `/cn` | Step 3: Specify customer needs (outcomes) |

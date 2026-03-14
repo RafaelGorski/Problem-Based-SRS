@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Business Context (`/bc`)**: New Step 0 of the Problem-Based SRS methodology
+- **Business Context (`/business-context`)**: New Step 0 of the Problem-Based SRS methodology
   - Establishes structured business context before problem discovery
   - Captures project identity, business principles, stakeholders, domain boundaries, constraints, and success criteria
   - Business principles classified as Mandatory/Guiding/Aspirational
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `problem-based-srs` orchestrator skill with Step 0 integration
 - Updated `problem-based-srs` agent with Step 0 detection heuristics and quality gates
 - Updated `customer-problems` skill to reference Business Context as preferred input
-- Updated `.github/copilot-instructions.md` with Step 0 skill reference and `/bc` command
+- Updated `.github/copilot-instructions.md` with Step 0 skill reference and `/business-context` command
 - Updated `AGENTS.md` with business-context in repository structure
 - Updated `README.md` with Step 0 in methodology flow, commands, and diagrams
 

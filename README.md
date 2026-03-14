@@ -115,7 +115,7 @@ Once installed, use these commands to work with different parts of the methodolo
 | Command | When to Use | What It Does |
 |---------|-------------|--------------|
 | `/problem-based-srs` | Starting a new project | Guides you through all steps from scratch |
-| `/bc` | Establishing project context | Captures business context, principles, and constraints (CONTEXT) |
+| `/business-context` | Establishing project context | Captures business context, principles, and constraints (CONTEXT) |
 | `/cp` | Analyzing business problems | Identifies and classifies customer problems (WHY) |
 | `/glance` | Quick project overview | Creates high-level software summary |
 | `/cn` | Defining what to build | Translates problems into customer needs (WHAT) |
@@ -126,8 +126,8 @@ Once installed, use these commands to work with different parts of the methodolo
 
 **Common scenarios:**
 
-- 🆕 **New project?** → Use `/problem-based-srs` to start from scratch (begins with `/bc`)
-- 📋 **Need structured context?** → Use `/bc` to establish business principles and boundaries
+- 🆕 **New project?** → Use `/problem-based-srs` to start from scratch (begins with `/business-context`)
+- 📋 **Need structured context?** → Use `/business-context` to establish business principles and boundaries
 - 🔍 **Reviewing existing requirements?** → Use `/fr` then `/zigzag` to validate
 - 💡 **Stakeholders proposing solutions instead of problems?** → Use `/cp` to dig deeper
 - ✅ **Need to verify requirements quality?** → Use `/zigzag` for traceability check
@@ -325,7 +325,7 @@ Released February 2026 with:
 - **NEW:** `/complexity` command for optional Axiomatic Design quality analysis
 - **NEW:** Condensed case study examples (CRM and MicroER systems)
 - **NEW:** C/P (Complete/Partial) completeness markers in traceability
-- **NEW:** Business Context step (`/bc`) for structured project context and principles
+- **NEW:** Business Context step (`/business-context`) for structured project context and principles
 - **NEW:** Problem decomposition guidance with heuristics
 - **NEW:** Expanded CN outcome class examples (Control, Construction, Entertainment)
 - **NEW:** Agile/sprint integration patterns

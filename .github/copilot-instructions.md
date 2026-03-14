@@ -275,7 +275,7 @@ description: I help with requirements.
 
 ### Problem-Based SRS Commands
 ```
-/bc           # Establish Business Context
+/business-context  # Establish Business Context
 /cp           # Generate Customer Problems
 /glance       # Create Software Glance
 /cn           # Generate Customer Needs
