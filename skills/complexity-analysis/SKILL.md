@@ -271,4 +271,4 @@ CP.5     [ ]   [ ]   [ ]   [ ]   [ ]   [C]
 
 **Version:** 1.2  
 **Type:** Optional Advanced Validation Tool  
-**Command:** `/complexity`
+**Command:** `/complexity-analysis`

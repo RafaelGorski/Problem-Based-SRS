@@ -336,37 +336,37 @@
                     <h4>Step 1: Customer Problems (CP)</h4>
                     <p>Identify the <strong>WHY</strong> - understand business pain and classify by problem class (Obligation / Expectation / Hope — roughly must-have / should-have / could-have)</p>
                     <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Clear focus on what matters most, justification for every feature</p>
-                    <span class="badge">/cp</span>
+                    <span class="badge">/customer-problems</span>
                 </div>
 
                 <div class="step">
                     <h4>Step 2: Software Glance</h4>
                     <p>Sketch high-level solution approach - components, interfaces, boundaries</p>
                     <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Shared understanding with team, architectural direction</p>
-                    <span class="badge">/glance</span>
+                    <span class="badge">/software-glance</span>
                 </div>
 
                 <div class="step">
                     <h4>Step 3: Customer Needs (CN)</h4>
                     <p>Define the <strong>WHAT</strong> - outcomes the system must deliver to solve the problems</p>
                     <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Success criteria, measurable goals, scope boundaries</p>
-                    <span class="badge">/cn</span>
-                    <span class="badge">/zigzag (validate)</span>
+                    <span class="badge">/customer-needs</span>
+                    <span class="badge">/zigzag-validator (validate)</span>
                 </div>
 
                 <div class="step">
                     <h4>Step 4: Software Vision</h4>
                     <p>Detail architecture, features, constraints, and technical approach</p>
                     <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Technical roadmap, stakeholder alignment, design decisions</p>
-                    <span class="badge">/vision</span>
+                    <span class="badge">/software-vision</span>
                 </div>
 
                 <div class="step">
                     <h4>Step 5: Functional Requirements (FR)</h4>
                     <p>Define the <strong>HOW</strong> - detailed, testable requirements for implementation</p>
                     <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Implementation checklist, acceptance criteria, full traceability</p>
-                    <span class="badge">/fr</span>
-                    <span class="badge">/zigzag (validate)</span>
+                    <span class="badge">/functional-requirements</span>
+                    <span class="badge">/zigzag-validator (validate)</span>
                 </div>
             </div>
 
@@ -407,14 +407,14 @@
             <h3>Using Skills (All AI Agents)</h3>
             <p>The skill is available in <code>skills/problem-based-srs/</code>. In VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
             
-            <pre><code>/cp           # Start with Customer Problems
-/glance       # Create Software Glance
-/cn           # Generate Customer Needs
-/vision       # Build Software Vision
-/fr           # Specify Functional Requirements
-/zigzag       # Validate traceability
-/complexity   # Optional: Axiomatic Design analysis
-/problem-based-srs  # Full methodology orchestration</code></pre>
+            <pre><code>/customer-problems        # Start with Customer Problems
+/software-glance          # Create Software Glance
+/customer-needs           # Generate Customer Needs
+/software-vision          # Build Software Vision
+/functional-requirements  # Specify Functional Requirements
+/zigzag-validator         # Validate traceability
+/complexity-analysis      # Optional: Axiomatic Design analysis
+/problem-based-srs        # Full methodology orchestration</code></pre>
             
             <h3>Using with Any AI Agent (Universal)</h3>
             <p>The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).</p>
@@ -452,13 +452,13 @@ $50k/month due to errors."</code></pre>
             <h3 style="margin-top: 2rem;">Available Commands</h3>
             <p>Use these commands in VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
 
-            <pre><code>/problem-based-srs  # Full methodology - start here for new projects
-/cp                 # Customer Problems - identify business pain
-/glance             # Software Glance - sketch solution approach
-/cn                 # Customer Needs - define required outcomes
-/vision             # Software Vision - detail architecture
-/fr                 # Functional Requirements - specify implementation
-/zigzag             # Validate traceability - quality check</code></pre>
+            <pre><code>/problem-based-srs        # Full methodology - start here for new projects
+/customer-problems        # Customer Problems - identify business pain
+/software-glance          # Software Glance - sketch solution approach
+/customer-needs           # Customer Needs - define required outcomes
+/software-vision          # Software Vision - detail architecture
+/functional-requirements  # Functional Requirements - specify implementation
+/zigzag-validator         # Validate traceability - quality check</code></pre>
 
             <h3 style="margin-top: 2rem;">Common Scenarios</h3>
 
@@ -471,19 +471,19 @@ $50k/month due to errors."</code></pre>
 
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
                     <h4 style="margin-top: 0; color: #667eea;">🔍 Review Existing Requirements</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/fr</code> then <code>/zigzag</code></p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/functional-requirements</code> then <code>/zigzag-validator</code></p>
                     <p style="font-size: 0.9rem;">Validate that requirements trace back to real problems.</p>
                 </div>
 
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
                     <h4 style="margin-top: 0; color: #667eea;">💡 Stakeholder Proposes Solution</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/cp</code></p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/customer-problems</code></p>
                     <p style="font-size: 0.9rem;">Dig deeper to uncover the actual problem they're trying to solve.</p>
                 </div>
 
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
                     <h4 style="margin-top: 0; color: #667eea;">✅ Quality Check</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/zigzag</code></p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/zigzag-validator</code></p>
                     <p style="font-size: 0.9rem;">Verify all requirements trace to customer needs and problems.</p>
                 </div>
             </div>
@@ -502,21 +502,21 @@ $50k/month due to errors."</code></pre>
                 <div class="feature-card">
                     <h3>🆕 New Feature Development</h3>
                     <p><strong>Situation:</strong> Product manager asks for "a dashboard with analytics"</p>
-                    <p><strong>Your approach:</strong> Use <code>/cp</code> to discover the real problem - turns out they need "real-time alerts when KPIs drop below threshold"</p>
+                    <p><strong>Your approach:</strong> Use <code>/customer-problems</code> to discover the real problem - turns out they need "real-time alerts when KPIs drop below threshold"</p>
                     <p><strong>Result:</strong> Build the right thing (alerting) not the requested thing (dashboard)</p>
                 </div>
 
                 <div class="feature-card">
                     <h3>🔍 Requirements Refinement</h3>
                     <p><strong>Situation:</strong> You inherited vague requirements from another team</p>
-                    <p><strong>Your approach:</strong> Use <code>/zigzag</code> to validate traceability, identify gaps, then use <code>/cp</code> to fill missing problems</p>
+                    <p><strong>Your approach:</strong> Use <code>/zigzag-validator</code> to validate traceability, identify gaps, then use <code>/customer-problems</code> to fill missing problems</p>
                     <p><strong>Result:</strong> Clear, traceable requirements that justify every feature</p>
                 </div>
 
                 <div class="feature-card">
                     <h3>💡 Problem Discovery</h3>
                     <p><strong>Situation:</strong> Stakeholders propose technical solutions ("Use Redis cache!")</p>
-                    <p><strong>Your approach:</strong> Use <code>/cp</code> with discovery mode to ask "What problem does this solve?"</p>
+                    <p><strong>Your approach:</strong> Use <code>/customer-problems</code> with discovery mode to ask "What problem does this solve?"</p>
                     <p><strong>Result:</strong> Uncover actual need (faster queries) and evaluate best solution</p>
                 </div>
 
@@ -530,7 +530,7 @@ $50k/month due to errors."</code></pre>
                 <div class="feature-card">
                     <h3>📋 Sprint Planning</h3>
                     <p><strong>Situation:</strong> Converting user stories to technical tasks</p>
-                    <p><strong>Your approach:</strong> Use <code>/cn</code> for acceptance criteria, <code>/fr</code> for implementation tasks</p>
+                    <p><strong>Your approach:</strong> Use <code>/customer-needs</code> for acceptance criteria, <code>/functional-requirements</code> for implementation tasks</p>
                     <p><strong>Result:</strong> Clear sprint goals with traceable work items</p>
                 </div>
 
@@ -548,25 +548,25 @@ $50k/month due to errors."</code></pre>
                 <div>
                     <h4 style="color: #667eea;">During Sprint Planning</h4>
                     <ul style="line-height: 2;">
-                        <li>Use <code>/cp</code> to capture user stories as customer problems</li>
-                        <li>Use <code>/cn</code> to define acceptance criteria</li>
-                        <li>Use <code>/fr</code> to break down into technical requirements</li>
+                        <li>Use <code>/customer-problems</code> to capture user stories as customer problems</li>
+                        <li>Use <code>/customer-needs</code> to define acceptance criteria</li>
+                        <li>Use <code>/functional-requirements</code> to break down into technical requirements</li>
                     </ul>
                 </div>
                 
                 <div>
                     <h4 style="color: #667eea;">During Feature Design</h4>
                     <ul style="line-height: 2;">
-                        <li>Reference <code>/glance</code> for high-level approach</li>
-                        <li>Reference <code>/vision</code> for architectural decisions</li>
-                        <li>Use <code>/zigzag</code> to ensure design addresses all needs</li>
+                        <li>Reference <code>/software-glance</code> for high-level approach</li>
+                        <li>Reference <code>/software-vision</code> for architectural decisions</li>
+                        <li>Use <code>/zigzag-validator</code> to ensure design addresses all needs</li>
                     </ul>
                 </div>
                 
                 <div>
                     <h4 style="color: #667eea;">During Implementation</h4>
                     <ul style="line-height: 2;">
-                        <li>Keep <code>/fr</code> requirements as implementation checklist</li>
+                        <li>Keep <code>/functional-requirements</code> requirements as implementation checklist</li>
                         <li>Trace each requirement back to CN and CP for context</li>
                         <li>Update requirements if new problems discovered</li>
                     </ul>
@@ -575,7 +575,7 @@ $50k/month due to errors."</code></pre>
                 <div>
                     <h4 style="color: #667eea;">During Code Review</h4>
                     <ul style="line-height: 2;">
-                        <li>Verify implementation satisfies <code>/fr</code> requirements</li>
+                        <li>Verify implementation satisfies <code>/functional-requirements</code> requirements</li>
                         <li>Check requirements still trace to customer needs</li>
                         <li>Validate no scope creep beyond identified problems</li>
                     </ul>
@@ -638,7 +638,7 @@ $50k/month due to errors."</code></pre>
             
             <h3>🆕 What's New in 1.1</h3>
             <ul style="line-height: 2; margin-top: 1rem;">
-                <li><strong>Complexity Analysis (<code>/complexity</code>):</strong> Optional Axiomatic Design-based quality analysis for critical systems
+                <li><strong>Complexity Analysis (<code>/complexity-analysis</code>):</strong> Optional Axiomatic Design-based quality analysis for critical systems
                     <ul style="margin-top: 0.5rem;">
                         <li>Independence axiom analysis (coupled/redundant/ideal specifications)</li>
                         <li>Design matrix evaluation</li>

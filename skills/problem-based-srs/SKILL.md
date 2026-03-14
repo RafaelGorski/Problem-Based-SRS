@@ -64,13 +64,13 @@ This orchestrator coordinates the following skills:
 | Skill | Command | Purpose |
 |-------|---------|---------|
 | `business-context` | `/business-context` | Step 0: Establish structured business context and principles |
-| `customer-problems` | `/cp` | Step 1: Identify and classify customer problems |
-| `software-glance` | `/glance` | Step 2: Create high-level solution view |
-| `customer-needs` | `/cn` | Step 3: Specify customer needs (outcomes) |
-| `software-vision` | `/vision` | Step 4: Define software vision and architecture |
-| `functional-requirements` | `/fr` | Step 5: Generate functional requirements |
-| `zigzag-validator` | `/zigzag` | Validate traceability across domains |
-| `complexity-analysis` | `/complexity` | Optional: Axiomatic Design quality analysis |
+| `customer-problems` | `/customer-problems` | Step 1: Identify and classify customer problems |
+| `software-glance` | `/software-glance` | Step 2: Create high-level solution view |
+| `customer-needs` | `/customer-needs` | Step 3: Specify customer needs (outcomes) |
+| `software-vision` | `/software-vision` | Step 4: Define software vision and architecture |
+| `functional-requirements` | `/functional-requirements` | Step 5: Generate functional requirements |
+| `zigzag-validator` | `/zigzag-validator` | Validate traceability across domains |
+| `complexity-analysis` | `/complexity-analysis` | Optional: Axiomatic Design quality analysis |
 
 ## 📁 Saving Progress (CRITICAL)
 

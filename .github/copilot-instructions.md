@@ -275,14 +275,14 @@ description: I help with requirements.
 
 ### Problem-Based SRS Commands
 ```
-/business-context  # Establish Business Context
-/cp           # Generate Customer Problems
-/glance       # Create Software Glance
-/cn           # Generate Customer Needs
-/vision       # Build Software Vision
-/fr           # Specify Functional Requirements
-/zigzag       # Validate traceability
-/problem-based-srs  # Full methodology orchestration
+/business-context          # Establish Business Context
+/customer-problems        # Generate Customer Problems
+/software-glance          # Create Software Glance
+/customer-needs           # Generate Customer Needs
+/software-vision          # Build Software Vision
+/functional-requirements  # Specify Functional Requirements
+/zigzag-validator         # Validate traceability
+/problem-based-srs        # Full methodology orchestration
 ```
 
 ### Traceability Chain

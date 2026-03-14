@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Complexity Analysis (`/complexity`)**: Optional Axiomatic Design-based quality analysis
+- **Complexity Analysis (`/complexity-analysis`)**: Optional Axiomatic Design-based quality analysis
   - Independence axiom analysis (coupled/redundant/ideal specifications)
   - Design matrix evaluation
   - Information content assessment

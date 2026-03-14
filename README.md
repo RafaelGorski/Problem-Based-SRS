@@ -116,21 +116,21 @@ Once installed, use these commands to work with different parts of the methodolo
 |---------|-------------|--------------|
 | `/problem-based-srs` | Starting a new project | Guides you through all steps from scratch |
 | `/business-context` | Establishing project context | Captures business context, principles, and constraints (CONTEXT) |
-| `/cp` | Analyzing business problems | Identifies and classifies customer problems (WHY) |
-| `/glance` | Quick project overview | Creates high-level software summary |
-| `/cn` | Defining what to build | Translates problems into customer needs (WHAT) |
-| `/vision` | Planning architecture | Documents software architecture and vision |
-| `/fr` | Writing requirements | Specifies detailed functional requirements (HOW) |
-| `/zigzag` | Quality check | Validates that all requirements trace to problems |
-| `/complexity` | Deep analysis (optional) | Axiomatic Design quality analysis for critical systems |
+| `/customer-problems` | Analyzing business problems | Identifies and classifies customer problems (WHY) |
+| `/software-glance` | Quick project overview | Creates high-level software summary |
+| `/customer-needs` | Defining what to build | Translates problems into customer needs (WHAT) |
+| `/software-vision` | Planning architecture | Documents software architecture and vision |
+| `/functional-requirements` | Writing requirements | Specifies detailed functional requirements (HOW) |
+| `/zigzag-validator` | Quality check | Validates that all requirements trace to problems |
+| `/complexity-analysis` | Deep analysis (optional) | Axiomatic Design quality analysis for critical systems |
 
 **Common scenarios:**
 
 - 🆕 **New project?** → Use `/problem-based-srs` to start from scratch (begins with `/business-context`)
 - 📋 **Need structured context?** → Use `/business-context` to establish business principles and boundaries
-- 🔍 **Reviewing existing requirements?** → Use `/fr` then `/zigzag` to validate
-- 💡 **Stakeholders proposing solutions instead of problems?** → Use `/cp` to dig deeper
-- ✅ **Need to verify requirements quality?** → Use `/zigzag` for traceability check
+- 🔍 **Reviewing existing requirements?** → Use `/functional-requirements` then `/zigzag-validator` to validate
+- 💡 **Stakeholders proposing solutions instead of problems?** → Use `/customer-problems` to dig deeper
+- ✅ **Need to verify requirements quality?** → Use `/zigzag-validator` for traceability check
 
 ## 📊 How It Works
 
@@ -211,9 +211,9 @@ claude --plugin-dir ./Problem-Based-SRS
 ```
 
 After installation, skills are available with the `problem-based-srs:` namespace:
-- `/problem-based-srs:cp` - Customer Problems
-- `/problem-based-srs:cn` - Customer Needs
-- `/problem-based-srs:fr` - Functional Requirements
+- `/problem-based-srs:customer-problems` - Customer Problems
+- `/problem-based-srs:customer-needs` - Customer Needs
+- `/problem-based-srs:functional-requirements` - Functional Requirements
 
 ### AI-Assisted Installation
 
@@ -322,7 +322,7 @@ git commit -m "Add Problem-Based SRS methodology"
 
 Released February 2026 with:
 
-- **NEW:** `/complexity` command for optional Axiomatic Design quality analysis
+- **NEW:** `/complexity-analysis` command for optional Axiomatic Design quality analysis
 - **NEW:** Condensed case study examples (CRM and MicroER systems)
 - **NEW:** C/P (Complete/Partial) completeness markers in traceability
 - **NEW:** Business Context step (`/business-context`) for structured project context and principles
@@ -380,9 +380,9 @@ Problem-Based-SRS/
 - **skills/** - Individual skills for each methodology step
   - `problem-based-srs/references/crm-example.md` - Complete CRM case study walkthrough
   - `problem-based-srs/references/microer-example.md` - Renewable energy system walkthrough
-### Optional:Complexity Analysis (`/complexity`)
+### Optional:Complexity Analysis (`/complexity-analysis`)
 
-For deeper quality analysis on critical systems, you can explicitly call `/complexity` to:
+For deeper quality analysis on critical systems, you can explicitly call `/complexity-analysis` to:
 - Analyze specification independence (coupled vs. uncoupled)
 - Use C/P (Complete/Partial) completeness markers
 - Apply Axiomatic Design principles
