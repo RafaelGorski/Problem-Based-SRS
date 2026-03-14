@@ -15,7 +15,7 @@ The repository follows the **[AgentSkills](https://agentskills.io)** standard an
 
 - **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
 - **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
-- **Consistency over time**: Keep this file and `.github/copilot-instructions.md` aligned when compatibility guidance changes.
+- **Consistency over time**: Keep compatibility guidance consistent when it changes.
 
 ## Repository Structure
 

@@ -17,7 +17,7 @@ When modifying this repository structure, ensure compliance with these plugin st
 
 1. **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
 2. **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
-3. **Consistency over time**: Keep this file and `AGENTS.md` aligned when compatibility guidance changes.
+3. **Consistency over time**: Keep compatibility guidance consistent when it changes.
 
 ## Core Principles
 1. **Problem-First Thinking**: Always identify the problem before proposing solutions
