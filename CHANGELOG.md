@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Renamed workflow from "Create Release v1.2" to "Create Release"
 - **Release Process Documentation**: Added comprehensive release instructions
   - Step-by-step guide added to `.github/copilot-instructions.md`
-  - Quick reference added to `AGENTS.md`
   - Includes version numbering, troubleshooting, and examples
 
 ## [1.2] - 2026-03-13

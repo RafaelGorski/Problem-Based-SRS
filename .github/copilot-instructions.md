@@ -161,6 +161,8 @@ Problem-Based-SRS/
 - Include references to relevant SRS standards (IEEE 830, etc.) where appropriate
 
 ### File Organization
+- **`AGENTS.md`**: **Customer-facing file** — part of the project methodology for end users. Must NOT contain internal development procedures (e.g., release process, CI/CD instructions, internal workflows). Keep aligned with `agents/problem-based-srs/AGENT.md`.
+- **`.github/copilot-instructions.md`**: Internal development instructions for AI agents working on this repository. All internal procedures (release process, development workflows, etc.) belong here.
 - **`.claude-plugin/`**: Plugin manifest (plugin.json) defining plugin metadata
 - **`skills/`**: AgentSkills (Claude Code, Claude.ai, GitHub Copilot)
   - Each skill is a self-contained directory with SKILL.md
