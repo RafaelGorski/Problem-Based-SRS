@@ -28,10 +28,10 @@ Step 1: Customer Problems → Step 2: Software Glance → Step 3: Customer Needs
 ## Purpose
 
 Generate a Software Vision document that serves as:
-- **Input boundary**: Requires Software Glance (Step 2) + Customer Needs (Step 3)
-- **Output boundary**: Feeds into Software Requirements Specification (Step 5)
+- **Requires**: Software Glance (Step 2) + Customer Needs (Step 3)
+- **Feeds into**: Software Requirements Specification (Step 5)
 - **Scope definition**: Establishes clear boundaries to keep requirements within scope
-- **Stakeholder agreement point**: High-level view all parties can review and approve
+- **Stakeholder agreement**: A high-level view all parties can review and approve
 
 ## Prerequisites (Required Inputs)
 
@@ -234,4 +234,4 @@ Summary:
 **Step:** 4 of 5  
 **Next:** functional-requirements skill
 
-**⚠ Important**: This is **Step 4 of 5** in a sequential process. Ensure Steps 1-3 are complete before using this skill. The output feeds directly into Step 5 (Requirements Specification).
+

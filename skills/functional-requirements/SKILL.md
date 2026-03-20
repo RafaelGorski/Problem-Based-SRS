@@ -418,8 +418,6 @@ Before finalizing, verify:
 
 ---
 
----
-
 ## Handoff to Engineering
 
 After completing this step:

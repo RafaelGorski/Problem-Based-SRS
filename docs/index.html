@@ -273,7 +273,7 @@
     <div class="container">
         <section id="overview">
             <h2>🎯 Overview</h2>
-            <p>An <strong><a href="https://agentskills.io" style="color: #667eea;">Agent Skill</a></strong> following the <strong>Problem-Based Software Requirements Specification (SRS)</strong> methodology. Designed for integration with AI agents like <strong>GitHub Copilot</strong> and <strong>Claude Code</strong>.</p>
+            <p>An <strong><a href="https://agentskills.io" style="color: #667eea;">Agent Skill</a></strong> for AI-guided software requirements engineering. Works with <strong>GitHub Copilot</strong>, <strong>Claude Code</strong>, and other AI agents.</p>
 
             <h3>⚡ The Problem We Solve</h3>
             <p>Have you ever spent weeks building a feature, only to discover it didn't solve the actual problem? <strong>You're not alone.</strong> The #1 cause of software project failures is building what stakeholders <em>asked for</em> instead of what they actually <em>need</em>.</p>
@@ -286,8 +286,8 @@
                 <strong>Result:</strong> Wasted effort, missed opportunity, frustrated team.
             </div>
 
-            <h3>💡 Our Solution</h3>
-            <p><strong>Problem-Based SRS</strong> helps engineers discover real customer problems before writing any code. Your AI coding assistant guides you through a proven 5-step process that ensures every feature you build traces back to an actual business need.</p>
+            <h3>💡 How It Helps</h3>
+            <p>Your AI coding assistant guides you through a proven 5-step process. You start with real business problems and end with traceable, justified requirements — so every feature you build solves an actual need.</p>
 
             <p style="margin-top: 1rem;"><strong>Spend 30 minutes upfront with your AI agent to save weeks of building the wrong thing.</strong></p>
 
@@ -404,28 +404,26 @@
 
             <h3>Step 2: Start Your First Session</h3>
             
-            <h3>Using Skills (All AI Agents)</h3>
-            <p>The skill is available in <code>skills/problem-based-srs/</code>. In VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
+            <p>Use these commands in VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
+
+            <pre><code>/problem-based-srs        # Full methodology - start here for new projects
+/business-context         # Business Context - establish project principles
+/customer-problems        # Customer Problems - identify business pain
+/software-glance          # Software Glance - sketch solution approach
+/customer-needs           # Customer Needs - define required outcomes
+/software-vision          # Software Vision - detail architecture
+/functional-requirements  # Functional Requirements - specify implementation
+/zigzag-validator         # Validate traceability - quality check
+/complexity-analysis      # Optional: Axiomatic Design analysis</code></pre>
             
-            <pre><code>/customer-problems        # Start with Customer Problems
-/software-glance          # Create Software Glance
-/customer-needs           # Generate Customer Needs
-/software-vision          # Build Software Vision
-/functional-requirements  # Specify Functional Requirements
-/zigzag-validator         # Validate traceability
-/complexity-analysis      # Optional: Axiomatic Design analysis
-/problem-based-srs        # Full methodology orchestration</code></pre>
-            
-            <h3>Using with Any AI Agent (Universal)</h3>
-            <p>The methodology works with any LLM (ChatGPT, DeepSeek, Claude, Llama, etc.).</p>
-            
-            <p><strong>AgentSkills (Open Standard)</strong></p>
-            <p>The <code>skills/</code> directory follows the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>, compatible with any tool that implements it.</p>
+            <h3>Compatibility</h3>
+            <p>Works with any AI agent that supports the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>:</p>
             
             <ul style="margin-top: 1rem; line-height: 2;">
-                <li><strong>For GitHub Copilot:</strong> The skill will auto-discover from the skills directory.</li>
-                <li><strong>For Claude Code:</strong> The skill will auto-discover when this repository is in your workspace.</li>
-                <li><strong>For Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder).</li>
+                <li><strong>GitHub Copilot:</strong> Auto-discovers from the skills directory</li>
+                <li><strong>Claude Code:</strong> Auto-discovers when this repository is in your workspace</li>
+                <li><strong>Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder)</li>
+                <li><strong>Other LLMs</strong> (ChatGPT, DeepSeek, Llama, etc.): Copy the skill content as context</li>
             </ul>
             
             <h3>For New Features</h3>
@@ -448,17 +446,6 @@ $50k/month due to errors."</code></pre>
                 <li>✅ Ensure traceability from problems to requirements</li>
                 <li>✅ Save your work as structured documents</li>
             </ul>
-
-            <h3 style="margin-top: 2rem;">Available Commands</h3>
-            <p>Use these commands in VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
-
-            <pre><code>/problem-based-srs        # Full methodology - start here for new projects
-/customer-problems        # Customer Problems - identify business pain
-/software-glance          # Software Glance - sketch solution approach
-/customer-needs           # Customer Needs - define required outcomes
-/software-vision          # Software Vision - detail architecture
-/functional-requirements  # Functional Requirements - specify implementation
-/zigzag-validator         # Validate traceability - quality check</code></pre>
 
             <h3 style="margin-top: 2rem;">Common Scenarios</h3>
 
@@ -566,7 +553,7 @@ $50k/month due to errors."</code></pre>
                 <div>
                     <h4 style="color: #667eea;">During Implementation</h4>
                     <ul style="line-height: 2;">
-                        <li>Keep <code>/functional-requirements</code> requirements as implementation checklist</li>
+                        <li>Use functional requirements as your implementation checklist</li>
                         <li>Trace each requirement back to CN and CP for context</li>
                         <li>Update requirements if new problems discovered</li>
                     </ul>
@@ -575,7 +562,7 @@ $50k/month due to errors."</code></pre>
                 <div>
                     <h4 style="color: #667eea;">During Code Review</h4>
                     <ul style="line-height: 2;">
-                        <li>Verify implementation satisfies <code>/functional-requirements</code> requirements</li>
+                        <li>Verify implementation satisfies functional requirements</li>
                         <li>Check requirements still trace to customer needs</li>
                         <li>Validate no scope creep beyond identified problems</li>
                     </ul>
@@ -587,7 +574,7 @@ $50k/month due to errors."</code></pre>
             <h2>📚 Additional Resources</h2>
             
             <h3>Repository Structure</h3>
-            <p>This repository provides both agents and skills in the AgentSkills format:</p>
+            <p>This repository provides agents and skills in the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> format:</p>
             
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
                 <h4 style="margin-top: 0; color: #667eea;">Agents</h4>
@@ -626,7 +613,7 @@ $50k/month due to errors."</code></pre>
         
         <section class="cta-section">
             <h2 style="color: white; border: none;">Get Started Today</h2>
-            <p style="font-size: 1.15rem; margin: 1.5rem 0;">Ready to improve your requirements engineering with AI-assisted methodology?</p>
+            <p style="font-size: 1.15rem; margin: 1.5rem 0;">Start building the right thing with AI-guided requirements.</p>
             <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="cta-button">View on GitHub</a>
             <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/skills" class="cta-button">View Skills</a>
             <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1" class="cta-button">Release 1.1</a>

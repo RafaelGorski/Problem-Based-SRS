@@ -17,7 +17,7 @@ metadata:
 
 ## Purpose
 
-Guide AI coding agents through identifying, documenting, and validating Customer Problems from business context. Customer Problems represent the **WHY domain** — they provide the business justification for why a software solution is needed. All subsequent artifacts (Software Glance, Customer Needs, Software Vision, Requirements) derive from CPs.
+Identify, document, and validate Customer Problems from business context. Customer Problems represent the **WHY domain** — they provide the business justification for why a software solution is needed. All subsequent artifacts (Software Glance, Customer Needs, Software Vision, Requirements) derive from CPs.
 
 **Best input:** A structured Business Context (Step 0) with project identity, business principles, stakeholders, current situation, and domain boundaries. If no Business Context exists, consider running the `business-context` skill first.
 

@@ -16,7 +16,7 @@ metadata:
 
 ## Purpose
 
-Guide AI coding agents through establishing a structured business context before identifying Customer Problems. The Business Context captures the foundational understanding of the project: who is involved, what principles govern decisions, what boundaries exist, and how success is measured. This structured foundation ensures that Step 1 (Customer Problems) starts with a shared, well-defined understanding rather than ad-hoc descriptions.
+Establish a structured business context before identifying Customer Problems. The Business Context captures the foundational understanding of the project: who is involved, what principles govern decisions, what boundaries exist, and how success is measured. This ensures that Step 1 (Customer Problems) starts from a shared, well-defined understanding rather than ad-hoc descriptions.
 
 **Inspired by:** The project constitution concept — establishing non-negotiable principles and governance before specification work begins.
 

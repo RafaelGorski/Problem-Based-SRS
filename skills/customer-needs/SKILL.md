@@ -27,13 +27,7 @@ Before running this skill, ensure you have:
 
 ## Definition
 
-Customer Needs are the OUTCOMES that a software shall provide to solve (or help solve) the customer's problems. CNs describe what the software shall provide—not functionalities or how it works.
-
-## Required Inputs
-
-I will provide:
-1. Customer Problems (CPs) to address
-2. Software Glance (the envisioned solution boundaries)
+Customer Needs describe the outcomes a software system must deliver to solve (or help solve) the customer's problems — not how the system works internally.
 
 ## Your Task
 

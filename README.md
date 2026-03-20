@@ -307,18 +307,13 @@ git commit -m "Add Problem-Based SRS methodology"
 
 ### Key Concepts
 
-**Traceability = Accountability:** Every functional requirement (FR) traces to a customer need (CN), which traces to a customer problem (CP). This means you can answer "Why are we building this?" for every line of code. No more building features that nobody uses.
+**Traceability = Accountability:** Every functional requirement (FR) traces to a customer need (CN), which traces to a customer problem (CP). You can always answer "Why are we building this?" No more building features nobody uses.
 
-**WHY → WHAT → HOW = Engineering Efficiency:** The methodology enforces this logical progression:
-- **WHY (Customer Problems)** = The business pain you're solving → Gives you focus
-- **WHAT (Customer Needs)** = Capabilities required to solve it → Defines success criteria
-- **HOW (Functional Requirements)** = Specific features to implement → Your implementation guide
-
-**Impact:** When stakeholders ask for changes, you can quickly assess impact by checking which problems are affected. When prioritizing work, you prioritize by problem severity, not by who shouts loudest.
+**Impact:** When stakeholders ask for changes, you can quickly check which problems are affected. When prioritizing, you rank by problem severity — not by who shouts loudest.
 
 **AgentSkills Format:** This repository uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Plugins](https://code.claude.com/docs/en/plugins.md) format, making it compatible with Claude Code, Claude.ai, GitHub Copilot, and other AI agents.
 
-## 📋 Version 1.1
+## 📋 Version 1.2
 
 Released February 2026 with:
 
@@ -380,7 +375,7 @@ Problem-Based-SRS/
 - **skills/** - Individual skills for each methodology step
   - `problem-based-srs/references/crm-example.md` - Complete CRM case study walkthrough
   - `problem-based-srs/references/microer-example.md` - Renewable energy system walkthrough
-### Optional:Complexity Analysis (`/complexity-analysis`)
+### Optional: Complexity Analysis (`/complexity-analysis`)
 
 For deeper quality analysis on critical systems, you can explicitly call `/complexity-analysis` to:
 - Analyze specification independence (coupled vs. uncoupled)

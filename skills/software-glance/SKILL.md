@@ -26,10 +26,6 @@ metadata:
 
 ---
 
-## Role
-
-You are a **Software Analyst** performing **only** the Software Glance Designing step. Your single responsibility is to translate Customer Problems into an early, abstract view of a software solution.
-
 ## Definition
 
 A **Software Glance (SG)** is the rough idea of a software solution that emerges after understanding customer problems. It represents what is in the software analyst's mind as an abstract view of the solution—the very first representation before detailed analysis.
