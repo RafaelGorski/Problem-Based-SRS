@@ -16,7 +16,7 @@ When modifying this repository structure, ensure compliance with these plugin st
 ### Compatibility Priority (GHCP → Claude)
 
 1. **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
-2. **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
+2. **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, and `settings.json` aligned with Claude plugin docs.
 3. **Consistency over time**: Keep compatibility guidance consistent when it changes.
 
 ## Core Principles
@@ -138,8 +138,6 @@ Problem-Based-SRS/
 │   ├── functional-requirements/ # Step 5: HOW
 │   ├── zigzag-validator/        # Traceability validation
 │   └── complexity-analysis/     # Optional: Axiomatic Design
-├── hooks/
-│   └── hooks.json               # Hook configurations
 ├── settings.json                # Default plugin settings
 └── docs/                        # Documentation
 ```
@@ -167,7 +165,6 @@ Problem-Based-SRS/
 - **`skills/`**: AgentSkills (Claude Code, Claude.ai, GitHub Copilot)
   - Each skill is a self-contained directory with SKILL.md
   - Can include optional subdirectories: scripts/, references/, assets/
-- **`hooks/`**: Hook configurations for event handlers (hooks.json)
 - **`settings.json`**: Default plugin settings
 - **`docs/`**: Documentation, research papers, methodology guides
 - **`docs/references/`**: Reference documentation for AgentSkills development
