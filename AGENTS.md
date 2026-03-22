@@ -14,7 +14,7 @@ The repository follows the **[AgentSkills](https://agentskills.io)** standard an
 ## Compatibility Priority (GHCP → Claude)
 
 - **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
-- **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
+- **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, and `settings.json` aligned with Claude plugin docs.
 - **Consistency over time**: Keep compatibility guidance consistent when it changes.
 
 ## Repository Structure
@@ -37,7 +37,7 @@ Problem-Based-SRS/
 │   ├── zigzag-validator/        # Traceability validation
 │   └── complexity-analysis/     # Optional: Axiomatic Design
 ├── docs/                        # Research papers and methodology
-└── hooks/                       # Hook configurations
+└── settings.json                # Default plugin settings
 ```
 
 ## When Working on This Repository

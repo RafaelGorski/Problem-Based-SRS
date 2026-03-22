@@ -361,8 +361,6 @@ Problem-Based-SRS/
 │   │   └── SKILL.md
 │   └── complexity-analysis/     # Optional: Axiomatic Design
 │       └── SKILL.md
-├── hooks/
-│   └── hooks.json               # Hook configurations
 ├── settings.json                # Default plugin settings
 └── docs/                        # Research paper and methodology
 ```
