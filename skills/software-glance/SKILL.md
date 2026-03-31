@@ -34,7 +34,7 @@ A **Software Glance (SG)** is the rough idea of a software solution that emerges
 - A high-level description of what the software will do (natural language narrative)
 - An identification of system boundaries, actors, and interfaces
 - A conceptual view of main components and data needs
-- Optionally: A simple block diagram showing system interactions
+- A Mermaid UML diagram showing system boundaries, actors, and interactions (mandatory)
 
 **What a Software Glance is NOT:**
 - Customer Needs (outcomes the software must provide) → Step 3
@@ -42,6 +42,8 @@ A **Software Glance (SG)** is the rough idea of a software solution that emerges
 - Software Requirements (functional/non-functional specs) → Step 5
 
 > **SG vs Software Vision:** The Software Glance is a rough starting point; the Software Vision (Step 4) enhances it with positioning, stakeholder analysis, feature lists, architecture decisions, and environment constraints. Do not add these details here.
+>
+> 🔗 **See also:** [Software Vision (Step 4)](../software-vision/SKILL.md) — drills down from this glance into detailed positioning, features, and architecture.
 
 ## Input (from Steps 0 and 1)
 
@@ -79,6 +81,7 @@ Problems expressed using this notation: `[Noun] [Verb] [Object] [Penalty]`
 **STOP** when you have produced:
 - A narrative description of the software
 - System boundary (actors + external systems)
+- A Mermaid UML diagram of the system
 - High-level components
 - Interfaces table
 - Data considerations
@@ -94,8 +97,12 @@ Problems expressed using this notation: `[Noun] [Verb] [Object] [Penalty]`
 ### Description
 [3-5 sentence narrative: what the software will do, who interacts with it, main interfaces, how data is managed. Use natural language, not bullet points.]
 
-### Block Diagram (Optional)
-[Simple ASCII or Mermaid diagram showing system boundaries, actors, and main interfaces]
+### System Diagram
+
+```mermaid
+%% Mermaid block diagram showing system boundaries, actors, and main interfaces
+%% Use flowchart, C4Context, or block-beta as appropriate
+```
 
 ### System Boundary
 
@@ -142,7 +149,7 @@ After generating the Software Glance, instruct the user:
 | Note data persistence needs | Design database schema |
 | Trace back to CPs | Specify Customer Needs (that's Step 3) |
 | Use natural language narrative | Use technical specifications |
-| Create simple block diagrams | Create detailed architectural diagrams |
+| Use Mermaid UML diagrams for system overview | Create detailed architectural diagrams |
 
 > **Boundary Check:** If you find yourself writing "The system shall..." or describing user stories, STOP—you are entering Requirements territory. Return to conceptual description.
 
@@ -168,6 +175,24 @@ Customer Problems:
 
 ### Description
 The CRM software will interact with clients through a web interface allowing marketing, promotions, receiving feedbacks, and sending answers to clients. The CRM software will provide local interfaces to interact with the Manager. Data about clients, feedbacks, and sales history will be stored in a local database. The CRM software will include a LAN interface with the Sales Management Software.
+
+### System Diagram
+
+```mermaid
+flowchart LR
+    Clients([Company Clients])
+    Manager([CRM Manager])
+    AccMgr([Account Manager])
+    SalesSW[(Sales Mgmt Software)]
+
+    Clients -- "Web: feedback, promotions" --> CRM[CRM Software]
+    CRM -- "Web: marketing, answers" --> Clients
+    Manager -- "Local: statistics, reports" --> CRM
+    AccMgr -- "Local: response management" --> CRM
+    CRM -- "LAN: sales data sync" --> SalesSW
+    SalesSW -- "LAN: purchase history" --> CRM
+    CRM --- DB[(Local Database)]
+```
 
 ### System Boundary
 
@@ -212,6 +237,7 @@ Before accepting the Software Glance output:
 
 - [ ] Every CP appears in Traceability table with explanation
 - [ ] Description is narrative style (3-5 sentences, not bullets)
+- [ ] Mermaid UML diagram included showing system boundaries, actors, and interfaces
 - [ ] No functional requirements or "shall" statements specified
 - [ ] No Customer Needs specified (that's Step 3)
 - [ ] No architecture patterns or technology choices (that's Step 4)
@@ -231,7 +257,7 @@ Before accepting the Software Glance output:
 | 1 | customer-problems | ← Input |
 | **2** | **software-glance** | **Current** |
 | 3 | customer-needs | → Next |
-| 4 | software-vision | |
+| 4 | [software-vision](../software-vision/SKILL.md) | 🔗 Drills down from this glance |
 | 5 | functional-requirements | |
 
 **Next:** Use the Software Glance output with `customer-needs` skill to specify what outcomes the software must provide.

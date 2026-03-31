@@ -20,6 +20,8 @@ metadata:
 
 This skill is used **during and after** Steps 1, 3, and 5 to validate and refine mappings between domains. It does not replace the generation skills—it complements them.
 
+> **Diagram preference:** When visualizing traceability mappings, prefer Mermaid UML diagrams (e.g., `flowchart` for hierarchy trees, `graph` for dependency maps) over ASCII art where rendering supports it.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           ZIG ZAG DECOMPOSITION                         │

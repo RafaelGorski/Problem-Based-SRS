@@ -33,6 +33,8 @@ Generate a Software Vision document that serves as:
 - **Scope definition**: Establishes clear boundaries to keep requirements within scope
 - **Stakeholder agreement**: A high-level view all parties can review and approve
 
+🔗 **See also:** [Software Glance (Step 2)](../software-glance/SKILL.md) — the initial abstract solution view that this Vision elaborates upon. Use the Glance to review system boundaries and actors before building the Vision.
+
 ## Prerequisites (Required Inputs)
 
 This skill **REQUIRES** completed artifacts from previous steps:
@@ -119,22 +121,41 @@ Specify:
 - **Compatibility Requirements**: Browsers, devices, OS versions
 
 #### 6. **High-Level Architecture**
-Provide:
-- Block diagram showing major subsystems
+Provide using **Mermaid UML diagrams** (mandatory):
+- Block/component diagram showing major subsystems
 - Key interfaces and data flows
 - External system connections
 - Technology stack recommendations (high-level)
 
-Use text-based diagrams or descriptions:
+Use Mermaid diagram types as appropriate:
+```mermaid
+flowchart TB
+    subgraph UI[User Interface Layer]
+        Web[Web App]
+        Mobile[Mobile App]
+    end
+    subgraph BL[Business Logic Layer]
+        API[API Gateway]
+        Services[Core Services]
+    end
+    subgraph DA[Data Access Layer]
+        ORM[Data Access]
+        Cache[Cache]
+    end
+    DB[(Database)]
+
+    UI --> BL
+    BL --> DA
+    DA --> DB
 ```
-[User Interface Layer]
-        ↓
-[Business Logic Layer]
-        ↓
-[Data Access Layer]
-        ↓
-[Database]
-```
+
+**Recommended Mermaid diagram types:**
+- `flowchart` — for component/subsystem relationships
+- `C4Context` / `C4Container` — for system context and container views
+- `sequenceDiagram` — for key interaction flows
+- `classDiagram` — for domain model overview
+
+> 🔗 **Cross-reference:** The system boundaries and actors defined in the [Software Glance (Step 2)](../software-glance/SKILL.md) should be expanded here with architectural detail. Readers can refer back to the Glance for the original abstract view.
 
 ### Best Practices
 
@@ -159,7 +180,7 @@ Provide the vision as a structured markdown document **directly in the response*
 
 Additional formatting:
 - Tables for structured data (features, stakeholders)
-- Diagrams where helpful (ASCII or description)
+- **Mermaid UML diagrams** for architecture (mandatory) and other visuals (preferred)
 - Concise, scannable content
 
 ### Validation Checklist
@@ -174,8 +195,9 @@ Additional formatting:
 - [ ] All stakeholders identified (users, developers, external systems)
 - [ ] 5-10 high-level features listed (NOT detailed requirements)
 - [ ] Environment and constraints specified
-- [ ] High-level architecture diagram included
+- [ ] Mermaid UML architecture diagram included (mandatory)
 - [ ] Scope boundaries clearly defined (what's IN and OUT)
+- [ ] Cross-reference to Software Glance for system boundary context
 
 **Boundary Validation**:
 - [ ] Stays at high-level (no detailed functional requirements)
@@ -209,7 +231,7 @@ Summary:
 
 ### Upstream Dependencies (Required Before This Step)
 - **Step 1**: Customer Problems (customer-problems skill)
-- **Step 2**: Software Glance (software-glance skill)
+- **Step 2**: [Software Glance](../software-glance/SKILL.md) (software-glance skill) — 🔗 refer back for system boundaries and actors
 - **Step 3**: Customer Needs (customer-needs skill)
 
 ### Downstream Artifacts (What Uses This Output)

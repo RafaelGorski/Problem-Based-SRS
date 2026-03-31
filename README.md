@@ -93,10 +93,19 @@ tracks everything in spreadsheets and loses $50k/month due to errors.
 
 **Step 1:** Install (one-time setup)
 
-Ask your AI assistant:
+Ask your AI assistant to install into your project's skills directory:
+
+**For GitHub Copilot (recommended):**
 ```
-Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS
+Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/
 ```
+
+**For Claude Code:**
+```
+Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .claude/skills/
+```
+
+> ⚠️ **Important:** Skills must be installed inside your project's agent-specific directory (e.g., `.github/skills/` for GitHub Copilot), **not** in a `skills/` folder at the repository root. A `skills/` folder at the root will not be recognized by your AI agent.
 
 **Step 2:** Start your first requirements session
 
@@ -217,13 +226,19 @@ After installation, skills are available with the `problem-based-srs:` namespace
 
 ### AI-Assisted Installation
 
-The easiest way—just ask your AI assistant:
+The easiest way—just ask your AI assistant. **Always specify the target directory** so it installs in the correct location:
 
+**GitHub Copilot:**
 ```
-Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS
+Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/
 ```
 
-Your AI will handle the installation automatically. Works with GitHub Copilot, Claude, and other agents.
+**Claude Code:**
+```
+Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .claude/skills/
+```
+
+> ⚠️ **Common mistake:** If you don't specify the target directory, the AI agent may create a `skills/` folder at the repository root — this **will not work**. Always include the correct path in your prompt (see table below).
 
 ### Alternative: Manual Installation
 

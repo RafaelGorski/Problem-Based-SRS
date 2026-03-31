@@ -14,6 +14,8 @@ Orchestrate requirements engineering using the Problem-Based SRS methodology (Go
 
 ## Methodology Overview
 
+> **Diagram standard:** Use Mermaid UML diagrams as the preferred format for all visual artifacts. Mermaid is **mandatory** for Software Glance (Step 2) and Software Vision (Step 4), and **preferred** for other steps where diagrams add value.
+
 ```
 Stakeholder Input
        ↓
@@ -74,6 +76,10 @@ This agent orchestrates the following skills:
 
 ## How to Use This Agent
 
+### ⚠ File Creation Rule: ONE FILE AT A TIME
+
+**NEVER create multiple artifact files in parallel.** Always create files **one at a time, sequentially** — wait for each file to be saved before creating the next one. Batch/parallel file creation causes JSON serialization errors in tool calls when the combined content is too large.
+
 ### Starting Fresh
 When user provides business context or problem description:
 1. **Ask where to save artifacts** (if not already specified)
@@ -82,7 +88,7 @@ When user provides business context or problem description:
 4. Detect current step (see Detection Heuristics below)
 5. Invoke the appropriate skill
 6. Guide user through the process
-7. **Save output to the corresponding file(s)**
+7. **Save output to the corresponding file(s)** (one file at a time)
 
 ### Continuing Work
 If user has existing artifacts (CPs, CNs, etc.):

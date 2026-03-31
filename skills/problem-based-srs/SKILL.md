@@ -14,6 +14,8 @@ Orchestrate requirements engineering using the Problem-Based SRS methodology (Go
 
 ## Methodology Overview
 
+> **Diagram standard:** Use Mermaid UML diagrams as the preferred format for all visual artifacts. Mermaid is **mandatory** for Software Glance (Step 2) and Software Vision (Step 4), and **preferred** for other steps where diagrams add value.
+
 ```
 Stakeholder Input
        ↓
@@ -75,6 +77,10 @@ This orchestrator coordinates the following skills:
 ## 📁 Saving Progress (CRITICAL)
 
 **IMPORTANT:** At each step, you MUST save the produced artifacts to files. Progress is NOT automatically saved between sessions.
+
+### ⚠ File Creation Rule: ONE FILE AT A TIME
+
+**NEVER create multiple artifact files in parallel.** Always create files **one at a time, sequentially** — wait for each file to be saved before creating the next one. Batch/parallel file creation causes JSON serialization errors in tool calls when the combined content is too large.
 
 ### First Time Setup
 
@@ -348,6 +354,7 @@ Determine current step by checking what artifacts exist:
 - [ ] System boundaries defined
 - [ ] Main actors and interfaces identified
 - [ ] High-level components described
+- [ ] Mermaid UML diagram included (mandatory)
 - [ ] **File saved:** `02-software-glance.md`
 
 ### After Step 3 (CNs)
@@ -361,6 +368,8 @@ Determine current step by checking what artifacts exist:
 - [ ] Positioning statement clear
 - [ ] All stakeholders identified
 - [ ] Major features listed
+- [ ] Mermaid UML architecture diagram included (mandatory)
+- [ ] Cross-reference to Software Glance present
 - [ ] **File saved:** `04-software-vision.md`
 
 ### After Step 5 (FRs/NFRs)

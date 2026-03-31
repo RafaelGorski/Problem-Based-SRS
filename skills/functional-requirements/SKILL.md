@@ -106,6 +106,8 @@ The wrong format above lacks "shall" statements, acceptance criteria, and proper
 
 **CRITICAL:** Each FR and NFR MUST be saved as an individual file so engineers can work on them as independent development units.
 
+**⚠ ONE FILE AT A TIME:** Always create FR/NFR files **sequentially, one at a time** — never create multiple files in parallel. Batch file creation causes JSON serialization errors when the combined content is too large.
+
 ### Folder Structure
 
 ```
