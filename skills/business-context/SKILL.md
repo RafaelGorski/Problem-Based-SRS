@@ -14,6 +14,8 @@ metadata:
 > **Step 0** of the Problem-Based SRS methodology
 > **Domain:** CONTEXT — Establishes the foundation for problem discovery
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 ## Purpose
 
 Establish a structured business context before identifying Customer Problems. The Business Context captures the foundational understanding of the project: who is involved, what principles govern decisions, what boundaries exist, and how success is measured. This ensures that Step 1 (Customer Problems) starts from a shared, well-defined understanding rather than ad-hoc descriptions.
@@ -76,7 +78,7 @@ Capture the essential identity of the project:
 
 ### 2. Business Principles
 
-Define the non-negotiable rules and values that govern this project. Each principle should be:
+Define the non-negotiable rules and values that govern this project. Each principle SHOULD be:
 - **Declarative** — States what must be true
 - **Testable** — Can verify compliance
 - **Actionable** — Guides real decisions
@@ -142,7 +144,7 @@ Document limitations that shape the solution space:
 
 Define measurable outcomes that indicate project success:
 
-- Each criterion must be **measurable** (quantitative or qualitative with clear evidence)
+- Each criterion MUST be **measurable** (quantitative or qualitative with clear evidence)
 - Tie criteria to business outcomes, not technical metrics
 - These criteria will later help validate whether CPs and FRs are addressing the right problems
 

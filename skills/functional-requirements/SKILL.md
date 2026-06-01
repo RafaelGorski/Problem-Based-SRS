@@ -15,6 +15,8 @@ metadata:
 > **Previous:** Customer Needs → Software Vision  
 > **Next:** Requirements Validation / Implementation
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 ---
 
 ## Position in Process
@@ -36,7 +38,7 @@ Before running this skill, ensure you have completed artifacts from previous ste
 - [ ] **Customer Needs (CNs)** — from customer-needs skill
 - [ ] **Software Vision** — from software-vision skill
 
-**⚠ Warning**: Do not proceed without these inputs. FRs cannot be generated independently—they must trace to Customer Needs and respect Software Vision boundaries.
+**⚠ Warning**: Do not proceed without these inputs. FRs cannot be generated independently—they MUST trace to Customer Needs and respect Software Vision boundaries.
 
 ---
 
@@ -64,7 +66,7 @@ For each CN:
 **Every FR in the response MUST include:**
 
 1. **The "shall" statement** — written out explicitly using the grammar: `The [System] shall [verb] [object]`
-2. **CN traceability** — each FR must show which CN it traces to (e.g., `→ CN-001`)
+2. **CN traceability** — each FR MUST show which CN it traces to (e.g., `→ CN-001`)
 3. **Acceptance criteria** — at least 2 testable criteria per FR
 
 **Example of CORRECT response format:**
@@ -267,17 +269,17 @@ The [System] shall [quality attribute] [measurable target] [condition].
 ## Traceability Rule (CRITICAL)
 
 - Every FR MUST trace to at least one Customer Need (FR.X → CN.Y)
-- Every NFR should trace to CNs or indicate which FRs it applies to
+- Every NFR SHOULD trace to CNs or indicate which FRs it applies to
 - One CN typically requires MULTIPLE FRs
-- Every CN must be addressed by at least one FR
+- Every CN MUST be addressed by at least one FR
 
-## Quality Rules (per ISO/IEC/IEEE 29148)
+## Quality Rules (per [ISO/IEC/IEEE 29148:2018](../../docs/references/iso-iec-ieee-29148-2018.md))
 
-- **Complete**: All customer needs must be met by requirements
-- **Correct**: All requirements must meet some customer need
-- **Testable**: Each FR must have verifiable acceptance criteria
+- **Complete**: All customer needs MUST be met by requirements
+- **Correct**: All requirements MUST meet some customer need
+- **Testable**: Each FR MUST have verifiable acceptance criteria
 - **Unambiguous**: Use precise language, avoid vague terms
-- **Measurable**: NFRs must have quantifiable targets
+- **Measurable**: NFRs MUST have quantifiable targets
 
 ## Content Restrictions (CRITICAL)
 

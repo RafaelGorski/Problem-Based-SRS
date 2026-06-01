@@ -11,6 +11,8 @@ metadata:
 
 # Software Vision
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 ## Overview
 **Step 4 of 5** in the Problem-Based SRS methodology.
 
@@ -45,7 +47,7 @@ This skill **REQUIRES** completed artifacts from previous steps:
    
 2. **Customer Needs** (from customer-needs skill)
    - Location: Provide file path or paste content
-   - Contains: List of desired outcomes the software must provide
+   - Contains: List of desired outcomes the software MUST provide
 
 **⚠ Warning**: Do not proceed without these inputs. The Vision cannot be created independently.
 
@@ -115,7 +117,7 @@ Example format:
 Specify:
 - **Deployment Environment**: Cloud, on-premise, hybrid, mobile
 - **Technical Constraints**: Platform, language, framework preferences
-- **Integration Requirements**: Systems that must connect
+- **Integration Requirements**: Systems that MUST connect
 - **Security Requirements**: Authentication, authorization, data protection
 - **Performance Requirements**: Response time, scalability expectations
 - **Compatibility Requirements**: Browsers, devices, OS versions
@@ -155,14 +157,14 @@ flowchart TB
 - `sequenceDiagram` — for key interaction flows
 - `classDiagram` — for domain model overview
 
-> 🔗 **Cross-reference:** The system boundaries and actors defined in the [Software Glance (Step 2)](../software-glance/SKILL.md) should be expanded here with architectural detail. Readers can refer back to the Glance for the original abstract view.
+> 🔗 **Cross-reference:** The system boundaries and actors defined in the [Software Glance (Step 2)](../software-glance/SKILL.md) SHOULD be expanded here with architectural detail. Readers can refer back to the Glance for the original abstract view.
 
 ### Best Practices
 
-1. **Trace to Inputs**: Every feature should trace back to Software Glance or Customer Needs
+1. **Trace to Inputs**: Every feature SHOULD trace back to Software Glance or Customer Needs
 2. **High-Level Only**: Stay conceptual - detailed requirements come in Step 5
 3. **Boundary Setting**: Explicitly state what is OUT of scope
-4. **Stakeholder Review**: Vision must be reviewable by both technical and business stakeholders
+4. **Stakeholder Review**: Vision MUST be reviewable by both technical and business stakeholders
 5. **Architecture ≠ Design**: Show major subsystems, not detailed architecture
 6. **Scope Guard**: This document guards Step 5 from scope creep
 
@@ -242,7 +244,7 @@ Summary:
 1. **Sequential vs Iterative**: While shown sequentially, this process supports iterative/incremental approaches
 2. **Causal Dependencies**: Vision depends on Glance + Needs; cannot skip steps
 3. **Scope Boundary**: Vision sets the boundary for Step 5 requirements to prevent scope creep
-4. **Input Traceability**: All vision content should trace to glance directives or customer needs
+4. **Input Traceability**: All vision content SHOULD trace to glance directives or customer needs
 
 ## References
 

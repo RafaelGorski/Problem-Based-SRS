@@ -5,6 +5,8 @@
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 **Stop building the wrong thing.** If you've ever spent weeks building a feature only to discover it didn't solve the actual problem—or worse, solved the wrong problem—this methodology is for you.
 
 Let your AI agent guide you through proven requirements engineering that starts with **real customer problems**, not feature wish lists. Works with GitHub Copilot, Claude, and other AI coding assistants to help you create software requirements that actually solve business problems and maximize the impact of your work.
@@ -310,6 +312,20 @@ git commit -m "Add Problem-Based SRS methodology"
 
 </details>
 
+
+## 📐 Standards Compliance
+
+This project uses normative keywords as defined in **[BCP 14](https://www.rfc-editor.org/bcp/bcp14)** ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)). Key words such as MUST, SHOULD, and MAY carry their defined normative meanings **only when written in ALL CAPITALS**.
+
+The requirement-writing guidance in this methodology aligns with **[ISO/IEC/IEEE 29148:2018](https://www.iso.org/standard/72089.html)** — *Systems and Software Engineering — Life Cycle Processes — Requirements Engineering* — particularly:
+
+- **Requirement quality characteristics** (complete, correct, unambiguous, verifiable, traceable)
+- **Structured requirement syntax** (`The [System] shall [verb]...`)
+- **Bidirectional traceability** between requirements and their sources (CP ↔ CN ↔ FR)
+
+> **Note on CP notation:** In Customer Problem statements, `must/expects/hopes` are classification verbs indicating problem severity (Obligation/Expectation/Hope). They are **not** BCP 14 normative keywords unless explicitly written in ALL CAPITALS.
+
+See [docs/references/](docs/references/) for local reference summaries of these standards.
 
 ## 📚 Learn More
 

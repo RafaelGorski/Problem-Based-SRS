@@ -15,6 +15,10 @@ metadata:
 > **Domain:** WHY — Explains why the solution is needed  
 > **Prerequisite:** Step 0 — Business Context (business-context skill)
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+>
+> **Note:** In Customer Problem notation, `must/expects/hopes` are classification verbs indicating severity class; they are not BCP 14 normative keywords unless explicitly written in ALL CAPITALS in normative guidance.
+
 ## Purpose
 
 Identify, document, and validate Customer Problems from business context. Customer Problems represent the **WHY domain** — they provide the business justification for why a software solution is needed. All subsequent artifacts (Software Glance, Customer Needs, Software Vision, Requirements) derive from CPs.

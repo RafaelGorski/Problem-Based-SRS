@@ -10,6 +10,8 @@ metadata:
 
 # Problem-Based SRS Agent
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 Orchestrate requirements engineering using the Problem-Based SRS methodology (Gorski & Stadzisz). This agent coordinates a structured process (Step 0 through Step 5) that ensures every requirement traces back to a real business problem.
 
 ## Methodology Overview
@@ -56,7 +58,7 @@ Stakeholder Input
 | Domain | Artifact | Question Answered |
 |--------|----------|-------------------|
 | **WHY** | Customer Problems (CP) | Why is the solution needed? (Business justification) |
-| **WHAT** | Customer Needs (CN) | What outcomes must the software provide? |
+| **WHAT** | Customer Needs (CN) | What outcomes MUST the software provide? |
 | **HOW** | Functional Requirements (FR) | How will the system behave? |
 
 ## Available Skills

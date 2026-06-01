@@ -8,6 +8,9 @@ This directory contains consolidated reference documentation for developing and 
 |-----------|-------------|--------|
 | [agentskills-specification.md](agentskills-specification.md) | Complete format specification for Agent Skills (SKILL.md structure, fields, directories) | [agentskills.io](https://agentskills.io/specification) |
 | [agentskills-best-practices.md](agentskills-best-practices.md) | Best practices for authoring effective Agent Skills | [Anthropic Claude Docs](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) |
+| [rfc2119.md](rfc2119.md) | Key words for use in RFCs to indicate requirement levels (BCP 14) | [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) |
+| [rfc8174.md](rfc8174.md) | Clarification: uppercase-only key words have normative meaning (BCP 14) | [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) |
+| [iso-iec-ieee-29148-2018.md](iso-iec-ieee-29148-2018.md) | Requirements engineering standard — quality characteristics and syntax | [ISO 29148:2018](https://www.iso.org/standard/72089.html) |
 
 ## Quick Reference
 

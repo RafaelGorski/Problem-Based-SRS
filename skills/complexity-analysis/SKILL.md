@@ -14,6 +14,8 @@ metadata:
 > **Purpose:** Analyze specification quality using Axiomatic Design principles  
 > **When to use:** After completing the standard process, when deeper quality analysis is needed
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 ---
 
 ## ⚠️ Optional Skill
@@ -112,7 +114,7 @@ CP.3     [ ]   [ ]   [C]
 
 **Interpretation:**
 - **C (Complete):** The CN fully addresses the CP
-- **P (Partial):** The CN helps but doesn't fully solve the CP; may need additional CNs
+- **P (Partial):** The CN helps but doesn't fully solve the CP; MAY need additional CNs
 
 ### CN → FR Completeness Matrix
 
@@ -125,8 +127,8 @@ CN.3     [ ]   [ ]   [C]   [P]
 
 ### Completeness Rules
 
-1. Every CP row must have at least one C or multiple Ps that together equal C
-2. Every CN row must have at least one C or multiple Ps that together equal C
+1. Every CP row MUST have at least one C or multiple Ps that together equal C
+2. Every CN row MUST have at least one C or multiple Ps that together equal C
 3. Blank rows indicate gaps (uncovered problems or needs)
 4. Blank columns indicate orphans (requirements without traced needs)
 

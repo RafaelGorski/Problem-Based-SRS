@@ -14,6 +14,8 @@ metadata:
 > **Purpose:** Map and decompose between CP, CN, and FR domains  
 > **Single Responsibility:** Ensure traceability and consistency across domain hierarchies
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 ---
 
 ## Position in Process
@@ -146,18 +148,18 @@ Output:
 ## Rules
 
 ### Independence Axiom
-Each FR should ideally map to one CN. If an FR affects multiple CNs, flag for review—it may indicate a coupled design.
+Each FR SHOULD ideally map to one CN. If an FR affects multiple CNs, flag for review—it may indicate a coupled design.
 
 ### Completeness Rule
-- Every CP must have at least one CN
-- Every CN must have at least one FR
+- Every CP MUST have at least one CN
+- Every CN MUST have at least one FR
 - No orphan FRs (requirements without traced needs)
 - No orphan CNs (needs without traced problems)
 
 ### Hierarchy Alignment
-When decomposing, sub-items should align across domains:
-- CP.1.1 should map to CN.1.1 (or subset)
-- CN.1.1 should map to FR.1.1.x
+When decomposing, sub-items SHOULD align across domains:
+- CP.1.1 SHOULD map to CN.1.1 (or subset)
+- CN.1.1 SHOULD map to FR.1.1.x
 
 ---
 

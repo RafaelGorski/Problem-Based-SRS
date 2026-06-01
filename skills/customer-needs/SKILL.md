@@ -15,6 +15,8 @@ metadata:
 > **Previous:** Customer Problems → Software Glance  
 > **Next:** Software Vision
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+
 ---
 
 ## Required Inputs
@@ -45,12 +47,12 @@ Where:
 - **Noun**: Who has the need (the company, a manager, a customer, a user)
 - **Verb**: Expresses necessity (needs, wants, intends, aims, desires)
 - **Means**: The software system under design
-- **Object**: What the software provides (must be one of four outcome classes)
+- **Object**: What the software provides (MUST be one of four outcome classes)
 - **Condition**: Constraints on the object (period, accuracy, scope)
 
 ## Four Outcome Classes
 
-Every CN must provide ONE of these outcomes. The software delivers VALUE through these categories:
+Every CN MUST provide ONE of these outcomes. The software delivers VALUE through these categories:
 
 ### 1. Information
 **What it is:** Data, knowledge, awareness delivered to the user
@@ -124,7 +126,7 @@ CN.[ID] - [Statement following the structured notation]
 
 ## Rules
 
-- Each CN must trace to at least one CP
+- Each CN MUST trace to at least one CP
 - Stay within the Software Glance boundaries
 - Focus on OUTCOMES, not functionalities
 - Use natural language the customer understands

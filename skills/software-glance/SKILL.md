@@ -13,6 +13,10 @@ metadata:
 
 > **Step 2 of 5** in the Problem-Based SRS process.
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+>
+> **Note:** In Customer Problem notation, `must/expects/hopes` are classification verbs indicating severity class; they are not BCP 14 normative keywords.
+
 ---
 
 ## Scope
@@ -121,7 +125,7 @@ Problems expressed using this notation: `[Noun] [Verb] [Object] [Penalty]`
 | [Name] | [Web/LAN/API/Local] | [Actor/System] | [Brief purpose] |
 
 ### Data Considerations
-[What data must be stored, where it originates, general persistence needs]
+[What data MUST be stored, where it originates, general persistence needs]
 
 ### Traceability
 | CP | How Glance Addresses It |
