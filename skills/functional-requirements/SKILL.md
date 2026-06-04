@@ -113,7 +113,7 @@ The wrong format above lacks "shall" statements, acceptance criteria, and proper
 ### Folder Structure
 
 ```
-[srs-folder]/
+.spec/
 ├── functional-requirements/
 │   ├── _index.md                    # Summary and traceability matrix
 │   ├── FR-001-[short-name].md       # Individual FR file
@@ -299,7 +299,7 @@ The [System] shall [quality attribute] [measurable target] [condition].
 **WHERE TO PUT CONSTRUCTION DETAILS:**
 Construction and implementation details belong in separate design documents:
 ```
-[srs-folder]/
+.spec/
 ├── functional-requirements/     # FR files (WHAT - no code)
 ├── non-functional-requirements/ # NFR files (WHAT - no code)
 └── design/                      # Construction details (HOW)

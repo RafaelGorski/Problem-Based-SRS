@@ -94,7 +94,7 @@ When user provides business context or problem description:
 
 ### Continuing Work
 If user has existing artifacts (CPs, CNs, etc.):
-1. **Check for existing SRS folder** (docs/srs/, requirements/, etc.)
+1. **Check for existing artifact folder** (`.spec/`, `docs/srs/`, `requirements/`, etc.)
 2. **Read existing files** to understand current state
 3. Identify what they have
 4. Jump to appropriate step

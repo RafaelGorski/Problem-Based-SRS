@@ -62,6 +62,7 @@ docs/CT_PPGCA_M_Souza_Rafael_Gorski_Moreno_2016.pdf
 docs/img/CT_PPGCA_M_Souza_Rafael_Gorski_Moreno_2016_*.png
 docs/dissertation-en/
 
-# SRS output artifacts (generated per-project, not versioned)
-srs/
+# Problem-Based SRS output artifacts (generated per-project, not versioned)
+.spec/
 docs/srs/
+/.pytest_cache

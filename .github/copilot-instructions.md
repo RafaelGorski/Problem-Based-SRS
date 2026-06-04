@@ -48,6 +48,27 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 | Orchestrator | `skills/problem-based-srs/SKILL.md` |
 | Agent | `agents/problem-based-srs/AGENT.md` |
 
+### Artifact Storage
+
+All Problem-Based SRS artifacts are saved to the `.spec/` folder at the project root by default. This hidden folder keeps specification artifacts separate from source code and documentation.
+
+```
+.spec/
+├── 00-business-context.md
+├── 01-customer-problems.md
+├── 02-software-glance.md
+├── 03-customer-needs.md
+├── 04-software-vision.md
+├── functional-requirements/
+│   ├── _index.md
+│   └── FR-001-[short-name].md
+└── non-functional-requirements/
+    ├── _index.md
+    └── NFR-001-[short-name].md
+```
+
+When adding or changing features/requirements in the solution, reference the `.spec/` folder for existing artifacts and save new artifacts there. If a legacy folder is detected (`docs/srs/`, `requirements/`), continue using it for consistency.
+
 ### Artifact Naming Convention
 
 - **Customer Problems**: `CP.{n}` or `CP.{n}.{m}` (e.g., CP.01, CP.01.1)
@@ -105,7 +126,7 @@ AI: "I'll analyze using Problem-Based SRS methodology.
      [Applies 5-step process from source files]
      
      Plan:
-     1. Save analysis to spec/NFR.2.0.md
+     1. Save analysis to .spec/NFR.2.0.md
      2. git add, commit, push to main
      
      Proceed? (yes/no)"

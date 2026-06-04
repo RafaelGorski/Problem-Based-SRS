@@ -86,25 +86,14 @@ This orchestrator coordinates the following skills:
 
 ### First Time Setup
 
-When starting a new project, ask the user:
-
-```
-Before we begin, where would you like to save your SRS artifacts?
-
-Options:
-1. `docs/srs/` (recommended - keeps SRS separate from code docs)
-2. `requirements/` (alternative - at project root)
-3. Custom path: [specify your preferred location]
-
-All artifacts will be saved in this folder with consistent naming.
-```
+When starting a new project, save artifacts to `.spec/` by default (a hidden folder at the project root). If the user specifies a different folder or an existing artifact folder is detected (e.g., `docs/srs/`, `requirements/`), use that location instead.
 
 ### Artifact File Structure
 
 Create the following folder structure as you progress through each step:
 
 ```
-[chosen-folder]/                      # e.g., docs/srs/
+.spec/
 ├── 00-business-context.md            # Step 0: Business context, principles, and constraints
 ├── 01-customer-problems.md           # Step 1: CPs (WHY)
 ├── 02-software-glance.md             # Step 2: High-level solution view
@@ -222,7 +211,7 @@ Example handoff for Step 5:
 ```
 ✅ Step 5 Complete: Functional Requirements Specified
 
-📁 Saved to: docs/srs/functional-requirements/
+📁 Saved to: .spec/functional-requirements/
    ├── _index.md (summary with 8 FRs)
    ├── FR-001.md → CN-001 (User Registration)
    ├── FR-002.md → CN-001 (User Authentication)
@@ -233,7 +222,7 @@ Example handoff for Step 5:
    ├── FR-007.md → CN-004 (Search Capability)
    └── FR-008.md → CN-004 (Filter Options)
 
-📁 Updated: docs/srs/traceability-matrix.md
+📁 Updated: .spec/traceability-matrix.md
 
 Engineers can now work on individual requirements independently.
 Each FR file contains full context and acceptance criteria.
@@ -262,7 +251,7 @@ When user provides business context or problem description:
 
 ### Continuing Work
 If user has existing artifacts (CPs, CNs, etc.):
-1. **Check for existing SRS folder** (docs/srs/, requirements/, etc.)
+1. **Check for existing artifact folder** (`.spec/`, `docs/srs/`, `requirements/`, etc.)
 2. **Read existing files** to understand current state
 3. Identify what they have
 4. Jump to appropriate step
@@ -429,7 +418,7 @@ Example:
 ```
 ✅ Step 3 Complete: Customer Needs Specified
 
-📁 Saved to: docs/srs/03-customer-needs.md
+📁 Saved to: .spec/03-customer-needs.md
 
 Outputs:
 - CN-001: [Information] User needs system to display...
@@ -444,7 +433,7 @@ Gate Check:
 
 → Next: Step 4 - Software Vision
 → Loading: references/step4-software-vision.md
-→ Will save to: docs/srs/04-software-vision.md
+→ Will save to: .spec/04-software-vision.md
 → Input: The CNs documented above
 ```
 
@@ -456,7 +445,7 @@ Start with Step 0 (Business Context) and progress through all steps sequentially
 
 ### Pattern 2: Jump In (Existing Artifacts)
 Detect what artifacts exist, skip completed steps, resume at current step.
-**Remember:** Check for existing SRS folder and read current files.
+**Remember:** Check for existing `.spec/` folder and read current files.
 
 ### Pattern 3: Iterative Refinement
 Complete initial pass, then iterate on specific steps as understanding improves.
