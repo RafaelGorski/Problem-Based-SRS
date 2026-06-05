@@ -1,418 +1,216 @@
 # Problem-Based SRS
 
-[![Version](https://img.shields.io/badge/version-1.2-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/docs/en/plugins.md)
-[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Open%20Standard-blue)](https://github.com/agentskills/agentskills)
+[![Version 1.2](https://img.shields.io/badge/version-1.2-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2)
+[![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+AI-guided requirements engineering that traces every feature back to the customer problem it solves. An [AgentSkill](https://agentskills.io) for GitHub Copilot, Claude Code, and other AI coding assistants.
 
-**Stop building the wrong thing.** If you've ever spent weeks building a feature only to discover it didn't solve the actual problem—or worse, solved the wrong problem—this methodology is for you.
+## The problem this solves
 
-Let your AI agent guide you through proven requirements engineering that starts with **real customer problems**, not feature wish lists. Works with GitHub Copilot, Claude, and other AI coding assistants to help you create software requirements that actually solve business problems and maximize the impact of your work.
+A stakeholder says: *"We need a reporting dashboard with 20 charts."*
 
-## ⚡ What You'll Get
+You build it. Three weeks. Ship it. They use 3 charts. The actual problem was slow data access, not visualization. Two weeks wasted, one frustrated team.
 
-This methodology helps engineers:
+This happens because requirements start with *what stakeholders ask for* instead of *what they need*. Problem-Based SRS fixes the order: identify the problem first, then derive the solution.
 
-- ✅ **Discover real problems** - Identify what customers actually need before writing any code
-- ✅ **Align your work with business impact** - Every line of code traces back to a problem it solves
-- ✅ **Avoid wasted effort** - Stop building "nice-to-have" features disguised as critical requirements
-- ✅ **Ship with confidence** - Know exactly why each feature matters and to whom
-- ✅ **Reduce rework** - Catch misunderstandings early, before weeks of coding are invested
-- ✅ **AI-guided process** - Your coding assistant walks you through each step automatically
+**With this methodology, the same request becomes:**
 
-**Based on peer-reviewed research** by Gorski & Stadzisz, this approach systematically addresses the #1 cause of software project failures: building what stakeholders *asked for* instead of what they actually *need*.
+> **CP.01**: "Managers must access sales data within 5 seconds to make decisions."
 
-## 💰 Why Engineers Love This
+From that problem, you derive the need (CN: real-time data access), then the requirement (FR: data API + 3 targeted charts). Built in one week. Solves the actual problem.
 
-**Before Problem-Based SRS:**
-- Stakeholder: "We need a reporting dashboard with 20 charts."
-- You: Build it over 3 weeks.
-- Result: They only use 3 charts. The real problem was slow data access, not visualization.
+## How it works
 
-**With Problem-Based SRS:**
-- Step 1: Discover the actual problem → "Managers must access sales data within 5 seconds to make decisions."
-- Step 2: Design solution → Simple data API + 3 key charts.
-- Result: Built in 1 week. Solves the real problem. Stakeholders happy.
+Your AI assistant walks you through six steps. Each builds on the previous:
 
-**ROI:** Spend 30 minutes upfront with your AI agent to save weeks of building the wrong thing.
+```mermaid
+graph LR
+    A[Your input] --> B0[CONTEXT]
+    B0 --> B[WHY]
+    B --> C[Glance]
+    C --> D[WHAT]
+    D --> E[Vision]
+    E --> F[HOW]
+    F --> G[Build]
 
-## 🎯 See It In Action
-
-Here's what happens when you use this methodology:
-
-**Your input:**
-```
-I need requirements for an inventory management system. Our warehouse
-tracks everything in spreadsheets and loses $50k/month due to errors.
+    style B0 fill:#dda0dd,color:#000
+    style B fill:#c44,color:#fff
+    style C fill:#3ba,color:#fff
+    style D fill:#47a,color:#fff
+    style E fill:#6a8,color:#fff
+    style F fill:#da6,color:#000
 ```
 
-**The AI guides you through:**
+| Step | Command | You answer | You get |
+|------|---------|------------|---------|
+| 0. Business Context | `/business-context` | Project identity, constraints, success criteria | Governing principles for all decisions |
+| 1. Customer Problems | `/customer-problems` | What's broken and for whom | Prioritized problems (Obligation / Expectation / Hope) |
+| 2. Software Glance | `/software-glance` | High-level solution direction | Shared understanding of scope and boundaries |
+| 3. Customer Needs | `/customer-needs` | Required outcomes per problem | Measurable success criteria |
+| 4. Software Vision | `/software-vision` | Architecture and technical approach | Technical roadmap with stakeholder alignment |
+| 5. Functional Requirements | `/functional-requirements` | Detailed behavior specs | Testable requirements traced to problems |
 
-0. **Business Context (CONTEXT)**
-   - Project: "InventoryPro" — Warehouse logistics
-   - Principle: "Inventory data must reflect physical reality within 0.1% tolerance" (Mandatory)
-   - Success: "Reduce inventory discrepancy from $50k to $5k/month"
+Every requirement traces backward: **FR → CN → CP**. You can always answer *"Why are we building this?"*
 
-1. **Customer Problems (WHY)**
-   - CP.01: "Warehouse must track inventory accurately otherwise $50k/month lost to errors"
-   - CP.02: "Staff expects real-time inventory visibility otherwise delays in fulfillment"
+Use `/zigzag-validator` at any point to verify the chain is complete.
 
-2. **Software Glance**
-   - "Web-based inventory system with barcode scanning and real-time sync"
+### Problem classification
 
-3. **Customer Needs (WHAT)**
-   - CN.01.1: "Warehouse needs system to track inventory with 99.9% accuracy"
-   - CN.02.1: "Staff needs system to scan items and update inventory within 2 seconds"
+Not all problems are equal. The methodology classifies each by severity:
 
-4. **Software Vision**
-   - "Cloud inventory platform with mobile scanning app for 50 concurrent users"
+| Class | Verb | Priority | Consequence if unsolved |
+|-------|------|----------|------------------------|
+| **Obligation** | must | High | Legal, contractual, or operational failure |
+| **Expectation** | expects | Medium | Degraded business outcomes |
+| **Hope** | hopes | Low | Missed improvement opportunity |
 
-5. **Functional Requirements (HOW)**
-   - FR.01.1.1: "System shall maintain 99.9% accuracy in inventory counts"
-   - FR.02.1.1: "System shall scan barcodes and update inventory database within 2 seconds"
+This prevents "everything is P1" by grounding priority in the problem's actual impact.
 
-**Result:** Every requirement traces back to the $50k problem. You build only what solves the actual business need. No wasted features.
+## Quick start
 
-## 👥 Who Should Use This
+**Install** (ask your AI assistant):
 
-**Perfect for:**
-- **Software Engineers** building features from vague stakeholder requests
-- **Tech Leads** ensuring team builds the right thing
-- **Product Engineers** validating ideas before sprint planning
-- **Solution Architects** aligning technical design with business problems
-- **Anyone using AI coding assistants** who wants better requirements
-
-**Use it when:**
-- Starting a new feature or project
-- Stakeholders describe solutions instead of problems ("We need a dashboard!")
-- Requirements are unclear or conflicting
-- You need to justify technical decisions with business value
-- Reviewing existing requirements for quality
-
-## 🚀 Quick Start
-
-**Step 1:** Install (one-time setup)
-
-Ask your AI assistant to install into your project's skills directory:
-
-**For GitHub Copilot (recommended):**
 ```
 Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/
 ```
 
-**For Claude Code:**
-```
-Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .claude/skills/
-```
+For Claude Code, use `.claude/skills/` instead. Skills must go in the agent-specific directory, not a `skills/` folder at the repo root.
 
-> ⚠️ **Important:** Skills must be installed inside your project's agent-specific directory (e.g., `.github/skills/` for GitHub Copilot), **not** in a `skills/` folder at the repository root. A `skills/` folder at the root will not be recognized by your AI agent.
-
-**Step 2:** Start your first requirements session
+**Run** your first session:
 
 ```
 /problem-based-srs
 ```
 
-Your AI will guide you through the complete process interactively.
+Describe your situation. The AI handles the rest:
 
-> **First time?** Just tell your AI about your project challenge. Example: *"We need a mobile app for field technicians who can't access customer data offline."* The AI will handle the rest.
-
-## 💡 Commands Reference
-
-Once installed, use these commands to work with different parts of the methodology:
-
-| Command | When to Use | What It Does |
-|---------|-------------|--------------|
-| `/problem-based-srs` | Starting a new project | Guides you through all steps from scratch |
-| `/business-context` | Establishing project context | Captures business context, principles, and constraints (CONTEXT) |
-| `/customer-problems` | Analyzing business problems | Identifies and classifies customer problems (WHY) |
-| `/software-glance` | Quick project overview | Creates high-level software summary |
-| `/customer-needs` | Defining what to build | Translates problems into customer needs (WHAT) |
-| `/software-vision` | Planning architecture | Documents software architecture and vision |
-| `/functional-requirements` | Writing requirements | Specifies detailed functional requirements (HOW) |
-| `/zigzag-validator` | Quality check | Validates that all requirements trace to problems |
-| `/complexity-analysis` | Deep analysis (optional) | Axiomatic Design quality analysis for critical systems |
-
-**Common scenarios:**
-
-- 🆕 **New project?** → Use `/problem-based-srs` to start from scratch (begins with `/business-context`)
-- 📋 **Need structured context?** → Use `/business-context` to establish business principles and boundaries
-- 🔍 **Reviewing existing requirements?** → Use `/functional-requirements` then `/zigzag-validator` to validate
-- 💡 **Stakeholders proposing solutions instead of problems?** → Use `/customer-problems` to dig deeper
-- ✅ **Need to verify requirements quality?** → Use `/zigzag-validator` for traceability check
-
-## 📊 How It Works
-
-The methodology follows a proven process that ensures you discover problems first, then design solutions:
-
-```mermaid
-graph LR
-    A[Stakeholder Input] --> B0[Step 0: Business Context - CONTEXT]
-    B0 --> B[Step 1: Customer Problems - WHY]
-    B --> C[Step 2: Software Glance]
-    C --> D[Step 3: Customer Needs - WHAT]
-    D --> E[Step 4: Software Vision]
-    E --> F[Step 5: Functional Requirements - HOW]
-    F --> G[Ready to Code]
-
-    style B0 fill:#dda0dd
-    style B fill:#ff6b6b
-    style C fill:#4ecdc4
-    style D fill:#45b7d1
-    style E fill:#96ceb4
-    style F fill:#ffeaa7
+```
+I need requirements for an inventory management system.
+Our warehouse tracks everything in spreadsheets and loses $50k/month due to errors.
 ```
 
-**The WHY → WHAT → HOW progression ensures:**
-- ✅ You understand the business problem before designing solutions
-- ✅ Every requirement traces back to a real customer pain point
-- ✅ Priorities are clear (must-solve vs nice-to-have)
-- ✅ You maximize impact by focusing on what actually matters
-- ✅ Stakeholders see their problems reflected in your work
+The methodology will produce traced artifacts from business context through functional requirements, stored in your project's `.spec/` directory.
 
-**Each step builds on the previous:**
-0. **CONTEXT (Business Context)** → Establish principles and boundaries ("What governs this project?")
-1. **WHY (Customer Problems)** → Identify business pain ("What's broken?")
-2. **Software Glance** → Sketch solution approach ("What might help?")
-3. **WHAT (Customer Needs)** → Define required outcomes ("What must it do?")
-4. **Software Vision** → Detail architecture and scope ("How will it work?")
-5. **HOW (Requirements)** → Specify exact behavior ("What are the details?")
+## Full example
 
-### Problem Priority Classification
+Here is one pass through the methodology for the warehouse scenario above:
 
-Customer Problems are classified by severity so you know what to build first:
+```
+CONTEXT
+  Project: InventoryPro — warehouse logistics
+  Principle: "Inventory data must reflect physical reality within 0.1% tolerance" (Mandatory)
+  Success: "Reduce inventory discrepancy from $50k to $5k/month"
 
-```mermaid
-graph TD
-    CP[Customer Problem] --> O{Classification}
-    O -->|Must, Required| OB[Obligation<br/>High Priority<br/>Legal/Contractual]
-    O -->|Expects, Should| EX[Expectation<br/>Medium Priority<br/>Business Goal]
-    O -->|Hopes, Wishes| HO[Hope<br/>Low Priority<br/>Improvement]
+WHY (Customer Problems)
+  CP.01  Warehouse must track inventory accurately otherwise $50k/month lost to errors
+  CP.02  Staff expects real-time inventory visibility otherwise delays in fulfillment
 
-    OB --> I1[Severe consequences<br/>if unsolved]
-    EX --> I2[Moderate impact<br/>if unsolved]
-    HO --> I3[Minimal penalty<br/>if unsolved]
+WHAT (Customer Needs)
+  CN.01.1  Warehouse needs system to track inventory with 99.9% accuracy
+  CN.02.1  Staff needs system to scan items and update inventory within 2 seconds
 
-    style OB fill:#ff6b6b
-    style EX fill:#ffa502
-    style HO fill:#ffeaa7
+HOW (Functional Requirements)
+  FR.01.1.1  System shall maintain 99.9% accuracy in inventory counts
+  FR.02.1.1  System shall scan barcodes and update inventory database within 2 seconds
 ```
 
-**Why this matters to you:**
-- **Obligation (Must)** → Build this first. Compliance, legal, contractual requirements.
-- **Expectation (Should)** → Build this next. Core business value and user satisfaction.
-- **Hope (Wishes)** → Build this last. Nice-to-have improvements and optimizations.
+Every FR traces to a CN, which traces to a CP. The $50k problem is the root. Nothing ships without a reason.
 
-This ensures you're not treating "nice to have" features the same as "business critical" requirements. **Maximize impact by focusing engineering time on high-severity problems first.**
+## Commands
 
-## 🛠️ Installation Options
+| Command | Purpose |
+|---------|---------|
+| `/problem-based-srs` | Full methodology, all steps |
+| `/business-context` | Step 0: project identity and constraints |
+| `/customer-problems` | Step 1: identify and classify problems |
+| `/software-glance` | Step 2: sketch solution approach |
+| `/customer-needs` | Step 3: define required outcomes |
+| `/software-vision` | Step 4: architecture and scope |
+| `/functional-requirements` | Step 5: detailed, testable requirements |
+| `/zigzag-validator` | Verify traceability across all artifacts |
+| `/complexity-analysis` | Optional: Axiomatic Design quality analysis |
 
-### Claude Code Plugin (Recommended)
+## Installation
 
-Install directly as a Claude Code plugin:
+<details>
+<summary>All installation methods</summary>
+
+### AI-assisted (recommended)
+
+Ask your AI assistant to install. Specify the target directory:
+
+| Agent | Install command |
+|-------|-----------------|
+| GitHub Copilot | `Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/` |
+| Claude Code | `Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .claude/skills/` |
+
+### Claude Code plugin
 
 ```bash
-# Test locally during development
 claude --plugin-dir ./Problem-Based-SRS
-
-# Or install from repository
+# or
 /plugin install https://github.com/RafaelGorski/Problem-Based-SRS
 ```
 
-After installation, skills are available with the `problem-based-srs:` namespace:
-- `/problem-based-srs:customer-problems` - Customer Problems
-- `/problem-based-srs:customer-needs` - Customer Needs
-- `/problem-based-srs:functional-requirements` - Functional Requirements
+### AgentSkills CLI
 
-### AI-Assisted Installation
-
-The easiest way—just ask your AI assistant. **Always specify the target directory** so it installs in the correct location:
-
-**GitHub Copilot:**
-```
-Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/
-```
-
-**Claude Code:**
-```
-Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .claude/skills/
-```
-
-> ⚠️ **Common mistake:** If you don't specify the target directory, the AI agent may create a `skills/` folder at the repository root — this **will not work**. Always include the correct path in your prompt (see table below).
-
-### Alternative: Manual Installation
-
-<details>
-<summary>Click to expand manual installation instructions</summary>
-
-#### For Individual Use
-
-Install to your personal skills directory:
-
-```bash
-# Clone the repository
-git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
-
-# Copy to your AI agent's skills directory
-# For Claude Code:
-cp -r Problem-Based-SRS/skills/problem-based-srs ~/.claude/skills/
-
-# For GitHub Copilot:
-cp -r Problem-Based-SRS/skills/problem-based-srs ~/.copilot/skills/
-```
-
-**Skills directory by AI agent:**
-
-| Agent | macOS/Linux | Windows |
-|-------|-------------|---------|
-| Claude Code | `~/.claude/skills/` | `%USERPROFILE%\.claude\skills\` |
-| GitHub Copilot | `~/.copilot/skills/` | `%USERPROFILE%\.copilot\skills\` |
-| Gemini CLI | `~/.gemini/skills/` | `%USERPROFILE%\.gemini\skills\` |
-| Cline | `~/.cline/skills/` | `%USERPROFILE%\.cline\skills\` |
-| Goose | `~/.config/goose/skills/` | `%USERPROFILE%\.config\goose\skills\` |
-
-#### For Teams (Project-Level)
-
-Install into your repository so everyone on the team automatically gets it:
-
-**Using the AgentSkills CLI:**
 ```bash
 npx skills add RafaelGorski/Problem-Based-SRS
 ```
 
-**Or manually:**
+### Manual
+
 ```bash
-# Clone the repository
 git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
 
-# Copy to your project's skills directory
-# For GitHub Copilot:
-cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.github/skills/
-
-# For Claude Code:
-cp -r Problem-Based-SRS/skills/problem-based-srs your-project/.claude/skills/
-
-# Commit to version control
-cd your-project
-git add .github/skills/  # or .claude/skills/
-git commit -m "Add Problem-Based SRS methodology"
+# Copy to your agent's skills directory:
+cp -r Problem-Based-SRS/skills/problem-based-srs <target>/
 ```
 
-**Project-level skills directories:**
+| Agent | Personal directory | Project directory |
+|-------|--------------------|-------------------|
+| GitHub Copilot | `~/.copilot/skills/` | `.github/skills/` |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Gemini CLI | `~/.gemini/skills/` | — |
+| Cursor | — | `.cursor/skills/` |
+| Cline | `~/.cline/skills/` | — |
+| Goose | `~/.config/goose/skills/` | — |
 
-| Agent | Project Directory |
-|-------|-------------------|
-| GitHub Copilot | `.github/skills/` |
-| Claude Code | `.claude/skills/` |
-| Cursor | `.cursor/skills/` |
-
-> **Tip:** Project-level installation ensures your entire team follows the same requirements methodology and the skill is automatically available in CI/CD.
+Project-level installation means your whole team uses the same methodology automatically.
 
 </details>
 
-
-## 📐 Standards Compliance
-
-This project uses normative keywords as defined in **[BCP 14](https://www.rfc-editor.org/bcp/bcp14)** ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)). Key words such as MUST, SHOULD, and MAY carry their defined normative meanings **only when written in ALL CAPITALS**.
-
-The requirement-writing guidance in this methodology aligns with **[ISO/IEC/IEEE 29148:2018](https://www.iso.org/standard/72089.html)** — *Systems and Software Engineering — Life Cycle Processes — Requirements Engineering* — particularly:
-
-- **Requirement quality characteristics** (complete, correct, unambiguous, verifiable, traceable)
-- **Structured requirement syntax** (`The [System] shall [verb]...`)
-- **Bidirectional traceability** between requirements and their sources (CP ↔ CN ↔ FR)
-
-> **Note on CP notation:** In Customer Problem statements, `must/expects/hopes` are classification verbs indicating problem severity (Obligation/Expectation/Hope). They are **not** BCP 14 normative keywords unless explicitly written in ALL CAPITALS.
-
-See [docs/references/](docs/references/) for local reference summaries of these standards.
-
-## 📚 Learn More
-
-### Documentation
-
-- **[Research Paper](docs/)** - The peer-reviewed methodology by Gorski & Stadzisz
-  - **DOI:** [10.21529/RESI.2016.1502002](https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230)
-- **[Contributing](CONTRIBUTING.md)** - Help improve the methodology
-- **[Changelog](CHANGELOG.md)** - Version history and updates
-
-### Key Concepts
-
-**Traceability = Accountability:** Every functional requirement (FR) traces to a customer need (CN), which traces to a customer problem (CP). You can always answer "Why are we building this?" No more building features nobody uses.
-
-**Impact:** When stakeholders ask for changes, you can quickly check which problems are affected. When prioritizing, you rank by problem severity — not by who shouts loudest.
-
-**AgentSkills Format:** This repository uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Plugins](https://code.claude.com/docs/en/plugins.md) format, making it compatible with Claude Code, Claude.ai, GitHub Copilot, and other AI agents.
-
-## 📋 Version 1.2
-
-Released February 2026 with:
-
-- **NEW:** `/complexity-analysis` command for optional Axiomatic Design quality analysis
-- **NEW:** Condensed case study examples (CRM and MicroER systems)
-- **NEW:** C/P (Complete/Partial) completeness markers in traceability
-- **NEW:** Business Context step (`/business-context`) for structured project context and principles
-- **NEW:** Problem decomposition guidance with heuristics
-- **NEW:** Expanded CN outcome class examples (Control, Construction, Entertainment)
-- **NEW:** Agile/sprint integration patterns
-- Complete methodology (Step 0-5) with traceability validation
-- AgentSkills format for GitHub Copilot, Claude, and other AI agents
-- Comprehensive documentation based on peer-reviewed research
-
-## 📂 Repository Contents
-
-This repository follows the [Claude Code plugins standard](https://code.claude.com/docs/en/plugins-reference.md):
+## Repository structure
 
 ```
 Problem-Based-SRS/
-├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest
-├── agents/
-│   └── problem-based-srs/       # Agent orchestrator
-│       └── AGENT.md
+├── agents/problem-based-srs/    # Agent orchestrator
 ├── skills/
-│   ├── problem-based-srs/       # Main SRS methodology skill
-│   │   ├── SKILL.md
-│   │   └── references/          # Examples only
-│   │       ├── crm-example.md
-│   │       └── microer-example.md
-│   ├── business-context/        # Step 0: Business context and principles
-│   │   └── SKILL.md
-│   ├── customer-problems/       # Step 1: WHY
-│   │   └── SKILL.md
-│   ├── software-glance/         # Step 2: High-level view
-│   │   └── SKILL.md
-│   ├── customer-needs/          # Step 3: WHAT
-│   │   └── SKILL.md
-│   ├── software-vision/         # Step 4: Architecture
-│   │   └── SKILL.md
-│   ├── functional-requirements/ # Step 5: HOW
-│   │   └── SKILL.md
+│   ├── problem-based-srs/       # Main skill + case study examples
+│   ├── business-context/        # Step 0
+│   ├── customer-problems/       # Step 1
+│   ├── software-glance/         # Step 2
+│   ├── customer-needs/          # Step 3
+│   ├── software-vision/         # Step 4
+│   ├── functional-requirements/ # Step 5
 │   ├── zigzag-validator/        # Traceability validation
-│   │   └── SKILL.md
 │   └── complexity-analysis/     # Optional: Axiomatic Design
-│       └── SKILL.md
-├── settings.json                # Default plugin settings
-└── docs/                        # Research paper and methodology
+├── docs/                        # Research paper and methodology
+└── .claude-plugin/              # Plugin manifest
 ```
 
-### Key Files
+Case studies: [`crm-example.md`](skills/problem-based-srs/references/crm-example.md) and [`microer-example.md`](skills/problem-based-srs/references/microer-example.md) walk through complete sessions.
 
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **docs/** - Research paper and methodology details
-- **agents/problem-based-srs/** - Agent orchestrator for AI agents
-- **skills/** - Individual skills for each methodology step
-  - `problem-based-srs/references/crm-example.md` - Complete CRM case study walkthrough
-  - `problem-based-srs/references/microer-example.md` - Renewable energy system walkthrough
-### Optional: Complexity Analysis (`/complexity-analysis`)
+## Research and standards
 
-For deeper quality analysis on critical systems, you can explicitly call `/complexity-analysis` to:
-- Analyze specification independence (coupled vs. uncoupled)
-- Use C/P (Complete/Partial) completeness markers
-- Apply Axiomatic Design principles
+Based on the methodology by Gorski & Stadzisz, published as peer-reviewed research.
+**DOI:** [10.21529/RESI.2016.1502002](https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230)
 
-This is **not** part of the standard flow—use it when you need formal quality gates.
+Requirement-writing guidance aligns with [ISO/IEC/IEEE 29148:2018](https://www.iso.org/standard/72089.html) for requirement quality, structured syntax, and bidirectional traceability. Normative keywords follow [BCP 14](https://www.rfc-editor.org/bcp/bcp14) (RFC 2119 / RFC 8174) when written in ALL CAPITALS.
+
+Uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Plugins](https://code.claude.com/docs/en/plugins.md) format.
 
 ---
 
-**Built with ❤️ by the requirements engineering community** | [Report Issues](https://github.com/RafaelGorski/Problem-Based-SRS/issues) | [MIT License](LICENSE)
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Report an issue](https://github.com/RafaelGorski/Problem-Based-SRS/issues) · [MIT License](LICENSE)

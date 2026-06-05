@@ -162,7 +162,10 @@ Problem-Based-SRS/
 ├── hooks/
 │   └── hooks.json               # Hook configurations
 ├── settings.json                # Default plugin settings
-└── docs/                        # Documentation
+└── docs/                        # Documentation + skill-generated files
+    ├── PRODUCT.md               # Brand identity (skill-generated)
+    ├── DESIGN.md                # Visual system (skill-generated)
+    └── index.html               # Project webpage (GitHub Pages)
 ```
 
 ### Skills Development (AgentSkills Format)
@@ -190,7 +193,7 @@ Problem-Based-SRS/
   - Can include optional subdirectories: scripts/, references/, assets/
 - **`hooks/`**: Hook configurations for event handlers (hooks.json)
 - **`settings.json`**: Default plugin settings
-- **`docs/`**: Documentation, research papers, methodology guides
+- **`docs/`**: Documentation, research papers, methodology guides, and **all skill-generated helper files** (e.g., PRODUCT.md, DESIGN.md). Any skill or agent that creates auxiliary files (brand identity, design systems, style guides, etc.) MUST place them in `docs/`, never in the repository root.
 - **`docs/references/`**: Reference documentation for AgentSkills development
 
 ### Code Style

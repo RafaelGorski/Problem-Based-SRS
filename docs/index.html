@@ -3,663 +3,654 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Problem-Based SRS - A lightweight, prompt-first methodology for software requirements specification designed for AI agents">
+    <meta name="description" content="Problem-Based SRS: AI-guided requirements engineering that traces every feature back to the customer problem it solves.">
+    <meta name="theme-color" content="#1a1a1a">
     <title>Problem-Based SRS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f8f9fa;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-        
-        header h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-        
-        header p {
-            font-size: 1.25rem;
-            opacity: 0.95;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        nav {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding: 1rem;
-        }
-        
-        nav li {
-            margin: 0 1rem;
-        }
-        
-        nav a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav a:hover {
-            color: #764ba2;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        section {
-            background: white;
-            margin: 2rem 0;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        h2 {
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 0.5rem;
-        }
-        
-        h3 {
-            color: #764ba2;
-            font-size: 1.5rem;
-            margin: 1.5rem 0 1rem;
-        }
-        
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        
-        .feature-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 1.5rem;
-            border-radius: 8px;
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .feature-card h3 {
-            color: #667eea;
-            margin-top: 0;
-        }
-        
-        .step-flow {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .step {
-            background: linear-gradient(to right, #ff6b6b, #ee5a6f);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            position: relative;
-        }
-        
-        .step:nth-child(2) {
-            background: linear-gradient(to right, #4ecdc4, #44a08d);
-        }
-        
-        .step:nth-child(3) {
-            background: linear-gradient(to right, #45b7d1, #2c97b5);
-        }
-        
-        .step:nth-child(4) {
-            background: linear-gradient(to right, #96ceb4, #7fb99e);
-        }
-        
-        .step:nth-child(5) {
-            background: linear-gradient(to right, #ffeaa7, #fdcb6e);
-            color: #333;
-        }
-        
-        .step h4 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        code {
-            background: #f4f4f4;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-        
-        pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 1rem 0;
-        }
-        
-        pre code {
-            background: transparent;
-            color: inherit;
-            padding: 0;
-        }
-        
-        .cta-section {
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 3rem 2rem;
-            border-radius: 8px;
-        }
-        
-        .cta-button {
-            display: inline-block;
-            background: white;
-            color: #667eea;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            margin: 1rem 0.5rem;
-            transition: transform 0.3s;
-        }
-        
-        .cta-button:hover {
-            transform: scale(1.05);
-        }
-        
-        footer {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-        
-        .badge {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin: 0.25rem;
+        /* ── Tokens ── */
+        :root {
+            --primary: oklch(0.60 0.16 24);
+            --primary-hover: oklch(0.55 0.18 24);
+            --primary-subtle: oklch(0.25 0.06 24);
+            --bg: oklch(0.10 0.000 0);
+            --bg-elevated: oklch(0.13 0.000 0);
+            --surface: oklch(0.16 0.004 24);
+            --surface-hover: oklch(0.19 0.005 24);
+            --surface-border: oklch(0.22 0.005 24);
+            --ink: oklch(0.93 0.000 0);
+            --ink-heading: oklch(0.97 0.000 0);
+            --accent: oklch(0.72 0.12 190);
+            --accent-hover: oklch(0.67 0.14 190);
+            --muted: oklch(0.60 0.000 0);
+            --muted-light: oklch(0.50 0.000 0);
+            --step-context: oklch(0.60 0.10 310);
+            --step-why: oklch(0.62 0.18 25);
+            --step-glance: oklch(0.68 0.12 175);
+            --step-what: oklch(0.65 0.10 230);
+            --step-vision: oklch(0.66 0.10 155);
+            --step-how: oklch(0.75 0.12 85);
+            --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+            --font-body: 'Figtree', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+            --text-xs: clamp(0.75rem, 0.7rem + 0.15vw, 0.8rem);
+            --text-sm: clamp(0.825rem, 0.78rem + 0.2vw, 0.9rem);
+            --text-base: clamp(0.95rem, 0.88rem + 0.25vw, 1.05rem);
+            --text-lg: clamp(1.125rem, 1rem + 0.4vw, 1.3rem);
+            --text-xl: clamp(1.4rem, 1.2rem + 0.6vw, 1.65rem);
+            --text-2xl: clamp(1.75rem, 1.4rem + 1vw, 2.1rem);
+            --text-3xl: clamp(2.2rem, 1.7rem + 1.5vw, 2.8rem);
+            --text-hero: clamp(3.2rem, 2.2rem + 3vw, 5rem);
+            --space-xs: clamp(0.25rem, 0.2rem + 0.15vw, 0.375rem);
+            --space-sm: clamp(0.5rem, 0.4rem + 0.3vw, 0.75rem);
+            --space-md: clamp(1rem, 0.8rem + 0.6vw, 1.5rem);
+            --space-lg: clamp(1.5rem, 1.2rem + 1vw, 2.5rem);
+            --space-xl: clamp(2.5rem, 1.8rem + 2vw, 4rem);
+            --space-2xl: clamp(4rem, 2.8rem + 3.5vw, 6.5rem);
+            --space-section: clamp(5rem, 3.5rem + 4.5vw, 9rem);
+            --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        .diagram {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin: 1.5rem auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: #fff;
+        /* ── Reset ── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            line-height: 1.7;
+            color: var(--ink);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
-        
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
+
+        /* ── Typography ── */
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            color: var(--ink-heading);
+            text-wrap: balance;
+            letter-spacing: -0.02em;
+        }
+        h2 { font-size: var(--text-3xl); margin-bottom: var(--space-lg); }
+        h3 { font-size: var(--text-xl); margin-bottom: var(--space-sm); color: var(--ink); }
+        p { max-width: 68ch; }
+        a { color: var(--accent); text-decoration: none; transition: color 0.2s ease; }
+        a:hover { color: var(--accent-hover); }
+        a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            background: var(--bg-elevated);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            border: 1px solid var(--surface-border);
+        }
+        pre {
+            background: var(--bg-elevated);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: var(--space-md);
+            overflow-x: auto;
+            margin: var(--space-md) 0;
+        }
+        pre code { background: none; border: none; padding: 0; font-size: var(--text-sm); line-height: 1.6; }
+
+        /* ── Layout ── */
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--space-lg); }
+        .section { padding: var(--space-section) 0; }
+        .section + .section { border-top: 1px solid var(--surface-border); }
+
+        /* ── Skip link ── */
+        .skip-link {
+            position: absolute; left: -9999px; top: var(--space-sm);
+            background: var(--primary); color: var(--ink-heading);
+            padding: var(--space-sm) var(--space-md); border-radius: 8px;
+            font-weight: 600; z-index: 200;
+        }
+        .skip-link:focus { left: var(--space-md); }
+
+        /* ── Nav ── */
+        .site-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: oklch(0.10 0.000 0 / 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--surface-border);
+        }
+        .site-nav .wrap {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: var(--space-sm); padding-bottom: var(--space-sm);
+            gap: var(--space-md);
+        }
+        .site-nav-brand {
+            font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700;
+            color: var(--ink-heading); text-decoration: none; white-space: nowrap;
+        }
+        .site-nav-brand span { color: var(--primary); }
+        .site-nav-links {
+            display: flex; gap: var(--space-md); list-style: none;
+            flex-wrap: wrap; align-items: center;
+        }
+        .site-nav-links a {
+            color: var(--muted); font-size: var(--text-sm); font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .site-nav-links a:hover { color: var(--ink); }
+        .gh-link {
+            display: inline-flex; align-items: center; gap: 0.35em;
+            color: var(--muted); font-size: var(--text-sm); font-weight: 500;
+        }
+        .gh-link:hover { color: var(--ink); }
+        .gh-link svg { width: 18px; height: 18px; fill: currentColor; }
+
+        /* ── Hero ── */
+        .hero {
+            padding: var(--space-2xl) 0 var(--space-section);
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute;
+            width: clamp(300px, 50vw, 700px); height: clamp(300px, 50vw, 700px);
+            background: radial-gradient(circle, oklch(0.60 0.16 24 / 0.1), transparent 70%);
+            top: 30%; left: 50%; transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .hero-content { position: relative; }
+        .hero h1 {
+            font-size: var(--text-hero);
+            line-height: 1.1;
+            margin-bottom: var(--space-lg);
+            max-width: 16ch;
+        }
+        .hero h1 .hl { color: var(--primary); }
+        .hero-sub {
+            font-size: var(--text-lg);
+            color: var(--muted);
+            max-width: 52ch;
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+        }
+        .hero-actions { display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center; }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 0.5em;
+            background: var(--primary); color: var(--ink-heading);
+            padding: 0.75em 1.5em; border-radius: 8px;
+            font-family: var(--font-body); font-size: var(--text-base); font-weight: 600;
+            text-decoration: none; transition: background 0.2s ease;
+        }
+        .btn-primary:hover { background: var(--primary-hover); color: var(--ink-heading); }
+        .btn-ghost {
+            display: inline-flex; align-items: center; gap: 0.5em;
+            background: transparent; color: var(--ink);
+            padding: 0.75em 1.5em; border-radius: 8px;
+            border: 1px solid var(--surface-border);
+            font-family: var(--font-body); font-size: var(--text-base); font-weight: 500;
+            text-decoration: none; transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .btn-ghost:hover { background: var(--surface); border-color: var(--muted-light); color: var(--ink); }
+        .hero-meta {
+            margin-top: var(--space-xl); display: flex; gap: var(--space-md);
+            flex-wrap: wrap; align-items: center;
+        }
+        .hero-badge {
+            font-size: var(--text-xs); color: var(--muted);
+            border: 1px solid var(--surface-border); padding: 0.3em 0.8em;
+            border-radius: 100px; white-space: nowrap;
+        }
+
+        /* ── Problem section ── */
+        .problem-before {
+            background: var(--surface); border-radius: 10px;
+            padding: var(--space-lg); margin: var(--space-lg) 0;
+            max-width: 56ch;
+        }
+        .problem-before p { color: var(--muted); }
+        .problem-before .quote {
+            font-size: var(--text-lg); color: var(--ink);
+            font-style: italic; margin-bottom: var(--space-md);
+        }
+        .problem-after {
+            margin: var(--space-lg) 0; max-width: 56ch;
+        }
+        .problem-after .cp {
+            font-family: var(--font-mono); font-size: var(--text-base);
+            color: var(--primary); background: var(--primary-subtle);
+            padding: var(--space-sm) var(--space-md); border-radius: 8px;
+            display: block; margin: var(--space-md) 0;
+        }
+
+        /* ── Flow (methodology timeline) ── */
+        .flow { position: relative; padding-left: 2.5rem; margin: var(--space-xl) 0; }
+        .flow::before {
+            content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+            width: 2px; background: var(--surface-border);
+        }
+        .flow-step {
+            position: relative; padding-bottom: var(--space-xl);
+        }
+        .flow-step:last-child { padding-bottom: 0; }
+        .flow-dot {
+            position: absolute; left: -2.5rem; top: 4px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--dot-color, var(--muted));
+        }
+        .flow-name {
+            font-family: var(--font-display); font-size: var(--text-xl);
+            font-weight: 700; color: var(--ink-heading);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-question {
+            font-size: var(--text-sm); color: var(--muted);
+            font-style: italic; margin-bottom: var(--space-xs);
+        }
+        .flow-desc { color: var(--ink); max-width: 52ch; }
+        .flow-cmd {
+            display: inline-block; margin-top: var(--space-sm);
+            font-family: var(--font-mono); font-size: var(--text-sm);
+            color: var(--accent); background: var(--bg-elevated);
+            padding: 0.2em 0.6em; border-radius: 4px;
+            border: 1px solid var(--surface-border);
+        }
+        .flow-trace {
+            margin-top: var(--space-xl); padding: var(--space-md) var(--space-lg);
+            background: var(--surface); border-radius: 10px;
+            font-family: var(--font-mono); font-size: var(--text-base);
+            color: var(--ink); text-align: center; letter-spacing: 0.02em;
+        }
+        .flow-trace .arrow { color: var(--muted); margin: 0 0.3em; }
+
+        /* ── Classification ── */
+        .class-grid { margin-top: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md); }
+        .class-row {
+            display: grid; grid-template-columns: auto 1fr;
+            gap: var(--space-md); align-items: start;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--surface); border-radius: 10px;
+        }
+        .class-indicator {
+            width: 10px; height: 10px; border-radius: 50%;
+            margin-top: 0.45em; flex-shrink: 0;
+        }
+        .class-label {
+            font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700;
+            color: var(--ink-heading);
+        }
+        .class-verb { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--muted); }
+        .class-desc { color: var(--ink); margin-top: var(--space-xs); }
+
+        /* ── Commands table ── */
+        .cmd-table { width: 100%; border-collapse: collapse; margin-top: var(--space-lg); }
+        .cmd-table th {
+            text-align: left; font-size: var(--text-sm); color: var(--muted);
+            font-weight: 500; padding: var(--space-sm) var(--space-md);
+            border-bottom: 1px solid var(--surface-border);
+        }
+        .cmd-table td {
+            padding: var(--space-sm) var(--space-md);
+            border-bottom: 1px solid oklch(0.16 0.000 0);
+            font-size: var(--text-sm);
+        }
+        .cmd-table tr:hover td { background: var(--surface); }
+        .cmd-table .cmd-name {
+            font-family: var(--font-mono); color: var(--accent); white-space: nowrap;
+        }
+
+        /* ── Footer CTA ── */
+        .footer-cta {
+            background: var(--primary-subtle);
+            padding: var(--space-2xl) 0;
+            text-align: center;
+        }
+        .footer-cta h2 { margin-bottom: var(--space-md); }
+        .footer-cta p { margin: 0 auto var(--space-lg); color: var(--ink); }
+        .footer-cta .hero-actions { justify-content: center; }
+
+        /* ── Footer ── */
+        .site-footer {
+            padding: var(--space-xl) 0; text-align: center;
+            border-top: 1px solid var(--surface-border);
+        }
+        .site-footer p { color: var(--muted-light); font-size: var(--text-sm); margin: 0 auto; }
+        .site-footer a { color: var(--muted); }
+        .site-footer a:hover { color: var(--ink); }
+        .footer-links { margin-top: var(--space-sm); }
+        .footer-links a + a::before { content: ' · '; color: var(--muted-light); }
+
+        /* ── Scroll reveal ── */
+        .reveal { opacity: 1; }
+        @media (prefers-reduced-motion: no-preference) {
+            body.js .reveal {
+                opacity: 0; transform: translateY(12px);
+                transition: opacity 0.5s var(--ease-out-quart), transform 0.5s var(--ease-out-quart);
             }
-            
-            nav ul {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            nav li {
-                margin: 0.5rem 0;
+            body.js .reveal.visible { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .site-nav-links { gap: var(--space-sm); }
+            .site-nav-links a { font-size: var(--text-xs); }
+            .hero h1 { max-width: none; }
+            .hero-actions { flex-direction: column; align-items: stretch; }
+            .btn-primary, .btn-ghost { justify-content: center; }
+            .class-row { grid-template-columns: 1fr; }
+            .class-indicator { display: none; }
+            .cmd-table { font-size: var(--text-xs); }
+            .cmd-table th:last-child, .cmd-table td:last-child { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>📄 Problem-Based SRS</h1>
-        <p>Stop building the wrong thing. AI-guided requirements engineering that starts with real customer problems, helping engineers discover what to build, reflect on business impact, and maximize the value of their work.</p>
-        <div style="margin-top: 1rem;">
-            <span class="badge">Version 1.1</span>
-            <span class="badge">AgentSkills Standard</span>
-            <span class="badge">GitHub Copilot Compatible</span>
-            <span class="badge">MIT License</span>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <nav class="site-nav" aria-label="Primary">
+        <div class="wrap">
+            <a href="/" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
+            <ul class="site-nav-links">
+                <li><a href="#problem">The problem</a></li>
+                <li><a href="#methodology">How it works</a></li>
+                <li><a href="#start">Get started</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#research">Research</a></li>
+                <li>
+                    <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="gh-link" target="_blank" rel="noopener" aria-label="View on GitHub">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                        GitHub
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="wrap hero-content">
+            <h1>Trace every feature to the <span class="hl">problem</span> it solves</h1>
+            <p class="hero-sub">AI-guided requirements engineering for software teams. Your coding assistant walks you from customer problems to functional requirements, with complete traceability at every step.</p>
+            <div class="hero-actions">
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-primary">View on GitHub</a>
+                <a href="https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230" class="btn-ghost" target="_blank" rel="noopener">Read the research</a>
+            </div>
+            <div class="hero-meta">
+                <span class="hero-badge">v1.2</span>
+                <span class="hero-badge">AgentSkills standard</span>
+                <span class="hero-badge">MIT License</span>
+            </div>
         </div>
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="#overview">Overview</a></li>
-            <li><a href="#methodology">Methodology</a></li>
-            <li><a href="#quickstart">Quick Start</a></li>
-            <li><a href="#features">Usage Patterns</a></li>
-            <li><a href="#resources">Resources</a></li>
-            <li><a href="#release">Release 1.1</a></li>
-        </ul>
-    </nav>
-    
-    <div class="container">
-        <section id="overview">
-            <h2>🎯 Overview</h2>
-            <p>An <strong><a href="https://agentskills.io" style="color: #667eea;">Agent Skill</a></strong> for AI-guided software requirements engineering. Works with <strong>GitHub Copilot</strong>, <strong>Claude Code</strong>, and other AI agents.</p>
 
-            <h3>⚡ The Problem We Solve</h3>
-            <p>Have you ever spent weeks building a feature, only to discover it didn't solve the actual problem? <strong>You're not alone.</strong> The #1 cause of software project failures is building what stakeholders <em>asked for</em> instead of what they actually <em>need</em>.</p>
-
-            <div style="background: #fff3cd; padding: 1.5rem; border-left: 4px solid #ffc107; margin: 1.5rem 0; border-radius: 4px;">
-                <strong>Real Example:</strong><br>
-                <strong>Stakeholder says:</strong> "We need a reporting dashboard with 20 charts."<br>
-                <strong>You build it:</strong> 3 weeks of work.<br>
-                <strong>Reality:</strong> They only use 3 charts. The real problem was <em>slow data access</em>, not visualization.<br><br>
-                <strong>Result:</strong> Wasted effort, missed opportunity, frustrated team.
-            </div>
-
-            <h3>💡 How It Helps</h3>
-            <p>Your AI coding assistant guides you through a proven 5-step process. You start with real business problems and end with traceable, justified requirements — so every feature you build solves an actual need.</p>
-
-            <p style="margin-top: 1rem;"><strong>Spend 30 minutes upfront with your AI agent to save weeks of building the wrong thing.</strong></p>
-
-            <h3 style="margin-top: 2rem;">🎯 What You'll Get</h3>
-            <div class="feature-grid" style="margin-top: 1.5rem;">
-                <div class="feature-card">
-                    <h3>🔍 Discover Real Problems</h3>
-                    <p>Identify what customers actually need before writing code</p>
+    <main id="main">
+        <!-- The Problem -->
+        <section id="problem" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Most requirements start in the wrong place</h2>
+                <div class="problem-before reveal">
+                    <p class="quote">"We need a reporting dashboard with 20 charts."</p>
+                    <p>You build it. Three weeks. Ship it. They use 3 of the 20 charts. The actual problem was slow data access, not visualization. Two weeks of engineering time, gone.</p>
                 </div>
-                <div class="feature-card">
-                    <h3>🎯 Align with Impact</h3>
-                    <p>Every line of code traces back to a problem it solves</p>
-                </div>
-                <div class="feature-card">
-                    <h3>⚡ Reduce Rework</h3>
-                    <p>Catch misunderstandings in minutes, not after weeks</p>
-                </div>
-                <div class="feature-card">
-                    <h3>🚀 Ship with Confidence</h3>
-                    <p>Know exactly why each feature matters and to whom</p>
-                </div>
-                <div class="feature-card">
-                    <h3>🤖 AI-Guided Process</h3>
-                    <p>Works with GitHub Copilot, Claude, and other AI agents</p>
-                </div>
-                <div class="feature-card">
-                    <h3>📊 Clear Priorities</h3>
-                    <p>Know what's critical vs nice-to-have based on problem severity</p>
-                </div>
-            </div>
-
-            <div style="background: #f8f9fa; padding: 1rem; border-left: 4px solid #667eea; margin: 1.5rem 0;">
-                <strong>Research-Backed:</strong> Based on peer-reviewed methodology by <strong>Gorski and Stadzisz</strong>, published in academic research on software requirements specification.<br>
-                <strong>DOI:</strong> <a href="https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230" style="color: #667eea;">10.21529/RESI.2016.1502002</a>
-            </div>
-        </section>
-        
-        <section id="methodology">
-            <h2>📊 The 5-Step Methodology</h2>
-            <p>A systematic process that ensures you discover problems first, then design solutions. Each step builds on the previous to maximize your impact:</p>
-
-            <img class="diagram" src="img/5-step-process.png" alt="5-step methodology flowchart">
-
-            <div class="step-flow">
-                <div class="step">
-                    <h4>Step 1: Customer Problems (CP)</h4>
-                    <p>Identify the <strong>WHY</strong> - understand business pain and classify by problem class (Obligation / Expectation / Hope — roughly must-have / should-have / could-have)</p>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Clear focus on what matters most, justification for every feature</p>
-                    <span class="badge">/customer-problems</span>
-                </div>
-
-                <div class="step">
-                    <h4>Step 2: Software Glance</h4>
-                    <p>Sketch high-level solution approach - components, interfaces, boundaries</p>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Shared understanding with team, architectural direction</p>
-                    <span class="badge">/software-glance</span>
-                </div>
-
-                <div class="step">
-                    <h4>Step 3: Customer Needs (CN)</h4>
-                    <p>Define the <strong>WHAT</strong> - outcomes the system must deliver to solve the problems</p>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Success criteria, measurable goals, scope boundaries</p>
-                    <span class="badge">/customer-needs</span>
-                    <span class="badge">/zigzag-validator (validate)</span>
-                </div>
-
-                <div class="step">
-                    <h4>Step 4: Software Vision</h4>
-                    <p>Detail architecture, features, constraints, and technical approach</p>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Technical roadmap, stakeholder alignment, design decisions</p>
-                    <span class="badge">/software-vision</span>
-                </div>
-
-                <div class="step">
-                    <h4>Step 5: Functional Requirements (FR)</h4>
-                    <p>Define the <strong>HOW</strong> - detailed, testable requirements for implementation</p>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">✅ <strong>You get:</strong> Implementation checklist, acceptance criteria, full traceability</p>
-                    <span class="badge">/functional-requirements</span>
-                    <span class="badge">/zigzag-validator (validate)</span>
-                </div>
-            </div>
-
-            <div style="background: #e8f5e9; padding: 1.5rem; border-left: 4px solid #4caf50; margin: 2rem 0; border-radius: 4px;">
-                <strong>💡 Why This Order Matters:</strong><br>
-                Starting with problems (WHY) before solutions (HOW) ensures you build the right thing. Engineers who skip problem discovery often build features that look good but don't solve actual needs.
-            </div>
-            
-            <h3 style="margin-top: 2rem;">🔄 Development Workflow Integration</h3>
-            <img class="diagram" src="img/development-workflow.png" alt="Development workflow integration diagram">
-            
-            <h3>🔗 Artifact Traceability</h3>
-            <p>Every requirement traces back to ensure it solves real problems. Each artifact is interconnected:</p>
-            <img class="diagram" src="img/artifact-traceability.png" alt="Artifact traceability diagram">
-            
-            <h3>📊 Problem Classification</h3>
-            <p>Customer Problems are classified by severity to prioritize what must be solved:</p>
-            <img class="diagram" src="img/problem-classification.png" alt="Problem classification diagram">
-            <ul style="margin-top: 1rem; line-height: 2;">
-                <li><strong>Obligation (Must/Required):</strong> High priority - severe consequences if unsolved (legal/contractual)</li>
-                <li><strong>Expectation (Should/Expects):</strong> Medium priority - moderate impact if unsolved (business goals)</li>
-                <li><strong>Hope (Wishes):</strong> Low priority - minimal penalty if unsolved (improvements)</li>
-            </ul>
-        </section>
-        
-        <section id="quickstart">
-            <h2>🚀 Quick Start for Engineers</h2>
-
-            <h3>Step 1: Install the Skill</h3>
-            <p>Ask your AI assistant to install it:</p>
-            <pre><code>Install the Problem-Based SRS skill from RafaelGorski/Problem-Based-SRS</code></pre>
-
-            <p style="margin-top: 1rem;">Many AI agents (including GitHub Copilot and Claude Code) can install AgentSkills when you ask them, but the exact installation steps vary by agent.</p>
-            <p>If your agent does not install it automatically, follow the <a href="https://github.com/RafaelGorski/Problem-Based-SRS#installation-options">Installation Options</a> in the README to copy the skill manually or use the AgentSkills CLI.</p>
-
-            <h3>Step 2: Start Your First Session</h3>
-            
-            <p>Use these commands in VS Code, Visual Studio, JetBrains IDEs, or Claude:</p>
-
-            <pre><code>/problem-based-srs        # Full methodology - start here for new projects
-/business-context         # Business Context - establish project principles
-/customer-problems        # Customer Problems - identify business pain
-/software-glance          # Software Glance - sketch solution approach
-/customer-needs           # Customer Needs - define required outcomes
-/software-vision          # Software Vision - detail architecture
-/functional-requirements  # Functional Requirements - specify implementation
-/zigzag-validator         # Validate traceability - quality check
-/complexity-analysis      # Optional: Axiomatic Design analysis</code></pre>
-            
-            <h3>Compatibility</h3>
-            <p>Works with any AI agent that supports the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills standard</a>:</p>
-            
-            <ul style="margin-top: 1rem; line-height: 2;">
-                <li><strong>GitHub Copilot:</strong> Auto-discovers from the skills directory</li>
-                <li><strong>Claude Code:</strong> Auto-discovers when this repository is in your workspace</li>
-                <li><strong>Claude.ai:</strong> Upload the skill from <code>skills/problem-based-srs/</code> (including the references folder)</li>
-                <li><strong>Other LLMs</strong> (ChatGPT, DeepSeek, Llama, etc.): Copy the skill content as context</li>
-            </ul>
-            
-            <h3>For New Features</h3>
-            <p>Simply describe your business context or problem:</p>
-
-            <pre><code>I need to create requirements for [feature name]
-
-Business Context: [describe current situation and problem]
-
-Example:
-"I need requirements for an inventory management system.
-Our warehouse tracks everything in spreadsheets and loses
-$50k/month due to errors."</code></pre>
-
-            <p style="margin-top: 1rem;">The AI will automatically:</p>
-            <ul style="line-height: 2;">
-                <li>✅ Guide you through all 5 steps</li>
-                <li>✅ Ask clarifying questions to uncover real problems</li>
-                <li>✅ Help you prioritize by problem severity</li>
-                <li>✅ Ensure traceability from problems to requirements</li>
-                <li>✅ Save your work as structured documents</li>
-            </ul>
-
-            <h3 style="margin-top: 2rem;">Common Scenarios</h3>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
-                    <h4 style="margin-top: 0; color: #667eea;">🆕 New Feature</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/problem-based-srs</code></p>
-                    <p style="font-size: 0.9rem;">Start from scratch and go through all 5 steps with your AI guiding you.</p>
-                </div>
-
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
-                    <h4 style="margin-top: 0; color: #667eea;">🔍 Review Existing Requirements</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/functional-requirements</code> then <code>/zigzag-validator</code></p>
-                    <p style="font-size: 0.9rem;">Validate that requirements trace back to real problems.</p>
-                </div>
-
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
-                    <h4 style="margin-top: 0; color: #667eea;">💡 Stakeholder Proposes Solution</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/customer-problems</code></p>
-                    <p style="font-size: 0.9rem;">Dig deeper to uncover the actual problem they're trying to solve.</p>
-                </div>
-
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
-                    <h4 style="margin-top: 0; color: #667eea;">✅ Quality Check</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Use:</strong> <code>/zigzag-validator</code></p>
-                    <p style="font-size: 0.9rem;">Verify all requirements trace to customer needs and problems.</p>
-                </div>
-            </div>
-
-            <div style="background: #e3f2fd; padding: 1.5rem; border-left: 4px solid #2196f3; margin: 2rem 0; border-radius: 4px;">
-                <strong>💡 Pro Tip:</strong> The skill works with any AI agent that supports the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> standard (GitHub Copilot, Claude Code, Claude.ai, etc.). Just upload the skill files or let your AI auto-discover them from your workspace.
-            </div>
-        </section>
-        
-        <section id="features">
-            <h2>💡 Real-World Use Cases</h2>
-
-            <p>How engineers use Problem-Based SRS in different situations:</p>
-
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h3>🆕 New Feature Development</h3>
-                    <p><strong>Situation:</strong> Product manager asks for "a dashboard with analytics"</p>
-                    <p><strong>Your approach:</strong> Use <code>/customer-problems</code> to discover the real problem - turns out they need "real-time alerts when KPIs drop below threshold"</p>
-                    <p><strong>Result:</strong> Build the right thing (alerting) not the requested thing (dashboard)</p>
-                </div>
-
-                <div class="feature-card">
-                    <h3>🔍 Requirements Refinement</h3>
-                    <p><strong>Situation:</strong> You inherited vague requirements from another team</p>
-                    <p><strong>Your approach:</strong> Use <code>/zigzag-validator</code> to validate traceability, identify gaps, then use <code>/customer-problems</code> to fill missing problems</p>
-                    <p><strong>Result:</strong> Clear, traceable requirements that justify every feature</p>
-                </div>
-
-                <div class="feature-card">
-                    <h3>💡 Problem Discovery</h3>
-                    <p><strong>Situation:</strong> Stakeholders propose technical solutions ("Use Redis cache!")</p>
-                    <p><strong>Your approach:</strong> Use <code>/customer-problems</code> with discovery mode to ask "What problem does this solve?"</p>
-                    <p><strong>Result:</strong> Uncover actual need (faster queries) and evaluate best solution</p>
-                </div>
-
-                <div class="feature-card">
-                    <h3>⚖️ Priority Negotiation</h3>
-                    <p><strong>Situation:</strong> Everything is "high priority" from stakeholders</p>
-                    <p><strong>Your approach:</strong> Use problem classification (Obligation/Expectation/Hope) to rank by severity</p>
-                    <p><strong>Result:</strong> Data-driven prioritization based on business impact</p>
-                </div>
-
-                <div class="feature-card">
-                    <h3>📋 Sprint Planning</h3>
-                    <p><strong>Situation:</strong> Converting user stories to technical tasks</p>
-                    <p><strong>Your approach:</strong> Use <code>/customer-needs</code> for acceptance criteria, <code>/functional-requirements</code> for implementation tasks</p>
-                    <p><strong>Result:</strong> Clear sprint goals with traceable work items</p>
-                </div>
-
-                <div class="feature-card">
-                    <h3>✅ Code Review Context</h3>
-                    <p><strong>Situation:</strong> Reviewing a PR and wondering "why this approach?"</p>
-                    <p><strong>Your approach:</strong> Check FR traceability to see which problem it solves</p>
-                    <p><strong>Result:</strong> Context-aware review focused on solving the actual problem</p>
-                </div>
-            </div>
-            
-            <h3 style="margin-top: 2rem;">🔧 Integration with Development Workflow</h3>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-                <div>
-                    <h4 style="color: #667eea;">During Sprint Planning</h4>
-                    <ul style="line-height: 2;">
-                        <li>Use <code>/customer-problems</code> to capture user stories as customer problems</li>
-                        <li>Use <code>/customer-needs</code> to define acceptance criteria</li>
-                        <li>Use <code>/functional-requirements</code> to break down into technical requirements</li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 style="color: #667eea;">During Feature Design</h4>
-                    <ul style="line-height: 2;">
-                        <li>Reference <code>/software-glance</code> for high-level approach</li>
-                        <li>Reference <code>/software-vision</code> for architectural decisions</li>
-                        <li>Use <code>/zigzag-validator</code> to ensure design addresses all needs</li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 style="color: #667eea;">During Implementation</h4>
-                    <ul style="line-height: 2;">
-                        <li>Use functional requirements as your implementation checklist</li>
-                        <li>Trace each requirement back to CN and CP for context</li>
-                        <li>Update requirements if new problems discovered</li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 style="color: #667eea;">During Code Review</h4>
-                    <ul style="line-height: 2;">
-                        <li>Verify implementation satisfies functional requirements</li>
-                        <li>Check requirements still trace to customer needs</li>
-                        <li>Validate no scope creep beyond identified problems</li>
-                    </ul>
+                <div class="problem-after reveal">
+                    <p>This methodology reverses the order. Instead of starting with the stakeholder's solution, you start with their problem:</p>
+                    <code class="cp">CP.01: "Managers must access sales data within 5 seconds to make decisions."</code>
+                    <p>From that problem, you derive the need (CN: real-time data access), then the requirement (FR: data API + 3 targeted charts). Built in one week. Solves what actually matters.</p>
                 </div>
             </div>
         </section>
-        
-        <section id="resources">
-            <h2>📚 Additional Resources</h2>
-            
-            <h3>Repository Structure</h3>
-            <p>This repository provides agents and skills in the <a href="https://agentskills.io" style="color: #667eea;">AgentSkills</a> format:</p>
-            
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-                <h4 style="margin-top: 0; color: #667eea;">Agents</h4>
-                <p style="margin-bottom: 0.5rem;"><code>agents/problem-based-srs/</code> - Orchestrator agent for full methodology</p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-                <h4 style="margin-top: 0; color: #667eea;">Skills (Individual Steps)</h4>
-                <p style="margin-bottom: 0.5rem;">For GitHub Copilot, Claude Code, Claude.ai, and other AI agents:</p>
-                <ul style="line-height: 2;">
-                    <li><code>skills/problem-based-srs/</code> - Main orchestrator skill
-                        <ul style="margin-top: 0.5rem;">
-                            <li><code>references/crm-example.md</code> - Complete CRM walkthrough</li>
-                            <li><code>references/microer-example.md</code> - Energy system walkthrough</li>
-                        </ul>
-                    </li>
-                    <li><code>skills/customer-problems/</code> - Step 1: CP generation</li>
-                    <li><code>skills/software-glance/</code> - Step 2: Software Glance design</li>
-                    <li><code>skills/customer-needs/</code> - Step 3: CN specification</li>
-                    <li><code>skills/software-vision/</code> - Step 4: Software Vision design</li>
-                    <li><code>skills/functional-requirements/</code> - Step 5: FR/NFR generation</li>
-                    <li><code>skills/zigzag-validator/</code> - Traceability validation</li>
-                    <li><code>skills/complexity-analysis/</code> - <em>Optional:</em> Axiomatic Design analysis</li>
-                </ul>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-                <h4 style="margin-top: 0; color: #667eea;">Additional Documentation</h4>
-                <ul style="line-height: 2;">
-                    <li><code>docs/</code> - Full methodology and research paper</li>
-                    <li><code>README.md</code> - Quick start guide and examples</li>
-                    <li><code>CONTRIBUTING.md</code> - Contribution guidelines</li>
-                </ul>
+
+        <!-- Methodology -->
+        <section id="methodology" class="section">
+            <div class="wrap">
+                <h2 class="reveal">How it works</h2>
+                <p class="reveal" style="color: var(--muted); margin-bottom: var(--space-lg);">Six steps. Each builds on the previous. Your AI assistant guides the conversation.</p>
+
+                <div class="flow">
+                    <div class="flow-step reveal" style="--dot-color: var(--step-context)">
+                        <div class="flow-dot"></div>
+                        <div class="flow-name">Business Context</div>
+                        <p class="flow-question">What governs this project?</p>
+                        <p class="flow-desc">Project identity, constraints, success criteria. Establishes principles for all downstream decisions.</p>
+                        <span class="flow-cmd">/business-context</span>
+                    </div>
+                    <div class="flow-step reveal" style="--dot-color: var(--step-why)">
+                        <div class="flow-dot"></div>
+                        <div class="flow-name">Customer Problems</div>
+                        <p class="flow-question">What is broken, and for whom?</p>
+                        <p class="flow-desc">Identify and classify problems by severity: Obligation (must solve), Expectation (should solve), Hope (could solve).</p>
+                        <span class="flow-cmd">/customer-problems</span>
+                    </div>
+                    <div class="flow-step reveal" style="--dot-color: var(--step-glance)">
+                        <div class="flow-dot"></div>
+                        <div class="flow-name">Software Glance</div>
+                        <p class="flow-question">What might help?</p>
+                        <p class="flow-desc">High-level solution sketch. Components, boundaries, interfaces. Shared understanding before details.</p>
+                        <span class="flow-cmd">/software-glance</span>
+                    </div>
+                    <div class="flow-step reveal" style="--dot-color: var(--step-what)">
+                        <div class="flow-dot"></div>
+                        <div class="flow-name">Customer Needs</div>
+                        <p class="flow-question">What must the system deliver?</p>
+                        <p class="flow-desc">Required outcomes per problem. Measurable, testable, scoped. Each need traces to a specific problem.</p>
+                        <span class="flow-cmd">/customer-needs</span>
+                    </div>
+                    <div class="flow-step reveal" style="--dot-color: var(--step-vision)">
+                        <div class="flow-dot"></div>
+                        <div class="flow-name">Software Vision</div>
+                        <p class="flow-question">How will it work?</p>
+                        <p class="flow-desc">Architecture, technical approach, constraints, stakeholder alignment. The technical roadmap.</p>
+                        <span class="flow-cmd">/software-vision</span>
+                    </div>
+                    <div class="flow-step reveal" style="--dot-color: var(--step-how)">
+                        <div class="flow-dot"></div>
+                        <div class="flow-name">Functional Requirements</div>
+                        <p class="flow-question">What are the details?</p>
+                        <p class="flow-desc">Detailed, testable behavior specifications. Each requirement traces backward to a need and a problem.</p>
+                        <span class="flow-cmd">/functional-requirements</span>
+                    </div>
+                </div>
+
+                <div class="flow-trace reveal">
+                    <strong>FR</strong> <span class="arrow">←</span> <strong>CN</strong> <span class="arrow">←</span> <strong>CP</strong>
+                    <br><span style="font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted);">Every requirement traces backward. You can always answer: "Why are we building this?"</span>
+                </div>
             </div>
         </section>
-        
-        <section class="cta-section">
-            <h2 style="color: white; border: none;">Get Started Today</h2>
-            <p style="font-size: 1.15rem; margin: 1.5rem 0;">Start building the right thing with AI-guided requirements.</p>
-            <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="cta-button">View on GitHub</a>
-            <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/skills" class="cta-button">View Skills</a>
-            <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1" class="cta-button">Release 1.1</a>
+
+        <!-- Classification -->
+        <section id="classification" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Not all problems are equal</h2>
+                <p class="reveal" style="color: var(--muted); margin-bottom: var(--space-sm);">The methodology classifies each problem by severity, so priority reflects actual impact.</p>
+
+                <div class="class-grid">
+                    <div class="class-row reveal">
+                        <div class="class-indicator" style="background: var(--step-why);"></div>
+                        <div>
+                            <span class="class-label">Obligation</span>
+                            <span class="class-verb"> must</span>
+                            <p class="class-desc">High priority. Legal, contractual, or operational failure if unsolved. Build this first.</p>
+                        </div>
+                    </div>
+                    <div class="class-row reveal">
+                        <div class="class-indicator" style="background: var(--step-how);"></div>
+                        <div>
+                            <span class="class-label">Expectation</span>
+                            <span class="class-verb"> expects</span>
+                            <p class="class-desc">Medium priority. Degraded business outcomes if unsolved. Core value and user satisfaction.</p>
+                        </div>
+                    </div>
+                    <div class="class-row reveal">
+                        <div class="class-indicator" style="background: var(--step-glance);"></div>
+                        <div>
+                            <span class="class-label">Hope</span>
+                            <span class="class-verb"> hopes</span>
+                            <p class="class-desc">Low priority. Missed improvement opportunity if unsolved. Build this last.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
-        
-        <section id="release">
-            <h2>🎉 Release 1.1 (February 2026)</h2>
-            <p>We're excited to announce version 1.1 with Complexity Analysis and enhanced methodology features!</p>
-            
-            <h3>🆕 What's New in 1.1</h3>
-            <ul style="line-height: 2; margin-top: 1rem;">
-                <li><strong>Complexity Analysis (<code>/complexity-analysis</code>):</strong> Optional Axiomatic Design-based quality analysis for critical systems
-                    <ul style="margin-top: 0.5rem;">
-                        <li>Independence axiom analysis (coupled/redundant/ideal specifications)</li>
-                        <li>Design matrix evaluation</li>
-                        <li>Information content assessment</li>
-                    </ul>
-                </li>
-                <li><strong>Case Study Examples:</strong> Condensed walkthroughs for learning
-                    <ul style="margin-top: 0.5rem;">
-                        <li><code>crm-example.md</code> - CRM system from business context to requirements</li>
-                        <li><code>microer-example.md</code> - Renewable energy system (technical domain)</li>
-                    </ul>
-                </li>
-                <li><strong>C/P Completeness Markers:</strong> Enhanced traceability with Complete/Partial indicators</li>
-                <li><strong>Problem Decomposition Guidance:</strong> When and how to break down Customer Problems</li>
-                <li><strong>Expanded CN Outcome Classes:</strong> Detailed examples for Information, Control, Construction, Entertainment</li>
-                <li><strong>Agile Integration Patterns:</strong> Sprint 0 planning, per-feature CP→CN→FR chains, minimal viable SRS</li>
-            </ul>
-            
-            <h3 style="margin-top: 2rem;">📦 Included from 1.0</h3>
-            <ul style="line-height: 2; margin-top: 1rem;">
-                <li><strong>AgentSkills Format:</strong> Full compatibility with GitHub Copilot, Claude Code, Claude.ai, and other AI agents</li>
-                <li><strong>Complete 5-Step Methodology:</strong> Customer Problems → Software Glance → Customer Needs → Software Vision → Functional Requirements</li>
-                <li><strong>Traceability Validation:</strong> ZigZag validator ensures all requirements trace back to real business problems</li>
-                <li><strong>Python Test Infrastructure:</strong> 57+ tests validating YAML, markdown structure, and traceability IDs</li>
-                <li><strong>Comprehensive Documentation:</strong> Detailed reference guides for each methodology step</li>
-            </ul>
-            
-            <p style="margin-top: 1.5rem;">View the full <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md" style="color: #667eea;">changelog</a> for details.</p>
+
+        <!-- Quick Start -->
+        <section id="start" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Get started</h2>
+
+                <div class="reveal">
+                    <h3>Install</h3>
+                    <p style="margin-bottom: var(--space-sm);">Ask your AI assistant:</p>
+                    <pre><code>Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/</code></pre>
+                    <p style="color: var(--muted); font-size: var(--text-sm); margin-top: var(--space-sm);">For Claude Code, use <code>.claude/skills/</code> instead. See the <a href="https://github.com/RafaelGorski/Problem-Based-SRS#installation">README</a> for all installation methods.</p>
+                </div>
+
+                <div class="reveal" style="margin-top: var(--space-xl);">
+                    <h3>Run your first session</h3>
+                    <pre><code>/problem-based-srs</code></pre>
+                    <p style="margin-top: var(--space-sm);">Describe your situation. The AI guides you through all six steps:</p>
+                    <pre><code>I need requirements for an inventory management system.
+Our warehouse tracks everything in spreadsheets and loses $50k/month due to errors.</code></pre>
+                </div>
+
+                <div class="reveal" style="margin-top: var(--space-xl);">
+                    <h3>What you get</h3>
+                    <p>Traced artifacts from business context through functional requirements, stored in your project's <code>.spec/</code> directory. Every requirement links back to the customer problem it solves.</p>
+                </div>
+            </div>
         </section>
+
+        <!-- Commands -->
+        <section id="commands" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Commands</h2>
+                <table class="cmd-table reveal">
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Purpose</th>
+                            <th>Step</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="cmd-name">/problem-based-srs</td>
+                            <td>Full methodology, all steps</td>
+                            <td style="color: var(--muted);">All</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/business-context</td>
+                            <td>Project identity and constraints</td>
+                            <td style="color: var(--muted);">0</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/customer-problems</td>
+                            <td>Identify and classify problems</td>
+                            <td style="color: var(--muted);">1</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/software-glance</td>
+                            <td>Sketch solution approach</td>
+                            <td style="color: var(--muted);">2</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/customer-needs</td>
+                            <td>Define required outcomes</td>
+                            <td style="color: var(--muted);">3</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/software-vision</td>
+                            <td>Architecture and scope</td>
+                            <td style="color: var(--muted);">4</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/functional-requirements</td>
+                            <td>Detailed, testable requirements</td>
+                            <td style="color: var(--muted);">5</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/zigzag-validator</td>
+                            <td>Verify traceability across artifacts</td>
+                            <td style="color: var(--muted);">Validate</td>
+                        </tr>
+                        <tr>
+                            <td class="cmd-name">/complexity-analysis</td>
+                            <td>Axiomatic Design quality analysis</td>
+                            <td style="color: var(--muted);">Optional</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="reveal" style="color: var(--muted); font-size: var(--text-sm); margin-top: var(--space-md);">
+                    Works with <a href="https://agentskills.io">AgentSkills</a>-compatible tools: GitHub Copilot, Claude Code, Claude.ai, Gemini CLI, and others.
+                </p>
+            </div>
+        </section>
+
+        <!-- Research -->
+        <section id="research" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Research and standards</h2>
+                <p class="reveal">Based on the methodology by Gorski &amp; Stadzisz, published as peer-reviewed research.<br>
+                <strong>DOI:</strong> <a href="https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230">10.21529/RESI.2016.1502002</a></p>
+
+                <p class="reveal" style="margin-top: var(--space-md); color: var(--muted);">
+                    Requirement-writing guidance aligns with <a href="https://www.iso.org/standard/72089.html">ISO/IEC/IEEE 29148:2018</a> for requirement quality, structured syntax, and bidirectional traceability. Normative keywords follow <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a> (RFC 2119 / RFC 8174) when written in ALL CAPITALS.
+                </p>
+
+                <p class="reveal" style="margin-top: var(--space-md); color: var(--muted);">
+                    Case studies: <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/skills/problem-based-srs/references/crm-example.md">CRM system walkthrough</a> and <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/skills/problem-based-srs/references/microer-example.md">renewable energy system walkthrough</a>.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer CTA -->
+    <div class="footer-cta">
+        <div class="wrap">
+            <h2 class="reveal">Start tracing requirements to problems</h2>
+            <p class="reveal">Install the skill, describe your project, and let your AI assistant guide the process.</p>
+            <div class="hero-actions reveal">
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-primary">View on GitHub</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md" class="btn-ghost">Changelog</a>
+            </div>
+        </div>
     </div>
-    
-    <footer>
-        <p>&copy; 2026 Problem-Based SRS | Based on research by Gorski and Stadzisz</p>
-        <p style="margin-top: 0.5rem;">Licensed under the MIT License</p>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>Problem-Based SRS · v1.2 · Methodology by Gorski &amp; Stadzisz</p>
+            <p class="footer-links">
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md">Changelog</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CONTRIBUTING.md">Contributing</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/LICENSE">MIT License</a>
+            </p>
+        </div>
     </footer>
+
+    <script>
+        document.body.classList.add('js');
+        if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+        }
+        document.querySelectorAll('.site-nav-links a[href^="#"]').forEach(function(a) {
+            a.addEventListener('click', function(e) {
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+    </script>
 </body>
 </html>
