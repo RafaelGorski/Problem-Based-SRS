@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: functional-requirements
 description: Generate Functional Requirements (FR) and Non-Functional Requirements (NFR) from Customer Needs and Software Vision. Creates individual requirement files with traceability. Step 5 of Problem-Based SRS methodology.
@@ -62,7 +61,7 @@ For each CN:
 
 **STOP. Do NOT generate requirements during this phase.** Your only job is to confirm scope, detail level, and constraints before specifying requirements.
 
-This is a required interaction. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+This is a required interaction. {{ask_instruction}}
 
 #### Interview Cadence
 

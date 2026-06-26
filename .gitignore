@@ -66,3 +66,9 @@ docs/dissertation-en/
 .spec/
 docs/srs/
 /.pytest_cache
+
+# Node.js
+node_modules/
+
+# Impeccable hook cache (if installed as a dependency)
+.impeccable/

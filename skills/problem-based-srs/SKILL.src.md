@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: problem-based-srs
 description: Complete Problem-Based Software Requirements Specification methodology following Gorski & Stadzisz research. Use when you need to perform requirements engineering from business problems to functional requirements with full traceability.
@@ -241,7 +240,7 @@ The business context captures: project identity, business principles (Mandatory/
 
 ### Clarifying Questions Pattern
 
-**Every step in this methodology includes a mandatory Discovery Interview.** Before generating artifacts, each skill MUST stop and ask the user clarifying questions to avoid assumptions. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+**Every step in this methodology includes a mandatory Discovery Interview.** Before generating artifacts, each skill MUST stop and ask the user clarifying questions to avoid assumptions. {{ask_instruction}}
 
 **Rules for all steps:**
 - Ask **2-3 questions per round**, then STOP and wait for answers

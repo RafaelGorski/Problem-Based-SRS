@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: software-vision
 description: Transform Software Glance and Customer Needs into a detailed Software Vision with positioning, stakeholders, features, and architecture. Use after Customer Needs. Step 4 of Problem-Based SRS methodology.
@@ -65,7 +64,7 @@ Transform the Software Glance into a detailed Vision document by:
 
 **STOP. Do NOT generate the Software Vision during this phase.** Your only job is to confirm architectural direction and scope boundaries before committing to a vision.
 
-This is a required interaction. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+This is a required interaction. {{ask_instruction}}
 
 #### Interview Cadence
 
