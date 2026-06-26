@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: business-context
 description: Establish structured business context and project principles before problem discovery. Use as Step 0 of Problem-Based SRS to capture project identity, business principles, stakeholders, domain boundaries, and success criteria that feed into Customer Problems identification.
@@ -59,7 +58,7 @@ Collect and structure the foundational business context for a project.
 
 **STOP. Do NOT generate the Business Context document during this phase.** Your only job is to understand the project deeply enough to produce an accurate context.
 
-This is a required interaction, not optional guidance. Ask questions in conversation, adapting based on answers. Do not dump all questions at once; have a natural dialogue. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+This is a required interaction, not optional guidance. Ask questions in conversation, adapting based on answers. Do not dump all questions at once; have a natural dialogue. {{ask_instruction}}
 
 #### Interview Cadence
 
@@ -96,7 +95,7 @@ When skipping, state in one line what you're using as the basis and proceed.
 Work through the following sections systematically. For each section, either:
 - Use information gathered during the interview
 - Infer from existing documentation (README, briefs, proposals)
-- If critical information is still missing, STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+- If critical information is still missing, {{ask_instruction}}
 
 ---
 

@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: customer-needs
 description: Specify Customer Needs (CN) that define WHAT outcomes software must provide to solve Customer Problems. Use after Software Glance to translate problems into needs. Step 3 of Problem-Based SRS methodology.
@@ -40,7 +39,7 @@ For each CP, generate CN statements that map directly to solving that problem.
 
 **STOP. Do NOT generate Customer Need statements during this phase.** Your only job is to confirm the scope and priorities before specifying outcomes.
 
-This is a required interaction. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+This is a required interaction. {{ask_instruction}}
 
 #### Interview Cadence
 

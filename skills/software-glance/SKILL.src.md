@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: software-glance
 description: Create the first abstract representation of a software solution from Customer Problems. Use after identifying CPs to design high-level system boundaries and components. Step 2 of Problem-Based SRS methodology.
@@ -77,7 +76,7 @@ Problems expressed using this notation: `[Noun] [Verb] [Object] [Penalty]`
 
 **STOP. Do NOT generate the Software Glance during this phase.** Your only job is to understand the solution space well enough to design accurate system boundaries.
 
-This is a required interaction. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
+This is a required interaction. {{ask_instruction}}
 
 #### Interview Cadence
 

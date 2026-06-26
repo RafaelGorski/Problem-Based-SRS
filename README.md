@@ -211,6 +211,11 @@ Requirement-writing guidance aligns with [ISO/IEC/IEEE 29148:2018](https://www.i
 
 Uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Plugins](https://code.claude.com/docs/en/plugins.md) format.
 
+## Inspirations
+
+- **[Impeccable](https://github.com/pbakaus/impeccable)** — The provider-aware build system and `{{ask_instruction}}` pattern for enforcing clarifying questions before acting. Our template compilation approach (`SKILL.src.md` → `SKILL.md`) is inspired by Impeccable's multi-provider placeholder architecture.
+- **[spec-kit](https://github.com/github/spec-kit)** — The project constitution concept: establishing non-negotiable principles and governance before specification work begins. Inspired our Business Context (Step 0) skill.
+
 ---
 
 [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Report an issue](https://github.com/RafaelGorski/Problem-Based-SRS/issues) · [MIT License](LICENSE)
