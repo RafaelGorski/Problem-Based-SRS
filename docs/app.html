@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SRS Navigator: a GitHub Copilot canvas that renders your Problem-Based SRS specification as an interactive graph, with an inline action bar to decompose and iterate on it alongside the agent.">
+    <meta name="theme-color" content="#f3f6f8">
+    <title>SRS Navigator &middot; Problem-Based SRS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <nav class="site-nav" aria-label="Primary">
+        <div class="wrap">
+            <div class="site-nav-id">
+                <a href="index.html" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.0, view releases">v2.0</a>
+            </div>
+            <ul class="site-nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#graph">The graph</a></li>
+                <li><a href="#action-bar">Action bar</a></li>
+                <li><a href="#decompose">Decompose</a></li>
+                <li><a href="#health">Health</a></li>
+                <li><a href="#launch">Launch</a></li>
+                <li>
+                    <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="gh-link" target="_blank" rel="noopener" aria-label="View on GitHub">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                        GitHub
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero subhero">
+        <div class="wrap hero-content">
+            <div class="hero-copy">
+                <p class="breadcrumb"><a href="index.html">Problem-Based SRS</a><span class="sep" aria-hidden="true">/</span>The app</p>
+                <h1>Your spec, as a <span class="hl">living graph</span></h1>
+                <p class="hero-sub">The <strong>SRS Navigator</strong> is a GitHub Copilot canvas that renders every customer problem, need, and requirement as one connected graph, then lets you decompose and iterate on it together with the agent, without leaving the panel.</p>
+                <div class="hero-actions">
+                    <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator" class="btn-primary">Get the Copilot extension</a>
+                    <a href="index.html#parts" class="btn-ghost">Back to the methodology</a>
+                </div>
+                <div class="hero-meta">
+                    <span class="hero-badge">Copilot canvas</span>
+                    <span class="hero-badge">Force-directed graph</span>
+                    <span class="hero-badge">Live agent iteration</span>
+                </div>
+            </div>
+            <figure class="hero-visual">
+                <div class="app-frame">
+                    <div class="app-frame-bar">
+                        <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                        <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                    </div>
+                    <div class="tbd" data-taskbar-demo
+                         data-instruction="Break FR-1 into finer-grained sub-items"
+                         data-placeholder="Describe a change&hellip;"
+                         data-working="Running functional_requirements skill&hellip;">
+                        <div class="tbd-stage" role="img"
+                             aria-label="The SRS Navigator action bar in use: a functional-requirement node is selected, an instruction to break it into finer-grained sub-items is typed, the decompose action runs, and two sub-requirement nodes appear.">
+                            <svg class="tbd-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                                <path d="M50 24 C 42 46, 33 56, 30 68" />
+                                <path d="M50 24 C 58 46, 67 56, 70 68" />
+                            </svg>
+                            <span class="tbd-node tbd-parent"><span class="tbd-glyph" aria-hidden="true">&lt;/&gt;</span>FR-1 &middot; Contact management</span>
+                            <span class="tbd-node tbd-child tbd-child-a"><span class="tbd-glyph" aria-hidden="true">&lt;/&gt;</span>FR-1.1 &middot; Create</span>
+                            <span class="tbd-node tbd-child tbd-child-b"><span class="tbd-glyph" aria-hidden="true">&lt;/&gt;</span>FR-1.2 &middot; Edit</span>
+                            <div class="tbd-bar" aria-hidden="true">
+                                <span class="tbd-bar-input"><span class="tbd-bar-text is-placeholder" data-tbd-text>Describe a change&hellip;</span><span class="tbd-caret"></span></span>
+                                <span class="tbd-btn">+NFR</span>
+                                <span class="tbd-btn is-decompose is-primary">+Sub-FR</span>
+                            </div>
+                            <div class="tbd-cursor" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="oklch(0.24 0.02 266)" stroke="#fff" stroke-width="1.4"><path d="M5 3l14 8-6 1.6L9.6 19 5 3z"/></svg>
+                            </div>
+                        </div>
+                        <div class="tbd-caption">
+                            <span class="tbd-status-dot" aria-hidden="true"></span>
+                            Decompose a requirement, live in the side panel
+                        </div>
+                    </div>
+                </div>
+                <figcaption>Hover a node, describe a change, and the agent runs the matching skill.</figcaption>
+            </figure>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- The graph -->
+        <section id="graph" class="section">
+            <div class="wrap">
+                <div class="feature-block">
+                    <div class="feature-copy reveal">
+                        <h2>See every artifact and its links</h2>
+                        <p>The navigator reads your <code>.spec/</code> folder and draws each artifact as a node in a force-directed graph. Traceability links are dashed; drag to rearrange, scroll to zoom, and search any node by name.</p>
+                        <p class="legend-intro" style="margin-top: var(--space-md)">Every node is color-coded by type:</p>
+                        <ul class="node-legend" aria-label="Node types in the graph">
+                            <li><span class="node-chip" style="--c: var(--step-why)">CP</span> Customer Problem</li>
+                            <li><span class="node-chip" style="--c: var(--step-what)">CN</span> Customer Need</li>
+                            <li><span class="node-chip" style="--c: var(--step-how)">FR</span> Functional Requirement</li>
+                            <li><span class="node-chip" style="--c: var(--step-nfr)">NFR</span> Non-Functional Requirement</li>
+                        </ul>
+                    </div>
+                    <div class="feature-media reveal">
+                        <div class="app-frame">
+                            <div class="app-frame-bar">
+                                <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                            </div>
+                            <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy" decoding="async"
+                                 alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The action bar -->
+        <section id="action-bar" class="section">
+            <div class="wrap">
+                <div class="feature-block is-reversed">
+                    <div class="feature-copy reveal">
+                        <h2>Derive or decompose, inline</h2>
+                        <p>Hover any node to reveal a floating action bar. Type an instruction, then pick an action: <strong>derive</strong> the next artifact downstream, or <strong>decompose</strong> the node into finer-grained, independently testable sub-items. Each action runs the methodology skill that owns that step.</p>
+                        <ul class="action-map">
+                            <li class="action-row">
+                                <span class="action-from" style="--c: var(--step-why)">Problem</span>
+                                <span class="action-to"><span class="action-pill">+CN</span><span class="action-pill is-decompose">+Sub-CP</span></span>
+                            </li>
+                            <li class="action-row">
+                                <span class="action-from" style="--c: var(--step-what)">Need</span>
+                                <span class="action-to"><span class="action-pill">+FR</span><span class="action-pill is-decompose">+Sub-CN</span></span>
+                            </li>
+                            <li class="action-row">
+                                <span class="action-from" style="--c: var(--step-how)">FR</span>
+                                <span class="action-to"><span class="action-pill">+NFR</span><span class="action-pill is-decompose">+Sub-FR</span></span>
+                            </li>
+                            <li class="action-row">
+                                <span class="action-from" style="--c: var(--step-nfr)">NFR</span>
+                                <span class="action-to"><span class="action-pill is-decompose">+Sub-NFR</span></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="feature-media reveal">
+                        <div class="app-frame">
+                            <div class="app-frame-bar">
+                                <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                            </div>
+                            <img src="assets/srs-navigator-actionbar.png" width="1440" height="900" loading="lazy" decoding="async"
+                                 alt="The SRS Navigator graph with a Functional Requirement node selected. A floating action bar below it holds a typed decompose instruction and +NFR and +Sub-FR action buttons.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Decompose & iterate -->
+        <section id="decompose" class="section">
+            <div class="wrap">
+                <div class="feature-block">
+                    <div class="feature-copy reveal">
+                        <h2>Refine the spec with the agent</h2>
+                        <p>Triggering an action opens the node's detail panel (description, a complexity score, and its upstream and downstream traceability) next to a live <strong>Agent activity</strong> log. Your request runs through the skill, the spec files are edited, and the graph refreshes on its own.</p>
+                        <div class="flow-trace" style="text-align: left; margin-top: var(--space-lg)">
+                            <span class="t-cp">Hover &amp; describe</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="t-cn">skill runs</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="t-fr">graph refreshes</span>
+                        </div>
+                    </div>
+                    <div class="feature-media reveal">
+                        <div class="app-frame">
+                            <div class="app-frame-bar">
+                                <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                            </div>
+                            <img src="assets/srs-navigator-iteration.png" width="1440" height="900" loading="lazy" decoding="async"
+                                 alt="The SRS Navigator with a right-side detail panel open for a Functional Requirement, showing its traceability and an Agent Activity conversation where the user asks to decompose the requirement and the agent is working on it.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Health -->
+        <section id="health" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Spot the gaps in your traceability</h2>
+                <p class="reveal section-lead">A health bar runs across the top of the graph. Each metric is a filter: click one to isolate the nodes that need attention, so a problem with no need or a need with no requirement never slips through.</p>
+                <div class="metric-grid reveal">
+                    <div class="metric"><div class="m-count">38</div><div class="m-label">nodes</div></div>
+                    <div class="metric"><div class="m-count ok">92%</div><div class="m-label">traceability</div></div>
+                    <div class="metric"><div class="m-count alert">2</div><div class="m-label">orphaned problems</div></div>
+                    <div class="metric"><div class="m-count alert">1</div><div class="m-label">unmet needs</div></div>
+                    <div class="metric"><div class="m-count alert">0</div><div class="m-label">isolated</div></div>
+                    <div class="metric"><div class="m-count ok">4</div><div class="m-label">need clusters</div></div>
+                </div>
+                <p class="reveal section-lead" style="margin-top: var(--space-lg)">Pair the metrics with <strong>search</strong> to jump to any node, and the <strong>hierarchy view</strong> to read the same spec as a nested outline.</p>
+            </div>
+        </section>
+
+        <!-- Launch -->
+        <section id="launch" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Launch it with <code>/live</code></h2>
+                <p class="reveal section-lead">The navigator ships inside the Problem-Based SRS plugin. Once installed, open it from any session:</p>
+                <pre class="reveal"><code>/live</code></pre>
+                <p class="reveal section-lead">Copilot opens the canvas in the side panel and loads the specification from your project's <code>.spec/</code> folder. No spec yet? Run the methodology first (<code>/problem-based-srs</code>), then open the navigator to see it take shape.</p>
+                <div class="app-actions reveal">
+                    <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator" class="btn-primary">Get the Copilot extension</a>
+                    <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/.github/extensions/srs-navigator/README.md" class="btn-ghost" target="_blank" rel="noopener">Extension docs</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer CTA -->
+    <div class="footer-cta">
+        <div class="wrap">
+            <p class="cta-chain reveal" role="img" aria-label="Customer Problem to Customer Need to Functional Requirement">
+                <span class="chain-cp">CP</span><span class="chain-arrow" aria-hidden="true">&rarr;</span><span class="chain-cn">CN</span><span class="chain-arrow" aria-hidden="true">&rarr;</span><span class="chain-fr">FR</span>
+            </p>
+            <h2 class="reveal">From problem to requirement, on one canvas</h2>
+            <p class="reveal">Run the methodology as Skills, then watch the spec come alive in the SRS Navigator.</p>
+            <div class="hero-actions reveal">
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-primary">View on GitHub</a>
+                <a href="index.html" class="btn-ghost">Back to home</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>Problem-Based SRS &middot; <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.0</a> &middot; Methodology by Gorski &amp; Stadzisz</p>
+            <p class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md">Changelog</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/LICENSE">MIT License</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="assets/site.js" defer></script>
+</body>
+</html>
