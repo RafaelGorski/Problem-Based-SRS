@@ -366,7 +366,6 @@
             border: 1px solid color-mix(in oklab, var(--c) 32%, transparent);
             padding: 0.2em 0.55em; border-radius: 6px; letter-spacing: 0.02em;
         }
-        .app-showcase { margin: 0; }
         .app-frame {
             border-radius: 14px; overflow: hidden; background: var(--bg-elevated);
             box-shadow: 0 2px 4px oklch(0.2 0.02 264 / 0.05),
@@ -381,11 +380,6 @@
         .app-dots span { width: 11px; height: 11px; border-radius: 50%; background: var(--surface-border); }
         .app-frame-title { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
         .app-frame img { display: block; width: 100%; height: auto; }
-        .app-showcase figcaption {
-            margin-top: var(--space-md); font-size: var(--text-sm);
-            color: var(--muted); text-align: center; max-width: 60ch;
-            margin-left: auto; margin-right: auto;
-        }
         .app-actions { margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
         /* ── Footer CTA ── */
@@ -498,7 +492,6 @@
                 <a href="https://www.periodicosibepes.org.br/index.php/reinfo/article/view/2230" class="btn-ghost" target="_blank" rel="noopener">Read the research</a>
             </div>
             <div class="hero-meta">
-                <span class="hero-badge">v1.2</span>
                 <span class="hero-badge">AgentSkills standard</span>
                 <span class="hero-badge">Copilot extension</span>
                 <span class="hero-badge">MIT License</span>
@@ -632,7 +625,7 @@
         <section id="visualize" class="section">
             <div class="wrap">
                 <h2 class="reveal">See your spec as a living graph</h2>
-                <p class="reveal section-lead">The <strong>SRS Navigator</strong> renders every artifact and its traceability as an interactive, force-directed graph, right inside the GitHub Copilot side panel. Follow problem to need to requirement without leaving your editor.</p>
+                <p class="reveal section-lead">The <strong>SRS Navigator</strong> renders every artifact and its traceability as an interactive, force-directed graph inside the GitHub Copilot side panel. Filter by analysis mode, search any node, and follow problem to need to requirement without switching tools.</p>
 
                 <ul class="node-legend reveal" aria-label="Node types in the graph">
                     <li><span class="node-chip" style="--c: var(--step-why)">CP</span> Customer Problem</li>
@@ -640,20 +633,6 @@
                     <li><span class="node-chip" style="--c: var(--step-how)">FR</span> Functional Requirement</li>
                     <li><span class="node-chip" style="--c: var(--step-nfr)">NFR</span> Non-Functional Requirement</li>
                 </ul>
-
-                <p class="reveal section-lead">Filter by analysis mode, search any node, and inspect dependencies without leaving the side panel. The specification below is a real CRM, built end to end with this methodology.</p>
-
-                <figure class="app-showcase reveal" style="margin-top: var(--space-lg);">
-                    <div class="app-frame">
-                        <div class="app-frame-bar">
-                            <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-                            <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
-                        </div>
-                        <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy" decoding="async"
-                             alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
-                    </div>
-                    <figcaption>Problem, need, and requirement nodes linked by traceability, rendered live in the Copilot side panel.</figcaption>
-                </figure>
 
                 <div class="app-actions reveal">
                     <a href="https://github.com/RafaelGorski/problem-based-srs-app" class="btn-primary">Get the Copilot extension</a>
