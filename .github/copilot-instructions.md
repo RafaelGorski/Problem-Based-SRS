@@ -318,53 +318,6 @@ CP (WHY) → CN (WHAT) → FR (HOW)
 
 ---
 
-## 🔧 Build System (Skill Template Compilation)
-
-This repository uses a **build system** to compile provider-specific skill files from source templates.
-
-### How It Works
-
-- **Source files:** `skills/*/SKILL.src.md` — contain `{{ask_instruction}}` and `{{command_prefix}}` placeholders
-- **Built files:** `skills/*/SKILL.md` — generated output with placeholders resolved for the target provider
-- **Both are committed** — consumers read `SKILL.md` directly; developers edit `SKILL.src.md`
-
-### Placeholders
-
-| Placeholder | Purpose |
-|-------------|---------|
-| `{{ask_instruction}}` | Provider-specific instruction for how to stop and ask the user clarifying questions |
-| `{{command_prefix}}` | Slash command prefix (`/` for most, `$` for Codex) |
-| `{{model}}` | Model name (Claude, GPT, etc.) |
-
-### Provider Values for `{{ask_instruction}}`
-
-| Provider | Value |
-|----------|-------|
-| `github-copilot` (default) | "STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer." |
-| `claude-code` | "STOP and call the AskUserQuestion tool to clarify." |
-| `codex` | "STOP and use Codex's structured user-input/question tool when available; if unavailable, ask directly in chat to clarify what you cannot infer." |
-| `cursor` | "ask the user directly to clarify what you cannot infer." |
-
-### Commands
-
-```bash
-npm run build          # Build for default provider (github-copilot)
-npm run build:claude   # Build for Claude Code
-npm run build:copilot  # Build for GitHub Copilot (same as default)
-npm run build:cursor   # Build for Cursor
-npm run build:codex    # Build for Codex
-```
-
-### When to Rebuild
-
-Run `npm run build` after modifying any `SKILL.src.md` file. The built `SKILL.md` files should be committed.
-
-### Adding New Placeholders
-
-Edit `scripts/lib/providers.mjs` to add new placeholder values, then update `scripts/build.mjs` if new regex replacements are needed.
-
----
-
 ## 📦 Release Process
 
 This repository uses **GitHub Actions** for creating releases. The process is automated but requires manual triggering with specific inputs.

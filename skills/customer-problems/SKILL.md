@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: customer-problems
 description: Identify and document Customer Problems (CP) from business context. Use when starting requirements engineering or when stakeholders describe solutions instead of problems. Step 1 of Problem-Based SRS methodology.
