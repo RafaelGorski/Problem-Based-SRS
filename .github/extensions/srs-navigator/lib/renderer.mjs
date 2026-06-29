@@ -283,7 +283,7 @@ export function renderGraphHtml(graphData, options = {}) {
       justify-content: center;
     }
     .type-dot svg { width: 14px; height: 14px; }
-    .type-label { font-size: 12px; font-weight: 600; }
+    .type-label { font-size: 12px; font-weight: 600; color: var(--foreground); }
     .graph-container {
       flex: 1;
       position: relative;
@@ -888,7 +888,8 @@ export function renderGraphHtml(graphData, options = {}) {
       .toolbar-row { gap: var(--space-sm); padding: var(--space-sm) var(--space-md); }
       .search-container { max-width: none; min-width: 100px; }
       .detail-panel { width: 100%; }
-      .type-indicators { display: none; }
+      .type-indicators { margin-left: var(--space-xs); padding-left: var(--space-xs); }
+      .type-label { display: none; }
     }
 
     /* Action bar - appears on node hover */
@@ -1325,7 +1326,7 @@ export function renderGraphHtml(graphData, options = {}) {
       const container = document.getElementById("type-indicators");
       container.innerHTML = types.map(type => {
         const c = nodeColors[type];
-        return '<div class="type-indicator"><div class="type-dot" style="background:' + c.fill + '">' + nodeIcons[type].replace('width="28" height="28"', 'width="12" height="12"') + '</div><span class="type-label" style="color:' + c.fill + '">' + c.label + '</span></div>';
+        return '<div class="type-indicator" title="' + c.label + '"><div class="type-dot" style="background:' + c.fill + '">' + nodeIcons[type].replace('width="28" height="28"', 'width="12" height="12"') + '</div><span class="type-label">' + c.label + '</span></div>';
       }).join("");
     }
     updateTypeIndicators();
