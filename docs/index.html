@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Problem-Based SRS: AI-guided requirements engineering that traces every feature back to the customer problem it solves.">
-    <meta name="theme-color" content="#f7f7f8">
+    <meta name="theme-color" content="#f3f6f8">
     <title>Problem-Based SRS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,34 +12,36 @@
     <style>
         /* ── Tokens ── */
         :root {
-            /* Primary — crimson identity, preserved and tuned for a light canvas. */
-            --primary: oklch(0.54 0.19 25);
-            --primary-hover: oklch(0.47 0.20 25);
-            --primary-subtle: oklch(0.96 0.025 25);
-            /* Background — clean, near-neutral off-white. */
-            --bg: oklch(0.985 0.001 260);
+            /* Primary — deep indigo, sampled from the SRS Navigator app's "Graph" control. */
+            --primary: oklch(0.45 0.16 266);
+            --primary-hover: oklch(0.38 0.16 266);
+            --primary-subtle: oklch(0.955 0.022 266);
+            /* Text on the primary fill — near-white for AA contrast on indigo. */
+            --on-primary: oklch(0.99 0 0);
+            /* Background — clean, slightly-cool off-white, matched to the app canvas. */
+            --bg: oklch(0.975 0.003 240);
             --bg-elevated: oklch(1 0 0);
             /* Surface — faint panels, hairline borders. */
-            --surface: oklch(0.972 0.002 260);
-            --surface-hover: oklch(0.955 0.003 260);
-            --surface-border: oklch(0.905 0.004 260);
+            --surface: oklch(0.965 0.004 240);
+            --surface-hover: oklch(0.945 0.005 240);
+            --surface-border: oklch(0.900 0.006 240);
             /* Ink — near-black text, high contrast on off-white. */
             --ink: oklch(0.30 0.012 264);
-            --ink-heading: oklch(0.19 0.016 264);
-            /* Accent — deep teal, readable on light. */
-            --accent: oklch(0.50 0.10 205);
-            --accent-hover: oklch(0.43 0.11 205);
+            --ink-heading: oklch(0.19 0.018 264);
+            /* Accent — teal, sampled from the CN nodes. Darkened for link contrast. */
+            --accent: oklch(0.53 0.10 205);
+            --accent-hover: oklch(0.46 0.11 205);
             /* Muted — secondary text, ≥4.5:1 on off-white. */
             --muted: oklch(0.47 0.012 264);
             --muted-light: oklch(0.57 0.012 264);
-            /* Methodology node colors — matched to the SRS Navigator app. */
+            /* Methodology node colors — sampled directly from the SRS Navigator app. */
             --step-context: oklch(0.52 0.16 305);
-            --step-why: oklch(0.56 0.17 40);
-            --step-glance: oklch(0.50 0.10 200);
-            --step-what: oklch(0.50 0.10 200);
-            --step-vision: oklch(0.52 0.13 150);
-            --step-how: oklch(0.50 0.17 272);
-            --step-nfr: oklch(0.50 0.16 300);
+            --step-why: oklch(0.61 0.18 48);
+            --step-glance: oklch(0.58 0.10 202);
+            --step-what: oklch(0.58 0.10 202);
+            --step-vision: oklch(0.55 0.12 150);
+            --step-how: oklch(0.56 0.16 266);
+            --step-nfr: oklch(0.54 0.15 320);
             --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
             --font-body: 'Figtree', system-ui, sans-serif;
             --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
@@ -123,7 +125,7 @@
         /* ── Nav ── */
         .site-nav {
             position: sticky; top: 0; z-index: 100;
-            background: oklch(0.985 0.001 260 / 0.82);
+            background: oklch(0.975 0.003 240 / 0.82);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--surface-border);
@@ -162,7 +164,7 @@
         .hero::before {
             content: ''; position: absolute;
             width: clamp(300px, 50vw, 700px); height: clamp(300px, 50vw, 700px);
-            background: radial-gradient(circle, oklch(0.54 0.19 25 / 0.08), transparent 70%);
+            background: radial-gradient(circle, oklch(0.45 0.16 266 / 0.09), transparent 70%);
             top: 30%; left: 50%; transform: translate(-50%, -50%);
             pointer-events: none;
         }
@@ -184,12 +186,12 @@
         .hero-actions { display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center; }
         .btn-primary {
             display: inline-flex; align-items: center; gap: 0.5em;
-            background: var(--primary); color: var(--ink-heading);
+            background: var(--primary); color: var(--on-primary);
             padding: 0.75em 1.5em; border-radius: 8px;
             font-family: var(--font-body); font-size: var(--text-base); font-weight: 600;
             text-decoration: none; transition: background 0.2s ease;
         }
-        .btn-primary:hover { background: var(--primary-hover); color: var(--ink-heading); }
+        .btn-primary:hover { background: var(--primary-hover); color: var(--on-primary); }
         .btn-ghost {
             display: inline-flex; align-items: center; gap: 0.5em;
             background: transparent; color: var(--ink);
@@ -225,7 +227,7 @@
         }
         .problem-after .cp {
             font-family: var(--font-mono); font-size: var(--text-base);
-            color: var(--primary); background: var(--primary-subtle);
+            color: oklch(0.48 0.14 50); background: oklch(0.61 0.18 48 / 0.10);
             padding: var(--space-sm) var(--space-md); border-radius: 8px;
             display: block; margin: var(--space-md) 0;
         }

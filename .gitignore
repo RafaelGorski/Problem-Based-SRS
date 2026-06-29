@@ -72,3 +72,10 @@ docs/srs/
 
 # Build & release pipeline output
 dist/
+
+# Node (tooling installed locally, never versioned)
+node_modules/
+package.json
+package-lock.json
+pw-*.png
+shot-*.png
