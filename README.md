@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version 1.2](https://img.shields.io/badge/version-1.2-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2)
+[![Version 1.4](https://img.shields.io/badge/version-1.4-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.4)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

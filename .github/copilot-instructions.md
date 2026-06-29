@@ -158,7 +158,19 @@ Problem-Based-SRS/
 │   ├── software-vision/         # Step 4: Architecture
 │   ├── functional-requirements/ # Step 5: HOW
 │   ├── zigzag-validator/        # Traceability validation
-│   └── complexity-analysis/     # Optional: Axiomatic Design
+│   ├── complexity-analysis/     # Optional: Axiomatic Design
+│   └── live/                    # Launch the SRS Navigator canvas (UX)
+├── .github/extensions/
+│   └── srs-navigator/           # Canvas extension (graph UX) + bundled skills
+│       ├── extension.mjs        # Canvas + 9 methodology tools
+│       ├── lib/ tests/ skills/  # Renderer/parser/validation, tests, bundled skills
+│       └── scripts/sync-skills.mjs  # Refresh bundled skills from skills/
+├── .spec/crm-system.json        # Demo specification for the navigator
+├── scripts/
+│   ├── build-plugin.py          # Validate/package the agent plugin
+│   ├── bump-version.mjs         # Bump the canvas extension version
+│   └── package-extension.mjs    # Package the canvas extension archives
+├── VERSION                      # Canvas extension version (X.Y.Z)
 ├── hooks/
 │   └── hooks.json               # Hook configurations
 ├── settings.json                # Default plugin settings
@@ -167,6 +179,31 @@ Problem-Based-SRS/
     ├── DESIGN.md                # Visual system (skill-generated)
     └── index.html               # Project webpage (GitHub Pages)
 ```
+
+### Two Development Workflows (Skill + Canvas App)
+
+This repository is maintained along **two complementary tracks**:
+
+1. **Agent-native skills** (the methodology). Canonical skills live in `skills/<slug>/SKILL.md`.
+   Validated/packaged by `scripts/build-plugin.py` and released via
+   `.github/workflows/create-release.yml` (tag `vX.Y`).
+2. **The SRS Navigator canvas app** (the UX) in `.github/extensions/srs-navigator/`.
+   Has its own test suite (`npm test`) and release workflow
+   `.github/workflows/release-canvas.yml` (tag `vX.Y.Z` via `scripts/bump-version.mjs`).
+
+**Bridge — skill sync:** the canvas app's bundled `skills/*.md` are **generated** from
+the canonical `skills/<slug>/SKILL.md`. Never hand-edit the bundled flat files; edit the
+canonical skill, then regenerate:
+
+```bash
+node .github/extensions/srs-navigator/scripts/sync-skills.mjs   # local copy from skills/
+node .github/extensions/srs-navigator/scripts/sync-skills.mjs --remote   # fetch from GitHub
+```
+
+In this monorepo it copies straight from `skills/` on disk; `--remote` fetches the latest
+skills from the upstream repo. So a skill is edited **once** and both tracks stay in sync.
+The `/live` skill (`skills/live/`) is the entry point that opens the `srs-navigator`
+canvas inside the GitHub Copilot app.
 
 ### Skills Development (AgentSkills Format)
 - Skills are located in the `skills/` directory
@@ -309,6 +346,7 @@ description: I help with requirements.
 /functional-requirements  # Specify Functional Requirements
 /zigzag-validator         # Validate traceability
 /problem-based-srs        # Full methodology orchestration
+/live                     # Launch the SRS Navigator canvas (visualize the spec)
 ```
 
 ### Traceability Chain
@@ -331,6 +369,12 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 | **Build script** | `scripts/build-plugin.py` | Validates the manifest + skills, extracts CHANGELOG notes, and packages the `dist/<name>-vX.Y.zip` artifact. Runs locally and in CI. |
 | **CI workflow** | `.github/workflows/ci.yml` | On every push/PR to `main`: validates the plugin and uploads the packaged zip as a build artifact. |
 | **Release workflow** | `.github/workflows/create-release.yml` | Builds, validates, packages, and publishes a GitHub Release with the zip attached. |
+| **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), packages archives (`scripts/package-extension.mjs`), and publishes a `vX.Y.Z` GitHub Release. |
+
+> **Two release pipelines, two tag schemes.** The **plugin** release uses `vX.Y` tags
+> (driven by `plugin.json` + `build-plugin.py`). The **canvas app** release uses `vX.Y.Z`
+> tags (driven by `VERSION` + `bump-version.mjs`). Keep them distinct so tags never
+> collide. "Make a release" of the methodology means the plugin pipeline below.
 
 ### Build script commands
 

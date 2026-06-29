@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4] - 2026-06-29
+
 ### Added
 
 - **SRS Navigator canvas app merged into this repo**: the interactive force-directed
@@ -27,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `skills/<slug>/SKILL.md` straight from this repo by default (network fetch remains
   available via `--remote`), so the agent plugin and the canvas app share one source of
   truth.
+
+[1.4]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.4
+
 
 ## [1.3] - 2026-06-29
 
