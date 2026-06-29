@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: business-context
 description: Establish structured business context and project principles before problem discovery. Use as Step 0 of Problem-Based SRS to capture project identity, business principles, stakeholders, domain boundaries, and success criteria that feed into Customer Problems identification.

@@ -213,7 +213,7 @@ Uses the [AgentSkills](https://agentskills.io) open standard and [Claude Code Pl
 
 ## Inspirations
 
-- **[Impeccable](https://github.com/pbakaus/impeccable)** — The provider-aware build system and `{{ask_instruction}}` pattern for enforcing clarifying questions before acting. Our template compilation approach (`SKILL.src.md` → `SKILL.md`) is inspired by Impeccable's multi-provider placeholder architecture.
+- **[Impeccable](https://github.com/pbakaus/impeccable)** — The clarifying questions pattern: forcing AI agents to stop and ask targeted questions before generating artifacts, rather than making assumptions.
 - **[spec-kit](https://github.com/github/spec-kit)** — The project constitution concept: establishing non-negotiable principles and governance before specification work begins. Inspired our Business Context (Step 0) skill.
 
 ---

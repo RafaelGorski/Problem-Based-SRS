@@ -1,4 +1,3 @@
-<!-- Built from SKILL.src.md for provider: github-copilot. Do not edit directly. -->
 ---
 name: software-glance
 description: Create the first abstract representation of a software solution from Customer Problems. Use after identifying CPs to design high-level system boundaries and components. Step 2 of Problem-Based SRS methodology.
