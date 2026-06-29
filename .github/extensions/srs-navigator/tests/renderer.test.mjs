@@ -115,9 +115,9 @@ describe("renderGraphHtml", () => {
 
   it("includes oklch node color configuration", () => {
     const html = renderGraphHtml(sampleGraph);
-    assert.ok(html.includes("oklch(0.65 0.19 50)")); // problem color
-    assert.ok(html.includes("oklch(0.60 0.15 200)")); // need color
-    assert.ok(html.includes("oklch(0.55 0.18 265)")); // fr color
+    assert.ok(html.includes("oklch(0.61 0.18 48)")); // problem color
+    assert.ok(html.includes("oklch(0.58 0.10 202)")); // need color
+    assert.ok(html.includes("oklch(0.56 0.16 266)")); // fr color
   });
 
   it("includes CSS custom properties for theming", () => {

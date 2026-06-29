@@ -3,10 +3,10 @@
 // Styled to match the original Problem-Based SRS Navigator application
 
 const NODE_COLORS = {
-  problem: { fill: 'oklch(0.65 0.19 50)', stroke: 'oklch(0.55 0.19 50)', text: '#fff', label: 'Problem', fullLabel: 'Customer Problem' },
-  need: { fill: 'oklch(0.60 0.15 200)', stroke: 'oklch(0.50 0.15 200)', text: '#fff', label: 'Need', fullLabel: 'Customer Need' },
-  fr: { fill: 'oklch(0.55 0.18 265)', stroke: 'oklch(0.45 0.18 265)', text: '#fff', label: 'FR', fullLabel: 'Functional Requirement' },
-  nfr: { fill: 'oklch(0.68 0.15 330)', stroke: 'oklch(0.58 0.15 330)', text: '#fff', label: 'NFR', fullLabel: 'Non-Functional Requirement' }
+  problem: { fill: 'oklch(0.61 0.18 48)', stroke: 'oklch(0.51 0.18 48)', text: '#fff', label: 'Problem', fullLabel: 'Customer Problem' },
+  need: { fill: 'oklch(0.58 0.10 202)', stroke: 'oklch(0.48 0.10 202)', text: '#fff', label: 'Need', fullLabel: 'Customer Need' },
+  fr: { fill: 'oklch(0.56 0.16 266)', stroke: 'oklch(0.46 0.16 266)', text: '#fff', label: 'FR', fullLabel: 'Functional Requirement' },
+  nfr: { fill: 'oklch(0.54 0.15 320)', stroke: 'oklch(0.44 0.15 320)', text: '#fff', label: 'NFR', fullLabel: 'Non-Functional Requirement' }
 };
 
 // SVG icons matching Phosphor icons from the original (using currentColor for dynamic coloring)
@@ -39,23 +39,23 @@ export function renderGraphHtml(graphData, options = {}) {
   <script src="https://d3js.org/d3.v7.min.js"><\/script>
   <style>
     :root {
-      --background: oklch(0.98 0 0);
+      --background: oklch(0.975 0.003 240);
       --foreground: oklch(0.15 0.02 240);
       --card: oklch(1 0 0);
       --card-foreground: oklch(0.15 0.02 240);
-      --primary: oklch(0.35 0.12 265);
-      --primary-foreground: oklch(0.98 0 0);
+      --primary: oklch(0.45 0.16 266);
+      --primary-foreground: oklch(0.99 0 0);
       --secondary: oklch(0.45 0.02 240);
       --muted: oklch(0.75 0.01 240);
       --muted-foreground: oklch(0.40 0.02 240);
-      --accent: oklch(0.55 0.15 200);
+      --accent: oklch(0.53 0.10 205);
       --border: oklch(0.87 0.01 240);
       --hover: oklch(0.95 0.005 240);
-      --focus: oklch(0.55 0.15 200);
-      --node-problem: oklch(0.65 0.19 50);
-      --node-need: oklch(0.60 0.15 200);
-      --node-fr: oklch(0.55 0.18 265);
-      --node-nfr: oklch(0.68 0.15 330);
+      --focus: oklch(0.53 0.10 205);
+      --node-problem: oklch(0.61 0.18 48);
+      --node-need: oklch(0.58 0.10 202);
+      --node-fr: oklch(0.56 0.16 266);
+      --node-nfr: oklch(0.54 0.15 320);
       --radius: 0.5rem;
       --space-xs: 4px;
       --space-sm: 8px;
@@ -133,7 +133,7 @@ export function renderGraphHtml(graphData, options = {}) {
       border-radius: 9999px;
       font-size: 12px;
       font-weight: 600;
-      background: oklch(0.55 0.12 50);
+      background: oklch(0.55 0.16 48);
       color: white;
       white-space: nowrap;
     }
@@ -224,7 +224,7 @@ export function renderGraphHtml(graphData, options = {}) {
       height: 34px;
       transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
-    .search-input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px oklch(0.55 0.15 200 / 0.15); }
+    .search-input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px oklch(0.53 0.10 205 / 0.18); }
     .search-input::placeholder { color: var(--muted-foreground); }
     .spec-btn {
       display: flex;
@@ -293,8 +293,8 @@ export function renderGraphHtml(graphData, options = {}) {
       width: 100%;
       height: 100%;
       background:
-        radial-gradient(circle at 20% 30%, oklch(0.80 0.03 200 / 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, oklch(0.80 0.03 280 / 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 20% 30%, oklch(0.80 0.03 205 / 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, oklch(0.80 0.03 266 / 0.08) 0%, transparent 50%),
         oklch(0.975 0.003 240);
     }
     .zoom-controls {
@@ -521,7 +521,7 @@ export function renderGraphHtml(graphData, options = {}) {
       transition: background var(--transition-fast), box-shadow var(--transition-fast);
     }
     .health-metric:hover { background: oklch(0.93 0.01 240); }
-    .health-metric.active { background: oklch(0.90 0.03 200); box-shadow: 0 0 0 1px oklch(0.55 0.15 200 / 0.3); }
+    .health-metric.active { background: oklch(0.92 0.03 205); box-shadow: 0 0 0 1px oklch(0.53 0.10 205 / 0.35); }
     .health-metric .count {
       font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-size: 12px;
@@ -562,7 +562,7 @@ export function renderGraphHtml(graphData, options = {}) {
     .spec-btn:focus-visible,
     .conn-badge:focus-visible,
     .modal-tab:focus-visible {
-      outline: 2px solid oklch(0.55 0.15 200);
+      outline: 2px solid oklch(0.53 0.10 205);
       outline-offset: 2px;
     }
 
@@ -913,7 +913,7 @@ export function renderGraphHtml(graphData, options = {}) {
       transform: translateY(0);
     }
     .action-bar.pinned {
-      box-shadow: 0 0 0 1px oklch(0.45 0.12 265 / 0.6), 0 4px 16px oklch(0 0 0 / 0.4);
+      box-shadow: 0 0 0 1px oklch(0.45 0.16 266 / 0.6), 0 4px 16px oklch(0 0 0 / 0.4);
     }
     .action-bar-input {
       flex: 1;
@@ -1054,8 +1054,8 @@ export function renderGraphHtml(graphData, options = {}) {
       border-color: var(--primary);
     }
     .landing-action-btn.primary:hover {
-      background: oklch(0.30 0.12 265);
-      border-color: oklch(0.30 0.12 265);
+      background: oklch(0.38 0.16 266);
+      border-color: oklch(0.38 0.16 266);
     }
     .landing-action-icon {
       width: 32px;
@@ -1571,7 +1571,7 @@ export function renderGraphHtml(graphData, options = {}) {
       .attr("cx", 0).attr("cy", 0)
       .attr("r", d => (d._radius || 22) + 4)
       .attr("fill", "none")
-      .attr("stroke", d => d._hotspotSeverity === 3 ? "oklch(0.60 0.19 50)" : "oklch(0.55 0.15 200)")
+      .attr("stroke", d => d._hotspotSeverity === 3 ? "oklch(0.61 0.18 48)" : "oklch(0.53 0.10 205)")
       .attr("stroke-width", 2);
 
     // Icon via foreignObject (like original)
@@ -1957,10 +1957,10 @@ export function renderGraphHtml(graphData, options = {}) {
       // Hot-spot insight
       if (node._hotspot) {
         const insights = {
-          orphaned: { icon: '⚠', color: 'oklch(0.55 0.19 50)', text: 'Orphaned — no linked needs. This problem lacks traceability to requirements.' },
-          unmet: { icon: '⚠', color: 'oklch(0.55 0.15 200)', text: 'Unmet — no linked requirements. This need has no FR/NFR addressing it.' },
+          orphaned: { icon: '⚠', color: 'oklch(0.61 0.18 48)', text: 'Orphaned — no linked needs. This problem lacks traceability to requirements.' },
+          unmet: { icon: '⚠', color: 'oklch(0.53 0.10 205)', text: 'Unmet — no linked requirements. This need has no FR/NFR addressing it.' },
           hub: { icon: '◉', color: 'oklch(0.45 0.15 145)', text: 'Need Cluster — high connectivity (' + node._degree + ' connections). Key convergence point in the dependency graph.' },
-          isolated: { icon: '⊘', color: 'oklch(0.55 0.19 50)', text: 'Isolated — no connections at all. This node is disconnected from the spec.' }
+          isolated: { icon: '⊘', color: 'oklch(0.61 0.18 48)', text: 'Isolated — no connections at all. This node is disconnected from the spec.' }
         };
         const insight = insights[node._hotspot];
         if (insight) {
@@ -2065,12 +2065,12 @@ export function renderGraphHtml(graphData, options = {}) {
             const line = d3.line().curve(d3.curveCatmullRomClosed.alpha(0.5));
             hullGroup.append("path")
               .attr("d", line(hull))
-              .attr("fill", "oklch(0.65 0.15 200 / 0.08)")
-              .attr("stroke", "oklch(0.65 0.15 200 / 0.3)")
+              .attr("fill", "oklch(0.63 0.09 205 / 0.08)")
+              .attr("stroke", "oklch(0.63 0.09 205 / 0.3)")
               .attr("stroke-width", 2)
               .attr("stroke-dasharray", "8,4")
               .attr("class", "hull-path")
-              .style("filter", "drop-shadow(0 4px 16px oklch(0.65 0.15 200 / 0.2))")
+              .style("filter", "drop-shadow(0 4px 16px oklch(0.63 0.09 205 / 0.2))")
               .attr("opacity", 0)
               .transition().duration(400).attr("opacity", 1);
           }
@@ -2092,9 +2092,9 @@ export function renderGraphHtml(graphData, options = {}) {
 
         el.select("rect")
           .transition().duration(250)
-          .attr("stroke", isSelected ? "oklch(0.55 0.15 200)" : isDownstream && !isSelected ? "oklch(0.65 0.15 200)" : (nodeColors[d.type]?.stroke || "#ccc"))
+          .attr("stroke", isSelected ? "oklch(0.53 0.10 205)" : isDownstream && !isSelected ? "oklch(0.63 0.09 205)" : (nodeColors[d.type]?.stroke || "#ccc"))
           .attr("stroke-width", isSelected ? 2.5 : isDownstream ? 2 : 1.5)
-          .attr("fill", isSelected ? "oklch(0.95 0.05 200)" : "white");
+          .attr("fill", isSelected ? "oklch(0.95 0.03 205)" : "white");
 
         el.select("foreignObject")
           .transition().duration(250)
@@ -2125,7 +2125,7 @@ export function renderGraphHtml(graphData, options = {}) {
         d3.select(this)
           .transition().duration(250)
           .attr("stroke-opacity", isDownstream ? 0.9 : (bothVisible && matchesHotspot ? 0.4 : (hotspotFilter ? 0.05 : 0.35)))
-          .attr("stroke", isDownstream ? "oklch(0.65 0.15 200)" : "oklch(0.65 0.05 240)")
+          .attr("stroke", isDownstream ? "oklch(0.63 0.09 205)" : "oklch(0.65 0.05 240)")
           .attr("stroke-width", isDownstream ? 3 : 2)
           .style("display", bothVisible || isDownstream ? null : "none");
       });

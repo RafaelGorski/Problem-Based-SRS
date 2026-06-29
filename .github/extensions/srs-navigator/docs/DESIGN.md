@@ -2,18 +2,18 @@
 name: SRS Navigator
 description: Interactive force-directed graph visualization for Problem-Based SRS specifications
 colors:
-  primary: "oklch(0.35 0.12 265)"
-  primary-foreground: "oklch(0.98 0 0)"
-  accent: "oklch(0.55 0.15 200)"
-  node-problem: "oklch(0.65 0.19 50)"
-  node-problem-stroke: "oklch(0.55 0.19 50)"
-  node-need: "oklch(0.60 0.15 200)"
-  node-need-stroke: "oklch(0.50 0.15 200)"
-  node-fr: "oklch(0.55 0.18 265)"
-  node-fr-stroke: "oklch(0.45 0.18 265)"
-  node-nfr: "oklch(0.68 0.15 330)"
-  node-nfr-stroke: "oklch(0.58 0.15 330)"
-  background: "oklch(0.98 0 0)"
+  primary: "oklch(0.45 0.16 266)"
+  primary-foreground: "oklch(0.99 0 0)"
+  accent: "oklch(0.53 0.10 205)"
+  node-problem: "oklch(0.61 0.18 48)"
+  node-problem-stroke: "oklch(0.51 0.18 48)"
+  node-need: "oklch(0.58 0.10 202)"
+  node-need-stroke: "oklch(0.48 0.10 202)"
+  node-fr: "oklch(0.56 0.16 266)"
+  node-fr-stroke: "oklch(0.46 0.16 266)"
+  node-nfr: "oklch(0.54 0.15 320)"
+  node-nfr-stroke: "oklch(0.44 0.15 320)"
+  background: "oklch(0.975 0.003 240)"
   card: "oklch(1 0 0)"
   foreground: "oklch(0.15 0.02 240)"
   secondary: "oklch(0.45 0.02 240)"
@@ -115,17 +115,17 @@ This system explicitly rejects overly decorated dashboards, marketing-style data
 Warm problem hues cooling toward technical implementation (ember → teal → indigo → rose). The four node colors are the system's signature; everything else recedes.
 
 ### Primary
-- **Deep Indigo** (oklch(0.35 0.12 265)): Primary action color — active states, selected tabs, focus rings. Used sparingly (≤5% of surface) so it commands attention when it appears.
-- **Analytical Teal** (oklch(0.55 0.15 200)): Accent for focus rings, selection highlights, and the Need node type. The system's secondary voice.
+- **Deep Indigo** (oklch(0.45 0.16 266)): Primary action color — active states, selected tabs, focus rings. Used sparingly (≤5% of surface) so it commands attention when it appears. Shared with the project webpage as the canonical brand primary.
+- **Analytical Teal** (oklch(0.53 0.10 205)): Accent for focus rings, selection highlights, and the Need node type. The system's secondary voice.
 
 ### Semantic (Node Colors)
-- **Ember** (oklch(0.65 0.19 50)): Customer Problem nodes. Warm and urgent — signals "this is the pain point."
-- **Teal** (oklch(0.60 0.15 200)): Customer Need nodes. Cool and purposeful — "what users require."
-- **Indigo** (oklch(0.55 0.18 265)): Functional Requirements. Deep technical — "what the system does."
-- **Rose** (oklch(0.68 0.15 330)): Non-Functional Requirements. Measured constraint — "how well it must perform."
+- **Ember** (oklch(0.61 0.18 48)): Customer Problem nodes. Warm and urgent — signals "this is the pain point."
+- **Teal** (oklch(0.58 0.10 202)): Customer Need nodes. Cool and purposeful — "what users require."
+- **Indigo** (oklch(0.56 0.16 266)): Functional Requirements. Deep technical — "what the system does."
+- **Rose** (oklch(0.54 0.15 320)): Non-Functional Requirements. Measured constraint — "how well it must perform."
 
 ### Neutral
-- **Background** (oklch(0.98 0 0)): Page surface. Pure achromatic near-white.
+- **Background** (oklch(0.975 0.003 240)): Page surface. Slightly-cool off-white, matched to the webpage canvas.
 - **Card** (oklch(1 0 0)): Elevated surfaces (toolbar, panels, modals). True white.
 - **Foreground** (oklch(0.15 0.02 240)): Primary text. Near-black with a cool cast.
 - **Muted** (oklch(0.40 0.02 240)): Secondary text, labels, metadata.
