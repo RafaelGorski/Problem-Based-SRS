@@ -197,11 +197,12 @@ canonical skill, then regenerate:
 
 ```bash
 node .github/extensions/srs-navigator/scripts/sync-skills.mjs   # local copy from skills/
-node .github/extensions/srs-navigator/scripts/sync-skills.mjs --remote   # fetch from GitHub
 ```
 
-In this monorepo it copies straight from `skills/` on disk; `--remote` fetches the latest
-skills from the upstream repo. So a skill is edited **once** and both tracks stay in sync.
+In this monorepo it copies straight from `skills/` on disk — the single source of truth.
+At runtime the extension reads the canonical `skills/<slug>/SKILL.md` directly (falling
+back to the bundled flat copies only for standalone installs outside the monorepo), so a
+skill is edited **once** and both tracks stay in sync.
 The `/live` skill (`skills/live/`) is the entry point that opens the `srs-navigator`
 canvas inside the GitHub Copilot app.
 

@@ -1254,17 +1254,6 @@ export function renderGraphHtml(graphData, options = {}) {
           <div class="landing-feature"><span class="landing-feature-dot" aria-hidden="true"></span><span class="landing-feature-text">Search &amp; filter</span></div>
           <div class="landing-feature"><span class="landing-feature-dot" aria-hidden="true"></span><span class="landing-feature-text">Agent-driven generation</span></div>
         </div>
-        <div class="landing-actions" style="max-width:100%; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 16px;">
-          <button class="landing-action-btn" id="modal-btn-sync-skills" aria-label="Sync methodology skills from GitHub">
-            <span class="landing-action-icon" aria-hidden="true">
-              <svg viewBox="0 0 256 256" fill="currentColor"><path d="M216,48V96a8,8,0,0,1-8,8H160a8,8,0,0,1,0-16h28.69L163.31,62.63A80,80,0,0,0,48,128a8,8,0,0,1-16,0A96,96,0,0,1,174.63,51.37L200,76.69V48a8,8,0,0,1,16,0ZM224,120a8,8,0,0,0-8,8A80,80,0,0,1,92.69,193.37L68,168H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l25.37,25.32A96,96,0,0,0,232,128,8,8,0,0,0,224,120Z"/></svg>
-            </span>
-            <span class="landing-action-text">
-              <span class="label">Sync Skills</span>
-              <span class="desc">Update methodology skills with the latest version from GitHub</span>
-            </span>
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -2265,37 +2254,6 @@ export function renderGraphHtml(graphData, options = {}) {
         if (data.ok && data.reload) window.location.reload();
         else { setModalLoading(modalBtnDemo, false); closeModal(); }
       } catch { setModalLoading(modalBtnDemo, false); }
-    });
-
-    // Sync the bundled methodology skills from the upstream GitHub repo.
-    const modalBtnSyncSkills = document.getElementById("modal-btn-sync-skills");
-    modalBtnSyncSkills.addEventListener("click", async () => {
-      setModalLoading(modalBtnSyncSkills, true);
-      showToast("Syncing skills from GitHub…", { variant: "pending", persistent: true });
-      try {
-        const res = await fetch('/api/sync-skills', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: '{}'
-        });
-        const data = await res.json();
-        const updatedCount = (data.updated && data.updated.length) || 0;
-        if (data.ok) {
-          showToast('✓ Synced ' + updatedCount + ' skill' + (updatedCount !== 1 ? 's' : '') + ' from GitHub');
-        } else {
-          const detail = data.failed && data.failed.length
-            ? data.failed.map(f => f.file + ': ' + f.error).join('\\n')
-            : (data.error || 'Unknown error');
-          const msg = updatedCount
-            ? 'Synced ' + updatedCount + ', some skills failed'
-            : 'Skill sync failed';
-          showToast(msg, { variant: 'error', detail });
-        }
-      } catch (e) {
-        showToast('Skill sync failed', { variant: 'error', detail: e.message });
-      } finally {
-        setModalLoading(modalBtnSyncSkills, false);
-      }
     });
 
     // Polling for spec loaded via agent action

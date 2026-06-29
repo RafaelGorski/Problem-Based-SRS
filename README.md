@@ -246,9 +246,10 @@ generated from the canonical `skills/<slug>/SKILL.md` in this repo. Run it local
 node .github/extensions/srs-navigator/scripts/sync-skills.mjs   # copy from skills/
 ```
 
-In this monorepo it copies straight from `skills/` on disk; pass `--remote` to fall back
-to fetching the latest skills from GitHub. So maintainers edit a skill **once** in
-`skills/`, and both the agent plugin and the canvas app stay in sync.
+In this monorepo it copies straight from `skills/` on disk — the single source of truth.
+The runtime also reads the canonical `skills/<slug>/SKILL.md` directly, so the bundled
+copies only exist for standalone installs and packaging. Maintainers edit a skill **once**
+in `skills/`, and both the agent plugin and the canvas app stay in sync.
 
 ## Research and standards
 

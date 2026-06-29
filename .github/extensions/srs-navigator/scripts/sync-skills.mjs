@@ -1,26 +1,22 @@
 #!/usr/bin/env node
-// Runnable wrapper around lib/skill-sync.mjs. Refreshes the bundled methodology
-// skill markdown files that the canvas extension ships with.
+// Refresh the bundled methodology skill markdown files that the canvas extension
+// ships with. The SRS Navigator lives in the Problem-Based-SRS monorepo, so the
+// canonical skills are right here at skills/<slug>/SKILL.md (four levels up from
+// this script). This copies them into the extension's bundled skills/ directory
+// so a standalone/packaged install still carries the methodology.
 //
-// In this monorepo the canonical skills live at skills/<slug>/SKILL.md, three
-// levels up from this extension. By default we copy them straight from disk so
-// the canvas app always bundles the exact skills maintained in this repo. When
-// run against an external checkout (or with --remote), it falls back to fetching
-// the skills from the upstream Problem-Based-SRS repository over the network.
+// At runtime the extension reads the canonical skills directly; this bundle is
+// only needed when the extension is installed on its own outside the monorepo.
 //
 // Usage:
-//   node scripts/sync-skills.mjs            # local copy from this repo's skills/
-//   node scripts/sync-skills.mjs --remote   # force download from upstream repo
-//   node scripts/sync-skills.mjs --ref dev  # download from a non-default ref
+//   node scripts/sync-skills.mjs            # copy from this repo's skills/
 //
-// Exit code is 0 when every skill synced, 1 when one or more skills failed so
-// CI can surface (but a release workflow may choose to treat it as non-fatal).
+// Exit code is 0 when every skill synced, 1 when one or more skills failed.
 
 import { writeFile, readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { syncSkills, syncSkillsLocal, SKILL_SOURCE, buildLocalSkillSourcePath } from "../lib/skill-sync.mjs";
+import { syncSkillsLocal } from "../lib/skill-sync.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const skillsDir = resolve(__dirname, "..", "skills");
@@ -41,57 +37,21 @@ const FILES = [
   "zigzag-validator.md",
 ];
 
-function parseArgs(argv) {
-  const out = {};
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--ref") out.ref = argv[++i];
-    if (argv[i] === "--owner") out.owner = argv[++i];
-    if (argv[i] === "--repo") out.repo = argv[++i];
-    if (argv[i] === "--remote") out.remote = true;
-    if (argv[i] === "--local") out.local = true;
-  }
-  return out;
-}
-
-// Use the local monorepo source when it is available and the caller has not
-// explicitly requested a remote sync.
-function shouldUseLocal(args) {
-  if (args.remote) return false;
-  if (args.local) return true;
-  return existsSync(buildLocalSkillSourcePath(FILES[0], repoRoot));
-}
-
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  console.log(`Refreshing ${FILES.length} bundled skills from ${repoRoot} ...`);
 
-  let result;
-  if (shouldUseLocal(args)) {
-    console.log(`Syncing ${FILES.length} skills from local monorepo (${repoRoot}) ...`);
-    result = await syncSkillsLocal({
-      files: FILES,
-      skillsDir,
-      repoRoot,
-      readFileImpl: readFile,
-      writeFileImpl: writeFile,
-    });
-  } else {
-    const source = { ...SKILL_SOURCE, ...args };
-    console.log(`Syncing ${FILES.length} skills from ${source.owner}/${source.repo}@${source.ref} ...`);
-    result = await syncSkills({
-      files: FILES,
-      skillsDir,
-      source,
-      writeFileImpl: writeFile,
-    });
-  }
+  const result = await syncSkillsLocal({
+    files: FILES,
+    skillsDir,
+    repoRoot,
+    readFileImpl: readFile,
+    writeFileImpl: writeFile,
+  });
 
   for (const file of result.updated) console.log(`  updated  ${file}`);
   for (const { file, error } of result.failed) console.error(`  FAILED   ${file}: ${error}`);
 
-  const where = result.source === "local" ? "local" : `ref ${result.ref}`;
-  console.log(
-    `Done: ${result.updated.length} updated, ${result.failed.length} failed (${where}).`
-  );
+  console.log(`Done: ${result.updated.length} updated, ${result.failed.length} failed.`);
 
   process.exit(result.failed.length === 0 ? 0 : 1);
 }

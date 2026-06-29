@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Single source of truth for skills**: the SRS Navigator canvas now reads the methodology
+  skills **live** from the repo's canonical `skills/<slug>/SKILL.md` at runtime, falling
+  back to the bundled flat copies only for standalone installs. The bundled copies are
+  regenerated from the canonical skills purely for packaging.
+
+### Removed
+
+- **Runtime "Sync Skills from GitHub" feature**: removed the `/api/sync-skills` endpoint,
+  the landing-page button, and the network sync path (`--remote`/`SKILL_SOURCE`). Bundled
+  skills are refreshed locally from `skills/` via `npm run sync-skills`.
+- All references to the former `RafaelGorski/problem-based-srs-app` repo; install URLs and
+  docs now point to `RafaelGorski/Problem-Based-SRS`.
+
 ## [1.4] - 2026-06-29
 
 ### Added

@@ -46,7 +46,7 @@ install_extension({ url: "<gist-url-or-repo-folder-url>", scope: "user" })
 
 Supported URL formats:
 - **Gist URL**: `https://gist.github.com/<user>/<gist-id>`
-- **Repo folder URL**: `https://github.com/RafaelGorski/problem-based-srs-app/tree/main/.github/extensions/srs-navigator`
+- **Repo folder URL**: `https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator`
 
 ### Method 3: Copy into Your Repository
 
@@ -197,7 +197,7 @@ flowchart LR
     subgraph Ext["srs-navigator extension process"]
         Server["HTTP server<br/>/api/invoke-skill<br/>/api/refresh-spec"]
         Canvas["createCanvas()<br/>open + actions"]
-        Skills["Bundled skills/*.md<br/>(read-only, no download)"]
+        Skills["Methodology skills<br/>(repo skills/ or bundled, read-only)"]
     end
     Agent["Copilot Agent / Session"]
     Repo[(".spec/ JSON + markdown")]
@@ -218,7 +218,7 @@ flowchart LR
 - **Source-aligned refresh.** The refresh button, the auto-refresh poll, and the idle hook all reload through one helper (`reloadInstanceFromSource`) that re-reads the **same file the agent loaded** (the instance's tracked `sourceFilePath`), only falling back to a `.spec/` folder scan when no source file is known. This keeps the manual refresh button in lock-step with what `load_specification` shows.
 - **Idle completion hook.** The extension listens for `session.idle`; when the agent finishes a turn it reloads every open canvas from its source so the UI reflects spec edits even if the agent never called `load_specification`. The hook never calls `session.send()`, so it cannot trigger another agent turn (no feedback loop) — the browser's 3s poll then performs the actual reload.
 - **Continuous polling.** The live graph polls every 3s and reloads itself when the spec changes, whether the agent edits `.spec/` directly or calls the `load_specification` action.
-- **Bundled skills.** Methodology skills ship inside the extension and are read locally. The extension does **not** download skill files at runtime, so opening the canvas never triggers an extension re-install / "downloaded" notification.
+- **Single source of truth for skills.** Inside the Problem-Based-SRS monorepo the extension reads the methodology skills **live** from the repo's canonical `skills/<slug>/SKILL.md`, so there is no copy to keep up to date. When the extension is installed standalone (gist/user install) it falls back to the flat `skills/*.md` copies bundled in the extension. Either way the skills are read locally — the extension never downloads skill files at runtime, so opening the canvas never triggers an extension re-install / "downloaded" notification. The bundled copies are regenerated from the canonical skills at packaging time via `npm run sync-skills`.
 
 ### Specification Format
 

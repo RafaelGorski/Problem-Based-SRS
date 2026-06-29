@@ -17,7 +17,6 @@ import { DEMO_SPEC } from "./lib/demo-spec.mjs";
 import { compileAndSave } from "./lib/spec-compiler.mjs";
 import { decomposeNode } from "./lib/decompose.mjs";
 import { isTrustedLoopbackRequest } from "./lib/http-guard.mjs";
-import { syncSkills } from "./lib/skill-sync.mjs";
 
 // Content fingerprint of a graph, used to detect *any* change to the loaded
 // specification (not just node/link count changes) so the canvas can reload
@@ -43,7 +42,31 @@ function graphSignature(graphData) {
 
 // Skills directory path
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const skillsDir = resolve(__dirname, "skills");
+
+// Bundled flat copies of the methodology skills that ship inside this extension
+// (used when the navigator is installed standalone outside the monorepo).
+const bundledSkillsDir = resolve(__dirname, "skills");
+
+// Canonical methodology skills. The navigator lives in the Problem-Based-SRS
+// monorepo at <repoRoot>/.github/extensions/srs-navigator/, so the single source
+// of truth is <repoRoot>/skills/<slug>/SKILL.md. We read those live so the canvas
+// always reflects the repo's skills without any copy/sync step. When installed
+// standalone (e.g. via gist into another project) this path won't resolve and we
+// fall back to the bundled flat copies above.
+const repoSkillsDir = resolve(__dirname, "..", "..", "..", "skills");
+
+// Load a methodology skill's markdown by its bundled file name (e.g.
+// "business-context.md"). Prefers the canonical <repoRoot>/skills/<slug>/SKILL.md
+// and falls back to the bundled flat file for standalone installs.
+async function loadSkillContentByFile(file) {
+    const slug = file.replace(/\.md$/i, "");
+    const canonical = resolve(repoSkillsDir, slug, "SKILL.md");
+    try {
+        return await readFile(canonical, "utf-8");
+    } catch {
+        return await readFile(resolve(bundledSkillsDir, file), "utf-8");
+    }
+}
 
 // Derive workspace root from extension location:
 // Project extension: <workspace>/.github/extensions/srs-navigator/ → 3 levels up
@@ -115,8 +138,7 @@ function buildSkillTools() {
             },
         },
         handler: async (args) => {
-            const skillPath = resolve(skillsDir, skill.file);
-            const content = await readFile(skillPath, "utf-8");
+            const content = await loadSkillContentByFile(skill.file);
             let result = content;
             if (args.context) {
                 result += `\n\n---\n\n## User-Provided Context\n\n${args.context}`;
@@ -406,22 +428,6 @@ function createCanvasServer(instanceId, fallbackHtml, workspacePath) {
             return;
         }
 
-        if (req.url === "/api/sync-skills" && req.method === "POST") {
-            (async () => {
-                try {
-                    const result = await syncSkills({
-                        files: SKILLS.map((s) => s.file),
-                        skillsDir,
-                        writeFileImpl: writeFile,
-                    });
-                    sendJson(res, { ok: result.failed.length === 0, ...result });
-                } catch (e) {
-                    sendJson(res, { ok: false, error: e.message }, 500);
-                }
-            })();
-            return;
-        }
-
         if (req.url === "/api/decompose" && req.method === "POST") {
             (async () => {
                 try {
@@ -692,7 +698,7 @@ const session = await joinSession({
                             try {
                                 const skillFile = SKILLS.find(s => s.name === action.skill)?.file;
                                 if (skillFile) {
-                                    skillContent = await readFile(resolve(skillsDir, skillFile), "utf-8");
+                                    skillContent = await loadSkillContentByFile(skillFile);
                                 }
                             } catch { /* skill file read failure is non-fatal */ }
 
@@ -725,8 +731,7 @@ const session = await joinSession({
                         const entry = instances.get(ctx.instanceId);
                         if (!entry) throw new CanvasError("not_open", "Canvas instance not found");
 
-                        const skillPath = resolve(skillsDir, "problem-based-srs.md");
-                        const skillContent = await readFile(skillPath, "utf-8");
+                        const skillContent = await loadSkillContentByFile("problem-based-srs.md");
 
                         let result = skillContent;
                         if (ctx.input?.context) {
