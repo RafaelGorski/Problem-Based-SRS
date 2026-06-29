@@ -2118,28 +2118,6 @@ export function renderGraphHtml(graphData, options = {}) {
       addActivity(node.id, { role: "you", text: describeAsk(actionKey, node, prompt) });
       const replyId = addActivity(node.id, { role: "agent", variant: "pending", text: "Sending your request to the agent" });
 
-      // Fast local path: decompose deterministically on the server (no model
-      // round-trip) for instant iteration, then reload the graph.
-      if (actionKey.startsWith("decompose")) {
-        updateActivity(node.id, replyId, { text: "Decomposing " + node.id });
-        fetch(location.origin + "/api/decompose", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nodeId: node.id }),
-        }).then(async res => {
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.ok && data.added > 0) {
-            updateActivity(node.id, replyId, { variant: "success", text: "Added " + data.added + " sub-item(s). Refreshing the graph…" });
-            setTimeout(() => window.location.reload(), 500);
-          } else if (data.added === 0) {
-            updateActivity(node.id, replyId, { variant: "info", text: "Nothing to decompose yet. Add more detail to " + node.id + ", then retry." });
-          } else {
-            updateActivity(node.id, replyId, { variant: "error", text: "Decompose failed." });
-          }
-        }).catch(() => updateActivity(node.id, replyId, { variant: "error", text: "Decompose failed." }));
-        return true;
-      }
-
       // Send action to the extension server → triggers session.send()
       const serverBase = location.origin;
       fetch(serverBase + "/api/invoke-skill", {
