@@ -69,6 +69,27 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes('class="btn active" data-mode="implementation"'));
   });
 
+  it("renders a version badge linking to releases", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('class="app-version"'), "version badge element present");
+    assert.match(html, /v\d+\.\d+\.\d+/, "version badge shows an x.y.z version");
+    assert.ok(html.includes("/releases"), "version badge links to releases");
+  });
+
+  it("renders a GitHub source link in the toolbar", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('class="gh-icon-link"'), "github link element present");
+    assert.ok(html.includes('href="https://github.com/RafaelGorski/Problem-Based-SRS"'), "links to the repo");
+  });
+
+  it("emits a valid whitespace regex for label wrapping (not /s+/)", () => {
+    // Guard against the template-literal escaping bug where /\s+/ collapses to
+    // /s+/ in the generated script and splits labels on the letter 's'.
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes("label.split(/\\s+/)"), "label wrap must split on whitespace, not 's'");
+    assert.ok(!html.includes("label.split(/s+/)"), "must not split on the letter 's'");
+  });
+
   it("does not include a network skill-sync button (skills are read live from the repo)", () => {
     const html = renderGraphHtml(sampleGraph);
     assert.ok(!html.includes('id="modal-btn-sync-skills"'));

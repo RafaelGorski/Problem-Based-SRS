@@ -2,6 +2,26 @@
 // Generates a self-contained HTML page with D3.js force-directed graph
 // Styled to match the original Problem-Based SRS Navigator application
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const REPO_URL = 'https://github.com/RafaelGorski/Problem-Based-SRS';
+
+// Read the canvas app version from package.json once at module load so the
+// on-screen badge stays in sync with the published extension version.
+const APP_VERSION = (() => {
+  try {
+    const pkgPath = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'package.json');
+    return JSON.parse(readFileSync(pkgPath, 'utf8')).version || '';
+  } catch {
+    return '';
+  }
+})();
+
+// Octocat mark for the "view source" link in the toolbar.
+const GITHUB_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>';
+
 const NODE_COLORS = {
   problem: { fill: 'oklch(0.61 0.18 48)', stroke: 'oklch(0.51 0.18 48)', text: '#fff', label: 'Problem', fullLabel: 'Customer Problem' },
   need: { fill: 'oklch(0.58 0.10 202)', stroke: 'oklch(0.48 0.10 202)', text: '#fff', label: 'Need', fullLabel: 'Customer Need' },
@@ -137,6 +157,41 @@ export function renderGraphHtml(graphData, options = {}) {
       color: white;
       white-space: nowrap;
     }
+    .app-version {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      line-height: 1.4;
+      white-space: nowrap;
+      text-decoration: none;
+      color: var(--primary);
+      background: oklch(0.45 0.16 266 / 0.10);
+      border: 1px solid oklch(0.45 0.16 266 / 0.24);
+      border-radius: 9999px;
+      padding: 2px 8px;
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+    .app-version:hover {
+      color: var(--primary-foreground);
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .gh-icon-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--foreground);
+      text-decoration: none;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .gh-icon-link:hover { background: var(--hover); }
+    .gh-icon-link svg { width: 18px; height: 18px; }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -1148,6 +1203,7 @@ export function renderGraphHtml(graphData, options = {}) {
       <div class="title-section">
         <h1>Problem-Based SRS</h1>
         <span class="badge" id="problem-badge"></span>
+        ${APP_VERSION ? `<a class="app-version" href="${REPO_URL}/releases" target="_blank" rel="noopener" title="Version ${escapeHtml(APP_VERSION)} — view releases" aria-label="Version ${escapeHtml(APP_VERSION)}, view releases">v${escapeHtml(APP_VERSION)}</a>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div class="btn-group">
@@ -1160,6 +1216,7 @@ export function renderGraphHtml(graphData, options = {}) {
             Hierarchy
           </button>
         </div>
+        <a class="gh-icon-link" href="${REPO_URL}" target="_blank" rel="noopener" title="View source on GitHub" aria-label="View source on GitHub">${GITHUB_ICON}</a>
       </div>
     </div>
     <div class="toolbar-row">
@@ -1581,7 +1638,7 @@ export function renderGraphHtml(graphData, options = {}) {
     nodeElements.each(function(d) {
       const group = d3.select(this);
       const label = (d.label || '').substring(0, 80); // Truncate very long labels
-      const words = label.split(/\s+/).filter(Boolean);
+      const words = label.split(/\\s+/).filter(Boolean);
       if (words.length === 0) return;
       const maxWidth = 120;
       const lineHeight = 1.1;
@@ -1601,7 +1658,7 @@ export function renderGraphHtml(graphData, options = {}) {
       }
       if (line.length > 0 && lines.length < maxLines) lines.push(line.join(" "));
       // Add ellipsis if truncated
-      if (lines.length >= maxLines && words.length > lines.join(" ").split(/\s+/).length) {
+      if (lines.length >= maxLines && words.length > lines.join(" ").split(/\\s+/).length) {
         lines[lines.length - 1] = lines[lines.length - 1].substring(0, 18) + '…';
       }
 

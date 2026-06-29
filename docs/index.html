@@ -149,6 +149,20 @@
             color: var(--ink-heading); text-decoration: none; white-space: nowrap;
         }
         .site-nav-brand span { color: var(--primary); }
+        .site-nav-id { display: inline-flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+        .version-badge {
+            font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 400;
+            line-height: 1.35; letter-spacing: 0.01em; white-space: nowrap;
+            color: var(--primary); background: var(--primary-subtle);
+            border: 1px solid color-mix(in oklch, var(--primary) 24%, transparent);
+            border-radius: 999px; padding: 0.18em 0.62em; text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .version-badge:hover {
+            color: var(--on-primary); background: var(--primary);
+            border-color: var(--primary);
+        }
+        .version-badge:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
         .site-nav-links {
             display: flex; gap: var(--space-md); list-style: none;
             flex-wrap: wrap; align-items: center;
@@ -427,6 +441,8 @@
         .site-footer a { color: var(--muted); display: inline-block; padding: 0.3rem 0.15rem; min-height: 24px; }
         .site-footer a:hover { color: var(--ink); }
         .footer-links { margin-top: var(--space-xs); }
+        .footer-version { font-family: var(--font-mono); font-size: 0.92em; color: var(--accent); }
+        .footer-version:hover { color: var(--accent-hover); }
         .footer-links a + a::before { content: ' · '; color: var(--muted-light); }
 
         /* ── Scroll reveal ── */
@@ -465,7 +481,10 @@
 
     <nav class="site-nav" aria-label="Primary">
         <div class="wrap">
-            <a href="/" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
+            <div class="site-nav-id">
+                <a href="/" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 1.4, view releases">v1.4</a>
+            </div>
             <ul class="site-nav-links">
                 <li><a href="#problem">The problem</a></li>
                 <li><a href="#methodology">How it works</a></li>
@@ -773,7 +792,7 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
 
     <footer class="site-footer">
         <div class="wrap">
-            <p>Problem-Based SRS · v1.2 · Methodology by Gorski &amp; Stadzisz</p>
+            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v1.4</a> · Methodology by Gorski &amp; Stadzisz</p>
             <p class="footer-links">
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md">Changelog</a>
