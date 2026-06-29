@@ -67,6 +67,8 @@ docs/dissertation-en/
 docs/srs/
 /.pytest_cache
 
-
 # Impeccable cache
 .impeccable/
+
+# Build & release pipeline output
+dist/

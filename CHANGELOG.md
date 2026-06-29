@@ -7,15 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3] - 2026-06-29
+
+### Added
+
+- **Build & Release Pipeline**: Validated, packaged releases on the GitHub Releases page
+  - `scripts/build-plugin.py`: validates `plugin.json` and every `SKILL.md` frontmatter,
+    extracts CHANGELOG release notes, and packages a `dist/<name>-vX.Y.zip` artifact
+  - `.github/workflows/ci.yml`: validates the plugin and uploads the package on every
+    push/PR to `main`
+  - Release workflow now **builds, validates, packages, and attaches the plugin zip** to
+    the GitHub Release, with notes auto-extracted from `CHANGELOG.md`
+  - Release can be triggered by pushing a `vX.Y` tag (in addition to manual dispatch)
+  - Release artifact ships **only the agent-required skills** (plugin manifest, agent, and
+    skills); README, CHANGELOG, lockfiles, tests, build scripts, and docs are excluded
+
 ### Changed
 
 - **GitHub Actions Release Workflow**: Made generic with input parameters
   - Workflow now accepts `version`, `release_name`, and `release_body` as inputs
+  - All inputs are now optional (version defaults to `plugin.json`, notes to `CHANGELOG.md`)
   - Removed hardcoded v1.2 release information
   - Renamed workflow from "Create Release v1.2" to "Create Release"
 - **Release Process Documentation**: Added comprehensive release instructions
   - Step-by-step guide added to `.github/copilot-instructions.md`
   - Includes version numbering, troubleshooting, and examples
+
+[1.3]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.3
 
 ## [1.2] - 2026-03-13
 
