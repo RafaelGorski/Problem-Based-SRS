@@ -2,52 +2,54 @@
 
 ## Theme
 
-Dark. An engineer's focused workspace at night: dark surface, warm signal colors that draw the eye to what matters. The methodology is about precision and clarity; the visual system mirrors that. Dark backgrounds let the structural elements (the CP → CN → FR chain, the traceability diagrams, the code examples) command attention without competing with decorative surface treatment.
+Light. A clean, off-white workspace: an engineer's reference page in daylight. Near-neutral off-white surface, near-black ink, hairline borders, and a single committed crimson for identity. The methodology is about precision and traceability; a calm light canvas keeps the structural elements (the CP → CN → FR chain, the traceability graph, the code examples) legible and uncluttered. The off-white is held at near-zero chroma to read as crisp and professional, not as the warm cream/sand AI default.
+
+The palette aligns with the **SRS Navigator** Copilot extension: the four methodology node colors (amber CP, teal CN, indigo FR, purple NFR) match the app's graph, so the webpage and the tool share one visual language.
 
 ## Color
 
-Strategy: **Committed.** The primary crimson carries identity across headers, CTAs, and structural accents. The rest is disciplined dark neutrals with a cool-teal accent for secondary emphasis.
+Strategy: **Committed.** The primary crimson carries identity across headers, CTAs, and structural accents on a disciplined off-white field, with a deep-teal accent for links and secondary emphasis.
 
 ```css
 :root {
-  /* Primary — warm crimson, the seed anchor. Signal color for identity. */
-  --primary: oklch(0.60 0.16 24);
-  --primary-hover: oklch(0.55 0.18 24);
-  --primary-subtle: oklch(0.25 0.06 24);
+  /* Primary — crimson identity, tuned for a light canvas. White text on fill. */
+  --primary: oklch(0.54 0.19 25);
+  --primary-hover: oklch(0.47 0.20 25);
+  --primary-subtle: oklch(0.96 0.025 25);
 
-  /* Background — near-black, zero chroma. Pure dark stage. */
-  --bg: oklch(0.10 0.000 0);
-  --bg-elevated: oklch(0.13 0.000 0);
+  /* Background — clean, near-neutral off-white (near-zero chroma, not cream). */
+  --bg: oklch(0.985 0.001 260);
+  --bg-elevated: oklch(1 0 0);
 
-  /* Surface — bg pulled slightly lighter for cards and panels. */
-  --surface: oklch(0.16 0.004 24);
-  --surface-hover: oklch(0.19 0.005 24);
-  --surface-border: oklch(0.22 0.005 24);
+  /* Surface — faint panels and code blocks, hairline borders. */
+  --surface: oklch(0.972 0.002 260);
+  --surface-hover: oklch(0.955 0.003 260);
+  --surface-border: oklch(0.905 0.004 260);
 
-  /* Ink — near-white body text. ≥7:1 contrast vs bg. */
-  --ink: oklch(0.93 0.000 0);
-  --ink-heading: oklch(0.97 0.000 0);
+  /* Ink — near-black text. ≥10:1 (body) / ≥13:1 (headings) vs bg. */
+  --ink: oklch(0.30 0.012 264);
+  --ink-heading: oklch(0.19 0.016 264);
 
-  /* Accent — cool teal, distinct from warm primary in both hue and feel. */
-  --accent: oklch(0.72 0.12 190);
-  --accent-hover: oklch(0.67 0.14 190);
-  --accent-subtle: oklch(0.22 0.04 190);
+  /* Accent — deep teal for links, readable on off-white. */
+  --accent: oklch(0.50 0.10 205);
+  --accent-hover: oklch(0.43 0.11 205);
 
-  /* Muted — secondary text. Ink pulled 40% toward bg. ≥3.5:1 vs bg. */
-  --muted: oklch(0.60 0.000 0);
-  --muted-light: oklch(0.50 0.000 0);
+  /* Muted — secondary text. ≥4.5:1 vs bg. */
+  --muted: oklch(0.47 0.012 264);
+  --muted-light: oklch(0.57 0.012 264);
 
-  /* Semantic — methodology step colors (used sparingly in diagrams). */
-  --step-why: oklch(0.62 0.18 25);     /* CP — crimson/warm, aligns with primary */
-  --step-glance: oklch(0.68 0.12 175); /* Software Glance — teal */
-  --step-what: oklch(0.65 0.10 230);   /* CN — steel blue */
-  --step-vision: oklch(0.66 0.10 155); /* Software Vision — muted green */
-  --step-how: oklch(0.75 0.12 85);     /* FR — warm amber */
-  --step-context: oklch(0.60 0.10 310); /* Business Context — muted plum */
+  /* Semantic — methodology node colors, matched to the SRS Navigator app. */
+  --step-context: oklch(0.52 0.16 305); /* Business Context — plum */
+  --step-why: oklch(0.56 0.17 40);      /* CP — amber/orange */
+  --step-glance: oklch(0.50 0.10 200);  /* Software Glance — teal */
+  --step-what: oklch(0.50 0.10 200);    /* CN — teal */
+  --step-vision: oklch(0.52 0.13 150);  /* Software Vision — green */
+  --step-how: oklch(0.50 0.17 272);     /* FR — indigo */
+  --step-nfr: oklch(0.50 0.16 300);     /* NFR — purple */
 }
 ```
 
-Text on primary/accent fills: white (`--ink-heading`). Both are mid-luminance saturated colors; white text is the perceptually correct choice.
+Text on primary/accent fills: white (`--bg-elevated`). Both are mid-luminance saturated colors; white text is the perceptually correct choice.
 
 ## Typography
 
@@ -71,7 +73,7 @@ Text on primary/accent fills: white (`--ink-heading`). Both are mid-luminance sa
 ```
 
 - **Display (Bricolage Grotesque):** Headers h1–h3. Weight 700. Angular terminals give it a technical, engineered quality without being cold. Letter-spacing: -0.02em on display sizes.
-- **Body (Figtree):** Paragraphs, lists, UI text. Weight 400 (body), 500 (emphasis), 600 (labels). Geometric proportions, high x-height for screen readability. Line-height: 1.7 for body on dark bg (extra breathing room for light-on-dark).
+- **Body (Figtree):** Paragraphs, lists, UI text. Weight 400 (body), 500 (emphasis), 600 (labels). Geometric proportions, high x-height for screen readability. Line-height: 1.7 for comfortable reading on the off-white field.
 - **Mono (JetBrains Mono):** Code blocks, command references, file paths. Weight 400. Used in the commands table and installation instructions.
 
 Cap body line-length at 68ch. Use `text-wrap: balance` on h1–h3.
@@ -110,7 +112,7 @@ Vary spacing for rhythm. Section breaks use `--space-section`. Related content g
 ## Components
 
 ### Code blocks
-Dark surface (`--bg-elevated`), `--font-mono`, 1px border in `--surface-border`. Syntax highlighting uses the semantic step colors sparingly.
+White panel surface (`--bg-elevated`), dark mono ink, `--font-mono`, 1px border in `--surface-border`. Syntax highlighting uses the semantic step colors sparingly.
 
 ### Command table
 Mono font for command names, body font for descriptions. Subtle row separators using `--surface-border`. No heavy borders or zebra striping.
@@ -125,5 +127,6 @@ Ghost: transparent, `--ink` text, 1px `--surface-border`, 8px radius. Hover: `--
 ## Assets
 
 - No stock imagery needed. This is a methodology/documentation brand.
-- Diagrams: SVG-based, using the semantic step colors on dark backgrounds.
+- Diagrams: SVG-based, using the semantic step colors on light backgrounds.
+- App showcase: the SRS Navigator screenshot (`assets/srs-navigator.png`) is presented in a browser-chrome frame with a soft shadow.
 - Icons: Minimal, monoline, used only for navigation and step indicators.

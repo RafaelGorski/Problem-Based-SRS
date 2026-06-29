@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Problem-Based SRS: AI-guided requirements engineering that traces every feature back to the customer problem it solves.">
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="#f7f7f8">
     <title>Problem-Based SRS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,26 +12,34 @@
     <style>
         /* ── Tokens ── */
         :root {
-            --primary: oklch(0.60 0.16 24);
-            --primary-hover: oklch(0.55 0.18 24);
-            --primary-subtle: oklch(0.25 0.06 24);
-            --bg: oklch(0.10 0.000 0);
-            --bg-elevated: oklch(0.13 0.000 0);
-            --surface: oklch(0.16 0.004 24);
-            --surface-hover: oklch(0.19 0.005 24);
-            --surface-border: oklch(0.22 0.005 24);
-            --ink: oklch(0.93 0.000 0);
-            --ink-heading: oklch(0.97 0.000 0);
-            --accent: oklch(0.72 0.12 190);
-            --accent-hover: oklch(0.67 0.14 190);
-            --muted: oklch(0.60 0.000 0);
-            --muted-light: oklch(0.50 0.000 0);
-            --step-context: oklch(0.60 0.10 310);
-            --step-why: oklch(0.62 0.18 25);
-            --step-glance: oklch(0.68 0.12 175);
-            --step-what: oklch(0.65 0.10 230);
-            --step-vision: oklch(0.66 0.10 155);
-            --step-how: oklch(0.75 0.12 85);
+            /* Primary — crimson identity, preserved and tuned for a light canvas. */
+            --primary: oklch(0.54 0.19 25);
+            --primary-hover: oklch(0.47 0.20 25);
+            --primary-subtle: oklch(0.96 0.025 25);
+            /* Background — clean, near-neutral off-white. */
+            --bg: oklch(0.985 0.001 260);
+            --bg-elevated: oklch(1 0 0);
+            /* Surface — faint panels, hairline borders. */
+            --surface: oklch(0.972 0.002 260);
+            --surface-hover: oklch(0.955 0.003 260);
+            --surface-border: oklch(0.905 0.004 260);
+            /* Ink — near-black text, high contrast on off-white. */
+            --ink: oklch(0.30 0.012 264);
+            --ink-heading: oklch(0.19 0.016 264);
+            /* Accent — deep teal, readable on light. */
+            --accent: oklch(0.50 0.10 205);
+            --accent-hover: oklch(0.43 0.11 205);
+            /* Muted — secondary text, ≥4.5:1 on off-white. */
+            --muted: oklch(0.47 0.012 264);
+            --muted-light: oklch(0.57 0.012 264);
+            /* Methodology node colors — matched to the SRS Navigator app. */
+            --step-context: oklch(0.52 0.16 305);
+            --step-why: oklch(0.56 0.17 40);
+            --step-glance: oklch(0.50 0.10 200);
+            --step-what: oklch(0.50 0.10 200);
+            --step-vision: oklch(0.52 0.13 150);
+            --step-how: oklch(0.50 0.17 272);
+            --step-nfr: oklch(0.50 0.16 300);
             --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
             --font-body: 'Figtree', system-ui, sans-serif;
             --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
@@ -82,7 +90,8 @@
         code {
             font-family: var(--font-mono);
             font-size: 0.9em;
-            background: var(--bg-elevated);
+            color: var(--ink-heading);
+            background: var(--surface);
             padding: 0.15em 0.4em;
             border-radius: 4px;
             border: 1px solid var(--surface-border);
@@ -114,7 +123,7 @@
         /* ── Nav ── */
         .site-nav {
             position: sticky; top: 0; z-index: 100;
-            background: oklch(0.10 0.000 0 / 0.85);
+            background: oklch(0.985 0.001 260 / 0.82);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--surface-border);
@@ -153,7 +162,7 @@
         .hero::before {
             content: ''; position: absolute;
             width: clamp(300px, 50vw, 700px); height: clamp(300px, 50vw, 700px);
-            background: radial-gradient(circle, oklch(0.60 0.16 24 / 0.1), transparent 70%);
+            background: radial-gradient(circle, oklch(0.54 0.19 25 / 0.08), transparent 70%);
             top: 30%; left: 50%; transform: translate(-50%, -50%);
             pointer-events: none;
         }
@@ -289,13 +298,52 @@
         }
         .cmd-table td {
             padding: var(--space-sm) var(--space-md);
-            border-bottom: 1px solid oklch(0.16 0.000 0);
+            border-bottom: 1px solid var(--surface-border);
             font-size: var(--text-sm);
         }
         .cmd-table tr:hover td { background: var(--surface); }
         .cmd-table .cmd-name {
             font-family: var(--font-mono); color: var(--accent); white-space: nowrap;
         }
+
+        /* ── App showcase (SRS Navigator) ── */
+        .section-lead { color: var(--muted); max-width: 62ch; margin-bottom: var(--space-lg); }
+        .section-lead strong { color: var(--ink-heading); font-weight: 600; }
+        .node-legend {
+            list-style: none; display: flex; flex-wrap: wrap;
+            gap: var(--space-md); margin-bottom: var(--space-lg);
+        }
+        .node-legend li {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: var(--text-sm); color: var(--muted);
+        }
+        .node-chip {
+            font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600;
+            color: var(--c); background: color-mix(in oklab, var(--c) 12%, transparent);
+            border: 1px solid color-mix(in oklab, var(--c) 32%, transparent);
+            padding: 0.2em 0.55em; border-radius: 6px; letter-spacing: 0.02em;
+        }
+        .app-showcase { margin: 0; }
+        .app-frame {
+            border-radius: 14px; overflow: hidden; background: var(--bg-elevated);
+            box-shadow: 0 2px 4px oklch(0.2 0.02 264 / 0.05),
+                        0 20px 44px oklch(0.42 0.05 25 / 0.12);
+        }
+        .app-frame-bar {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.7rem 1rem; background: var(--surface);
+            border-bottom: 1px solid var(--surface-border);
+        }
+        .app-dots { display: flex; gap: 0.4rem; }
+        .app-dots span { width: 11px; height: 11px; border-radius: 50%; background: var(--surface-border); }
+        .app-frame-title { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+        .app-frame img { display: block; width: 100%; height: auto; }
+        .app-showcase figcaption {
+            margin-top: var(--space-md); font-size: var(--text-sm);
+            color: var(--muted); text-align: center; max-width: 60ch;
+            margin-left: auto; margin-right: auto;
+        }
+        .app-actions { margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
         /* ── Footer CTA ── */
         .footer-cta {
@@ -358,6 +406,7 @@
             <ul class="site-nav-links">
                 <li><a href="#problem">The problem</a></li>
                 <li><a href="#methodology">How it works</a></li>
+                <li><a href="#visualize">Visualize</a></li>
                 <li><a href="#start">Get started</a></li>
                 <li><a href="#commands">Commands</a></li>
                 <li><a href="#research">Research</a></li>
@@ -382,6 +431,7 @@
             <div class="hero-meta">
                 <span class="hero-badge">v1.2</span>
                 <span class="hero-badge">AgentSkills standard</span>
+                <span class="hero-badge">Copilot extension</span>
                 <span class="hero-badge">MIT License</span>
             </div>
         </div>
@@ -493,6 +543,38 @@
                             <p class="class-desc">Low priority. Missed improvement opportunity if unsolved. Build this last.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualize (SRS Navigator app) -->
+        <section id="visualize" class="section">
+            <div class="wrap">
+                <h2 class="reveal">See your spec as a living graph</h2>
+                <p class="reveal section-lead">The <strong>SRS Navigator</strong> renders every artifact and its traceability as an interactive, force-directed graph, right inside the GitHub Copilot side panel. Follow problem to need to requirement without leaving your editor.</p>
+
+                <ul class="node-legend reveal" aria-label="Node types in the graph">
+                    <li><span class="node-chip" style="--c: var(--step-why)">CP</span> Customer Problem</li>
+                    <li><span class="node-chip" style="--c: var(--step-what)">CN</span> Customer Need</li>
+                    <li><span class="node-chip" style="--c: var(--step-how)">FR</span> Functional Requirement</li>
+                    <li><span class="node-chip" style="--c: var(--step-nfr)">NFR</span> Non-Functional Requirement</li>
+                </ul>
+
+                <figure class="app-showcase reveal">
+                    <div class="app-frame">
+                        <div class="app-frame-bar">
+                            <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                            <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                        </div>
+                        <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy"
+                             alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                    </div>
+                    <figcaption>A CRM specification rendered as a graph. Filter by analysis mode, search nodes, and inspect dependencies, all in the side panel.</figcaption>
+                </figure>
+
+                <div class="app-actions reveal">
+                    <a href="https://github.com/RafaelGorski/problem-based-srs-app" class="btn-primary">Get the Copilot extension</a>
+                    <a href="https://github.com/RafaelGorski/problem-based-srs-app#readme" class="btn-ghost" target="_blank" rel="noopener">How it works</a>
                 </div>
             </div>
         </section>
