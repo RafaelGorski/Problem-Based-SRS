@@ -1027,6 +1027,14 @@ export function renderGraphHtml(graphData, options = {}) {
     .action-bar-btn:active {
       background: oklch(0.18 0.03 265);
     }
+    .action-bar-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .action-bar-btn:disabled:hover {
+      background: oklch(0.20 0.015 265);
+      color: oklch(0.75 0.03 265);
+    }
     .action-bar-btn svg {
       width: 14px;
       height: 14px;
@@ -1743,6 +1751,13 @@ export function renderGraphHtml(graphData, options = {}) {
       return actions;
     }
 
+    function syncActionButtonsEnabled() {
+      const hasInput = actionBarInput.value.trim().length > 0;
+      actionBarActions.querySelectorAll(".action-bar-btn").forEach((btn) => {
+        btn.disabled = !hasInput;
+      });
+    }
+
     function showActionBar(node, svgElement) {
       if (actionBarLocked && actionBarNode && actionBarNode.id === node.id) return;
       actionBarNode = node;
@@ -1780,6 +1795,10 @@ export function renderGraphHtml(graphData, options = {}) {
       const typeLabels = { problem: "Customer Problem", need: "Customer Need", fr: "Functional Req", nfr: "Non-Functional Req" };
       actionBarInput.placeholder = "Describe changes to " + (typeLabels[node.type] || node.type) + " " + node.id + "...";
       actionBarInput.value = "";
+
+      // Actions require engineer input — keep buttons disabled until the field
+      // has content so a button alone can never trigger an action.
+      syncActionButtonsEnabled();
 
       // Position the bar below the node
       positionActionBar(svgElement);
@@ -1822,53 +1841,35 @@ export function renderGraphHtml(graphData, options = {}) {
     function handleActionBarAction(actionKey, skillName, node) {
       const prompt = actionBarInput.value.trim();
 
+      // Every node action is driven by the engineer's input: it tells the agent
+      // what to create. The button alone, with an empty field, must not trigger
+      // anything — prompt the engineer for detail and stop.
+      if (!prompt) {
+        showToast("Describe what to create, then click the action", { variant: "info" });
+        actionBarInput.focus();
+        return;
+      }
+
       // Build context message for the skill invocation
       const typeLabels = { problem: "Customer Problem", need: "Customer Need", fr: "Functional Requirement", nfr: "Non-Functional Requirement" };
       const nodeLabel = typeLabels[node.type] || node.type;
       let context = "";
 
       if (actionKey === "submit") {
-        if (!prompt) return;
         const typeSkillMap = { problem: "customer_problems", need: "customer_needs", fr: "functional_requirements", nfr: "functional_requirements" };
         skillName = typeSkillMap[node.type] || "customer_problems";
         context = "Regarding " + nodeLabel + " " + node.id + " (" + node.label + "): " + prompt;
       } else if (actionKey.startsWith("decompose")) {
-        context = "Decompose " + nodeLabel + " " + node.id + " (" + node.label + ") into finer-grained sub-items of the same type.";
-        if (prompt) context += " Additional context: " + prompt;
+        context = "Decompose " + nodeLabel + " " + node.id + " (" + node.label + ") into finer-grained sub-items of the same type. Additional context: " + prompt;
       } else if (actionKey === "addCN") {
-        context = "Derive a new Customer Need (CN) from " + nodeLabel + " " + node.id + " (" + node.label + "). The CN must trace back to this problem.";
-        if (prompt) context += " Additional context: " + prompt;
+        context = "Derive a new Customer Need (CN) from " + nodeLabel + " " + node.id + " (" + node.label + "). The CN must trace back to this problem. Additional context: " + prompt;
       } else if (actionKey === "addFR") {
-        context = "Derive a new Functional Requirement (FR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The FR must trace back to this need.";
-        if (prompt) context += " Additional context: " + prompt;
+        context = "Derive a new Functional Requirement (FR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The FR must trace back to this need. Additional context: " + prompt;
       } else if (actionKey === "addNFR") {
-        context = "Derive a new Non-Functional Requirement (NFR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The NFR must trace back to this requirement.";
-        if (prompt) context += " Additional context: " + prompt;
+        context = "Derive a new Non-Functional Requirement (NFR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The NFR must trace back to this requirement. Additional context: " + prompt;
       }
 
       if (!context || !skillName) return;
-
-      // Fast local path: decompose deterministically on the server (no model
-      // round-trip) for instant iteration, then reload the graph.
-      if (actionKey.startsWith("decompose")) {
-        showToast("⏳ Decomposing " + node.id + "...", { variant: "pending", persistent: true });
-        fetch(location.origin + "/api/decompose", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nodeId: node.id }),
-        }).then(async res => {
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.ok && data.added > 0) {
-            showToast("✓ Added " + data.added + " sub-item(s) — reloading...");
-            setTimeout(() => window.location.reload(), 400);
-          } else if (data.added === 0) {
-            showToast("Nothing to decompose — add detail then retry", { variant: "info" });
-          } else {
-            showToast("Decompose failed", { variant: "error" });
-          }
-        }).catch(() => showToast("Decompose failed", { variant: "error" }));
-        return;
-      }
 
       // Show persistent pending status
       showToast("⏳ Sending to agent: " + skillName + " on " + node.id + "...", { variant: "pending", persistent: true });
@@ -1971,6 +1972,7 @@ export function renderGraphHtml(graphData, options = {}) {
     actionBarInput.addEventListener("input", () => {
       // Toggle pinned state based on content presence
       actionBar.classList.toggle("pinned", actionBarInput.value.length > 0);
+      syncActionButtonsEnabled();
     });
     actionBarInput.addEventListener("click", (e) => e.stopPropagation());
 
