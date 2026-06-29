@@ -130,6 +130,20 @@ Every FR traces to a CN, which traces to a CP. The $50k problem is the root. Not
 | `/functional-requirements` | Step 5: detailed, testable requirements |
 | `/zigzag-validator` | Verify traceability across all artifacts |
 | `/complexity-analysis` | Optional: Axiomatic Design quality analysis |
+| `/live` | Launch the **SRS Navigator** canvas to visualize the spec as an interactive graph |
+
+## Visualize it live
+
+This repository is **both** the methodology skill **and** the UX to navigate it. The
+**SRS Navigator** is a GitHub Copilot canvas extension (in
+[`.github/extensions/srs-navigator/`](.github/extensions/srs-navigator/)) that renders a
+specification as an interactive force-directed graph of Customer Problems, Customer
+Needs, and Functional/Non-Functional Requirements — explore traceability, filter by
+analysis mode, search nodes, and inspect dependencies inside the Copilot side panel.
+
+Run `/live` and your assistant opens the navigator on the current `.spec/` (or a built-in
+CRM demo if you haven't created one yet). The extension also bundles the full methodology
+as agent tools, so every step is available without leaving the panel.
 
 ## Installation
 
@@ -195,12 +209,46 @@ Problem-Based-SRS/
 │   ├── software-vision/         # Step 4
 │   ├── functional-requirements/ # Step 5
 │   ├── zigzag-validator/        # Traceability validation
-│   └── complexity-analysis/     # Optional: Axiomatic Design
+│   ├── complexity-analysis/     # Optional: Axiomatic Design
+│   └── live/                    # Launch the SRS Navigator canvas
+├── .github/extensions/
+│   └── srs-navigator/           # Canvas extension (UX) + bundled skills
+├── .spec/crm-system.json        # Demo specification for the navigator
+├── scripts/                     # build-plugin.py, bump-version, package-extension
 ├── docs/                        # Research paper and methodology
 └── .claude-plugin/              # Plugin manifest
 ```
 
 Case studies: [`crm-example.md`](skills/problem-based-srs/references/crm-example.md) and [`microer-example.md`](skills/problem-based-srs/references/microer-example.md) walk through complete sessions.
+
+## Two development workflows
+
+This repository is maintained along two complementary tracks:
+
+1. **Agent-native skills** (the methodology). The canonical skills live in
+   [`skills/`](skills/) as `SKILL.md` files. Validate and package them with
+   `python scripts/build-plugin.py validate` / `package`; CI
+   ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) checks every push and the
+   plugin release ([`.github/workflows/create-release.yml`](.github/workflows/create-release.yml))
+   publishes the AgentSkills/Claude plugin.
+
+2. **The SRS Navigator canvas app** (the UX). The extension in
+   [`.github/extensions/srs-navigator/`](.github/extensions/srs-navigator/) bundles a
+   flattened copy of the methodology skills and renders the graph. Its own release
+   workflow ([`.github/workflows/release-canvas.yml`](.github/workflows/release-canvas.yml))
+   runs the extension test suite, refreshes the bundled skills, bumps the version, and
+   publishes packaged archives.
+
+The two tracks are bridged by **skill sync**: the canvas app's bundled `skills/*.md` are
+generated from the canonical `skills/<slug>/SKILL.md` in this repo. Run it locally with:
+
+```bash
+node .github/extensions/srs-navigator/scripts/sync-skills.mjs   # copy from skills/
+```
+
+In this monorepo it copies straight from `skills/` on disk; pass `--remote` to fall back
+to fetching the latest skills from GitHub. So maintainers edit a skill **once** in
+`skills/`, and both the agent plugin and the canvas app stay in sync.
 
 ## Research and standards
 

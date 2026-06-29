@@ -35,10 +35,18 @@ Problem-Based-SRS/
 │   ├── software-vision/         # Step 4: Architecture
 │   ├── functional-requirements/ # Step 5: HOW
 │   ├── zigzag-validator/        # Traceability validation
-│   └── complexity-analysis/     # Optional: Axiomatic Design
+│   ├── complexity-analysis/     # Optional: Axiomatic Design
+│   └── live/                    # Launch the SRS Navigator canvas (UX)
+├── .github/extensions/
+│   └── srs-navigator/           # Canvas extension: graph UX + bundled skills
+├── .spec/crm-system.json        # Demo specification for the navigator
 ├── docs/                        # Research papers and methodology
 └── settings.json                # Default plugin settings
 ```
+
+Run `/live` to open the **SRS Navigator** canvas and explore a specification as an
+interactive graph (Customer Problems → Customer Needs → Requirements) inside the GitHub
+Copilot app.
 
 ## When Working on This Repository
 

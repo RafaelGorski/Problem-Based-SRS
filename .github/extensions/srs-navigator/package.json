@@ -1,0 +1,24 @@
+{
+  "name": "srs-navigator",
+  "version": "1.0.3",
+  "description": "An interactive force-directed graph visualization for **Problem-Based SRS** specifications, running as a GitHub Copilot (GHCP) canvas extension.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test tests/parser.test.mjs tests/validation.test.mjs tests/renderer.test.mjs tests/action-bar.test.mjs tests/integration.test.mjs tests/decompose.test.mjs tests/skill-sync.test.mjs",
+    "test:e2e": "playwright test",
+    "sync-skills": "node scripts/sync-skills.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "playwright": "^1.61.1"
+  }
+}

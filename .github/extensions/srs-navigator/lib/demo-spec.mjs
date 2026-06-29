@@ -1,0 +1,43 @@
+// Demo CRM System specification for the SRS Navigator canvas
+export const DEMO_SPEC = {
+  name: "CRM System",
+  description: "Customer Relationship Management System Specification",
+  version: "1.0",
+  problems: [
+    { id: "CP-1", title: "Scattered Customer Information", description: "Sales teams waste valuable time searching for customer information across multiple disconnected systems." },
+    { id: "CP-2", title: "Missed Follow-ups and Lost Opportunities", description: "Without a systematic way to track interactions, sales reps miss important touchpoints." },
+    { id: "CP-3", title: "Lack of Sales Pipeline Visibility", description: "Sales managers have no clear, real-time view of pipeline status or performance metrics." },
+    { id: "CP-4", title: "Inefficient Lead Management", description: "New leads from various sources are manually entered with no standardized process." },
+    { id: "CP-5", title: "No Customer Communication History", description: "No shared record of previous conversations or commitments across team members." }
+  ],
+  needs: [
+    { id: "CN-1", title: "Centralized Customer Database", description: "A single searchable repository for all customer information.", problemIds: ["CP-1", "CP-5"] },
+    { id: "CN-2", title: "Automated Task and Follow-up Management", description: "Automatic follow-up tasks and reminders based on interactions.", problemIds: ["CP-2"] },
+    { id: "CN-3", title: "Visual Sales Pipeline Management", description: "Visual deal progression through stages with metrics.", problemIds: ["CP-3"] },
+    { id: "CN-4", title: "Automated Lead Capture and Routing", description: "Automatic lead capture, qualification, and intelligent routing.", problemIds: ["CP-4"] },
+    { id: "CN-5", title: "Comprehensive Activity Tracking", description: "Automatic logging of all customer touchpoints.", problemIds: ["CP-5"] },
+    { id: "CN-6", title: "Real-time Reporting and Analytics", description: "Customizable dashboards with real-time sales metrics.", problemIds: ["CP-3"] },
+    { id: "CN-7", title: "Mobile Access to Customer Data", description: "Full mobile access with offline capability.", problemIds: ["CP-1", "CP-2"] }
+  ],
+  functionalRequirements: [
+    { id: "FR-1", title: "Contact and Company Management", description: "Database with hierarchical relationships, custom fields, and search.", needIds: ["CN-1"] },
+    { id: "FR-2", title: "Activity Logging Interface", description: "Logging calls, emails, meetings with timeline view.", needIds: ["CN-5"] },
+    { id: "FR-3", title: "Task Management System", description: "Tasks with due dates, priorities, and automated creation.", needIds: ["CN-2"] },
+    { id: "FR-4", title: "Pipeline Visualization", description: "Kanban-style board with drag-and-drop deal management.", needIds: ["CN-3"] },
+    { id: "FR-5", title: "Lead Capture Forms and API", description: "Embeddable forms and REST API for lead submission.", needIds: ["CN-4"] },
+    { id: "FR-6", title: "Lead Qualification and Scoring", description: "Scoring system based on attributes and behaviors.", needIds: ["CN-4"] },
+    { id: "FR-7", title: "Automated Lead Assignment", description: "Rule engine for lead routing based on criteria.", needIds: ["CN-4"] },
+    { id: "FR-8", title: "Dashboard and Reporting Engine", description: "Pre-built widgets and custom report builder.", needIds: ["CN-6"] },
+    { id: "FR-9", title: "Mobile Application", description: "Native mobile apps with offline caching.", needIds: ["CN-7"] },
+    { id: "FR-10", title: "Email Integration", description: "Two-way email sync with tracking.", needIds: ["CN-5", "CN-7"] },
+    { id: "FR-11", title: "Calendar Integration", description: "Sync with external calendars.", needIds: ["CN-2", "CN-5"] },
+    { id: "FR-12", title: "User and Permission Management", description: "Role-based access control with team hierarchies.", needIds: ["CN-1", "CN-6"] }
+  ],
+  nonFunctionalRequirements: [
+    { id: "NFR-1", title: "Performance", description: "Page load < 2s, search results < 500ms.", needIds: ["CN-1", "CN-6"] },
+    { id: "NFR-2", title: "Security", description: "SOC2 compliance, encryption at rest and in transit.", needIds: ["CN-1"] },
+    { id: "NFR-3", title: "Scalability", description: "Support 10,000+ concurrent users.", needIds: ["CN-1", "CN-4"] },
+    { id: "NFR-4", title: "Availability", description: "99.9% uptime SLA.", needIds: ["CN-7"] },
+    { id: "NFR-5", title: "Usability", description: "Intuitive UI requiring < 2hr onboarding.", needIds: ["CN-3", "CN-7"] }
+  ]
+};

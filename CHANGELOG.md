@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **SRS Navigator canvas app merged into this repo**: the interactive force-directed
+  graph visualization (formerly `RafaelGorski/problem-based-srs-app`) now lives in
+  [`.github/extensions/srs-navigator/`](.github/extensions/srs-navigator/). This repo is
+  now both the methodology skill **and** the UX to navigate it.
+- **`/live` skill** (`skills/live/`): launches the SRS Navigator canvas inside the GitHub
+  Copilot app to visualize the current specification as an interactive graph.
+- **Demo specification** `.spec/crm-system.json` for the navigator.
+- **Canvas release workflow** `.github/workflows/release-canvas.yml`: tests, refreshes
+  bundled skills, bumps the version, and publishes packaged extension archives.
+- **Version/packaging scripts** `scripts/bump-version.mjs` and
+  `scripts/package-extension.mjs`, plus a root `VERSION` file for the canvas app.
+
+### Changed
+
+- **Monorepo skill sync**: `sync-skills` now copies the canonical
+  `skills/<slug>/SKILL.md` straight from this repo by default (network fetch remains
+  available via `--remote`), so the agent plugin and the canvas app share one source of
+  truth.
+
 ## [1.3] - 2026-06-29
 
 ### Added

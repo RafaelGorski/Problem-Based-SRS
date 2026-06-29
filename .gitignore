@@ -63,15 +63,19 @@ docs/img/CT_PPGCA_M_Souza_Rafael_Gorski_Moreno_2016_*.png
 docs/dissertation-en/
 
 # Problem-Based SRS output artifacts (generated per-project, not versioned)
-.spec/
+.spec/*
 docs/srs/
 /.pytest_cache
+
+# ...but keep the SRS Navigator demo specification under version control.
+!.spec/crm-system.json
 
 # Impeccable cache
 .impeccable/
 
 # Build & release pipeline output
 dist/
+build/
 
 # Node (tooling installed locally, never versioned)
 node_modules/
@@ -79,3 +83,10 @@ package.json
 package-lock.json
 pw-*.png
 shot-*.png
+
+# ...but keep the SRS Navigator canvas extension's package manifests tracked.
+!.github/extensions/srs-navigator/package.json
+!.github/extensions/srs-navigator/package-lock.json
+
+# SRS Navigator skill-sync runtime state (auto-generated, per-machine)
+.github/extensions/srs-navigator/skills/.sync-state.json

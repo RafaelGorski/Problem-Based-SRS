@@ -1,0 +1,110 @@
+name: Release Canvas Extension
+
+# Packages the srs-navigator canvas extension (code + bundled Problem-Based SRS
+# skills) and publishes a versioned GitHub Release.
+#
+# Pipeline:
+#   1. Run the extension unit test suite.
+#   2. Download the latest methodology skills from the upstream Problem-Based-SRS
+#      repo (the extension's "dependencies").
+#   3. Bump an incremental project version (patch by default).
+#   4. Commit the version bump + refreshed skills and push a matching tag.
+#   5. Package the extension into .tar.gz / .zip archives.
+#   6. Create the GitHub Release with those archives attached.
+
+on:
+  workflow_dispatch:
+    inputs:
+      part:
+        description: "Semver part to bump"
+        type: choice
+        required: true
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout (full history for tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run unit tests
+        working-directory: .github/extensions/srs-navigator
+        run: npm test
+
+      - name: Download skill dependencies from Problem-Based-SRS
+        working-directory: .github/extensions/srs-navigator
+        continue-on-error: true
+        run: node scripts/sync-skills.mjs
+
+      - name: Bump project version
+        id: bump
+        run: node scripts/bump-version.mjs --part "${{ inputs.part }}"
+
+      - name: Commit version bump and refreshed skills
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add VERSION \
+            .github/extensions/srs-navigator/package.json \
+            .github/extensions/srs-navigator/copilot-extension.json \
+            .github/extensions/srs-navigator/skills
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit \
+              -m "Release ${{ steps.bump.outputs.tag }}" \
+              -m "Bump project version and refresh bundled Problem-Based SRS skills." \
+              -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
+
+      - name: Create and push tag
+        run: |
+          git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
+          git push origin "${{ steps.bump.outputs.tag }}"
+
+      - name: Package the extension
+        run: node scripts/package-extension.mjs --version "${{ steps.bump.outputs.version }}"
+
+      - name: Create GitHub Release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.bump.outputs.tag }}" \
+            build/srs-navigator-*.tar.gz \
+            build/srs-navigator-*.zip \
+            --title "srs-navigator ${{ steps.bump.outputs.version }}" \
+            --generate-notes
+          url=$(gh release view "${{ steps.bump.outputs.tag }}" --json url --jq .url)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Release published :rocket:"
+            echo ""
+            echo "- **Version:** ${{ steps.bump.outputs.version }}"
+            echo "- **Tag:** ${{ steps.bump.outputs.tag }}"
+            echo "- **Release page:** $url"
+          } >> "$GITHUB_STEP_SUMMARY"
