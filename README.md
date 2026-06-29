@@ -1,10 +1,19 @@
 # Problem-Based SRS
 
-[![Version 1.4](https://img.shields.io/badge/version-1.4-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.4)
+[![Version 2.0](https://img.shields.io/badge/version-2.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.0)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 AI-guided requirements engineering that traces every feature back to the customer problem it solves. An [AgentSkill](https://agentskills.io) for GitHub Copilot, Claude Code, and other AI coding assistants.
+
+**Version 2.0 ships two things in one project:**
+
+| | What it is | Where it runs |
+|---|------------|---------------|
+| 🧠 **Skills** | The Problem-Based SRS methodology as agent-native skills (Business Context → CP → CN → FR, with traceability and validation). | GitHub Copilot, Claude Code, and any AgentSkills-compatible assistant |
+| 🗺️ **App** | The **SRS Navigator** — a GitHub Copilot canvas app that visualizes your spec as an interactive graph and lets you decompose and iterate requirements with the agent, in place. | The GitHub Copilot side panel (`/live`) |
+
+![SRS Navigator — interactive force-directed graph of Customer Problems, Customer Needs, and Functional / Non-Functional Requirements](docs/assets/srs-navigator.png)
 
 ## The problem this solves
 
@@ -144,6 +153,25 @@ analysis mode, search nodes, and inspect dependencies inside the Copilot side pa
 Run `/live` and your assistant opens the navigator on the current `.spec/` (or a built-in
 CRM demo if you haven't created one yet). The extension also bundles the full methodology
 as agent tools, so every step is available without leaving the panel.
+
+### Decompose and iterate with the agent
+
+The navigator isn't read-only — it's where you **refine the spec together with the agent**.
+Hover any node to reveal an inline action bar. Describe the change you want, then pick an
+action: derive a downstream artifact (`+CN`, `+FR`, `+NFR`) or **decompose** the node into
+finer-grained, independently testable sub-items (`+Sub-FR`).
+
+![Inline action bar on a Functional Requirement node, with a decompose instruction typed in and the +Sub-FR action ready](docs/assets/srs-navigator-actionbar.png)
+
+Triggering an action opens the node's detail panel on the right. You see the full
+context — description, complexity, and upstream/downstream traceability — alongside a live
+**Agent Activity** conversation. Your request is sent to the matching methodology skill, the
+agent edits the specification, and the graph refreshes automatically when it's done.
+
+![Right-side detail panel showing FR-1 traceability and an Agent Activity log where the agent is decomposing the requirement](docs/assets/srs-navigator-iteration.png)
+
+The result: a tight loop where the visual graph, the methodology skills, and the agent all
+operate on a single, fully-traced specification.
 
 ## Installation
 

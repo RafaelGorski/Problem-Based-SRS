@@ -397,6 +397,14 @@
         .app-frame img { display: block; width: 100%; height: auto; }
         .app-actions { margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
+        /* ── Iterate section: stacked annotated screenshots ── */
+        .shot-stack { display: grid; gap: var(--space-xl); margin-top: var(--space-xl); }
+        .shot figure { margin: 0; }
+        .shot-copy { margin-bottom: var(--space-md); }
+        .shot-copy h3 { font-size: var(--text-lg); margin: 0 0 0.4rem; }
+        .shot-copy p { color: var(--muted); max-width: 60ch; }
+        .shot figcaption { margin-top: var(--space-sm); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+
         /* ── Footer CTA ── */
         /* ── Footer CTA — drenched dark panel, the bold close ── */
         .footer-cta {
@@ -483,12 +491,13 @@
         <div class="wrap">
             <div class="site-nav-id">
                 <a href="/" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
-                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 1.4, view releases">v1.4</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.0, view releases">v2.0</a>
             </div>
             <ul class="site-nav-links">
                 <li><a href="#problem">The problem</a></li>
                 <li><a href="#methodology">How it works</a></li>
                 <li><a href="#visualize">Visualize</a></li>
+                <li><a href="#iterate">Iterate</a></li>
                 <li><a href="#start">Get started</a></li>
                 <li><a href="#commands">Commands</a></li>
                 <li><a href="#research">Research</a></li>
@@ -662,6 +671,52 @@
             </div>
         </section>
 
+        <!-- Iterate with the agent -->
+        <section id="iterate" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Decompose and iterate with the agent</h2>
+                <p class="reveal section-lead">The navigator is more than a viewer — it's where you refine the specification <em>together with the agent</em>, without leaving the graph. Hover a node, describe the change, and the matching methodology skill does the work while traceability is preserved.</p>
+
+                <div class="shot-stack">
+                    <div class="shot reveal">
+                        <div class="shot-copy">
+                            <h3>1 &middot; The inline action bar</h3>
+                            <p>Hover any node to reveal an action bar. Type an instruction, then derive a downstream artifact (<code>+CN</code>, <code>+FR</code>, <code>+NFR</code>) or <strong>decompose</strong> the node into finer-grained, independently testable sub-items (<code>+Sub-FR</code>).</p>
+                        </div>
+                        <figure>
+                            <div class="app-frame">
+                                <div class="app-frame-bar">
+                                    <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                    <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                                </div>
+                                <img src="assets/srs-navigator-actionbar.png" width="1440" height="900" loading="lazy" decoding="async"
+                                     alt="The SRS Navigator graph with a Functional Requirement node selected. A floating action bar below it holds a typed decompose instruction and +NFR and +Sub-FR action buttons.">
+                            </div>
+                            <figcaption>Hover a Functional Requirement, describe the change, and pick the decompose action.</figcaption>
+                        </figure>
+                    </div>
+
+                    <div class="shot reveal">
+                        <div class="shot-copy">
+                            <h3>2 &middot; The agent works in the side panel</h3>
+                            <p>Triggering an action opens the node's detail panel — description, complexity, and upstream/downstream traceability — alongside a live <strong>Agent Activity</strong> log. Your request runs through the methodology skill, the spec is edited, and the graph refreshes automatically.</p>
+                        </div>
+                        <figure>
+                            <div class="app-frame">
+                                <div class="app-frame-bar">
+                                    <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                    <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                                </div>
+                                <img src="assets/srs-navigator-iteration.png" width="1440" height="900" loading="lazy" decoding="async"
+                                     alt="The SRS Navigator with a right-side detail panel open for a Functional Requirement, showing its traceability and an Agent Activity conversation where the user asks to decompose the requirement and the agent is working on it.">
+                            </div>
+                            <figcaption>The detail panel shows traceability and a live conversation as the agent decomposes the requirement.</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Quick Start -->
         <section id="start" class="section">
             <div class="wrap">
@@ -792,7 +847,7 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
 
     <footer class="site-footer">
         <div class="wrap">
-            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v1.4</a> · Methodology by Gorski &amp; Stadzisz</p>
+            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.0</a> · Methodology by Gorski &amp; Stadzisz</p>
             <p class="footer-links">
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md">Changelog</a>

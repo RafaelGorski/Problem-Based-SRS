@@ -7,20 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0] - 2026-06-29
+
+Version 2.0 reframes the project around **two deliverables in one**: the Problem-Based
+SRS **Skills** (the methodology) and the **SRS Navigator app** (the GitHub Copilot canvas
+for visualizing, decomposing, and iterating a specification with the agent).
+
+### Added
+
+- **README scope refresh**: a "Skills + App" overview table up top, plus a
+  "Decompose and iterate with the agent" walkthrough with real screenshots of the
+  inline action bar and the right-side agent-activity panel.
+- **GitHub Pages — new "Iterate" section**: documents the agent interaction loop
+  (hover → action bar → decompose → agent works in the side panel) with annotated
+  screenshots, and adds an "Iterate" entry to the site navigation.
+- **New navigator screenshots** in `docs/assets/`: `srs-navigator-actionbar.png`
+  (inline action bar with a decompose instruction on a Functional Requirement) and
+  `srs-navigator-iteration.png` (detail panel with traceability and a live Agent
+  Activity conversation), plus a refreshed `srs-navigator.png` graph overview.
+
 ### Changed
 
-- **Single source of truth for skills**: the SRS Navigator canvas now reads the methodology
-  skills **live** from the repo's canonical `skills/<slug>/SKILL.md` at runtime, falling
-  back to the bundled flat copies only for standalone installs. The bundled copies are
-  regenerated from the canonical skills purely for packaging.
+- Project version bumped to **2.0** across `plugin.json`, the README badge, and the
+  GitHub Pages version badges.
 
-### Removed
+### Notes
 
-- **Runtime "Sync Skills from GitHub" feature**: removed the `/api/sync-skills` endpoint,
-  the landing-page button, and the network sync path (`--remote`/`SKILL_SOURCE`). Bundled
-  skills are refreshed locally from `skills/` via `npm run sync-skills`.
-- All references to the former `RafaelGorski/problem-based-srs-app` repo; install URLs and
-  docs now point to `RafaelGorski/Problem-Based-SRS`.
+- The single source of truth for skills (canvas reads canonical `skills/<slug>/SKILL.md`
+  at runtime) and the removal of the runtime "Sync Skills from GitHub" feature, previously
+  staged under Unreleased, ship as part of this release.
+
+[2.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.0
 
 ## [1.4] - 2026-06-29
 
