@@ -50,9 +50,9 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes("My Custom Title"));
   });
 
-  it("defaults title to SRS Navigator", () => {
+  it("defaults title to Problem-Based SRS", () => {
     const html = renderGraphHtml(sampleGraph);
-    assert.ok(html.includes("SRS Navigator"));
+    assert.ok(html.includes("Problem-Based SRS"));
   });
 
   it("includes analysis mode buttons", () => {

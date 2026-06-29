@@ -5,6 +5,7 @@
 
 import { createServer } from "node:http";
 import { readFile, readdir, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -42,6 +43,17 @@ function graphSignature(graphData) {
 
 // Skills directory path
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Release/version of this canvas extension, read from its own package.json so it
+// can be surfaced in the canvas description (visible when installing/inspecting).
+const EXTENSION_VERSION = (() => {
+    try {
+        const pkg = JSON.parse(readFileSync(resolve(__dirname, "package.json"), "utf-8"));
+        return pkg.version || "unknown";
+    } catch {
+        return "unknown";
+    }
+})();
 
 // Bundled flat copies of the methodology skills that ship inside this extension
 // (used when the navigator is installed standalone outside the monorepo).
@@ -301,7 +313,7 @@ async function reloadInstanceFromSource(inst, workspacePath) {
 
 // --- Agent prompts shared by the landing overlay and the graph action bar ---
 const LEARN_PROMPT = [
-    "## SRS Navigator: Learn & Create Specification",
+    "## Problem-Based SRS: Learn & Create Specification",
     "",
     "The user wants to create a Problem-Based SRS specification for their project.",
     "Use the `problem_based_srs` tool to run the full methodology.",
@@ -317,7 +329,7 @@ const LEARN_PROMPT = [
 ].join("\n");
 
 const LOAD_PROMPT = [
-    "## SRS Navigator: Load Specification",
+    "## Problem-Based SRS: Load Specification",
     "",
     "The user wants to load an existing specification file.",
     "Look for .spec/*.json files in the workspace, or ask the user which file to load.",
@@ -326,7 +338,7 @@ const LOAD_PROMPT = [
 
 function buildActionPrompt(action) {
     return [
-        `## SRS Navigator Action: ${action.action}`,
+        `## Problem-Based SRS Action: ${action.action}`,
         `**Skill:** ${action.skill}`,
         `**Node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
         `**Context:** ${action.context}`,
@@ -482,8 +494,8 @@ const session = await joinSession({
     canvases: [
         createCanvas({
             id: "srs-navigator",
-            displayName: "SRS Navigator",
-            description: "Interactive force-directed graph visualization for Problem-Based SRS specifications. Opens a canvas showing relationships between customer problems, needs, and requirements.",
+            displayName: "Problem-Based SRS",
+            description: `v${EXTENSION_VERSION} — Problem-Based SRS: interactive force-directed graph visualization for Problem-Based SRS specifications. Opens a canvas showing relationships between customer problems, needs, and requirements.`,
             inputSchema: {
                 type: "object",
                 properties: {
@@ -879,7 +891,7 @@ const session = await joinSession({
 
                         instances.set(ctx.instanceId, { server, url, html: landingHtml, graphData: demoResult.graphData, specName: demoResult.specName, isLanding: true });
 
-                        return { title: "SRS Navigator", url };
+                        return { title: "Problem-Based SRS", url };
                     }
                 }
 
