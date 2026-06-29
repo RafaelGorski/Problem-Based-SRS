@@ -506,6 +506,233 @@ export function renderGraphHtml(graphData, options = {}) {
       color: var(--foreground);
       white-space: pre-wrap;
     }
+
+    /* Detail Activity — chat-style agent progress + composer at panel base */
+    .detail-activity {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      max-height: 52%;
+      border-top: 1px solid var(--border);
+      background: var(--background);
+    }
+    .detail-activity[hidden] { display: none; }
+    .activity-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg);
+      flex-shrink: 0;
+    }
+    .activity-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted-foreground);
+    }
+    .activity-title svg { width: 13px; height: 13px; }
+    .activity-clear {
+      border: none;
+      background: transparent;
+      color: var(--muted-foreground);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 5px;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .activity-clear:hover { background: var(--hover); color: var(--foreground); }
+    .activity-log {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg) var(--space-md);
+      scroll-behavior: smooth;
+    }
+    .activity-log::-webkit-scrollbar { width: 6px; }
+    .activity-log::-webkit-scrollbar-track { background: transparent; }
+    .activity-log::-webkit-scrollbar-thumb { background: oklch(0.80 0 0); border-radius: 3px; }
+    .activity-msg {
+      max-width: 86%;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      animation: activity-in 0.18s ease-out;
+    }
+    @keyframes activity-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .activity-msg.from-you {
+      align-self: flex-end;
+      background: oklch(0.45 0.16 266 / 0.10);
+      border: 1px solid oklch(0.45 0.16 266 / 0.20);
+      border-bottom-right-radius: 4px;
+      color: var(--foreground);
+    }
+    .activity-msg.from-agent {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+      color: var(--foreground);
+    }
+    .activity-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted-foreground);
+    }
+    .activity-meta .activity-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--muted);
+    }
+    .activity-msg.is-pending .activity-status-dot {
+      background: var(--primary);
+      animation: activity-pulse 1.1s ease-in-out infinite;
+    }
+    .activity-msg.is-success .activity-status-dot { background: oklch(0.55 0.18 145); }
+    .activity-msg.is-error .activity-status-dot { background: oklch(0.60 0.22 25); }
+    @keyframes activity-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.7); }
+    }
+    .activity-text { white-space: pre-wrap; word-break: break-word; }
+    .activity-msg.is-pending .activity-text::after {
+      content: "";
+      display: inline-block;
+      width: 1ch;
+      text-align: left;
+      animation: activity-ellipsis 1.2s steps(4, end) infinite;
+    }
+    @keyframes activity-ellipsis {
+      0% { content: ""; }
+      25% { content: "."; }
+      50% { content: ".."; }
+      75% { content: "..."; }
+    }
+    .activity-detail-link {
+      align-self: flex-start;
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: 600;
+      color: oklch(0.55 0.18 25);
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+    .activity-detail-link:hover { color: oklch(0.45 0.20 25); }
+    .activity-empty {
+      align-self: center;
+      margin: auto 0;
+      font-size: 12px;
+      color: var(--muted-foreground);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .activity-composer {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg) var(--space-md);
+      border-top: 1px solid var(--border);
+    }
+    .composer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .composer-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 26px;
+      padding: 0 9px;
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      background: var(--card);
+      color: var(--foreground);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    }
+    .composer-chip:hover { background: var(--hover); border-color: var(--muted); }
+    .composer-chip svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .composer-input-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .composer-input {
+      flex: 1;
+      min-width: 0;
+      height: 34px;
+      padding: 0 var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      background: var(--card);
+      color: var(--foreground);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .composer-input::placeholder { color: var(--muted-foreground); }
+    .composer-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px oklch(0.45 0.16 266 / 0.12);
+    }
+    .composer-send {
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 9999px;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      cursor: pointer;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+    .composer-send:hover { background: oklch(0.38 0.16 266); }
+    .composer-send:active { transform: scale(0.94); }
+    .composer-send svg { width: 16px; height: 16px; }
+    @media (prefers-reduced-motion: reduce) {
+      .activity-msg,
+      .activity-msg.is-pending .activity-status-dot,
+      .activity-msg.is-pending .activity-text::after { animation: none; }
+      .activity-log { scroll-behavior: auto; }
+    }
     .complexity-bar {
       display: flex;
       align-items: center;
@@ -1268,6 +1495,25 @@ export function renderGraphHtml(graphData, options = {}) {
         </button>
       </div>
       <div class="detail-body" id="panel-content"></div>
+      <div class="detail-activity" id="detail-activity" hidden>
+        <div class="activity-header">
+          <span class="activity-title">
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232,128A104,104,0,0,1,79.12,219.82L45.07,231.17a16,16,0,0,1-20.24-20.24l11.35-34.05A104,104,0,1,1,232,128Zm-128,12a12,12,0,1,0-12-12A12,12,0,0,0,104,140Zm48,0a12,12,0,1,0-12-12A12,12,0,0,0,152,140Z"/></svg>
+            Agent activity
+          </span>
+          <button class="activity-clear" id="activity-clear" type="button" aria-label="Clear activity for this node" title="Clear activity">Clear</button>
+        </div>
+        <div class="activity-log" id="activity-log" role="log" aria-live="polite" aria-label="Agent progress for this node"></div>
+        <form class="activity-composer" id="activity-composer">
+          <div class="composer-actions" id="composer-actions"></div>
+          <div class="composer-input-row">
+            <input class="composer-input" id="composer-input" type="text" autocomplete="off" aria-label="Describe a change for this node" placeholder="Describe a change..." />
+            <button class="composer-send" id="composer-send" type="submit" aria-label="Send to agent" title="Send to agent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -1838,16 +2084,47 @@ export function renderGraphHtml(graphData, options = {}) {
       actionBarNode = null;
     }
 
+    // Thin wrapper kept for the hover action bar: reads its input, dispatches,
+    // then resets the bar. The shared work lives in performNodeAction so the
+    // in-panel composer can reuse the exact same flow.
     function handleActionBarAction(actionKey, skillName, node) {
-      const prompt = actionBarInput.value.trim();
+      const dispatched = performNodeAction(actionKey, skillName, node, actionBarInput.value.trim());
+      if (!dispatched) return;
+      actionBarInput.value = "";
+      actionBarLocked = false;
+      actionBar.classList.remove("pinned");
+      hideActionBar();
+    }
+
+    // Build a short, human-readable label for the "you" chat bubble.
+    function describeAsk(actionKey, node, prompt) {
+      if (actionKey === "submit") return prompt;
+      const labels = {
+        decompose: "Break " + node.id + " into finer-grained sub-items",
+        addCN: "Derive a Customer Need from " + node.id,
+        addFR: "Derive a Functional Requirement from " + node.id,
+        addNFR: "Derive a Non-Functional Requirement from " + node.id,
+      };
+      let base = actionKey.startsWith("decompose") ? labels.decompose : (labels[actionKey] || ("Run " + actionKey + " on " + node.id));
+      if (prompt) base += " — " + prompt;
+      return base;
+    }
+
+    // Dispatch a node action, mirror progress into the node's activity chat,
+    // and open the detail panel so the user can watch it happen.
+    // Returns true when an action was actually sent.
+    function performNodeAction(actionKey, skillName, node, prompt) {
+      if (!node) return false;
+      prompt = (prompt || "").trim();
 
       // Every node action is driven by the engineer's input: it tells the agent
       // what to create. The button alone, with an empty field, must not trigger
       // anything — prompt the engineer for detail and stop.
       if (!prompt) {
         showToast("Describe what to create, then click the action", { variant: "info" });
-        actionBarInput.focus();
-        return;
+        if (actionBar.classList.contains("visible")) actionBarInput.focus();
+        else composerInput.focus();
+        return false;
       }
 
       // Build context message for the skill invocation
@@ -1869,10 +2146,35 @@ export function renderGraphHtml(graphData, options = {}) {
         context = "Derive a new Non-Functional Requirement (NFR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The NFR must trace back to this requirement. Additional context: " + prompt;
       }
 
-      if (!context || !skillName) return;
+      if (!context || !skillName) return false;
 
-      // Show persistent pending status
-      showToast("⏳ Sending to agent: " + skillName + " on " + node.id + "...", { variant: "pending", persistent: true });
+      // Open the panel for this node so the conversation is visible, then log
+      // the ask and a pending agent reply that we mutate through to completion.
+      openNodePanel(node);
+      addActivity(node.id, { role: "you", text: describeAsk(actionKey, node, prompt) });
+      const replyId = addActivity(node.id, { role: "agent", variant: "pending", text: "Sending your request to the agent" });
+
+      // Fast local path: decompose deterministically on the server (no model
+      // round-trip) for instant iteration, then reload the graph.
+      if (actionKey.startsWith("decompose")) {
+        updateActivity(node.id, replyId, { text: "Decomposing " + node.id });
+        fetch(location.origin + "/api/decompose", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nodeId: node.id }),
+        }).then(async res => {
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok && data.added > 0) {
+            updateActivity(node.id, replyId, { variant: "success", text: "Added " + data.added + " sub-item(s). Refreshing the graph…" });
+            setTimeout(() => window.location.reload(), 500);
+          } else if (data.added === 0) {
+            updateActivity(node.id, replyId, { variant: "info", text: "Nothing to decompose yet. Add more detail to " + node.id + ", then retry." });
+          } else {
+            updateActivity(node.id, replyId, { variant: "error", text: "Decompose failed." });
+          }
+        }).catch(() => updateActivity(node.id, replyId, { variant: "error", text: "Decompose failed." }));
+        return true;
+      }
 
       // Send action to the extension server → triggers session.send()
       const serverBase = location.origin;
@@ -1890,7 +2192,7 @@ export function renderGraphHtml(graphData, options = {}) {
       }).then(async res => {
         const data = await res.json().catch(() => ({}));
         if (res.ok && data.ok) {
-          showToast("⏳ Agent processing: " + skillName + " → " + node.id + "...", { variant: "pending", persistent: true });
+          updateActivity(node.id, replyId, { variant: "pending", text: "Agent is working on " + node.id });
           // Poll for spec changes and auto-refresh when agent finishes
           let polls = 0;
           const maxPolls = 120; // ~2 minutes at 1s intervals
@@ -1898,7 +2200,7 @@ export function renderGraphHtml(graphData, options = {}) {
             polls++;
             if (polls > maxPolls) {
               clearInterval(pollInterval);
-              showToast("✓ Action sent — refresh manually when ready");
+              updateActivity(node.id, replyId, { variant: "info", text: "Request sent. Refresh the graph when the agent is done." });
               return;
             }
             try {
@@ -1906,30 +2208,27 @@ export function renderGraphHtml(graphData, options = {}) {
               const checkData = await checkRes.json().catch(() => ({}));
               if (checkData.refreshed) {
                 clearInterval(pollInterval);
-                showToast("✓ Spec updated — reloading graph...");
-                setTimeout(() => window.location.reload(), 500);
+                updateActivity(node.id, replyId, { variant: "success", text: "Spec updated. Refreshing the graph…" });
+                setTimeout(() => window.location.reload(), 700);
               }
             } catch { /* keep polling */ }
           }, 1000);
         } else {
-          showToast("⚠ Failed to reach agent", {
+          updateActivity(node.id, replyId, {
             variant: "error",
-            persistent: true,
+            text: "Couldn't reach the agent.",
             detail: data.detail || data.error || ("HTTP " + res.status),
           });
         }
       }).catch(err => {
-        showToast("⚠ Connection error", {
+        updateActivity(node.id, replyId, {
           variant: "error",
-          persistent: true,
+          text: "Connection error.",
           detail: err.message || "Could not reach the extension server. Check if the canvas is still running.",
         });
       });
 
-      actionBarInput.value = "";
-      actionBarLocked = false;
-      actionBar.classList.remove("pinned");
-      hideActionBar();
+      return true;
     }
 
     // Hover interactions on nodes
@@ -1984,8 +2283,118 @@ export function renderGraphHtml(graphData, options = {}) {
       updateVisibility();
     });
 
+    // === Detail panel activity chat ===
+    // Per-node conversation log: nodeId -> [{ id, role, text, variant, detail }]
+    const nodeActivity = new Map();
+    let currentDetailNodeId = null;
+    let activitySeq = 0;
+    const activityRegion = document.getElementById("detail-activity");
+    const activityLogEl = document.getElementById("activity-log");
+    const composerActionsEl = document.getElementById("composer-actions");
+    const composerInput = document.getElementById("composer-input");
+    const composerForm = document.getElementById("activity-composer");
+
+    function fmtTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function addActivity(nodeId, msg) {
+      const list = nodeActivity.get(nodeId) || [];
+      const entry = { id: "act-" + (++activitySeq), ts: Date.now(), role: msg.role || "agent", text: msg.text || "", variant: msg.variant || null, detail: msg.detail || null };
+      list.push(entry);
+      nodeActivity.set(nodeId, list);
+      if (currentDetailNodeId === nodeId) renderActivityLog(nodeId);
+      return entry.id;
+    }
+
+    function updateActivity(nodeId, id, patch) {
+      const list = nodeActivity.get(nodeId);
+      if (!list) return;
+      const entry = list.find(e => e.id === id);
+      if (!entry) return;
+      Object.assign(entry, patch);
+      if (currentDetailNodeId === nodeId) renderActivityLog(nodeId);
+    }
+
+    function clearActivity(nodeId) {
+      nodeActivity.delete(nodeId);
+      if (currentDetailNodeId === nodeId) renderActivityLog(nodeId);
+    }
+
+    const ROLE_LABELS = { you: "You", agent: "Agent" };
+
+    function renderActivityLog(nodeId) {
+      const list = nodeActivity.get(nodeId) || [];
+      if (list.length === 0) {
+        activityLogEl.innerHTML = '<div class="activity-empty">No agent activity yet.<br>Use an action below to ask the agent to refine ' + escapeHtml(nodeId) + '.</div>';
+        return;
+      }
+      let html = "";
+      for (const e of list) {
+        const roleClass = e.role === "you" ? "from-you" : "from-agent";
+        const variantClass = e.variant ? " is-" + e.variant : "";
+        html += '<div class="activity-msg ' + roleClass + variantClass + '">';
+        html += '<div class="activity-meta">';
+        if (e.role !== "you") html += '<span class="activity-status-dot"></span>';
+        html += '<span>' + (ROLE_LABELS[e.role] || "Agent") + ' · ' + fmtTime(e.ts) + '</span>';
+        html += '</div>';
+        html += '<div class="activity-text">' + escapeHtml(e.text) + '</div>';
+        if (e.detail) {
+          html += '<button type="button" class="activity-detail-link" data-detail="' + escapeHtml(e.detail) + '">Show details</button>';
+        }
+        html += '</div>';
+      }
+      activityLogEl.innerHTML = html;
+      activityLogEl.querySelectorAll(".activity-detail-link").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const overlay = document.getElementById("error-modal-overlay");
+          document.getElementById("error-modal-body").textContent = btn.dataset.detail;
+          overlay.classList.add("active");
+        });
+      });
+      activityLogEl.scrollTop = activityLogEl.scrollHeight;
+    }
+
+    function renderComposer(node) {
+      const actions = getActionsForType(node.type);
+      composerActionsEl.innerHTML = "";
+      actions.forEach(action => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "composer-chip";
+        chip.innerHTML = action.icon + '<span>' + action.label + '</span>';
+        chip.setAttribute("aria-label", action.label + " for " + node.id);
+        chip.addEventListener("click", () => {
+          performNodeAction(action.key, action.skill, node, composerInput.value.trim());
+          composerInput.value = "";
+        });
+        composerActionsEl.appendChild(chip);
+      });
+      composerInput.placeholder = "Describe a change to " + node.id + "…";
+    }
+
+    // Open (or focus) the detail panel for a node and surface its activity.
+    function openNodePanel(node) {
+      selectedNode = node.id;
+      showDetail(node);
+      updateVisibility();
+    }
+
+    composerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const node = nodes.find(n => n.id === currentDetailNodeId);
+      if (!node) return;
+      performNodeAction("submit", null, node, composerInput.value.trim());
+      composerInput.value = "";
+    });
+    document.getElementById("activity-clear").addEventListener("click", () => {
+      if (currentDetailNodeId) clearActivity(currentDetailNodeId);
+    });
+
     function showDetail(node) {
       panel.classList.add("active");
+      currentDetailNodeId = node.id;
       const colors = nodeColors[node.type];
       const icon = nodeIcons[node.type] || '';
       const smallIcon = icon.replace('width="28" height="28"', 'width="14" height="14"');
@@ -2063,9 +2472,17 @@ export function renderGraphHtml(graphData, options = {}) {
           if (target) { selectedNode = target.id; showDetail(target); updateVisibility(); }
         });
       });
+
+      // Activity chat: composer for this node + its conversation log
+      activityRegion.hidden = false;
+      renderComposer(node);
+      renderActivityLog(node.id);
     }
 
-    function hideDetail() { panel.classList.remove("active"); }
+    function hideDetail() {
+      panel.classList.remove("active");
+      currentDetailNodeId = null;
+    }
 
     function getVisibleTypes() {
       if (currentMode === "customer-problem") return new Set(["problem", "need"]);
