@@ -147,6 +147,7 @@
         .site-nav-links a {
             color: var(--muted); font-size: var(--text-sm); font-weight: 500;
             transition: color 0.2s ease;
+            display: inline-flex; align-items: center; min-height: 24px; padding: 0.4rem 0;
         }
         .site-nav-links a:hover { color: var(--ink); }
         .gh-link {
@@ -320,6 +321,8 @@
         .cmd-table .cmd-name {
             font-family: var(--font-mono); color: var(--accent); white-space: nowrap;
         }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: var(--space-lg); }
+        .table-scroll .cmd-table { margin-top: 0; }
 
         /* ── App showcase (SRS Navigator) ── */
         .section-lead { color: var(--muted); max-width: 62ch; margin-bottom: var(--space-lg); }
@@ -376,9 +379,9 @@
             border-top: 1px solid var(--surface-border);
         }
         .site-footer p { color: var(--muted-light); font-size: var(--text-sm); margin: 0 auto; }
-        .site-footer a { color: var(--muted); }
+        .site-footer a { color: var(--muted); display: inline-block; padding: 0.3rem 0.15rem; min-height: 24px; }
         .site-footer a:hover { color: var(--ink); }
-        .footer-links { margin-top: var(--space-sm); }
+        .footer-links { margin-top: var(--space-xs); }
         .footer-links a + a::before { content: ' · '; color: var(--muted-light); }
 
         /* ── Scroll reveal ── */
@@ -588,7 +591,19 @@
                     <li><span class="node-chip" style="--c: var(--step-nfr)">NFR</span> Non-Functional Requirement</li>
                 </ul>
 
-                <p class="reveal section-lead">Filter by analysis mode, search any node, and inspect dependencies without leaving the side panel. The graph in the header above is a real CRM specification built with this methodology.</p>
+                <p class="reveal section-lead">Filter by analysis mode, search any node, and inspect dependencies without leaving the side panel. The specification below is a real CRM, built end to end with this methodology.</p>
+
+                <figure class="app-showcase reveal" style="margin-top: var(--space-lg);">
+                    <div class="app-frame">
+                        <div class="app-frame-bar">
+                            <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                            <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                        </div>
+                        <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy" decoding="async"
+                             alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                    </div>
+                    <figcaption>Problem, need, and requirement nodes linked by traceability, rendered live in the Copilot side panel.</figcaption>
+                </figure>
 
                 <div class="app-actions reveal">
                     <a href="https://github.com/RafaelGorski/problem-based-srs-app" class="btn-primary">Get the Copilot extension</a>
@@ -628,7 +643,8 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
         <section id="commands" class="section">
             <div class="wrap">
                 <h2 class="reveal">Commands</h2>
-                <table class="cmd-table reveal">
+                <div class="table-scroll reveal">
+                <table class="cmd-table">
                     <thead>
                         <tr>
                             <th>Command</th>
@@ -684,6 +700,7 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
                         </tr>
                     </tbody>
                 </table>
+                </div>
                 <p class="reveal" style="color: var(--muted); font-size: var(--text-sm); margin-top: var(--space-md);">
                     Works with <a href="https://agentskills.io">AgentSkills</a>-compatible tools: GitHub Copilot, Claude Code, Claude.ai, Gemini CLI, and others.
                 </p>
