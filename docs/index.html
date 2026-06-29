@@ -8,7 +8,7 @@
     <title>Problem-Based SRS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
         /* ── Tokens ── */
         :root {
@@ -42,6 +42,14 @@
             --step-vision: oklch(0.55 0.12 150);
             --step-how: oklch(0.56 0.16 266);
             --step-nfr: oklch(0.54 0.15 320);
+            /* Bolder accents — committed color moments */
+            --cp-bold: oklch(0.55 0.17 50);          /* deepened amber for the hero "problem" word (4.8:1 on bg) */
+            --primary-deep: oklch(0.30 0.12 266);    /* drenched dark indigo for the closing panel */
+            --on-deep: oklch(0.99 0 0);
+            --on-deep-muted: oklch(0.86 0.04 266);
+            --chain-cp: oklch(0.84 0.13 55);         /* light node tints, ≥7.9:1 on the deep panel */
+            --chain-cn: oklch(0.82 0.09 200);
+            --chain-fr: oklch(0.88 0.05 266);
             --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
             --font-body: 'Figtree', system-ui, sans-serif;
             --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
@@ -83,7 +91,7 @@
             text-wrap: balance;
             letter-spacing: -0.02em;
         }
-        h2 { font-size: var(--text-3xl); margin-bottom: var(--space-lg); }
+        h2 { font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em; margin-bottom: var(--space-lg); }
         h3 { font-size: var(--text-xl); margin-bottom: var(--space-sm); color: var(--ink); }
         p { max-width: 68ch; }
         a { color: var(--accent); text-decoration: none; transition: color 0.2s ease; }
@@ -162,14 +170,20 @@
             padding: var(--space-2xl) 0 var(--space-section);
             position: relative; overflow: hidden;
         }
-        .hero::before {
-            content: ''; position: absolute;
-            width: clamp(300px, 50vw, 700px); height: clamp(300px, 50vw, 700px);
-            background: radial-gradient(circle, oklch(0.45 0.16 266 / 0.09), transparent 70%);
-            top: 30%; left: 50%; transform: translate(-50%, -50%);
-            pointer-events: none;
+        .hero::before, .hero::after {
+            content: ''; position: absolute; pointer-events: none; z-index: 0;
+            width: clamp(280px, 42vw, 560px); height: clamp(280px, 42vw, 560px);
+            border-radius: 50%;
         }
-        .hero-content { position: relative; display: grid; gap: var(--space-2xl); align-items: center; }
+        .hero::before { /* indigo field, anchored behind the app frame */
+            background: radial-gradient(circle, oklch(0.45 0.16 266 / 0.13), transparent 70%);
+            top: 16%; right: -8%;
+        }
+        .hero::after { /* amber field, anchored behind the headline */
+            background: radial-gradient(circle, oklch(0.61 0.18 48 / 0.11), transparent 70%);
+            top: 44%; left: -10%;
+        }
+        .hero-content { position: relative; z-index: 1; display: grid; gap: var(--space-2xl); align-items: center; }
         @media (min-width: 900px) {
             .hero-content { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--space-section); }
         }
@@ -185,11 +199,18 @@
         }
         .hero h1 {
             font-size: var(--text-hero);
-            line-height: 1.1;
+            line-height: 1.04;
+            font-weight: 800;
+            letter-spacing: -0.03em;
             margin-bottom: var(--space-lg);
             max-width: 16ch;
         }
-        .hero h1 .hl { color: var(--primary); }
+        .hero h1 .hl { color: var(--cp-bold); position: relative; white-space: nowrap; }
+        .hero h1 .hl::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0.04em;
+            height: 0.1em; border-radius: 2px;
+            background: var(--cp-bold); opacity: 0.22;
+        }
         .hero-sub {
             font-size: var(--text-lg);
             color: var(--muted);
@@ -364,14 +385,39 @@
         .app-actions { margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
         /* ── Footer CTA ── */
+        /* ── Footer CTA — drenched dark panel, the bold close ── */
         .footer-cta {
-            background: var(--primary-subtle);
-            padding: var(--space-2xl) 0;
+            background: var(--primary-deep);
+            padding: var(--space-section) 0;
             text-align: center;
+            position: relative; overflow: hidden;
         }
-        .footer-cta h2 { margin-bottom: var(--space-md); }
-        .footer-cta p { margin: 0 auto var(--space-lg); color: var(--ink); }
+        .footer-cta::before {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background:
+                radial-gradient(58% 80% at 12% 8%, oklch(0.61 0.18 48 / 0.16), transparent 60%),
+                radial-gradient(58% 80% at 88% 92%, oklch(0.58 0.10 202 / 0.16), transparent 60%);
+        }
+        .footer-cta .wrap { position: relative; z-index: 1; }
+        .cta-chain {
+            font-family: var(--font-display); font-weight: 800;
+            font-size: clamp(2.75rem, 1.6rem + 4.5vw, 5rem);
+            letter-spacing: -0.03em; line-height: 1;
+            margin: 0 auto var(--space-lg);
+            display: flex; align-items: center; justify-content: center;
+            gap: clamp(0.5rem, 2.5vw, 1.5rem);
+        }
+        .cta-chain .chain-cp { color: var(--chain-cp); }
+        .cta-chain .chain-cn { color: var(--chain-cn); }
+        .cta-chain .chain-fr { color: var(--chain-fr); }
+        .cta-chain .chain-arrow { color: var(--on-deep-muted); font-weight: 400; font-size: 0.55em; }
+        .footer-cta h2 { color: var(--on-deep); margin-bottom: var(--space-md); }
+        .footer-cta p { margin: 0 auto var(--space-lg); color: var(--on-deep-muted); max-width: 54ch; }
         .footer-cta .hero-actions { justify-content: center; }
+        .footer-cta .btn-primary { background: var(--on-deep); color: var(--primary-deep); }
+        .footer-cta .btn-primary:hover { background: oklch(0.92 0.03 266); color: var(--primary-deep); }
+        .footer-cta .btn-ghost { color: var(--on-deep); border-color: oklch(0.92 0.02 266 / 0.4); }
+        .footer-cta .btn-ghost:hover { background: oklch(1 0 0 / 0.08); border-color: var(--on-deep); color: var(--on-deep); }
 
         /* ── Footer ── */
         .site-footer {
@@ -728,6 +774,9 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
     <!-- Footer CTA -->
     <div class="footer-cta">
         <div class="wrap">
+            <p class="cta-chain reveal" aria-label="Customer Problem to Customer Need to Functional Requirement">
+                <span class="chain-cp">CP</span><span class="chain-arrow" aria-hidden="true">&rarr;</span><span class="chain-cn">CN</span><span class="chain-arrow" aria-hidden="true">&rarr;</span><span class="chain-fr">FR</span>
+            </p>
             <h2 class="reveal">Start tracing requirements to problems</h2>
             <p class="reveal">Install the skill, describe your project, and let your AI assistant guide the process.</p>
             <div class="hero-actions reveal">
