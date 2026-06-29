@@ -352,6 +352,7 @@
         /* ── App showcase (SRS Navigator) ── */
         .section-lead { color: var(--muted); max-width: 62ch; margin-bottom: var(--space-lg); }
         .section-lead strong { color: var(--ink-heading); font-weight: 600; }
+        .legend-intro { color: var(--muted); font-size: var(--text-sm); margin-bottom: var(--space-sm); }
         .node-legend {
             list-style: none; display: flex; flex-wrap: wrap;
             gap: var(--space-md); margin-bottom: var(--space-lg);
@@ -627,6 +628,7 @@
                 <h2 class="reveal">See your spec as a living graph</h2>
                 <p class="reveal section-lead">The <strong>SRS Navigator</strong> renders every artifact and its traceability as an interactive, force-directed graph inside the GitHub Copilot side panel. Filter by analysis mode, search any node, and follow problem to need to requirement without switching tools.</p>
 
+                <p class="reveal legend-intro">Every node is color-coded by type:</p>
                 <ul class="node-legend reveal" aria-label="Node types in the graph">
                     <li><span class="node-chip" style="--c: var(--step-why)">CP</span> Customer Problem</li>
                     <li><span class="node-chip" style="--c: var(--step-what)">CN</span> Customer Need</li>
