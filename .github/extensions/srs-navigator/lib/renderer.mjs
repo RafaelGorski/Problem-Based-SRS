@@ -42,7 +42,7 @@ const NODE_ICONS = {
  * Styled to match the original Problem-Based SRS Navigator
  */
 export function renderGraphHtml(graphData, options = {}) {
-  const { title = 'Problem-Based SRS', analysisMode = 'customer-problem', selectedNodeId = null, isDemo = false, showLanding = false } = options;
+  const { title = 'Problem-Based SRS', selectedNodeId = null, isDemo = false, showLanding = false } = options;
   // Escape `<` to its unicode form so spec content cannot break out of the
   // <script> block (e.g. a label containing "</script>") — prevents XSS.
   const graphJSON = JSON.stringify(graphData).replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
@@ -299,30 +299,10 @@ export function renderGraphHtml(graphData, options = {}) {
     }
     .spec-btn:hover { background: var(--hover); }
     .spec-btn svg { flex-shrink: 0; }
-    .analysis-section {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 3px;
-      background: oklch(0.97 0 0);
-      height: 34px;
-    }
-    .analysis-section .btn {
-      border: none;
-      height: 28px;
-      border-radius: calc(var(--radius) - 2px);
-      font-size: 13px;
-    }
-    .analysis-section .btn.active { box-shadow: 0 1px 3px oklch(0 0 0 / 0.08); }
     .type-indicators {
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      margin-left: var(--space-sm);
-      padding-left: var(--space-sm);
-      border-left: 1px solid var(--border);
     }
     .type-indicator {
       display: flex;
@@ -1464,11 +1444,7 @@ export function renderGraphHtml(graphData, options = {}) {
         <svg class="search-icon" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>
         <input class="search-input" type="text" placeholder="Search nodes…" id="search" aria-label="Search nodes"/>
       </div>
-      <div class="analysis-section">
-        <button class="btn ${analysisMode === 'customer-problem' ? 'active' : ''}" data-mode="customer-problem">Problem Focus</button>
-        <button class="btn ${analysisMode === 'implementation' ? 'active' : ''}" data-mode="implementation">Implementation</button>
-        <div class="type-indicators" id="type-indicators"></div>
-      </div>
+      <div class="type-indicators" id="type-indicators"></div>
     </div>
   </div>
 
@@ -1601,7 +1577,6 @@ export function renderGraphHtml(graphData, options = {}) {
     const graphData = ${graphJSON};
     const nodeColors = ${JSON.stringify(NODE_COLORS)};
     const nodeIcons = ${JSON.stringify(NODE_ICONS)};
-    let currentMode = "${analysisMode}";
     let searchTerm = "";
     let selectedNode = ${selectedNodeId ? `"${selectedNodeId}"` : 'null'};
 
@@ -1622,7 +1597,7 @@ export function renderGraphHtml(graphData, options = {}) {
 
     // Type indicators
     function updateTypeIndicators() {
-      const types = currentMode === "customer-problem" ? ["problem", "need"] : ["need", "fr", "nfr"];
+      const types = ["problem", "need", "fr", "nfr"];
       const container = document.getElementById("type-indicators");
       container.innerHTML = types.map(type => {
         const c = nodeColors[type];
@@ -1630,17 +1605,6 @@ export function renderGraphHtml(graphData, options = {}) {
       }).join("");
     }
     updateTypeIndicators();
-
-    // Analysis mode buttons
-    document.querySelectorAll(".analysis-section .btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".analysis-section .btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentMode = btn.dataset.mode;
-        updateTypeIndicators();
-        updateVisibility();
-      });
-    });
 
     // Search
     document.getElementById("search").addEventListener("input", (e) => {
@@ -2485,8 +2449,6 @@ export function renderGraphHtml(graphData, options = {}) {
     }
 
     function getVisibleTypes() {
-      if (currentMode === "customer-problem") return new Set(["problem", "need"]);
-      if (currentMode === "implementation") return new Set(["need", "fr", "nfr"]);
       return new Set(["problem", "need", "fr", "nfr"]);
     }
 
@@ -2848,18 +2810,10 @@ export function renderGraphHtml(graphData, options = {}) {
 
     // Public API
     window.srsNavigator = {
-      getState: () => ({ selectedNode, currentMode, searchTerm }),
+      getState: () => ({ selectedNode, searchTerm }),
       selectNode: (id) => {
         const node = nodes.find(n => n.id === id);
         if (node) { selectedNode = id; showDetail(node); updateVisibility(); }
-      },
-      setMode: (mode) => {
-        currentMode = mode;
-        document.querySelectorAll(".analysis-section .btn").forEach(b => {
-          b.classList.toggle("active", b.dataset.mode === mode);
-        });
-        updateTypeIndicators();
-        updateVisibility();
       }
     };
   })();

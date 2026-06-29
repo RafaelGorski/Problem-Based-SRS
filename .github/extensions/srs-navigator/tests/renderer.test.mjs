@@ -55,18 +55,11 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes("Problem-Based SRS"));
   });
 
-  it("includes analysis mode buttons", () => {
-    const html = renderGraphHtml(sampleGraph, { analysisMode: "customer-problem" });
-    assert.ok(html.includes("Problem Focus"));
-    assert.ok(html.includes("Implementation"));
-    assert.ok(html.includes('data-mode="customer-problem"'));
-  });
-
-  it("marks the selected analysis mode as active", () => {
-    const html = renderGraphHtml(sampleGraph, { analysisMode: "implementation" });
-    assert.ok(html.includes('data-mode="implementation">Implementation</button>'));
-    // The implementation button should have "active" class
-    assert.ok(html.includes('class="btn active" data-mode="implementation"'));
+  it("renders type indicators for all node types", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('id="type-indicators"'));
+    assert.ok(!html.includes("Problem Focus"));
+    assert.ok(!html.includes('data-mode='));
   });
 
   it("renders a version badge linking to releases", () => {
@@ -153,7 +146,6 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes("window.srsNavigator"));
     assert.ok(html.includes("getState"));
     assert.ok(html.includes("selectNode"));
-    assert.ok(html.includes("setMode"));
   });
 
   it("includes zoom controls", () => {

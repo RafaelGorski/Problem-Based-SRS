@@ -515,11 +515,6 @@ const session = await joinSession({
                     filePath: {
                         type: "string",
                         description: "Path to a specification JSON file to load. Takes precedence over inline specification."
-                    },
-                    analysisMode: {
-                        type: "string",
-                        enum: ["all", "customer-problem", "implementation"],
-                        description: "Initial analysis mode: 'all' shows everything, 'customer-problem' shows problems+needs, 'implementation' shows needs+requirements."
                     }
                 }
             },
@@ -906,7 +901,6 @@ const session = await joinSession({
 
                 const html = renderGraphHtml(graphData, {
                     title: specName,
-                    analysisMode: input.analysisMode || "all",
                     isDemo
                 });
 
