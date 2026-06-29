@@ -336,15 +336,24 @@ const LOAD_PROMPT = [
     "Then use the `load_specification` canvas action to display it.",
 ].join("\n");
 
+// Map a skill tool name (e.g. "customer_needs") to its Problem-Based SRS
+// slash-command form (e.g. "/customer-needs"). Taskbar actions must run these
+// existing skills, never improvised free-text instructions.
+function skillCommand(skill) {
+    return "/" + String(skill || "").replace(/_/g, "-");
+}
+
 function buildActionPrompt(action) {
+    const command = skillCommand(action.skill);
     return [
-        `## Problem-Based SRS Action: ${action.action}`,
-        `**Skill:** ${action.skill}`,
-        `**Node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
-        `**Context:** ${action.context}`,
+        `## Problem-Based SRS — run the ${command} skill`,
         "",
-        "Use the `" + action.skill + "` tool with the context above to process this request.",
-        "After generating the result, use the `load_specification` canvas action to update the graph if the specification changes.",
+        `Run the existing Problem-Based SRS **${command}** skill (the \`${action.skill}\` tool) and follow its methodology exactly. Do not improvise a generic answer — the skill defines the process you must use.`,
+        "",
+        `**Target node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
+        `**Request:** ${action.context}`,
+        "",
+        `Apply the ${command} skill to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. After the skill updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
     ].join("\n");
 }
 
@@ -716,14 +725,14 @@ const session = await joinSession({
 
                             return {
                                 ...action,
-                                instruction: `Use the "${action.skill}" methodology skill to process this action. Context:\n\n${action.context}`,
+                                instruction: `Run the existing ${skillCommand(action.skill)} skill (the "${action.skill}" tool) and follow its methodology exactly — do not improvise. Apply it to ${action.nodeId} using this request as input:\n\n${action.context}`,
                                 skillContent,
                             };
                         }));
 
                         return {
                             actions: enriched,
-                            message: `${enriched.length} action(s) ready. For each action, invoke the specified skill tool with the provided context.`,
+                            message: `${enriched.length} action(s) ready. For each action, run the existing Problem-Based SRS skill named in its instruction with the provided context — do not improvise generic answers.`,
                         };
                     }
                 },
