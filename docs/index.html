@@ -168,7 +168,20 @@
             top: 30%; left: 50%; transform: translate(-50%, -50%);
             pointer-events: none;
         }
-        .hero-content { position: relative; }
+        .hero-content { position: relative; display: grid; gap: var(--space-2xl); align-items: center; }
+        @media (min-width: 900px) {
+            .hero-content { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--space-section); }
+        }
+        .hero-copy { min-width: 0; }
+        .hero-visual { margin: 0; min-width: 0; }
+        .hero-visual .app-frame { transition: transform 0.4s var(--ease-out-quart); }
+        @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+            .hero-visual .app-frame:hover { transform: translateY(-4px); }
+        }
+        .hero-visual figcaption {
+            margin-top: var(--space-sm); font-size: var(--text-xs);
+            color: var(--muted); text-align: center;
+        }
         .hero h1 {
             font-size: var(--text-hero);
             line-height: 1.1;
@@ -424,6 +437,7 @@
 
     <header class="hero">
         <div class="wrap hero-content">
+            <div class="hero-copy">
             <h1>Trace every feature to the <span class="hl">problem</span> it solves</h1>
             <p class="hero-sub">AI-guided requirements engineering for software teams. Your coding assistant walks you from customer problems to functional requirements, with complete traceability at every step.</p>
             <div class="hero-actions">
@@ -436,6 +450,18 @@
                 <span class="hero-badge">Copilot extension</span>
                 <span class="hero-badge">MIT License</span>
             </div>
+            </div>
+            <figure class="hero-visual">
+                <div class="app-frame">
+                    <div class="app-frame-bar">
+                        <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                        <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                    </div>
+                    <img src="assets/srs-navigator.png" width="1280" height="796" fetchpriority="high" decoding="async"
+                         alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                </div>
+                <figcaption>The SRS Navigator graph, live in the GitHub Copilot side panel.</figcaption>
+            </figure>
         </div>
     </header>
 
@@ -562,17 +588,7 @@
                     <li><span class="node-chip" style="--c: var(--step-nfr)">NFR</span> Non-Functional Requirement</li>
                 </ul>
 
-                <figure class="app-showcase reveal">
-                    <div class="app-frame">
-                        <div class="app-frame-bar">
-                            <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-                            <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
-                        </div>
-                        <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy"
-                             alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
-                    </div>
-                    <figcaption>A CRM specification rendered as a graph. Filter by analysis mode, search nodes, and inspect dependencies, all in the side panel.</figcaption>
-                </figure>
+                <p class="reveal section-lead">Filter by analysis mode, search any node, and inspect dependencies without leaving the side panel. The graph in the header above is a real CRM specification built with this methodology.</p>
 
                 <div class="app-actions reveal">
                     <a href="https://github.com/RafaelGorski/problem-based-srs-app" class="btn-primary">Get the Copilot extension</a>
