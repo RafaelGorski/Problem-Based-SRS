@@ -25,6 +25,7 @@
                 <li><a href="#methodology">How it works</a></li>
                 <li><a href="#visualize">Visualize</a></li>
                 <li><a href="#iterate">Iterate</a></li>
+                <li><a href="#learn">Start from code</a></li>
                 <li><a href="app.html">The app</a></li>
                 <li><a href="#start">Get started</a></li>
                 <li><a href="#commands">Commands</a></li>
@@ -64,35 +65,31 @@
                         <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                         <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
                     </div>
-                    <div class="tbd" data-taskbar-demo
-                         data-instruction="Break FR-1 into finer-grained sub-items"
-                         data-placeholder="Describe a change&hellip;"
-                         data-working="Running functional_requirements skill&hellip;">
+                    <div class="tbd" data-taskbar-demo>
                         <div class="tbd-stage" role="img"
-                             aria-label="The SRS Navigator action bar in use: a functional-requirement node is selected, an instruction to break it into finer-grained sub-items is typed, the decompose action runs, and two sub-requirement nodes appear.">
+                             aria-label="The SRS Navigator deriving a specification: starting from a customer problem, the agent runs the customer-needs skill to add a customer need, then the functional-requirements skill to add a functional requirement, forming a traced chain.">
                             <svg class="tbd-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                                <path d="M50 24 C 42 46, 33 56, 30 68" />
-                                <path d="M50 24 C 58 46, 67 56, 70 68" />
+                                <path class="tbd-link tbd-link-cn" d="M50 23 L50 43" />
+                                <path class="tbd-link tbd-link-fr" d="M50 57 L50 77" />
                             </svg>
-                            <span class="tbd-node tbd-parent"><span class="tbd-glyph" aria-hidden="true">&lt;/&gt;</span>FR-1 &middot; Contact management</span>
-                            <span class="tbd-node tbd-child tbd-child-a"><span class="tbd-glyph" aria-hidden="true">&lt;/&gt;</span>FR-1.1 &middot; Create</span>
-                            <span class="tbd-node tbd-child tbd-child-b"><span class="tbd-glyph" aria-hidden="true">&lt;/&gt;</span>FR-1.2 &middot; Edit</span>
-                            <div class="tbd-bar" aria-hidden="true">
+                            <span class="tbd-node tbd-cp"><span class="tbd-glyph" aria-hidden="true">CP</span>Sales data is slow</span>
+                            <span class="tbd-node tbd-cn"><span class="tbd-glyph" aria-hidden="true">CN</span>Real-time access</span>
+                            <span class="tbd-node tbd-fr"><span class="tbd-glyph" aria-hidden="true">FR</span>Sales data API</span>
+                            <div class="tbd-bar at-cp" aria-hidden="true">
                                 <span class="tbd-bar-input"><span class="tbd-bar-text is-placeholder" data-tbd-text>Describe a change&hellip;</span><span class="tbd-caret"></span></span>
-                                <span class="tbd-btn">+NFR</span>
-                                <span class="tbd-btn is-decompose is-primary">+Sub-FR</span>
-                            </div>
-                            <div class="tbd-cursor" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="oklch(0.24 0.02 266)" stroke="#fff" stroke-width="1.4"><path d="M5 3l14 8-6 1.6L9.6 19 5 3z"/></svg>
+                                <span class="tbd-btn s1">+Sub-CP</span>
+                                <span class="tbd-btn s1 is-derive">+CN</span>
+                                <span class="tbd-btn s2">+Sub-CN</span>
+                                <span class="tbd-btn s2 is-derive">+FR</span>
                             </div>
                         </div>
                         <div class="tbd-caption">
                             <span class="tbd-status-dot" aria-hidden="true"></span>
-                            Decompose a requirement, live in the side panel
+                            Derive the spec, problem to requirement, with the agent
                         </div>
                     </div>
                 </div>
-                <figcaption>The action bar in the SRS Navigator: hover a node, describe a change, and the agent runs the matching skill.</figcaption>
+                <figcaption>Watch the chain build: a customer problem becomes a need, then a functional requirement, each step run by its skill.</figcaption>
             </figure>
         </div>
     </header>
@@ -250,6 +247,60 @@
                             <p class="class-desc">Low priority. Missed improvement opportunity if unsolved. Build this last.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learn from your current system -->
+        <section id="learn" class="section">
+            <div class="wrap">
+                <h2 class="reveal">Start from the system you already have</h2>
+                <p class="reveal section-lead">Most specs start on a brownfield: software that already exists, with no written requirements. When you open the SRS Navigator without a spec, it offers to <strong>read your current system</strong> and work backward to the problems it solves.</p>
+                <div class="learn-layout">
+                    <div class="learn-copy reveal">
+                        <h3>Learn &amp; Create Spec</h3>
+                        <p>Point the navigator at a repository. It scans the code, the README, and the documentation, then runs the full methodology to draft customer problems, needs, and requirements into your <code>.spec/</code> folder. You review and refine from there.</p>
+                        <ol class="learn-steps">
+                            <li><span class="ls-n">1</span> Scan the existing code, README, and documentation</li>
+                            <li><span class="ls-n">2</span> Run the methodology to draft problems, needs, and requirements</li>
+                            <li><span class="ls-n">3</span> Load the result as a graph you refine with the agent</li>
+                        </ol>
+                        <p class="learn-alt">Already have a spec? <strong>Load</strong> a <code>.spec</code> JSON file, or <strong>explore the demo</strong> to tour the features first.</p>
+                    </div>
+                    <figure class="learn-media reveal">
+                        <div class="app-frame">
+                            <div class="app-frame-bar">
+                                <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                            </div>
+                            <div class="learn-screen" role="img" aria-label="The SRS Navigator start screen with three actions: Learn and Create Spec, which scans your project and generates a specification; Load Specification, which opens an existing .spec JSON file; and Explore Demo, which loads the CRM sample.">
+                                <div class="learn-screen-head">
+                                    <h4>Problem-Based SRS</h4>
+                                    <p>Load or generate a specification to visualize as an interactive graph.</p>
+                                </div>
+                                <div class="learn-actions">
+                                    <div class="learn-action is-primary">
+                                        <span class="la-icon" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,128a8,8,0,0,1-8,8H136v88a8,8,0,0,1-16,0V136H32a8,8,0,0,1,0-16h88V32a8,8,0,0,1,16,0v88h88A8,8,0,0,1,232,128Z"/></svg></span>
+                                        <span class="la-text"><span class="la-label">Learn &amp; Create Spec</span><span class="la-desc">Scan your project and generate a specification</span></span>
+                                    </div>
+                                    <div class="learn-action">
+                                        <span class="la-icon" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"/></svg></span>
+                                        <span class="la-text"><span class="la-label">Load Specification</span><span class="la-desc">Open an existing .spec JSON file from your project</span></span>
+                                    </div>
+                                    <div class="learn-action">
+                                        <span class="la-icon" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,24H72A32,32,0,0,0,40,56V224a8,8,0,0,0,8,8H192a8,8,0,0,0,0-16H56a16,16,0,0,1,16-16H208a8,8,0,0,0,8-8V32A8,8,0,0,0,208,24Zm-8,160H72a31.82,31.82,0,0,0-16,4.29V56A16,16,0,0,1,72,40H200Z"/></svg></span>
+                                        <span class="la-text"><span class="la-label">Explore Demo</span><span class="la-desc">Load the CRM sample specification to explore features</span></span>
+                                    </div>
+                                </div>
+                                <ul class="learn-feats" aria-label="Navigator features">
+                                    <li><span class="lf-dot" style="--c: var(--step-why)" aria-hidden="true"></span>Force-directed graph</li>
+                                    <li><span class="lf-dot" style="--c: var(--step-what)" aria-hidden="true"></span>Problem to requirement tracing</li>
+                                    <li><span class="lf-dot" style="--c: var(--step-how)" aria-hidden="true"></span>Agent-driven generation</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <figcaption>The start screen when you open the navigator without a spec.</figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
