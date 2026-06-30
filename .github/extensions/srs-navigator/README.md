@@ -6,6 +6,7 @@ An interactive force-directed graph visualization for **Problem-Based SRS** spec
 
 ## Features
 
+- **Learn from your codebase** — Open the navigator without a spec and it offers to scan your code, README, and docs to draft a Problem-Based SRS automatically
 - **Interactive D3.js graph** — Force-directed layout showing relationships between problems, needs, and requirements
 - **Search & filter** — Find nodes by ID or label text, toggle node types via the legend
 - **Detail panel** — Click any node to see its full description and connections
@@ -136,12 +137,31 @@ open_canvas({
 
 | Action | Description |
 |--------|-------------|
+| `learn` | Scan the project (code, README, docs) and generate a specification from scratch — the onboarding action for projects without a spec |
 | `load_specification` | Load a new spec (JSON object, file path, or markdown) |
 | `validate_specification` | Validate a spec against schema and reference integrity |
 | `inspect_node` | Get details about a specific node by ID |
 | `get_summary` | Get node/link counts for the loaded spec |
 | `search_nodes` | Search nodes by ID or label text |
 | `decompose_node` | Split a node into child requirements locally (no model round-trip) |
+
+## Start from your current system
+
+Most specifications are written for software that already exists. When you open the
+SRS Navigator and no specification is loaded, the start screen offers three ways in:
+
+| Action | What it does |
+|--------|--------------|
+| **Learn & Create Spec** | Scans your project and generates a specification |
+| **Load Specification** | Opens an existing `.spec` JSON file from your project |
+| **Explore Demo** | Loads the CRM sample specification to explore features |
+
+**Learn & Create Spec** is the primary onboarding path. It reads your existing code,
+README, and documentation, runs the full Problem-Based SRS methodology (`problem_based_srs`)
+to work backward from the system to the customer problems it solves, writes the resulting
+artifacts to your `.spec/` folder, and loads them as an interactive graph. You then refine
+the draft with the agent using the action bar (`+CN`, `+FR`, `decompose`, and so on). It is
+the same path the `learn` agent action triggers programmatically.
 
 ## Architecture & Agent Integration
 

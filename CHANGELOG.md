@@ -25,11 +25,23 @@ for visualizing, decomposing, and iterating a specification with the agent).
   (inline action bar with a decompose instruction on a Functional Requirement) and
   `srs-navigator-iteration.png` (detail panel with traceability and a live Agent
   Activity conversation), plus a refreshed `srs-navigator.png` graph overview.
+- **GitHub Pages — "Start from the system you already have" section**: documents the
+  navigator's onboarding screen (Learn & Create Spec / Load Specification / Explore Demo),
+  with a recreation of the start screen and the three-step Learn flow (scan the code,
+  README, and docs, run the methodology, load the graph). Added to both `index.html` and
+  the app subpage `app.html`, with matching navigation links.
+- **App README — "Start from your current system" section**: documents the
+  `learn` action and the unified spec start screen, including a "Learn from your codebase"
+  entry in the feature list and a `learn` row in the actions table.
 
 ### Changed
 
 - Project version bumped to **2.0** across `plugin.json`, the README badge, and the
   GitHub Pages version badges.
+- **GitHub Pages hero animation reworked**: the task-bar demo now plays the methodology's
+  derivation chain (Customer Problem to Customer Need via `/customer-needs`, then to a
+  Functional Requirement via `/functional-requirements`) instead of a single decompose
+  step. Renders the full chain statically under reduced motion.
 
 ### Notes
 

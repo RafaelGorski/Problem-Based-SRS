@@ -562,42 +562,50 @@
     background-size: 20px 20px; background-position: -6px -6px;
     overflow: hidden;
 }
+
+/* Traceability links (CP -> CN, CN -> FR) */
 .tbd-links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.tbd-links path {
-    fill: none; stroke: color-mix(in oklab, var(--step-how) 55%, transparent);
-    stroke-width: 1.4; stroke-dasharray: 4 4;
-    stroke-dashoffset: 0; opacity: 1;
+.tbd-link {
+    fill: none; stroke-width: 1.6; stroke-dasharray: 4 4;
+    vector-effect: non-scaling-stroke;
     transition: opacity 0.5s var(--ease-out-quart);
 }
+.tbd-link-cn { stroke: color-mix(in oklab, var(--step-what) 60%, transparent); }
+.tbd-link-fr { stroke: color-mix(in oklab, var(--step-how) 60%, transparent); }
+
+/* Nodes: a vertical CP -> CN -> FR chain */
 .tbd-node {
-    position: absolute; transform: translate(-50%, -50%);
+    position: absolute; left: 50%; transform: translate(-50%, -50%);
     display: inline-flex; align-items: center; gap: 0.5em;
     font-family: var(--font-mono); font-weight: 600;
-    font-size: clamp(0.66rem, 0.55rem + 0.45vw, 0.84rem);
+    font-size: clamp(0.64rem, 0.54rem + 0.42vw, 0.82rem);
     padding: 0.5em 0.7em; border-radius: 10px;
     background: var(--bg-elevated); white-space: nowrap;
-    color: color-mix(in oklab, var(--c) 68%, black);
+    color: color-mix(in oklab, var(--c) 70%, black);
     border: 1.5px solid color-mix(in oklab, var(--c) 45%, transparent);
     box-shadow: 0 1px 3px oklch(0.2 0.02 264 / 0.10);
-    transition: box-shadow 0.35s var(--ease-out-quart), transform 0.35s var(--ease-out-quart), opacity 0.4s var(--ease-out-quart);
+    transition: box-shadow 0.35s var(--ease-out-quart), transform 0.4s var(--ease-out-quart), opacity 0.4s var(--ease-out-quart);
     z-index: 2;
 }
 .tbd-node .tbd-glyph {
     display: inline-grid; place-items: center;
-    width: 1.45em; height: 1.45em; border-radius: 6px;
+    min-width: 1.45em; height: 1.45em; padding: 0 0.3em; border-radius: 6px;
     background: color-mix(in oklab, var(--c) 16%, transparent);
-    color: color-mix(in oklab, var(--c) 72%, black);
-    font-size: 0.78em;
+    color: color-mix(in oklab, var(--c) 74%, black);
+    font-size: 0.7em; font-weight: 700; letter-spacing: 0.02em;
 }
-.tbd-parent { left: 50%; top: 20%; --c: var(--step-how); }
-.tbd-child { --c: var(--step-how); top: 74%; font-size: clamp(0.58rem, 0.48rem + 0.38vw, 0.74rem); }
-.tbd-child-a { left: 27%; }
-.tbd-child-b { left: 73%; }
-.tbd-child .tbd-glyph { background: color-mix(in oklab, var(--c) 14%, transparent); }
+.tbd-cp { top: 16%; --c: var(--step-why); }
+.tbd-cn { top: 50%; --c: var(--step-what); }
+.tbd-fr { top: 84%; --c: var(--step-how); }
 
-/* Action bar */
+/* Active-node focus ring */
+.tbd-node.is-focus {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--c) 34%, transparent), 0 6px 18px oklch(0.2 0.04 266 / 0.16);
+}
+
+/* Floating action bar */
 .tbd-bar {
-    position: absolute; left: 50%; top: 40%; transform: translate(-50%, 0);
+    position: absolute; left: 50%; top: 30%; transform: translate(-50%, 0);
     display: flex; align-items: center; gap: 0.35rem;
     width: min(86%, 30rem);
     padding: 0.4rem 0.42rem;
@@ -605,13 +613,18 @@
     border: 1px solid oklch(0.40 0.03 266); border-radius: 10px;
     box-shadow: 0 14px 34px oklch(0.18 0.04 266 / 0.30);
     z-index: 3;
-    transition: opacity 0.4s var(--ease-out-quart), transform 0.45s var(--ease-out-quart);
+    transition: opacity 0.35s var(--ease-out-quart), transform 0.4s var(--ease-out-quart);
 }
+.tbd-bar.at-cp { top: 30%; }
+.tbd-bar.at-cn { top: 64%; }
+/* In the static default (no JS / reduced motion) show only the composed chain; the
+   action bar belongs to the animation and would otherwise overlap the Need node. */
+.tbd:not(.is-playing) .tbd-bar { opacity: 0; pointer-events: none; }
 .tbd-bar-input {
     flex: 1 1 auto; min-width: 0;
     display: flex; align-items: center; gap: 1px;
     padding: 0.28em 0.5em;
-    font-family: var(--font-body); font-size: clamp(0.66rem, 0.56rem + 0.35vw, 0.8rem);
+    font-family: var(--font-body); font-size: clamp(0.64rem, 0.54rem + 0.34vw, 0.78rem);
     line-height: 1.3; color: oklch(0.97 0.008 266);
     background: oklch(0.20 0.02 266); border-radius: 7px;
     border: 1px solid oklch(0.34 0.03 266);
@@ -623,31 +636,30 @@
     display: inline-block; width: 1.5px; height: 1em; flex: 0 0 auto;
     background: var(--step-glance); opacity: 0; transform: translateY(0.12em);
 }
+.tbd-bar.is-typing .tbd-caret { opacity: 1; animation: tbd-blink 1s steps(1) infinite; }
 .tbd-btn {
     flex: 0 0 auto;
     display: inline-flex; align-items: center; gap: 0.3em;
     font-family: var(--font-mono); font-weight: 600;
-    font-size: clamp(0.6rem, 0.5rem + 0.3vw, 0.72rem);
+    font-size: clamp(0.58rem, 0.48rem + 0.3vw, 0.7rem);
     padding: 0.36em 0.5em; border-radius: 7px;
     color: oklch(0.88 0.02 266); background: oklch(0.30 0.02 266);
     border: 1px solid oklch(0.42 0.03 266); white-space: nowrap;
     transition: background 0.25s var(--ease-out-quart), color 0.25s var(--ease-out-quart), transform 0.15s var(--ease-out-quart), box-shadow 0.25s var(--ease-out-quart);
 }
-.tbd-btn svg { width: 1em; height: 1em; }
-.tbd-btn.is-primary {
+/* Show only the active derivation stage's buttons */
+.tbd[data-stage="2"] .tbd-btn.s1 { display: none; }
+.tbd:not([data-stage="2"]) .tbd-btn.s2 { display: none; }
+/* Highlighted derive (primary) button, colored per target node type */
+.tbd-btn.is-derive {
     color: oklch(0.97 0.01 266);
-    background: var(--step-how);
-    border-color: color-mix(in oklab, var(--step-how) 70%, white);
-    box-shadow: 0 0 0 3px oklch(0.56 0.16 266 / 0.30);
+    background: var(--bc);
+    border-color: color-mix(in oklab, var(--bc) 70%, white);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bc) 30%, transparent);
 }
-.tbd-cursor {
-    position: absolute; left: 50%; top: 20%; z-index: 4;
-    width: 18px; height: 18px; pointer-events: none;
-    transform: translate(40px, 34px);
-    transition: transform 0.7s var(--ease-out-quart), opacity 0.4s var(--ease-out-quart);
-    filter: drop-shadow(0 1px 2px oklch(0.2 0.02 264 / 0.4));
-}
-.tbd-cursor svg { width: 100%; height: 100%; display: block; }
+.tbd-btn.s1.is-derive { --bc: var(--step-what); }
+.tbd-btn.s2.is-derive { --bc: var(--step-how); }
+.tbd-btn.is-press { transform: scale(0.94); }
 
 /* Caption strip under the stage */
 .tbd-caption {
@@ -661,56 +673,18 @@
     flex: 0 0 auto;
 }
 
-/* ── Playing state: choreography driven by data-phase ── */
+/* Playing state: hide downstream nodes/links/bar until JS reveals them.
+   The no-JS / reduced-motion default shows the full composed chain. */
+.tbd.is-playing .tbd-cn,
+.tbd.is-playing .tbd-fr { opacity: 0; transform: translate(-50%, -50%) scale(0.72); }
+.tbd.is-playing .tbd-cn.is-in,
+.tbd.is-playing .tbd-fr.is-in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.tbd.is-playing .tbd-link { opacity: 0; }
+.tbd.is-playing .tbd-link.is-in { opacity: 1; }
 .tbd.is-playing .tbd-bar { opacity: 0; transform: translate(-50%, 8px); }
-.tbd.is-playing .tbd-child { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-.tbd.is-playing .tbd-links path { opacity: 0; }
-.tbd.is-playing .tbd-caret { opacity: 0; }
-.tbd.is-playing .tbd-node.tbd-parent { box-shadow: 0 1px 3px oklch(0.2 0.02 264 / 0.10); }
-
-.tbd.is-playing[data-phase="focus"] .tbd-node.tbd-parent,
-.tbd.is-playing[data-phase="bar"] .tbd-node.tbd-parent,
-.tbd.is-playing[data-phase="type"] .tbd-node.tbd-parent,
-.tbd.is-playing[data-phase="press"] .tbd-node.tbd-parent,
-.tbd.is-playing[data-phase="work"] .tbd-node.tbd-parent,
-.tbd.is-playing[data-phase="done"] .tbd-node.tbd-parent {
-    box-shadow: 0 0 0 3px oklch(0.56 0.16 266 / 0.28), 0 6px 18px oklch(0.2 0.04 266 / 0.16);
-    transform: translate(-50%, -50%) translateY(-2px);
-}
-
-.tbd.is-playing[data-phase="bar"] .tbd-bar,
-.tbd.is-playing[data-phase="type"] .tbd-bar,
-.tbd.is-playing[data-phase="press"] .tbd-bar,
-.tbd.is-playing[data-phase="work"] .tbd-bar { opacity: 1; transform: translate(-50%, 0); }
-
-.tbd.is-playing[data-phase="bar"] .tbd-caret,
-.tbd.is-playing[data-phase="type"] .tbd-caret { opacity: 1; animation: tbd-blink 1s steps(1) infinite; }
-
-.tbd.is-playing[data-phase="press"] .tbd-btn.is-decompose,
-.tbd.is-playing[data-phase="work"] .tbd-btn.is-decompose {
-    color: oklch(0.97 0.01 266); background: var(--step-how);
-    border-color: color-mix(in oklab, var(--step-how) 70%, white);
-    box-shadow: 0 0 0 3px oklch(0.56 0.16 266 / 0.30);
-}
-.tbd.is-playing[data-phase="press"] .tbd-btn.is-decompose { transform: scale(0.94); }
-
-.tbd.is-playing[data-phase="work"] .tbd-child { opacity: 0.45; transform: translate(-50%, -50%) scale(0.9); }
-.tbd.is-playing[data-phase="done"] .tbd-child { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-.tbd.is-playing[data-phase="done"] .tbd-bar { opacity: 0; transform: translate(-50%, 6px); }
-.tbd.is-playing[data-phase="work"] .tbd-links path,
-.tbd.is-playing[data-phase="done"] .tbd-links path { opacity: 1; }
-
-.tbd.is-playing[data-phase="idle"] .tbd-cursor { transform: translate(40px, 34px); opacity: 1; }
-.tbd.is-playing[data-phase="focus"] .tbd-cursor,
-.tbd.is-playing[data-phase="bar"] .tbd-cursor,
-.tbd.is-playing[data-phase="type"] .tbd-cursor { transform: translate(6px, 6px); opacity: 1; }
-.tbd.is-playing[data-phase="press"] .tbd-cursor { transform: translate(0, 2px) scale(0.86); opacity: 1; }
-.tbd.is-playing[data-phase="work"] .tbd-cursor,
-.tbd.is-playing[data-phase="done"] .tbd-cursor { transform: translate(40px, 30px); opacity: 0; }
+.tbd.is-playing .tbd-bar.is-show { opacity: 1; transform: translate(-50%, 0); }
 
 @keyframes tbd-blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
-
-.tbd-child { transform: translate(-50%, -50%); }
 
 /* ── App subpage ── */
 .subhero { padding: var(--space-2xl) 0 var(--space-xl); position: relative; overflow: hidden; }
@@ -786,13 +760,6 @@
     .action-row { grid-template-columns: 1fr; gap: var(--space-sm); }
 }
 
-/* Decompose button: reset the static `is-primary` highlight while the demo
-   plays so it only lights up at the press/work phases (rules above). */
-.tbd.is-playing .tbd-btn.is-decompose {
-    color: oklch(0.88 0.02 266); background: oklch(0.30 0.02 266);
-    border-color: oklch(0.42 0.03 266); box-shadow: none; transform: none;
-}
-
 /* Subhero highlight underline tracks the primary (indigo), not the amber CP tint. */
 .subhero h1 .hl::after { background: var(--primary); }
 
@@ -801,3 +768,68 @@
     .site-nav .wrap { flex-wrap: wrap; row-gap: var(--space-sm); }
     .site-nav-links { width: 100%; order: 3; justify-content: flex-start; gap: var(--space-md); }
 }
+
+/* ── Learn from your current system (landing/onboarding) ── */
+.learn-layout {
+    display: grid; gap: var(--space-xl); grid-template-columns: 1fr;
+    margin-top: var(--space-xl); align-items: start;
+}
+@media (min-width: 880px) {
+    .learn-layout { grid-template-columns: 0.85fr 1.15fr; gap: var(--space-2xl); }
+}
+.learn-copy h3 { margin-bottom: var(--space-sm); }
+.learn-copy > p { color: var(--muted); max-width: 52ch; }
+.learn-steps {
+    list-style: none; margin: var(--space-lg) 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--space-sm);
+}
+.learn-steps li {
+    display: flex; align-items: flex-start; gap: 0.7rem;
+    font-size: var(--text-sm); color: var(--ink); line-height: 1.5;
+}
+.learn-steps .ls-n {
+    flex: 0 0 auto; display: inline-grid; place-items: center;
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--primary); font-family: var(--font-mono); font-weight: 600; font-size: 0.75rem;
+}
+.learn-alt { font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-md); }
+
+.learn-screen {
+    background: var(--bg-elevated); padding: var(--space-lg);
+    display: flex; flex-direction: column; gap: var(--space-md);
+}
+.learn-screen-head h4 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 1.1rem; color: var(--ink-heading); margin: 0 0 0.25rem;
+}
+.learn-screen-head p { font-size: var(--text-sm); color: var(--muted); margin: 0; max-width: 42ch; }
+.learn-actions { display: flex; flex-direction: column; gap: 0.6rem; }
+.learn-action {
+    display: flex; align-items: center; gap: 0.85rem;
+    padding: 0.8rem 0.9rem; border-radius: 12px;
+    border: 1px solid var(--surface-border); background: var(--surface);
+}
+.learn-action.is-primary { border-color: transparent; background: var(--primary); color: var(--on-primary); }
+.la-icon {
+    flex: 0 0 auto; display: inline-grid; place-items: center;
+    width: 2rem; height: 2rem; border-radius: 8px;
+    background: color-mix(in oklab, var(--primary) 12%, transparent); color: var(--primary);
+}
+.learn-action.is-primary .la-icon { background: oklch(1 0 0 / 0.16); color: var(--on-primary); }
+.la-icon svg { width: 1.05rem; height: 1.05rem; }
+.la-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.la-label { font-weight: 600; font-size: var(--text-sm); }
+.la-desc { font-size: var(--text-xs); color: var(--muted); }
+.learn-action.is-primary .la-desc { color: oklch(1 0 0 / 0.82); }
+.learn-feats {
+    list-style: none; margin: 0; padding: var(--space-sm) 0 0;
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem;
+    border-top: 1px solid var(--surface-border);
+}
+.learn-feats li {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-size: var(--text-xs); color: var(--muted); font-family: var(--font-mono);
+}
+.learn-feats .lf-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c, var(--primary)); flex: 0 0 auto; }
+.learn-media figcaption { margin-top: var(--space-sm); font-size: var(--text-xs); color: var(--muted); text-align: center; }
