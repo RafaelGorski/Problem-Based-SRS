@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2] - 2026-07-01
+
+### Changed
+
+- **GitHub Pages hero now uses an animated image instead of the live app.** Both
+  `docs/index.html` and `docs/app.html` replace the embedded live navigator iframe with a
+  self-contained animated SVG (`docs/assets/srs-chain.svg`). Its CSS keyframes build the
+  traceability chain in the methodology's causal order: Customer Problems appear first,
+  then the Customer Needs that address them, then the Functional / Non-Functional
+  Requirements that satisfy them, with links drawing in. The image reuses the real
+  navigator's node colors and Phosphor icons, and honors `prefers-reduced-motion`.
+
+### Added
+
+- **`scripts/build-chain-animation.mjs`**: generator for the animated SVG. Node colors and
+  icons are sampled verbatim from the extension's `renderer.mjs`, and the chain uses a real
+  slice of the bundled CRM demo spec. The canvas app itself is unchanged.
+
+### Removed
+
+- `docs/navigator-embed.html` and `scripts/build-navigator-embed.mjs` (the live-app embed),
+  superseded by the animated image.
+
+[2.2]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.2
+
 ## [2.1] - 2026-06-29
 
 ### Changed
