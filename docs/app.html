@@ -18,7 +18,7 @@
         <div class="wrap">
             <div class="site-nav-id">
                 <a href="index.html" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
-                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.0, view releases">v2.0</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.1, view releases">v2.1</a>
             </div>
             <ul class="site-nav-links">
                 <li><a href="index.html">Home</a></li>
@@ -60,28 +60,9 @@
                         <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                         <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
                     </div>
-                    <div class="tbd" data-taskbar-demo>
-                        <div class="tbd-stage" role="img"
-                             aria-label="The SRS Navigator deriving a specification: starting from a customer problem, the agent runs the customer-needs skill to add a customer need, then the functional-requirements skill to add a functional requirement, forming a traced chain.">
-                            <svg class="tbd-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                                <path class="tbd-link tbd-link-cn" d="M50 23 L50 43" />
-                                <path class="tbd-link tbd-link-fr" d="M50 57 L50 77" />
-                            </svg>
-                            <span class="tbd-node tbd-cp"><span class="tbd-glyph" aria-hidden="true">CP</span>Sales data is slow</span>
-                            <span class="tbd-node tbd-cn"><span class="tbd-glyph" aria-hidden="true">CN</span>Real-time access</span>
-                            <span class="tbd-node tbd-fr"><span class="tbd-glyph" aria-hidden="true">FR</span>Sales data API</span>
-                            <div class="tbd-bar at-cp" aria-hidden="true">
-                                <span class="tbd-bar-input"><span class="tbd-bar-text is-placeholder" data-tbd-text>Describe a change&hellip;</span><span class="tbd-caret"></span></span>
-                                <span class="tbd-btn s1">+Sub-CP</span>
-                                <span class="tbd-btn s1 is-derive">+CN</span>
-                                <span class="tbd-btn s2">+Sub-CN</span>
-                                <span class="tbd-btn s2 is-derive">+FR</span>
-                            </div>
-                        </div>
-                        <div class="tbd-caption">
-                            <span class="tbd-status-dot" aria-hidden="true"></span>
-                            Derive the spec, problem to requirement, with the agent
-                        </div>
+                    <div class="nav-embed">
+                        <iframe class="nav-embed-frame" src="navigator-embed.html" loading="lazy"
+                                title="The SRS Navigator app building a specification: customer problems appear first, then the customer needs that address them, then the functional and non-functional requirements that satisfy them, each connected in a live traceability chain."></iframe>
                     </div>
                 </div>
                 <figcaption>From a customer problem to a need to a requirement, derived step by step with the agent.</figcaption>
@@ -280,7 +261,7 @@
 
     <footer class="site-footer">
         <div class="wrap">
-            <p>Problem-Based SRS &middot; <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.0</a> &middot; Methodology by Gorski &amp; Stadzisz</p>
+            <p>Problem-Based SRS &middot; <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.1</a> &middot; Methodology by Gorski &amp; Stadzisz</p>
             <p class="footer-links">
                 <a href="index.html">Home</a>
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>

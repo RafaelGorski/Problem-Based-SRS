@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1] - 2026-06-29
+
+### Changed
+
+- **GitHub Pages hero now embeds the real SRS Navigator.** Both `docs/index.html` and
+  `docs/app.html` replace the hand-built CSS mock of the CP → CN → FR chain with an
+  iframe of the genuine navigator (`docs/navigator-embed.html`). Its own force-directed
+  intro animation builds the traceability chain live: Customer Problems reveal first,
+  then the Customer Needs that address them, then the Functional and Non-Functional
+  Requirements that satisfy them, with links forming between tiers.
+
+### Added
+
+- **`scripts/build-navigator-embed.mjs`**: generator that renders the real navigator to
+  `docs/navigator-embed.html` from the extension's own `parser`, `renderer`, and
+  `demo-spec` modules against the bundled CRM demo specification. The canvas app itself
+  is unchanged.
+
+[2.1]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.1
+
 ## [2.0] - 2026-06-29
 
 Version 2.0 reframes the project around **two deliverables in one**: the Problem-Based

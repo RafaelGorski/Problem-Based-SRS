@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version 2.0](https://img.shields.io/badge/version-2.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.0)
+[![Version 2.1](https://img.shields.io/badge/version-2.1-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.1)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -153,6 +153,11 @@ analysis mode, search nodes, and inspect dependencies inside the Copilot side pa
 Run `/live` and your assistant opens the navigator on the current `.spec/` (or a built-in
 CRM demo if you haven't created one yet). The extension also bundles the full methodology
 as agent tools, so every step is available without leaving the panel.
+
+> Prefer a preview first? The [project website](https://rafaelgorski.github.io/Problem-Based-SRS/)
+> embeds the real navigator and plays its intro animation, building the traceability chain
+> live: Customer Problems first, then the Needs that address them, then the Requirements
+> that satisfy them.
 
 ### Decompose and iterate with the agent
 
