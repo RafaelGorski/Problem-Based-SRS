@@ -8,7 +8,6 @@ An interactive force-directed graph visualization for **Problem-Based SRS** spec
 
 - **Learn from your codebase** — Open the navigator without a spec and it offers to scan your code, README, and docs to draft a Problem-Based SRS automatically
 - **Interactive D3.js graph** — Force-directed layout showing relationships between problems, needs, and requirements
-- **Traceability build animation** — On first open, the graph assembles itself in methodology order: Customer Problems surface first, then the Customer Needs and links that address them, then the Functional and Non-Functional Requirements that satisfy them (respects `prefers-reduced-motion`)
 - **Search & filter** — Find nodes by ID or label text, toggle node types via the legend
 - **Detail panel** — Click any node to see its full description and connections
 - **Graph/Hierarchy views** — Toggle between force-directed graph and hierarchical layout

@@ -2589,59 +2589,6 @@ export function renderGraphHtml(graphData, options = {}) {
     // Initial visibility
     updateVisibility();
 
-    // === Intro: build the traceability chain (Customer Problem -> Customer Need -> Requirement) ===
-    // The graph assembles itself in the methodology's causal order: problems surface first,
-    // then the needs and links that address them, then the requirements that satisfy them.
-    (function introReveal() {
-      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let alreadyPlayed = false;
-      try { alreadyPlayed = sessionStorage.getItem("srsIntroPlayed") === "1"; } catch (e) {}
-
-      // Skip the choreography for reduced-motion users and on later refreshes
-      // (agent edits reload the page); the chain builds once per canvas session.
-      if (prefersReduced || alreadyPlayed || nodes.length === 0) {
-        nodeElements.attr("opacity", 1);
-        linkElements.attr("opacity", 1);
-        return;
-      }
-      try { sessionStorage.setItem("srsIntroPlayed", "1"); } catch (e) {}
-
-      // problem (CP) reveals first, need (CN) second, fr/nfr (requirements) last
-      const tierOf = (t) => t === "problem" ? 0 : t === "need" ? 1 : 2;
-      const TIER_GAP = 340; // ms between successive tiers
-      const STEP = 45;      // ms stagger between siblings within a tier
-      const MAX_STAGGER = 12; // cap the staggered count so large tiers stay snappy
-
-      const tierCounts = {};
-      nodeElements.attr("opacity", 0).each(function(d) {
-        const tier = tierOf(d.type);
-        const idx = (tierCounts[tier] = (tierCounts[tier] || 0) + 1) - 1;
-        d._introDelay = tier * TIER_GAP + Math.min(idx, MAX_STAGGER) * STEP;
-      });
-
-      nodeElements.transition()
-        .delay(d => d._introDelay)
-        .duration(460)
-        .ease(d3.easeCubicOut)
-        .attr("opacity", 1);
-
-      // A link forms once its downstream endpoint has appeared, so the chain
-      // visibly connects CP -> CN, then CN -> FR.
-      linkElements.attr("opacity", 0)
-        .transition()
-        .delay(d => {
-          const src = typeof d.source === "object" ? d.source : nodes.find(n => n.id === d.source);
-          const tgt = typeof d.target === "object" ? d.target : nodes.find(n => n.id === d.target);
-          const tier = Math.max(tierOf(src && src.type), tierOf(tgt && tgt.type));
-          return tier * TIER_GAP + 140;
-        })
-        .duration(420)
-        .ease(d3.easeCubicOut)
-        .attr("opacity", 1);
-
-      announce("Building traceability chain: customer problems, then needs, then requirements.");
-    })();
-
     // Handle resize
     window.addEventListener("resize", () => {
       simulation.force("center", d3.forceCenter(container.clientWidth / 2, container.clientHeight / 2));
