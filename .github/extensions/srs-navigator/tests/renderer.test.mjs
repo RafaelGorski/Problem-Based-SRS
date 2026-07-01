@@ -178,6 +178,15 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes("stroke-dasharray: 5,5"));
   });
 
+  it("includes the CP -> CN -> FR intro build animation", () => {
+    const html = renderGraphHtml(sampleGraph);
+    // Signature entrance: nodes reveal in methodology tier order, once per session.
+    assert.ok(html.includes("srsIntroPlayed"), "intro reveal is gated once per session");
+    assert.ok(html.includes("introReveal"), "intro reveal routine present");
+    assert.ok(html.includes("_introDelay"), "per-node tier delay is computed");
+    assert.ok(html.includes("prefers-reduced-motion"), "intro respects reduced motion");
+  });
+
   it("includes hull polygon for selection", () => {
     const html = renderGraphHtml(sampleGraph);
     assert.ok(html.includes("hull-group"));
