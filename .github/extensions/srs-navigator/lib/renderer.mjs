@@ -2165,6 +2165,10 @@ export function renderGraphHtml(graphData, options = {}) {
           el.classList.add('active');
           el.setAttribute('aria-pressed', 'true');
           hotspotFilter = filter;
+          // The CP spotlight and hot-spot filters are separate focus modes;
+          // engaging a filter clears the Customer-Problem highlight so the two
+          // never stack into a confusing dual-dim state.
+          if (problemHighlight) setProblemHighlight(false);
           announce('Filtering: ' + el.getAttribute('aria-label'));
         } else {
           hotspotFilter = null;
@@ -3003,7 +3007,8 @@ export function renderGraphHtml(graphData, options = {}) {
           .transition().duration(250)
           .attr("stroke", isSelected ? "oklch(0.53 0.10 205)" : cpActive ? "oklch(0.61 0.18 48)" : isDownstream && !isSelected ? "oklch(0.63 0.09 205)" : (nodeColors[d.type]?.stroke || "#ccc"))
           .attr("stroke-width", isSelected ? 2.5 : cpActive ? 2.5 : isDownstream ? 2 : 1.5)
-          .attr("fill", isSelected ? "oklch(0.95 0.03 205)" : cpActive ? "oklch(0.97 0.03 48)" : "white");
+          .attr("fill", isSelected ? "oklch(0.95 0.03 205)" : cpActive ? "oklch(0.97 0.03 48)" : "white")
+          .attr("opacity", shouldDim ? 0.15 : 1);
 
         el.select("foreignObject")
           .transition().duration(250)
@@ -3088,6 +3093,14 @@ export function renderGraphHtml(graphData, options = {}) {
       if (problemCount === 0) return;
       // Selecting a node and highlighting are mutually exclusive views.
       if (selectedNode) { selectedNode = null; hideDetail(); }
+      // Clear any active hot-spot filter so the CP spotlight is the sole focus.
+      if (!problemHighlight && hotspotFilter) {
+        hotspotFilter = null;
+        document.querySelectorAll('.health-metric.active').forEach(m => {
+          m.classList.remove('active');
+          m.setAttribute('aria-pressed', 'false');
+        });
+      }
       setProblemHighlight(!problemHighlight);
     });
 

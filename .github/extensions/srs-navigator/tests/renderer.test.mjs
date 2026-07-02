@@ -169,6 +169,16 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes("badge-cp-count"), "badge count is animated via a dedicated span");
   });
 
+  it("keeps the CP spotlight exclusive to the badge (filters clear it, and dim hides node rects)", () => {
+    const html = renderGraphHtml(sampleGraph);
+    // The highlight is a distinct focus mode: engaging a hot-spot filter clears it.
+    assert.ok(html.includes("if (problemHighlight) setProblemHighlight(false);"),
+      "activating a hot-spot filter clears the Customer-Problem highlight");
+    // Dimmed nodes fade their rect too, so a filter never leaves CP boxes looking lit.
+    assert.match(html, /el\.select\("rect"\)[\s\S]*?\.attr\("opacity", shouldDim \? 0\.15 : 1\)/,
+      "dimmed node rects fade to 0.15 so filters don't mimic the CP highlight");
+  });
+
   it("lays out the graph hierarchically with tier lanes (CPs on top)", () => {
     const html = renderGraphHtml(sampleGraph);
     // Vertical tier force replaces the old radial center force
