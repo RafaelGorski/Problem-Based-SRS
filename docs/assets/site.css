@@ -288,6 +288,19 @@
         }
 
         /* ── Flow (methodology timeline) ── */
+        .method-grid {
+            display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+            gap: clamp(1.5rem, 1rem + 3vw, 3.5rem); align-items: start;
+        }
+        .method-aside { margin: var(--space-xl) 0 0; position: sticky; top: 2rem; }
+        .method-aside figcaption {
+            margin-top: var(--space-md); color: var(--muted);
+            font-size: var(--text-sm); max-width: 42ch;
+        }
+        @media (max-width: 860px) {
+            .method-grid { grid-template-columns: 1fr; }
+            .method-aside { position: static; margin-top: 0; }
+        }
         .flow { position: relative; padding-left: 2.5rem; margin: var(--space-xl) 0; }
         .flow::before {
             content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
@@ -337,7 +350,7 @@
             border: 1px solid oklch(0.32 0.02 264);
             box-shadow: 0 2px 4px oklch(0.15 0.02 264 / 0.2),
                         0 22px 48px oklch(0.20 0.03 264 / 0.28);
-            margin-bottom: var(--space-xl); max-width: 760px;
+            max-width: 760px;
         }
         .cli-bar {
             display: flex; align-items: center; gap: 0.7rem;
