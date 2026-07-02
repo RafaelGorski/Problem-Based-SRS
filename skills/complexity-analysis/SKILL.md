@@ -273,4 +273,4 @@ CP.5     [ ]   [ ]   [ ]   [ ]   [ ]   [C]
 
 **Version:** 1.2  
 **Type:** Optional Advanced Validation Tool  
-**Command:** `/complexity-analysis`
+**Command:** `/problem-based-srs complexity`

@@ -230,9 +230,9 @@ Summary:
 - [N] Construction needs
 - [N] Entertainment needs
 
-→ MANDATORY: Run zigzag-validator skill to validate CP → CN traceability
+→ MANDATORY: Run /problem-based-srs validate to validate CP → CN traceability
 → Next Step: 4 - Software Vision
-→ Use skill: software-vision
+→ Action: /problem-based-srs software-vision
 ```
 
 ---

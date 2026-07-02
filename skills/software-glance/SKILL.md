@@ -174,7 +174,7 @@ After generating the Software Glance, instruct the user:
 
 > ✅ **Software Glance complete.** To continue the Problem-Based SRS process:
 > 
-> **Next Step:** Use `customer-needs` skill to specify Customer Needs based on this Software Glance and the Customer Problems.
+> **Next Step:** Run `/problem-based-srs needs` to specify Customer Needs based on this Software Glance and the Customer Problems.
 > 
 > The Software Glance provides boundaries and direction for identifying what outcomes the software must provide.
 
@@ -299,7 +299,7 @@ Before accepting the Software Glance output:
 | 4 | [software-vision](../software-vision/SKILL.md) | 🔗 Drills down from this glance |
 | 5 | functional-requirements | |
 
-**Next:** Use the Software Glance output with `customer-needs` skill to specify what outcomes the software must provide.
+**Next:** Use the Software Glance output with `/problem-based-srs needs` to specify what outcomes the software must provide.
 
 ---
 

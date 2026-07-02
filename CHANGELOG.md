@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4] - 2026-07-02
+
+### Added
+
+- **New `evals/` harness for testing and evaluating the methodology skills using the
+  GitHub Copilot CLI SDK.** Two tiers: deterministic offline tests (`evals/tests/*.test.mjs`,
+  57 tests via `node --test`) covering the headless Copilot SDK wrapper, the SKILL.md
+  loader/graders, and static skill evals over every `skills/<slug>/SKILL.md` (name/dir
+  match, description contract, body line cap, link resolution, methodology tokens, and a
+  regression guard proving the unified `/problem-based-srs <action>` refactor left no
+  legacy per-step commands or `Use skill:` handoffs); and opt-in live LLM evals
+  (`evals/cases/*.case.mjs` + `evals/run-evals.mjs`) that run each skill through the real
+  model and grade it with a rubric plus an optional LLM judge. Includes PowerShell runners
+  `evals/scripts/run-tests.ps1` and `evals/scripts/run-evals.ps1` for manual verification.
+- **Verbose eval output.** `evals/run-evals.mjs` gains `--verbose`/`-v` and `-vv`
+  (surfaced as `-Detailed`/`-Trace` in `run-evals.ps1`) to print the built prompt, run
+  metadata (exit code, duration, token usage, loaded skills, tool calls, stderr), the full
+  model artifact, and every rubric check (passing and failing) for troubleshooting.
+- **Repo-root `run-tests.ps1`** that runs all offline suites in sequence — plugin
+  validation, the canvas extension tests, and the deterministic skill evals — with a
+  pass/fail summary and `-SkipValidate` / `-SkipCanvas` / `-SkipEvals` switches.
+
+### Changed
+
+- **Unified the nine per-step commands into a single `/problem-based-srs` command
+  with an `action` argument.** Instead of `/customer-problems`, `/customer-needs`,
+  `/functional-requirements`, etc., the methodology is now driven by one command that
+  dispatches to a step: `/problem-based-srs problems`, `/problem-based-srs needs`,
+  `/problem-based-srs functional-requirements`, `/problem-based-srs business-context`,
+  `/problem-based-srs software-glance`, `/problem-based-srs software-vision`,
+  `/problem-based-srs validate`, `/problem-based-srs complexity`, and
+  `/problem-based-srs` (full run, the default). Applied consistently across the CLI
+  skills/agent, the SRS Navigator canvas extension (a single `problem_based_srs` tool
+  replaces the nine per-step tools; action-bar payloads now carry an `srsAction`
+  field), and the project webpage. The eight step content files under `skills/<slug>/`
+  are retained as the backing methodology library.
+
+[2.4]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.4
+
 ## [2.3] - 2026-07-01
 
 ### Added

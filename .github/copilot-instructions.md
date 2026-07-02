@@ -342,17 +342,19 @@ description: I help with requirements.
 
 ## Quick Reference
 
-### Problem-Based SRS Commands
+### Problem-Based SRS Command
+A single command, `/problem-based-srs`, dispatches to each step via an **action** argument:
 ```
-/business-context          # Establish Business Context
-/customer-problems        # Generate Customer Problems
-/software-glance          # Create Software Glance
-/customer-needs           # Generate Customer Needs
-/software-vision          # Build Software Vision
-/functional-requirements  # Specify Functional Requirements
-/zigzag-validator         # Validate traceability
-/problem-based-srs        # Full methodology orchestration
-/live                     # Launch the SRS Navigator canvas (visualize the spec)
+/problem-based-srs business-context        # Establish Business Context
+/problem-based-srs problems                # Generate Customer Problems
+/problem-based-srs software-glance         # Create Software Glance
+/problem-based-srs needs                   # Generate Customer Needs
+/problem-based-srs software-vision         # Build Software Vision
+/problem-based-srs functional-requirements # Specify Functional Requirements
+/problem-based-srs validate                # Validate traceability (ZigZag)
+/problem-based-srs complexity              # Optional: Axiomatic Design analysis
+/problem-based-srs                         # Full methodology orchestration (default)
+/live                                      # Launch the SRS Navigator canvas (visualize the spec)
 ```
 
 ### Traceability Chain

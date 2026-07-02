@@ -367,7 +367,7 @@ Artifacts:
 [List CP-IDs with brief titles]
 
 → Next Step: 2 - Software Glance
-→ Use skill: software-glance
+→ Action: /problem-based-srs software-glance
 → Input: The CPs documented above
 ```
 

@@ -86,78 +86,72 @@ async function loadSkillContentByFile(file) {
 const isProjectExtension = __dirname.includes(".github");
 const derivedWorkspacePath = isProjectExtension ? resolve(__dirname, "..", "..", "..") : null;
 
-// Skill definitions for tool registration
-const SKILLS = [
-    {
-        name: "business_context",
-        file: "business-context.md",
-        description: "Step 0: Establish structured business context and project principles before problem discovery. Use when starting requirements engineering to capture project identity, business principles, stakeholders, domain boundaries, and success criteria.",
-    },
-    {
-        name: "customer_problems",
-        file: "customer-problems.md",
-        description: "Step 1: Identify and document Customer Problems (CP) from business context. Use when stakeholders describe solutions instead of problems, or when starting requirements engineering.",
-    },
-    {
-        name: "software_glance",
-        file: "software-glance.md",
-        description: "Step 2: Create the first abstract representation of a software solution from Customer Problems. Use after identifying CPs to design high-level system boundaries and components.",
-    },
-    {
-        name: "customer_needs",
-        file: "customer-needs.md",
-        description: "Step 3: Specify Customer Needs (CN) that define WHAT outcomes software must provide to solve Customer Problems. Use after Software Glance to translate problems into needs.",
-    },
-    {
-        name: "software_vision",
-        file: "software-vision.md",
-        description: "Step 4: Transform Software Glance and Customer Needs into a detailed Software Vision with positioning, stakeholders, features, and architecture.",
-    },
-    {
-        name: "functional_requirements",
-        file: "functional-requirements.md",
-        description: "Step 5: Generate Functional Requirements (FR) and Non-Functional Requirements (NFR) from Customer Needs and Software Vision. Creates individual requirement files with traceability.",
-    },
-    {
-        name: "complexity_analysis",
-        file: "complexity-analysis.md",
-        description: "Optional: Analyze specification quality using Axiomatic Design principles. Evaluates independence, completeness, and information content of requirements.",
-    },
-    {
-        name: "problem_based_srs",
-        file: "problem-based-srs.md",
-        description: "Complete Problem-Based SRS methodology orchestrator. Use when you need to perform full requirements engineering from business problems to functional requirements with traceability.",
-    },
-    {
-        name: "zigzag_validator",
-        file: "zigzag-validator.md",
-        description: "Validate traceability and consistency across Customer Problems, Customer Needs, and Functional Requirements domains. Use to check completeness and identify gaps.",
-    },
+// Methodology action definitions. The Problem-Based SRS methodology is exposed
+// through a SINGLE tool/command (`problem_based_srs` / `/problem-based-srs`) that
+// dispatches to a step via an `action` argument, instead of one command per step.
+// Each action maps to the canonical skill markdown that backs it.
+const ACTIONS = [
+    { action: "business-context", file: "business-context.md" },
+    { action: "problems", file: "customer-problems.md" },
+    { action: "software-glance", file: "software-glance.md" },
+    { action: "needs", file: "customer-needs.md" },
+    { action: "software-vision", file: "software-vision.md" },
+    { action: "functional-requirements", file: "functional-requirements.md" },
+    { action: "validate", file: "zigzag-validator.md" },
+    { action: "complexity", file: "complexity-analysis.md" },
+    { action: "full", file: "problem-based-srs.md" },
 ];
 
-// Build tools array from skill definitions
-function buildSkillTools() {
-    return SKILLS.map((skill) => ({
-        name: skill.name,
-        description: skill.description,
+// Resolve the backing skill file for an action, defaulting to the full
+// orchestrator when the action is unknown or omitted.
+function fileForAction(action) {
+    const match = ACTIONS.find((a) => a.action === action);
+    return (match || ACTIONS.find((a) => a.action === "full")).file;
+}
+
+// Map a methodology action (e.g. "needs") to its slash-command form. The whole
+// methodology is a single command; the action is passed as an argument, so
+// "full" (the default) is just `/problem-based-srs`.
+function srsActionCommand(action) {
+    const a = String(action || "full").trim() || "full";
+    return a === "full" ? "/problem-based-srs" : `/problem-based-srs ${a}`;
+}
+
+// Build the single unified methodology tool. It replaces the former one-tool-per
+// -step registry: callers select a step with the `action` argument.
+function buildSrsTool() {
+    return {
+        name: "problem_based_srs",
+        description:
+            "Problem-Based SRS methodology — single entry point. Provide `action` to run a specific step: " +
+            "`business-context`, `problems`, `software-glance`, `needs`, `software-vision`, " +
+            "`functional-requirements`, `validate`, or `complexity`. Omit it (or use `full`) to run the " +
+            "complete methodology from business problems to functional requirements with full traceability.",
         parameters: {
             type: "object",
             properties: {
+                action: {
+                    type: "string",
+                    enum: ACTIONS.map((a) => a.action),
+                    description:
+                        "Which methodology step to run. Defaults to 'full' (complete orchestration).",
+                },
                 context: {
                     type: "string",
-                    description: "Optional: existing artifacts or business context to provide as input for this methodology step.",
+                    description:
+                        "Optional: existing artifacts or business context to provide as input for this methodology step.",
                 },
             },
         },
         handler: async (args) => {
-            const content = await loadSkillContentByFile(skill.file);
+            const content = await loadSkillContentByFile(fileForAction(args.action || "full"));
             let result = content;
             if (args.context) {
                 result += `\n\n---\n\n## User-Provided Context\n\n${args.context}`;
             }
             return result;
         },
-    }));
+    };
 }
 
 // Per-instance state: server + loaded graph data
@@ -336,17 +330,15 @@ const LOAD_PROMPT = [
     "Then use the `load_specification` canvas action to display it.",
 ].join("\n");
 
-// Map a skill tool name (e.g. "customer_needs") to its Problem-Based SRS
-// slash-command form (e.g. "/customer-needs"). Taskbar actions must run these
-// existing skills, never improvised free-text instructions.
-function skillCommand(skill) {
-    return "/" + String(skill || "").replace(/_/g, "-");
-}
+// Map a methodology action (e.g. "needs") to its Problem-Based SRS slash-command
+// form (e.g. "/problem-based-srs needs"). Taskbar actions must run the existing
+// methodology, never improvised free-text instructions. (Defined near the ACTIONS
+// registry as `srsActionCommand`.)
 
 function buildActionPrompt(action) {
-    // "Implement" is not a methodology skill — it asks the agent to turn a
+    // "Implement" is not a methodology step — it asks the agent to turn a
     // fully-specified requirement into real code, so it gets its own prompt
-    // instead of a skill slash-command.
+    // instead of a methodology slash-command.
     if (action.action === "implement") {
         const kind = action.nodeType === "nfr" ? "Non-Functional Requirement" : "Functional Requirement";
         return [
@@ -366,16 +358,16 @@ function buildActionPrompt(action) {
             "This is an implementation task, not a requirements-authoring task — do not rewrite the specification files. When done, briefly summarize what you built and where.",
         ].join("\n");
     }
-    const command = skillCommand(action.skill);
+    const command = srsActionCommand(action.srsAction);
     return [
-        `## Problem-Based SRS — run the ${command} skill`,
+        `## Problem-Based SRS — run ${command}`,
         "",
-        `Run the existing Problem-Based SRS **${command}** skill (the \`${action.skill}\` tool) and follow its methodology exactly. Do not improvise a generic answer — the skill defines the process you must use.`,
+        `Run the Problem-Based SRS **${command}** action (the \`problem_based_srs\` tool with \`action: "${action.srsAction}"\`) and follow its methodology exactly. Do not improvise a generic answer — the methodology defines the process you must use.`,
         "",
         `**Target node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
         `**Request:** ${action.context}`,
         "",
-        `Apply the ${command} skill to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. After the skill updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
+        `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
     ].join("\n");
 }
 
@@ -521,7 +513,7 @@ function createCanvasServer(instanceId, fallbackHtml, workspacePath) {
 }
 
 const session = await joinSession({
-    tools: buildSkillTools(),
+    tools: [buildSrsTool()],
     canvases: [
         createCanvas({
             id: "srs-navigator",
@@ -720,7 +712,7 @@ const session = await joinSession({
                 },
                 {
                     name: "pending_actions",
-                    description: "Retrieve and consume pending actions queued from the canvas UI. When an engineer clicks an action button on a node (e.g., +CN, +FR, +NFR, decompose), the action is queued here with the skill name and context. The agent should invoke the corresponding skill tool with the provided context. Returns the queue and clears it.",
+                    description: "Retrieve and consume pending actions queued from the canvas UI. When an engineer clicks an action button on a node (e.g., +CN, +FR, +NFR, decompose), the action is queued here with its methodology action and context. The agent should invoke the problem_based_srs tool with the provided action and context. Returns the queue and clears it.",
                     handler: async (ctx) => {
                         const queue = pendingActions.get(ctx.instanceId) || [];
                         // Clear the queue after retrieval
@@ -730,26 +722,23 @@ const session = await joinSession({
                             return { actions: [], message: "No pending actions" };
                         }
 
-                        // Enrich each action with skill instructions
+                        // Enrich each action with methodology instructions
                         const enriched = await Promise.all(queue.map(async (action) => {
                             let skillContent = "";
                             try {
-                                const skillFile = SKILLS.find(s => s.name === action.skill)?.file;
-                                if (skillFile) {
-                                    skillContent = await loadSkillContentByFile(skillFile);
-                                }
+                                skillContent = await loadSkillContentByFile(fileForAction(action.srsAction));
                             } catch { /* skill file read failure is non-fatal */ }
 
                             return {
                                 ...action,
-                                instruction: `Run the existing ${skillCommand(action.skill)} skill (the "${action.skill}" tool) and follow its methodology exactly — do not improvise. Apply it to ${action.nodeId} using this request as input:\n\n${action.context}`,
+                                instruction: `Run the Problem-Based SRS ${srsActionCommand(action.srsAction)} action (the "problem_based_srs" tool with action "${action.srsAction}") and follow its methodology exactly — do not improvise. Apply it to ${action.nodeId} using this request as input:\n\n${action.context}`,
                                 skillContent,
                             };
                         }));
 
                         return {
                             actions: enriched,
-                            message: `${enriched.length} action(s) ready. For each action, run the existing Problem-Based SRS skill named in its instruction with the provided context — do not improvise generic answers.`,
+                            message: `${enriched.length} action(s) ready. For each action, run the Problem-Based SRS methodology action named in its instruction with the provided context — do not improvise generic answers.`,
                         };
                     }
                 },

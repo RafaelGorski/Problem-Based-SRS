@@ -164,63 +164,63 @@
                             <div class="flow-name">Business Context</div>
                             <p class="flow-question">What governs this project?</p>
                             <p class="flow-desc">Project identity, constraints, success criteria. Establishes principles for all downstream decisions.</p>
-                            <span class="flow-cmd">/business-context</span>
+                            <span class="flow-cmd">/problem-based-srs business-context</span>
                         </div>
                         <div class="flow-step reveal" style="--dot-color: var(--step-why)">
                             <div class="flow-dot"></div>
                             <div class="flow-name">Customer Problems</div>
                             <p class="flow-question">What is broken, and for whom?</p>
                             <p class="flow-desc">Identify and classify problems by severity: Obligation (must solve), Expectation (should solve), Hope (could solve).</p>
-                            <span class="flow-cmd">/customer-problems</span>
+                            <span class="flow-cmd">/problem-based-srs problems</span>
                         </div>
                         <div class="flow-step reveal" style="--dot-color: var(--step-glance)">
                             <div class="flow-dot"></div>
                             <div class="flow-name">Software Glance</div>
                             <p class="flow-question">What might help?</p>
                             <p class="flow-desc">High-level solution sketch. Components, boundaries, interfaces. Shared understanding before details.</p>
-                            <span class="flow-cmd">/software-glance</span>
+                            <span class="flow-cmd">/problem-based-srs software-glance</span>
                         </div>
                         <div class="flow-step reveal" style="--dot-color: var(--step-what)">
                             <div class="flow-dot"></div>
                             <div class="flow-name">Customer Needs</div>
                             <p class="flow-question">What must the system deliver?</p>
                             <p class="flow-desc">Required outcomes per problem. Measurable, testable, scoped. Each need traces to a specific problem.</p>
-                            <span class="flow-cmd">/customer-needs</span>
+                            <span class="flow-cmd">/problem-based-srs needs</span>
                         </div>
                         <div class="flow-step reveal" style="--dot-color: var(--step-vision)">
                             <div class="flow-dot"></div>
                             <div class="flow-name">Software Vision</div>
                             <p class="flow-question">How will it work?</p>
                             <p class="flow-desc">Architecture, technical approach, constraints, stakeholder alignment. The technical roadmap.</p>
-                            <span class="flow-cmd">/software-vision</span>
+                            <span class="flow-cmd">/problem-based-srs software-vision</span>
                         </div>
                         <div class="flow-step reveal" style="--dot-color: var(--step-how)">
                             <div class="flow-dot"></div>
                             <div class="flow-name">Functional Requirements</div>
                             <p class="flow-question">What are the details?</p>
                             <p class="flow-desc">Detailed, testable behavior specifications. Each requirement traces backward to a need and a problem.</p>
-                            <span class="flow-cmd">/functional-requirements</span>
+                            <span class="flow-cmd">/problem-based-srs functional-requirements</span>
                         </div>
                     </div>
 
                     <figure class="method-aside reveal">
-                        <div class="cli-sim" role="img" aria-label="A Copilot CLI session calling each Problem-Based SRS skill in order: business-context, customer-problems, software-glance, customer-needs, software-vision, and functional-requirements, ending with 100% traceability from FR back to CN back to CP.">
+                        <div class="cli-sim" role="img" aria-label="A Copilot CLI session calling the Problem-Based SRS command for each step in order: business-context, problems, software-glance, needs, software-vision, and functional-requirements, ending with 100% traceability from FR back to CN back to CP.">
                             <div class="cli-bar">
                                 <div class="cli-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                                 <span class="cli-title">copilot &middot; problem-based-srs</span>
                             </div>
                             <div class="cli-body" aria-hidden="true">
                                 <div class="cli-line cli-you" style="--i:0"><span class="cli-caret">&rsaquo;</span> Turn the outage postmortem into a spec</div>
-                                <div class="cli-line" style="--i:1"><span class="cli-cmd" style="--c: var(--step-context)">/business-context</span><span class="cli-out">project identity, constraints, success criteria</span></div>
-                                <div class="cli-line" style="--i:2"><span class="cli-cmd" style="--c: var(--step-why)">/customer-problems</span><span class="cli-out">CP&#8209;1&#8230;CP&#8209;5, classified by severity</span></div>
-                                <div class="cli-line" style="--i:3"><span class="cli-cmd" style="--c: var(--step-glance)">/software-glance</span><span class="cli-out">high-level solution sketch</span></div>
-                                <div class="cli-line" style="--i:4"><span class="cli-cmd" style="--c: var(--step-what)">/customer-needs</span><span class="cli-out">each CN traces to a CP</span></div>
-                                <div class="cli-line" style="--i:5"><span class="cli-cmd" style="--c: var(--step-vision)">/software-vision</span><span class="cli-out">architecture and approach</span></div>
-                                <div class="cli-line" style="--i:6"><span class="cli-cmd" style="--c: var(--step-how)">/functional-requirements</span><span class="cli-out">each FR traces to a CN and a CP</span></div>
+                                <div class="cli-line" style="--i:1"><span class="cli-cmd" style="--c: var(--step-context)">/problem-based-srs business-context</span><span class="cli-out">project identity, constraints, success criteria</span></div>
+                                <div class="cli-line" style="--i:2"><span class="cli-cmd" style="--c: var(--step-why)">/problem-based-srs problems</span><span class="cli-out">CP&#8209;1&#8230;CP&#8209;5, classified by severity</span></div>
+                                <div class="cli-line" style="--i:3"><span class="cli-cmd" style="--c: var(--step-glance)">/problem-based-srs software-glance</span><span class="cli-out">high-level solution sketch</span></div>
+                                <div class="cli-line" style="--i:4"><span class="cli-cmd" style="--c: var(--step-what)">/problem-based-srs needs</span><span class="cli-out">each CN traces to a CP</span></div>
+                                <div class="cli-line" style="--i:5"><span class="cli-cmd" style="--c: var(--step-vision)">/problem-based-srs software-vision</span><span class="cli-out">architecture and approach</span></div>
+                                <div class="cli-line" style="--i:6"><span class="cli-cmd" style="--c: var(--step-how)">/problem-based-srs functional-requirements</span><span class="cli-out">each FR traces to a CN and a CP</span></div>
                                 <div class="cli-line cli-done" style="--i:7"><span class="cli-check">&#10003;</span> 100% traceability &middot; FR &larr; CN &larr; CP<span class="cli-cursor"></span></div>
                             </div>
                         </div>
-                        <figcaption>Each step runs as a skill your assistant calls in the terminal.</figcaption>
+                        <figcaption>Each step runs as an action of the single <code>/problem-based-srs</code> command your assistant calls in the terminal.</figcaption>
                     </figure>
                 </div>
 
@@ -297,7 +297,8 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
         <!-- Commands -->
         <section id="commands" class="section">
             <div class="wrap">
-                <h2 class="reveal">Commands</h2>
+                <h2 class="reveal">Command &amp; actions</h2>
+                <p class="reveal" style="color: var(--muted); margin-bottom: var(--space-md);">One command, <code>/problem-based-srs</code>, drives the whole methodology. Pass an action to run a single step, or run it with no action for the full walkthrough.</p>
                 <div class="table-scroll reveal">
                 <table class="cmd-table">
                     <thead>
@@ -314,42 +315,42 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
                             <td style="color: var(--muted);">All</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/business-context</td>
+                            <td class="cmd-name">/problem-based-srs business-context</td>
                             <td>Project identity and constraints</td>
                             <td style="color: var(--muted);">0</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/customer-problems</td>
+                            <td class="cmd-name">/problem-based-srs problems</td>
                             <td>Identify and classify problems</td>
                             <td style="color: var(--muted);">1</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/software-glance</td>
+                            <td class="cmd-name">/problem-based-srs software-glance</td>
                             <td>Sketch solution approach</td>
                             <td style="color: var(--muted);">2</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/customer-needs</td>
+                            <td class="cmd-name">/problem-based-srs needs</td>
                             <td>Define required outcomes</td>
                             <td style="color: var(--muted);">3</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/software-vision</td>
+                            <td class="cmd-name">/problem-based-srs software-vision</td>
                             <td>Architecture and scope</td>
                             <td style="color: var(--muted);">4</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/functional-requirements</td>
+                            <td class="cmd-name">/problem-based-srs functional-requirements</td>
                             <td>Detailed, testable requirements</td>
                             <td style="color: var(--muted);">5</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/zigzag-validator</td>
+                            <td class="cmd-name">/problem-based-srs validate</td>
                             <td>Verify traceability across artifacts</td>
                             <td style="color: var(--muted);">Validate</td>
                         </tr>
                         <tr>
-                            <td class="cmd-name">/complexity-analysis</td>
+                            <td class="cmd-name">/problem-based-srs complexity</td>
                             <td>Axiomatic Design quality analysis</td>
                             <td style="color: var(--muted);">Optional</td>
                         </tr>

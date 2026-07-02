@@ -252,7 +252,7 @@ Use **C** (Complete) and **P** (Partial) markers to indicate how well each eleme
 ### Uncovered Customer Problems
 | CP | Statement | Suggested Action |
 |----|-----------|------------------|
-| CP.3 | [statement] | Generate CN using customer-needs skill |
+| CP.3 | [statement] | Generate CN using /problem-based-srs needs |
 
 ### Orphan Items
 | Item | Type | Issue | Suggested Action |
