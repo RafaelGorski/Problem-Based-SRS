@@ -344,6 +344,28 @@ function skillCommand(skill) {
 }
 
 function buildActionPrompt(action) {
+    // "Implement" is not a methodology skill — it asks the agent to turn a
+    // fully-specified requirement into real code, so it gets its own prompt
+    // instead of a skill slash-command.
+    if (action.action === "implement") {
+        const kind = action.nodeType === "nfr" ? "Non-Functional Requirement" : "Functional Requirement";
+        return [
+            `## Problem-Based SRS — implement ${action.nodeId} in code`,
+            "",
+            `Turn the following ${kind} into production-ready code in this repository.`,
+            "",
+            `**Target requirement:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
+            `**Request:** ${action.context}`,
+            "",
+            "Steps:",
+            "1. Read the specification in the `.spec/` folder to understand this requirement in full, including its parent Customer Needs and Customer Problems.",
+            "2. Locate the relevant part of the codebase (or create it) and write real, working code that satisfies the requirement.",
+            `3. Preserve traceability: reference ${action.nodeId} in code comments or the commit message so the implementation maps back to the spec.`,
+            "4. Follow the repository's existing conventions, and add or update tests where the project already has them.",
+            "",
+            "This is an implementation task, not a requirements-authoring task — do not rewrite the specification files. When done, briefly summarize what you built and where.",
+        ].join("\n");
+    }
     const command = skillCommand(action.skill);
     return [
         `## Problem-Based SRS — run the ${command} skill`,

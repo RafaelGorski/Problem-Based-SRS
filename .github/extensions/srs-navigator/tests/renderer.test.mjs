@@ -194,6 +194,92 @@ describe("renderGraphHtml", () => {
   });
 });
 
+describe("renderGraphHtml - Hierarchical List View", () => {
+  const sampleGraph = {
+    nodes: [
+      { id: "CP-1", type: "problem", label: "Test Problem", data: { description: "Desc" } },
+      { id: "CN-1", type: "need", label: "Test Need", data: { description: "Need desc" } },
+      { id: "FR-1", type: "fr", label: "Test FR", data: { description: "FR desc" }, complexity: 3 }
+    ],
+    links: [
+      { source: "CP-1", target: "CN-1", type: "addresses" },
+      { source: "CN-1", target: "FR-1", type: "implements" }
+    ]
+  };
+
+  it("wraps graph + list + detail panel in a mode-scoped view wrapper", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('id="view-wrap"'));
+    assert.ok(html.includes('class="view-wrap mode-graph"'));
+    assert.ok(html.includes('id="list-view"'));
+    assert.ok(html.includes('id="list-inner"'));
+  });
+
+  it("enables the List toggle button (no longer disabled)", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('id="btn-hierarchy"'));
+    assert.ok(!html.includes('id="btn-hierarchy" disabled'), "List toggle must be enabled");
+    assert.ok(html.includes('aria-pressed'), "toggle exposes pressed state");
+  });
+
+  it("builds the tree and wires a view toggle", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes("buildTree"));
+    assert.ok(html.includes('function() { setView("list"); }') || html.includes('setView("list")'));
+    assert.ok(html.includes('mode-list'));
+  });
+
+  it("renders a Decompose row action for every node", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('data-act="decompose"'));
+    assert.ok(html.includes("stageComposerAction"));
+  });
+
+  it("renders an Implement row action for requirements only", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('data-act="implement"'));
+    assert.ok(html.includes('is-implement'));
+    // guarded to fr/nfr in the row builder
+    assert.ok(html.includes('node.type === "fr" || node.type === "nfr"'));
+  });
+
+  it("dispatches the implement action bypassing the empty-prompt guard", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes('actionKey !== "implement"'), "empty-prompt guard exempts implement");
+    assert.ok(html.includes('action: actionKey'));
+  });
+
+  it("groups unlinked nodes under an Unlinked section", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes("Unlinked"));
+    assert.ok(html.includes("tree-section-label"));
+  });
+
+  it("shows an empty state that captures the first customer problem", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes("No customer problems yet"));
+    assert.ok(html.includes("establish_context"));
+    assert.ok(html.includes('id="list-empty-form"'));
+  });
+
+  it("exposes setView on the public API", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes("setView"));
+    assert.ok(html.includes("viewMode"));
+  });
+
+  it("guards graph auto-zoom against a hidden (zero-size) container", () => {
+    // When the list view is active the graph is display:none; applying a d3
+    // zoom transform to a 0x0 SVG produces translate(NaN,NaN) console errors.
+    const html = renderGraphHtml(sampleGraph);
+    assert.ok(html.includes("graphVisible"), "auto-zoom is gated on graph visibility");
+    assert.ok(
+      html.includes("firstMatch && searchTerm && graphVisible"),
+      "search auto-zoom requires a visible graph"
+    );
+  });
+});
+
 describe("renderGraphHtml - Hardening", () => {
   it("handles empty nodes array gracefully", () => {
     const html = renderGraphHtml({ nodes: [], links: [] });
