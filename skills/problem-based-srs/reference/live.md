@@ -1,13 +1,3 @@
----
-name: live
-description: Launches the SRS Navigator canvas inside the GitHub Copilot app to visualize a Problem-Based SRS specification as an interactive graph of Customer Problems, Customer Needs, and Functional/Non-Functional Requirements. Use when the user runs /live or asks to open, view, visualize, navigate, or render the specification as a live graph in the side panel.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.0"
-  methodology: problem-based-srs
----
-
 # Live — Launch the SRS Navigator Canvas
 
 Open the **SRS Navigator** canvas extension in the GitHub Copilot app side panel and

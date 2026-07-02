@@ -61,18 +61,23 @@ const bundledSkillsDir = resolve(__dirname, "skills");
 
 // Canonical methodology skills. The navigator lives in the Problem-Based-SRS
 // monorepo at <repoRoot>/.github/extensions/srs-navigator/, so the single source
-// of truth is <repoRoot>/skills/<slug>/SKILL.md. We read those live so the canvas
-// always reflects the repo's skills without any copy/sync step. When installed
-// standalone (e.g. via gist into another project) this path won't resolve and we
-// fall back to the bundled flat copies above.
-const repoSkillsDir = resolve(__dirname, "..", "..", "..", "skills");
+// of truth is the consolidated skill at <repoRoot>/skills/problem-based-srs/:
+// its SKILL.md is the orchestrator and reference/<action>.md holds each step. We
+// read those live so the canvas always reflects the repo's skills without any
+// copy/sync step. When installed standalone (e.g. via gist into another project)
+// these paths won't resolve and we fall back to the bundled flat copies above.
+const repoSkillDir = resolve(__dirname, "..", "..", "..", "skills", "problem-based-srs");
+const repoReferenceDir = resolve(repoSkillDir, "reference");
 
 // Load a methodology skill's markdown by its bundled file name (e.g.
-// "business-context.md"). Prefers the canonical <repoRoot>/skills/<slug>/SKILL.md
-// and falls back to the bundled flat file for standalone installs.
+// "business-context.md"). Prefers the canonical consolidated skill —
+// skills/problem-based-srs/SKILL.md for the full orchestrator
+// ("problem-based-srs.md") and skills/problem-based-srs/reference/<action>.md for
+// each step — and falls back to the bundled flat file for standalone installs.
 async function loadSkillContentByFile(file) {
-    const slug = file.replace(/\.md$/i, "");
-    const canonical = resolve(repoSkillsDir, slug, "SKILL.md");
+    const canonical = file === "problem-based-srs.md"
+        ? resolve(repoSkillDir, "SKILL.md")
+        : resolve(repoReferenceDir, file);
     try {
         return await readFile(canonical, "utf-8");
     } catch {
@@ -92,13 +97,13 @@ const derivedWorkspacePath = isProjectExtension ? resolve(__dirname, "..", "..",
 // Each action maps to the canonical skill markdown that backs it.
 const ACTIONS = [
     { action: "business-context", file: "business-context.md" },
-    { action: "problems", file: "customer-problems.md" },
+    { action: "problems", file: "problems.md" },
     { action: "software-glance", file: "software-glance.md" },
-    { action: "needs", file: "customer-needs.md" },
+    { action: "needs", file: "needs.md" },
     { action: "software-vision", file: "software-vision.md" },
     { action: "functional-requirements", file: "functional-requirements.md" },
-    { action: "validate", file: "zigzag-validator.md" },
-    { action: "complexity", file: "complexity-analysis.md" },
+    { action: "validate", file: "validate.md" },
+    { action: "complexity", file: "complexity.md" },
     { action: "full", file: "problem-based-srs.md" },
 ];
 

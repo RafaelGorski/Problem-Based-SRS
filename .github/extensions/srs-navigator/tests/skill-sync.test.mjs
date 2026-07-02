@@ -1,5 +1,5 @@
 // Unit tests for the skill-sync module: copying the canonical methodology skill
-// markdown from this monorepo's skills/<slug>/SKILL.md into the bundled copies.
+// markdown from this monorepo's skills/problem-based-srs/ into the bundled copies.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { isValidSkillContent, syncSkillsLocal, buildLocalSkillSourcePath } from "../lib/skill-sync.mjs";
@@ -31,30 +31,34 @@ describe("isValidSkillContent", () => {
 });
 
 describe("buildLocalSkillSourcePath", () => {
-  it("maps a flat file to skills/<slug>/SKILL.md under the repo root", () => {
+  it("maps a reference action file to skills/problem-based-srs/reference/<file>", () => {
     const p = buildLocalSkillSourcePath("business-context.md", "/repo");
-    assert.match(p.replace(/\\/g, "/"), /\/repo\/skills\/business-context\/SKILL\.md$/);
+    assert.match(p.replace(/\\/g, "/"), /\/repo\/skills\/problem-based-srs\/reference\/business-context\.md$/);
+  });
+  it("maps the orchestrator to skills/problem-based-srs/SKILL.md", () => {
+    const p = buildLocalSkillSourcePath("problem-based-srs.md", "/repo");
+    assert.match(p.replace(/\\/g, "/"), /\/repo\/skills\/problem-based-srs\/SKILL\.md$/);
   });
 });
 
 describe("syncSkillsLocal", () => {
-  it("copies each canonical SKILL.md into skillsDir", async () => {
+  it("copies each canonical source into skillsDir", async () => {
     const writes = [];
     const reads = [];
     const result = await syncSkillsLocal({
-      files: ["business-context.md", "zigzag-validator.md"],
+      files: ["business-context.md", "validate.md"],
       skillsDir: "/skills",
       repoRoot: "/repo",
       readFileImpl: async (path) => { reads.push(path); return VALID_SKILL; },
       writeFileImpl: async (path, content) => { writes.push({ path, content }); },
     });
 
-    assert.deepEqual(result.updated, ["business-context.md", "zigzag-validator.md"]);
+    assert.deepEqual(result.updated, ["business-context.md", "validate.md"]);
     assert.equal(result.failed.length, 0);
     assert.equal(result.source, "local");
     assert.equal(reads.length, 2);
     assert.equal(writes.length, 2);
-    assert.match(reads[0].replace(/\\/g, "/"), /\/repo\/skills\/business-context\/SKILL\.md$/);
+    assert.match(reads[0].replace(/\\/g, "/"), /\/repo\/skills\/problem-based-srs\/reference\/business-context\.md$/);
     assert.ok(writes[0].path.includes("business-context.md"));
     assert.equal(writes[0].content, VALID_SKILL);
   });

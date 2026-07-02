@@ -1,14 +1,3 @@
----
-name: business-context
-description: Establish structured business context and project principles before problem discovery. Use as Step 0 of Problem-Based SRS to capture project identity, business principles, stakeholders, domain boundaries, and success criteria that feed into Customer Problems identification.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.0"
-  methodology: problem-based-srs
-  step: 0
----
-
 # Business Context (BC)
 
 > **Step 0** of the Problem-Based SRS methodology

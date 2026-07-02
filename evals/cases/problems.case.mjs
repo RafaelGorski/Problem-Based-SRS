@@ -6,8 +6,8 @@ import { patternCheck, absenceCheck, check } from "../lib/graders.mjs";
 import { buildExecutionPrompt, readFixture } from "./_shared.mjs";
 
 export default {
-  name: "customer-problems",
-  skill: "customer-problems",
+  name: "problems",
+  skill: "problems",
   fixture: "relaydesk-brief.md",
   threshold: 0.75,
 

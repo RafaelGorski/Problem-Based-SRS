@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Consolidated the methodology into a single skill folder.** The 9 previously isolated
+  `skills/<slug>/SKILL.md` folders are collapsed into one skill at `skills/problem-based-srs/`:
+  the `SKILL.md` orchestrator plus one plain-markdown file per action under
+  `reference/<action>.md` (filename == action), mirroring the pbakaus/impeccable layout.
+  `/problem-based-srs` is now the single main skill; `SKILL.md` routes each action to its
+  `reference/<action>.md`. Action files carry no YAML frontmatter. Renamed actions:
+  `customer-problems`→`problems`, `customer-needs`→`needs`, `zigzag-validator`→`validate`,
+  `complexity-analysis`→`complexity`. The canvas extension's skill-sync, bundled copies,
+  eval loaders/tests, and docs were updated to match; skill history is preserved via `git mv`.
+
 ## [2.4] - 2026-07-02
 
 ### Added

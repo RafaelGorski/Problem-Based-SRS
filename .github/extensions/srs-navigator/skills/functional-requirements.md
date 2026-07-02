@@ -1,14 +1,3 @@
----
-name: functional-requirements
-description: Generate Functional Requirements (FR) and Non-Functional Requirements (NFR) from Customer Needs and Software Vision. Creates individual requirement files with traceability. Step 5 of Problem-Based SRS methodology.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
-  step: 5
----
-
 # Functional Requirements (FR) & Non-Functional Requirements (NFR)
 
 > **Step 5 of 5** in Problem-Based SRS methodology  
@@ -308,7 +297,7 @@ The [System] shall [quality attribute] [measurable target] [condition].
 - One CN typically requires MULTIPLE FRs
 - Every CN MUST be addressed by at least one FR
 
-## Quality Rules (per [ISO/IEC/IEEE 29148:2018](../../docs/references/iso-iec-ieee-29148-2018.md))
+## Quality Rules (per [ISO/IEC/IEEE 29148:2018](../../../docs/references/iso-iec-ieee-29148-2018.md))
 
 - **Complete**: All customer needs MUST be met by requirements
 - **Correct**: All requirements MUST meet some customer need

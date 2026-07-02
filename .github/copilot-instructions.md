@@ -35,16 +35,17 @@ When analyzing or working with this repository, **use the Problem-Based SRS meth
 
 **Load and follow the methodology from these skills:**
 
-| Step | Skill |
-|------|-------|
-| 0. Business Context (CONTEXT) | `skills/business-context/SKILL.md` |
-| 1. Customer Problems (WHY) | `skills/customer-problems/SKILL.md` |
-| 2. Software Glance | `skills/software-glance/SKILL.md` |
-| 3. Customer Needs (WHAT) | `skills/customer-needs/SKILL.md` |
-| 4. Software Vision | `skills/software-vision/SKILL.md` |
-| 5. Functional Requirements (HOW) | `skills/functional-requirements/SKILL.md` |
-| Validation | `skills/zigzag-validator/SKILL.md` |
-| Complexity (Optional) | `skills/complexity-analysis/SKILL.md` |
+| Step | Action file |
+|------|-------------|
+| 0. Business Context (CONTEXT) | `skills/problem-based-srs/reference/business-context.md` |
+| 1. Customer Problems (WHY) | `skills/problem-based-srs/reference/problems.md` |
+| 2. Software Glance | `skills/problem-based-srs/reference/software-glance.md` |
+| 3. Customer Needs (WHAT) | `skills/problem-based-srs/reference/needs.md` |
+| 4. Software Vision | `skills/problem-based-srs/reference/software-vision.md` |
+| 5. Functional Requirements (HOW) | `skills/problem-based-srs/reference/functional-requirements.md` |
+| Validation | `skills/problem-based-srs/reference/validate.md` |
+| Complexity (Optional) | `skills/problem-based-srs/reference/complexity.md` |
+| Live canvas | `skills/problem-based-srs/reference/live.md` |
 | Orchestrator | `skills/problem-based-srs/SKILL.md` |
 | Agent | `agents/problem-based-srs/AGENT.md` |
 
@@ -153,18 +154,19 @@ Problem-Based-SRS/
 │   └── problem-based-srs/       # Agent orchestrator
 │       └── AGENT.md
 ├── skills/
-│   ├── problem-based-srs/       # Main skill for SRS methodology
-│   │   ├── SKILL.md
-│   │   └── references/          # Examples only
-│   ├── business-context/        # Step 0: Business context and principles
-│   ├── customer-problems/       # Step 1: WHY
-│   ├── software-glance/         # Step 2: High-level view
-│   ├── customer-needs/          # Step 3: WHAT
-│   ├── software-vision/         # Step 4: Architecture
-│   ├── functional-requirements/ # Step 5: HOW
-│   ├── zigzag-validator/        # Traceability validation
-│   ├── complexity-analysis/     # Optional: Axiomatic Design
-│   └── live/                    # Launch the SRS Navigator canvas (UX)
+│   └── problem-based-srs/       # The single methodology skill
+│       ├── SKILL.md             # Orchestrator: /problem-based-srs <action>
+│       └── reference/           # One file per action (filename == action)
+│           ├── business-context.md        # Step 0: Business context and principles
+│           ├── problems.md                 # Step 1: WHY (customer problems)
+│           ├── software-glance.md          # Step 2: High-level view
+│           ├── needs.md                    # Step 3: WHAT (customer needs)
+│           ├── software-vision.md          # Step 4: Architecture
+│           ├── functional-requirements.md  # Step 5: HOW
+│           ├── validate.md                 # Traceability validation (ZigZag)
+│           ├── complexity.md               # Optional: Axiomatic Design
+│           ├── live.md                     # Launch the SRS Navigator canvas (UX)
+│           └── {crm,microer}-example.md    # Case study walkthroughs
 ├── .github/extensions/
 │   └── srs-navigator/           # Canvas extension (graph UX) + bundled skills
 │       ├── extension.mjs        # Canvas + 9 methodology tools
@@ -189,7 +191,8 @@ Problem-Based-SRS/
 
 This repository is maintained along **two complementary tracks**:
 
-1. **Agent-native skills** (the methodology). Canonical skills live in `skills/<slug>/SKILL.md`.
+1. **Agent-native skills** (the methodology). The canonical skill lives in
+   `skills/problem-based-srs/` (`SKILL.md` orchestrator + `reference/<action>.md`).
    Validated/packaged by `scripts/build-plugin.py` and released via
    `.github/workflows/create-release.yml` (tag `vX.Y`).
 2. **The SRS Navigator canvas app** (the UX) in `.github/extensions/srs-navigator/`.
@@ -197,25 +200,28 @@ This repository is maintained along **two complementary tracks**:
    `.github/workflows/release-canvas.yml` (tag `vX.Y.Z` via `scripts/bump-version.mjs`).
 
 **Bridge — skill sync:** the canvas app's bundled `skills/*.md` are **generated** from
-the canonical `skills/<slug>/SKILL.md`. Never hand-edit the bundled flat files; edit the
-canonical skill, then regenerate:
+the canonical single skill at `skills/problem-based-srs/` (its `SKILL.md` orchestrator and
+`reference/<action>.md` files). Never hand-edit the bundled flat files; edit the canonical
+skill, then regenerate:
 
 ```bash
 node .github/extensions/srs-navigator/scripts/sync-skills.mjs   # local copy from skills/
 ```
 
-In this monorepo it copies straight from `skills/` on disk — the single source of truth.
-At runtime the extension reads the canonical `skills/<slug>/SKILL.md` directly (falling
-back to the bundled flat copies only for standalone installs outside the monorepo), so a
-skill is edited **once** and both tracks stay in sync.
-The `/live` skill (`skills/live/`) is the entry point that opens the `srs-navigator`
-canvas inside the GitHub Copilot app.
+In this monorepo it copies straight from `skills/problem-based-srs/` on disk — the single
+source of truth. At runtime the extension reads the canonical `SKILL.md` /
+`reference/<action>.md` directly (falling back to the bundled flat copies only for
+standalone installs outside the monorepo), so a skill is edited **once** and both tracks
+stay in sync.
+The `live` action (`skills/problem-based-srs/reference/live.md`) is the entry point that
+opens the `srs-navigator` canvas inside the GitHub Copilot app.
 
 ### Skills Development (AgentSkills Format)
-- Skills are located in the `skills/` directory
-- Each skill has a `SKILL.md` file with YAML frontmatter (name, description, license)
+- The methodology lives in a single skill directory: `skills/problem-based-srs/`
+- `SKILL.md` is the orchestrator (YAML frontmatter: name, description, license); each
+  action is a plain-markdown file at `reference/<action>.md` (filename == action name)
 - Description field is critical - it determines when the skill triggers
-- Keep SKILL.md content under 500 lines (use references/ for detailed docs)
+- Keep SKILL.md content under 500 lines (use `reference/` for detailed docs)
 - Follow the AgentSkills specification: https://agentskills.io/specification
 - Test skills by using them in practice
 - Focus on guiding users through problem identification before solution design
@@ -232,8 +238,8 @@ canvas inside the GitHub Copilot app.
 - **`.github/copilot-instructions.md`**: Internal development instructions for AI agents working on this repository. All internal procedures (release process, development workflows, etc.) belong here.
 - **`.claude-plugin/`**: Plugin manifest (plugin.json) defining plugin metadata
 - **`skills/`**: AgentSkills (Claude Code, Claude.ai, GitHub Copilot)
-  - Each skill is a self-contained directory with SKILL.md
-  - Can include optional subdirectories: scripts/, references/, assets/
+  - A single self-contained skill directory: `skills/problem-based-srs/`
+  - `SKILL.md` orchestrator + `reference/<action>.md` action files (filename == action)
 - **`hooks/`**: Hook configurations for event handlers (hooks.json)
 - **`settings.json`**: Default plugin settings
 - **`docs/`**: Documentation, research papers, methodology guides, and **all skill-generated helper files** (e.g., PRODUCT.md, DESIGN.md). Any skill or agent that creates auxiliary files (brand identity, design systems, style guides, etc.) MUST place them in `docs/`, never in the repository root.

@@ -1,14 +1,3 @@
----
-name: customer-problems
-description: Identify and document Customer Problems (CP) from business context. Use when starting requirements engineering or when stakeholders describe solutions instead of problems. Step 1 of Problem-Based SRS methodology.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
-  step: 1
----
-
 # Customer Problems (CP)
 
 > **Step 1** of the Problem-Based SRS methodology  

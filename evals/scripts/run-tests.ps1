@@ -4,7 +4,7 @@
 #   pwsh evals/scripts/run-tests.ps1 -File skills-static.test.mjs
 #
 # These cover the Copilot SDK wrapper, the SKILL.md loader/graders, and the
-# static skill evals over every skills/<slug>/SKILL.md. No Copilot login needed.
+# static skill evals over the consolidated skills/problem-based-srs/ skill. No Copilot login needed.
 
 [CmdletBinding()]
 param(
