@@ -367,11 +367,11 @@
         .cli-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.2rem 0.75rem; }
         .cli-you { color: oklch(0.9 0.012 264); margin-bottom: 0.4rem; }
         .cli-caret { color: var(--step-what); font-weight: 700; }
-        .cli-cmd {
-            color: color-mix(in oklab, var(--c) 62%, white);
-            font-weight: 600; min-width: 15.5em;
-        }
+        .cli-cmd { min-width: 15.5em; font-weight: 400; }
         .cli-cmd::before { content: '↳ '; color: oklch(0.55 0.015 264); font-weight: 400; }
+        /* One command, many actions: the command recedes, the action carries the color. */
+        .cli-base { color: oklch(0.62 0.015 264); }
+        .cli-action { color: color-mix(in oklab, var(--c) 66%, white); font-weight: 600; }
         .cli-out { color: oklch(0.68 0.015 264); }
         .cli-done { margin-top: 0.5rem; color: var(--step-vision); font-weight: 600; }
         .cli-check { color: var(--step-vision); font-weight: 700; }
