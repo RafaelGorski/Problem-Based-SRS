@@ -269,6 +269,23 @@
             padding: var(--space-sm) var(--space-md); border-radius: 8px;
             display: block; margin: var(--space-md) 0;
         }
+        .problem-grid {
+            display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+            gap: clamp(1.5rem, 1rem + 3vw, 3.5rem); align-items: center;
+        }
+        .problem-copy .problem-before:first-child { margin-top: 0; }
+        .problem-figure { margin: 0; position: sticky; top: 2rem; }
+        .problem-figure .app-frame img { background: var(--bg-elevated); }
+        .problem-figure figcaption {
+            margin-top: var(--space-md); color: var(--muted);
+            font-size: var(--text-sm); max-width: 46ch;
+        }
+        .problem-figure figcaption strong { color: var(--cp-bold); font-weight: 700; }
+        @media (max-width: 860px) {
+            .problem-grid { grid-template-columns: 1fr; }
+            .problem-figure { position: static; order: -1; }
+            .problem-copy .problem-before, .problem-copy .problem-after { max-width: none; }
+        }
 
         /* ── Flow (methodology timeline) ── */
         .flow { position: relative; padding-left: 2.5rem; margin: var(--space-xl) 0; }
@@ -312,6 +329,56 @@
         .flow-trace .t-cp { color: var(--cp-bold); }
         .flow-trace .t-cn { color: var(--cn-text); }
         .flow-trace .t-fr { color: var(--primary); }
+
+        /* ── CLI simulation: the assistant calling each skill ── */
+        .cli-sim {
+            border-radius: 12px; overflow: hidden;
+            background: oklch(0.20 0.018 264);
+            border: 1px solid oklch(0.32 0.02 264);
+            box-shadow: 0 2px 4px oklch(0.15 0.02 264 / 0.2),
+                        0 22px 48px oklch(0.20 0.03 264 / 0.28);
+            margin-bottom: var(--space-xl); max-width: 760px;
+        }
+        .cli-bar {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.6rem 0.9rem; background: oklch(0.26 0.018 264);
+            border-bottom: 1px solid oklch(0.34 0.02 264);
+        }
+        .cli-dots { display: flex; gap: 0.4rem; }
+        .cli-dots span { width: 11px; height: 11px; border-radius: 50%; background: oklch(0.42 0.02 264); }
+        .cli-title { font-family: var(--font-mono); font-size: var(--text-xs); color: oklch(0.72 0.015 264); }
+        .cli-body {
+            font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.75;
+            color: oklch(0.86 0.015 264); padding: var(--space-md) var(--space-lg) var(--space-lg);
+        }
+        .cli-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.2rem 0.75rem; }
+        .cli-you { color: oklch(0.9 0.012 264); margin-bottom: 0.4rem; }
+        .cli-caret { color: var(--step-what); font-weight: 700; }
+        .cli-cmd {
+            color: color-mix(in oklab, var(--c) 62%, white);
+            font-weight: 600; min-width: 15.5em;
+        }
+        .cli-cmd::before { content: '↳ '; color: oklch(0.55 0.015 264); font-weight: 400; }
+        .cli-out { color: oklch(0.68 0.015 264); }
+        .cli-done { margin-top: 0.5rem; color: var(--step-vision); font-weight: 600; }
+        .cli-check { color: var(--step-vision); font-weight: 700; }
+        .cli-cursor {
+            display: inline-block; width: 0.55em; height: 1.05em; margin-left: 0.35em;
+            background: oklch(0.82 0.015 264); vertical-align: text-bottom; border-radius: 1px;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .cli-line { opacity: 0; transform: translateY(6px);
+                animation: cliReveal 13s var(--ease-out-quart) infinite both;
+                animation-delay: calc(0.35s + var(--i) * 0.62s); }
+            .cli-cursor { animation: cliBlink 1.05s steps(1) infinite; }
+        }
+        @keyframes cliReveal {
+            0% { opacity: 0; transform: translateY(6px); }
+            3% { opacity: 1; transform: translateY(0); }
+            88% { opacity: 1; transform: translateY(0); }
+            94%, 100% { opacity: 0; transform: translateY(0); }
+        }
+        @keyframes cliBlink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 
         /* ── Classification ── */
         .class-grid { margin-top: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md); }
