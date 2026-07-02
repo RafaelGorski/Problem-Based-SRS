@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Documentation for Problem-Based SRS: tutorials, core concepts, automation, the SRS Navigator app, and every methodology command.">
+    <meta name="theme-color" content="#f3f6f8">
+    <title>Documentation &middot; Problem-Based SRS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <nav class="site-nav" aria-label="Primary">
+        <div class="wrap">
+            <div class="site-nav-id">
+                <a href="index.html" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.4, view releases">v2.4</a>
+            </div>
+            <ul class="site-nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#tutorials">Tutorials</a></li>
+                <li><a href="#concepts">Concepts</a></li>
+                <li><a href="#automation">Automation</a></li>
+                <li><a href="#navigator">The app</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li>
+                    <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="gh-link" target="_blank" rel="noopener" aria-label="View on GitHub">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                        GitHub
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="docs-grid">
+        <!-- Sidebar -->
+        <aside class="docs-sidebar" data-open="false">
+            <button type="button" class="docs-sidebar-toggle" aria-expanded="false" aria-controls="docs-nav">
+                Browse docs
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <nav class="docs-nav" id="docs-nav" aria-label="Documentation">
+                <p class="docs-nav-label">Learn</p>
+                <p class="docs-nav-cat">Tutorials</p>
+                <ul>
+                    <li><a href="#getting-started">Getting started</a></li>
+                    <li><a href="#first-session">Your first session</a></li>
+                    <li><a href="#from-codebase">Learn from your codebase</a></li>
+                </ul>
+
+                <p class="docs-nav-label">Reference</p>
+                <p class="docs-nav-cat">Core concepts</p>
+                <ul>
+                    <li><a href="#concept-chain">The traceability chain</a></li>
+                    <li><a href="#concept-spec">The .spec folder</a></li>
+                    <li><a href="#concept-naming">Naming conventions</a></li>
+                    <li><a href="#concept-severity">Problem severity</a></li>
+                </ul>
+                <p class="docs-nav-cat">Automation</p>
+                <ul>
+                    <li><a href="#auto-validate">ZigZag validation</a></li>
+                    <li><a href="#auto-release">Build &amp; release</a></li>
+                    <li><a href="#auto-hooks">Hooks &amp; settings</a></li>
+                </ul>
+
+                <p class="docs-nav-label">Features</p>
+                <p class="docs-nav-cat">The SRS Navigator</p>
+                <ul>
+                    <li><a href="#nav-graph">The graph</a></li>
+                    <li><a href="#nav-action-bar">Action bar</a></li>
+                    <li><a href="#nav-refine">Refine with the agent</a></li>
+                    <li><a href="#nav-health">Health &amp; gaps</a></li>
+                    <li><a href="#nav-launch">Launch with /live</a></li>
+                </ul>
+                <p class="docs-nav-cat">Methodology skills</p>
+                <ul>
+                    <li><a href="#skill-context">business-context</a></li>
+                    <li><a href="#skill-problems">problems</a></li>
+                    <li><a href="#skill-glance">software-glance</a></li>
+                    <li><a href="#skill-needs">needs</a></li>
+                    <li><a href="#skill-vision">software-vision</a></li>
+                    <li><a href="#skill-fr">functional-requirements</a></li>
+                    <li><a href="#skill-validate">validate</a></li>
+                    <li><a href="#skill-complexity">complexity</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main -->
+        <main class="docs-main" id="main">
+            <header class="docs-intro">
+                <p class="breadcrumb"><a href="index.html">Problem-Based SRS</a><span class="sep" aria-hidden="true">/</span>Documentation</p>
+                <h1 class="docs-title">Everything you can run with <span>Problem-Based SRS</span></h1>
+                <p class="docs-lede">Start a session in minutes, learn the ideas behind the traceability chain, wire it into your pipeline, and browse every command and Navigator feature in one place.</p>
+            </header>
+
+            <!-- Quick start -->
+            <section class="docs-section" id="start" style="border-top: 0; padding-top: var(--space-md);">
+                <h2>Start in three steps</h2>
+                <p class="section-lead">Install the skills into your assistant, run the methodology, then open the result as a graph.</p>
+                <div class="qs-rail">
+                    <div class="qs-step">
+                        <span class="qs-num">01</span>
+                        <span class="qs-label">Install</span>
+                        <code class="qs-cmd">RafaelGorski/Problem-Based-SRS</code>
+                        <span class="qs-line">Ask your assistant to add the skills into <code>.github/skills/</code> (or <code>.claude/skills/</code>).</span>
+                    </div>
+                    <div class="qs-step">
+                        <span class="qs-num">02</span>
+                        <span class="qs-label">Run</span>
+                        <code class="qs-cmd">/problem-based-srs</code>
+                        <span class="qs-line">Describe your situation. The agent walks you from context to requirements.</span>
+                    </div>
+                    <div class="qs-step">
+                        <span class="qs-num">03</span>
+                        <span class="qs-label">Visualize</span>
+                        <code class="qs-cmd">/live</code>
+                        <span class="qs-line">Open the SRS Navigator and explore the spec as a living graph.</span>
+                    </div>
+                </div>
+
+                <p class="section-lead" style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">Or jump straight to the step you need:</p>
+                <div class="doc-chooser">
+                    <a href="#skill-context"><span class="dc-need">Frame the project</span><span class="dc-cmd">/problem-based-srs business-context</span></a>
+                    <a href="#skill-problems"><span class="dc-need">Find the real problems</span><span class="dc-cmd">/problem-based-srs problems</span></a>
+                    <a href="#skill-needs"><span class="dc-need">Turn problems into needs</span><span class="dc-cmd">/problem-based-srs needs</span></a>
+                    <a href="#skill-fr"><span class="dc-need">Write the requirements</span><span class="dc-cmd">/problem-based-srs functional-requirements</span></a>
+                    <a href="#skill-validate"><span class="dc-need">Check the traceability</span><span class="dc-cmd">/problem-based-srs validate</span></a>
+                    <a href="#nav-launch"><span class="dc-need">See it as a graph</span><span class="dc-cmd">/live</span></a>
+                </div>
+            </section>
+
+            <!-- Tutorials -->
+            <section class="docs-section" id="tutorials">
+                <h2>Tutorials</h2>
+                <p class="section-lead">Guided walkthroughs, from a blank project to refining a spec alongside the agent.</p>
+                <div class="tut-list">
+                    <article class="tut reveal" id="getting-started">
+                        <span class="tut-kicker">Tutorial &middot; 5 min</span>
+                        <h3>Getting started</h3>
+                        <p>Install the skills into GitHub Copilot, Claude Code, or Claude.ai, confirm <code>/problem-based-srs</code> is available, and run a single step to see how artifacts land in <code>.spec/</code>.</p>
+                        <a class="tut-more" href="#start">Jump to install <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </article>
+                    <article class="tut reveal" id="first-session">
+                        <span class="tut-kicker">Tutorial &middot; 15 min</span>
+                        <h3>Your first session</h3>
+                        <p>Describe a real situation in one paragraph, then let the agent guide the full sequence: business context, customer problems, a software glance, needs, a software vision, and functional requirements. End with 100% traceability from every requirement back to a problem.</p>
+                        <a class="tut-more" href="#navigator">Then open the Navigator <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </article>
+                    <article class="tut reveal" id="from-codebase">
+                        <span class="tut-kicker">Tutorial &middot; brownfield</span>
+                        <h3>Learn from your codebase</h3>
+                        <p>Inherited a system with no spec? Open the Navigator on an existing project and choose <strong>Learn &amp; Create Spec</strong>. It scans your code, README, and docs, runs the methodology, and drafts problems, needs, and requirements for you to refine.</p>
+                        <a class="tut-more" href="#nav-launch">See how the Navigator drafts it <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Core concepts -->
+            <section class="docs-section" id="concepts">
+                <h2>Core concepts</h2>
+                <p class="section-lead">The three ideas that make a Problem-Based specification hang together.</p>
+                <div class="concept-list">
+                    <div class="concept" id="concept-chain">
+                        <span class="concept-marker" style="--c: var(--step-why)" aria-hidden="true"></span>
+                        <div>
+                            <h3>The traceability chain</h3>
+                            <p>Every artifact answers one question and links to the next. A <strong>Customer Problem</strong> states <em>why</em>, a <strong>Customer Need</strong> states <em>what</em>, and a <strong>Functional Requirement</strong> states <em>how</em>. You can always walk backward from a line of work to the problem that justifies it.</p>
+                            <p class="part-chain" style="margin-top: var(--space-md)" aria-label="Customer Problem to Customer Need to Functional Requirement">
+                                <span class="pc pc-cp">CP</span><span class="pc-arrow" aria-hidden="true">&rarr;</span>
+                                <span class="pc pc-cn">CN</span><span class="pc-arrow" aria-hidden="true">&rarr;</span>
+                                <span class="pc pc-fr">FR</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="concept" id="concept-spec">
+                        <span class="concept-marker" style="--c: var(--step-how)" aria-hidden="true"></span>
+                        <div>
+                            <h3>The <code>.spec</code> folder</h3>
+                            <p>Artifacts are written to a hidden <code>.spec/</code> folder at the project root, so the specification lives beside the code it drives, versioned in git.</p>
+                            <pre><code>.spec/
+&#9500;&#9472; 00-business-context.md
+&#9500;&#9472; 01-customer-problems.md
+&#9500;&#9472; 02-software-glance.md
+&#9500;&#9472; 03-customer-needs.md
+&#9500;&#9472; 04-software-vision.md
+&#9500;&#9472; functional-requirements/
+&#9474;  &#9492;&#9472; FR-001-[short-name].md
+&#9492;&#9472; non-functional-requirements/
+   &#9492;&#9472; NFR-001-[short-name].md</code></pre>
+                        </div>
+                    </div>
+                    <div class="concept" id="concept-naming">
+                        <span class="concept-marker" style="--c: var(--step-what)" aria-hidden="true"></span>
+                        <div>
+                            <h3>Naming conventions</h3>
+                            <p>IDs encode the chain itself, so a requirement's name tells you which need and problem it serves.</p>
+                            <div class="doc-chooser" style="margin-top: var(--space-md)">
+                                <a href="#skill-problems"><span class="dc-need">Customer Problem</span><span class="dc-cmd">CP.01 &middot; CP.01.1</span></a>
+                                <a href="#skill-needs"><span class="dc-need">Customer Need (traces to a CP)</span><span class="dc-cmd">CN.01.1</span></a>
+                                <a href="#skill-fr"><span class="dc-need">Functional Requirement (traces to a CN)</span><span class="dc-cmd">FR.01.1.1</span></a>
+                                <a href="#skill-fr"><span class="dc-need">Non-Functional Requirement</span><span class="dc-cmd">NFR.1.0</span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="concept" id="concept-severity">
+                        <span class="concept-marker" style="--c: var(--step-context)" aria-hidden="true"></span>
+                        <div>
+                            <h3>Problem severity</h3>
+                            <p>Not every problem carries the same weight. Each is classified so priority reflects real impact, not the loudest voice in the room.</p>
+                            <ul class="band-caps" style="margin-top: var(--space-md)">
+                                <li><span class="bc-dot" style="--c: var(--step-why)" aria-hidden="true"></span><span><strong>Obligation</strong> &mdash; must solve. Legal, contractual, or operational failure if unmet. Build first.</span></li>
+                                <li><span class="bc-dot" style="--c: var(--step-how)" aria-hidden="true"></span><span><strong>Expectation</strong> &mdash; should solve. Degraded outcomes if unmet. Core value.</span></li>
+                                <li><span class="bc-dot" style="--c: var(--step-glance)" aria-hidden="true"></span><span><strong>Hope</strong> &mdash; could solve. A missed improvement if unmet. Build last.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Automation -->
+            <section class="docs-section" id="automation">
+                <h2>Automation</h2>
+                <p class="section-lead">Keep the specification honest and shippable without manual bookkeeping.</p>
+                <div class="concept-list">
+                    <div class="concept" id="auto-validate">
+                        <span class="concept-marker" style="--c: var(--step-vision)" aria-hidden="true"></span>
+                        <div>
+                            <h3>ZigZag validation</h3>
+                            <p>Walk the chain in both directions to catch gaps: problems with no need, needs with no requirement, and requirements that trace to nothing. Run it any time the spec changes.</p>
+                            <pre><code>/problem-based-srs validate</code></pre>
+                            <p>The optional <code>complexity</code> pass adds an Axiomatic Design score for independence, completeness, and information content.</p>
+                        </div>
+                    </div>
+                    <div class="concept" id="auto-release">
+                        <span class="concept-marker" style="--c: var(--step-how)" aria-hidden="true"></span>
+                        <div>
+                            <h3>Build &amp; release</h3>
+                            <p>The methodology plugin ships through a single build script that validates the manifest and every skill, then packages a versioned artifact.</p>
+                            <pre><code>python scripts/build-plugin.py build --version X.Y
+git tag vX.Y &amp;&amp; git push origin vX.Y</code></pre>
+                            <p>The SRS Navigator app releases on its own <code>vX.Y.Z</code> track, gated by <code>npm test</code>. The two pipelines never share a tag.</p>
+                        </div>
+                    </div>
+                    <div class="concept" id="auto-hooks">
+                        <span class="concept-marker" style="--c: var(--step-nfr)" aria-hidden="true"></span>
+                        <div>
+                            <h3>Hooks &amp; settings</h3>
+                            <p>Event handlers live in <code>hooks/hooks.json</code> and default plugin behavior in <code>settings.json</code>, so a team can standardize how the methodology runs across projects.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features: The SRS Navigator -->
+            <section class="docs-section" id="navigator">
+                <h2>The SRS Navigator</h2>
+                <p class="section-lead">A GitHub Copilot canvas that renders your <code>.spec/</code> folder as an interactive graph, then lets you decompose and iterate on it beside the agent.</p>
+
+                <!-- Learn & create -->
+                <div class="docs-feature">
+                    <div class="learn-layout">
+                        <div class="learn-copy reveal">
+                            <h3>Open it on a system that already exists</h3>
+                            <p>Launch the Navigator without a spec and it offers to read your current system and draft one. No blank page.</p>
+                            <ol class="learn-steps">
+                                <li><span class="ls-n">1</span> Scan the existing code, README, and documentation</li>
+                                <li><span class="ls-n">2</span> Run the methodology to draft problems, needs, and requirements</li>
+                                <li><span class="ls-n">3</span> Load the result as a graph you refine with the agent</li>
+                            </ol>
+                            <p class="learn-alt">Prefer your own file? <strong>Load</strong> a <code>.spec</code> JSON. Just looking? <strong>Explore the demo</strong>.</p>
+                        </div>
+                        <figure class="learn-media reveal">
+                            <div class="learn-screen" role="img" aria-label="The SRS Navigator start screen with three actions: Learn and Create Spec, Load Specification, and Explore Demo.">
+                                <div class="learn-screen-head">
+                                    <h4>Problem-Based SRS</h4>
+                                    <p>Load or generate a specification to visualize as an interactive graph.</p>
+                                </div>
+                                <div class="learn-actions">
+                                    <div class="learn-action is-primary">
+                                        <span class="la-icon" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,128a8,8,0,0,1-8,8H136v88a8,8,0,0,1-16,0V136H32a8,8,0,0,1,0-16h88V32a8,8,0,0,1,16,0v88h88A8,8,0,0,1,232,128Z"/></svg></span>
+                                        <span class="la-text"><span class="la-label">Learn &amp; Create Spec</span><span class="la-desc">Scan your project and generate a specification</span></span>
+                                    </div>
+                                    <div class="learn-action">
+                                        <span class="la-icon" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"/></svg></span>
+                                        <span class="la-text"><span class="la-label">Load Specification</span><span class="la-desc">Open an existing .spec JSON file from your project</span></span>
+                                    </div>
+                                    <div class="learn-action">
+                                        <span class="la-icon" aria-hidden="true"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,24H72A32,32,0,0,0,40,56V224a8,8,0,0,0,8,8H192a8,8,0,0,0,0-16H56a16,16,0,0,1,16-16H208a8,8,0,0,0,8-8V32A8,8,0,0,0,208,24Zm-8,160H72a31.82,31.82,0,0,0-16,4.29V56A16,16,0,0,1,72,40H200Z"/></svg></span>
+                                        <span class="la-text"><span class="la-label">Explore Demo</span><span class="la-desc">Load the CRM sample specification to explore features</span></span>
+                                    </div>
+                                </div>
+                                <ul class="learn-feats" aria-label="Navigator features">
+                                    <li><span class="lf-dot" style="--c: var(--step-why)" aria-hidden="true"></span>Force-directed graph</li>
+                                    <li><span class="lf-dot" style="--c: var(--step-what)" aria-hidden="true"></span>Problem to requirement tracing</li>
+                                    <li><span class="lf-dot" style="--c: var(--step-how)" aria-hidden="true"></span>Agent-driven generation</li>
+                                </ul>
+                            </div>
+                        </figure>
+                    </div>
+                </div>
+
+                <!-- The graph -->
+                <div class="docs-feature" id="nav-graph">
+                    <div class="feature-block">
+                        <div class="feature-copy reveal">
+                            <span class="feature-eyebrow">The graph</span>
+                            <h2>See every artifact and its links</h2>
+                            <p>The Navigator reads your <code>.spec/</code> folder and draws each artifact as a node in a force-directed graph. Traceability links are dashed; drag to rearrange, scroll to zoom, and search any node by name.</p>
+                            <p class="legend-intro" style="margin-top: var(--space-md)">Every node is color-coded by type:</p>
+                            <ul class="node-legend" aria-label="Node types in the graph">
+                                <li><span class="node-chip" style="--c: var(--step-why)">CP</span> Customer Problem</li>
+                                <li><span class="node-chip" style="--c: var(--step-what)">CN</span> Customer Need</li>
+                                <li><span class="node-chip" style="--c: var(--step-how)">FR</span> Functional Requirement</li>
+                                <li><span class="node-chip" style="--c: var(--step-nfr)">NFR</span> Non-Functional Requirement</li>
+                            </ul>
+                        </div>
+                        <div class="feature-media reveal">
+                            <div class="app-frame">
+                                <div class="app-frame-bar">
+                                    <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                    <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                                </div>
+                                <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy" decoding="async"
+                                     alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action bar -->
+                <div class="docs-feature" id="nav-action-bar">
+                    <div class="feature-block is-reversed">
+                        <div class="feature-copy reveal">
+                            <span class="feature-eyebrow">Action bar</span>
+                            <h2>Derive or decompose, inline</h2>
+                            <p>Hover any node to reveal a floating action bar. Type an instruction, then pick an action: <strong>derive</strong> the next artifact downstream, or <strong>decompose</strong> the node into finer-grained, independently testable sub-items. Each action runs the methodology skill that owns that step.</p>
+                            <ul class="action-map">
+                                <li class="action-row">
+                                    <span class="action-from" style="--c: var(--step-why)">Problem</span>
+                                    <span class="action-to"><span class="action-pill">+CN</span><span class="action-pill is-decompose">+Sub-CP</span></span>
+                                </li>
+                                <li class="action-row">
+                                    <span class="action-from" style="--c: var(--step-what)">Need</span>
+                                    <span class="action-to"><span class="action-pill">+FR</span><span class="action-pill is-decompose">+Sub-CN</span></span>
+                                </li>
+                                <li class="action-row">
+                                    <span class="action-from" style="--c: var(--step-how)">FR</span>
+                                    <span class="action-to"><span class="action-pill">+NFR</span><span class="action-pill is-decompose">+Sub-FR</span></span>
+                                </li>
+                                <li class="action-row">
+                                    <span class="action-from" style="--c: var(--step-nfr)">NFR</span>
+                                    <span class="action-to"><span class="action-pill is-decompose">+Sub-NFR</span></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="feature-media reveal">
+                            <div class="app-frame">
+                                <div class="app-frame-bar">
+                                    <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                    <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                                </div>
+                                <img src="assets/srs-navigator-actionbar.png" width="1440" height="900" loading="lazy" decoding="async"
+                                     alt="The SRS Navigator graph with a Functional Requirement node selected. A floating action bar below it holds a typed decompose instruction and +NFR and +Sub-FR action buttons.">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refine -->
+                <div class="docs-feature" id="nav-refine">
+                    <div class="feature-block">
+                        <div class="feature-copy reveal">
+                            <span class="feature-eyebrow">Refine with the agent</span>
+                            <h2>Iterate on the spec in place</h2>
+                            <p>Triggering an action opens the node's detail panel (description, a complexity score, and its upstream and downstream traceability) next to a live <strong>Agent activity</strong> log. Your request runs through the skill, the spec files are edited, and the graph refreshes on its own.</p>
+                            <div class="flow-trace" style="text-align: left; margin-top: var(--space-lg)">
+                                <span class="t-cp">Hover &amp; describe</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="t-cn">skill runs</span><span class="arrow" aria-hidden="true">&rarr;</span><span class="t-fr">graph refreshes</span>
+                            </div>
+                        </div>
+                        <div class="feature-media reveal">
+                            <div class="app-frame">
+                                <div class="app-frame-bar">
+                                    <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                    <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                                </div>
+                                <img src="assets/srs-navigator-iteration.png" width="1440" height="900" loading="lazy" decoding="async"
+                                     alt="The SRS Navigator with a right-side detail panel open for a Functional Requirement, showing its traceability and an Agent Activity conversation where the user asks to decompose the requirement and the agent is working on it.">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health -->
+                <div class="docs-feature" id="nav-health">
+                    <h3>Spot the gaps in your traceability</h3>
+                    <p class="section-lead">A health bar runs across the top of the graph. Each metric is a filter: click one to isolate the nodes that need attention, so a problem with no need or a need with no requirement never slips through.</p>
+                    <div class="metric-grid reveal">
+                        <div class="metric"><div class="m-count ok">92%</div><div class="m-label">traceability</div></div>
+                        <div class="metric is-alert"><div class="m-count alert">2</div><div class="m-label">orphaned problems</div></div>
+                        <div class="metric is-alert"><div class="m-count alert">1</div><div class="m-label">unmet need</div></div>
+                        <div class="metric"><div class="m-count">0</div><div class="m-label">isolated</div></div>
+                        <div class="metric"><div class="m-count">38</div><div class="m-label">nodes</div></div>
+                        <div class="metric"><div class="m-count">4</div><div class="m-label">need clusters</div></div>
+                    </div>
+                    <p class="section-lead" style="margin-top: var(--space-lg)">Pair the metrics with <strong>search</strong> to jump to any node, and the <strong>hierarchy view</strong> to read the same spec as a nested outline.</p>
+                </div>
+
+                <!-- Launch -->
+                <div class="docs-feature" id="nav-launch">
+                    <h3>Launch it with <code>/live</code></h3>
+                    <p class="section-lead">The Navigator ships inside the Problem-Based SRS plugin. Once installed, open it from any session:</p>
+                    <pre><code>/live</code></pre>
+                    <p class="section-lead">Copilot opens the canvas in the side panel and loads the specification from your project's <code>.spec/</code> folder. No spec yet? Run the methodology first (<code>/problem-based-srs</code>), then open the Navigator to see it take shape.</p>
+                    <div class="app-actions">
+                        <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator" class="btn-primary">Get the Copilot extension</a>
+                        <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/.github/extensions/srs-navigator/README.md" class="btn-ghost" target="_blank" rel="noopener">Extension README</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features: Methodology skills -->
+            <section class="docs-section" id="skills">
+                <h2>Methodology skills</h2>
+                <p class="section-lead">One command, <code>/problem-based-srs</code>, drives every step. Pass an action to run a single skill, or run it bare for the full walkthrough.</p>
+
+                <p class="docs-subhead">Context</p>
+                <div class="feat-list">
+                    <div class="feat-row" id="skill-context">
+                        <span class="feat-dot" style="--c: var(--step-context)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs business-context</span>
+                            <p class="feat-desc">Capture project identity, business principles, stakeholders, and domain boundaries before a single problem is written.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="docs-subhead">Discover</p>
+                <div class="feat-list">
+                    <div class="feat-row" id="skill-problems">
+                        <span class="feat-dot" style="--c: var(--step-why)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs problems</span>
+                            <p class="feat-desc">Surface the real Customer Problems behind a request and classify each by severity: obligation, expectation, or hope.</p>
+                        </div>
+                    </div>
+                    <div class="feat-row" id="skill-glance">
+                        <span class="feat-dot" style="--c: var(--step-glance)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs software-glance</span>
+                            <p class="feat-desc">Sketch the first abstract picture of a solution: components, boundaries, and interfaces, for a shared understanding before details.</p>
+                        </div>
+                    </div>
+                    <div class="feat-row" id="skill-needs">
+                        <span class="feat-dot" style="--c: var(--step-what)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs needs</span>
+                            <p class="feat-desc">Translate each problem into the Customer Needs that state what the software must deliver. Every need traces to a problem.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="docs-subhead">Specify</p>
+                <div class="feat-list">
+                    <div class="feat-row" id="skill-vision">
+                        <span class="feat-dot" style="--c: var(--step-vision)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs software-vision</span>
+                            <p class="feat-desc">Turn the glance and needs into positioning, stakeholders, features, and architecture: the technical roadmap.</p>
+                        </div>
+                    </div>
+                    <div class="feat-row" id="skill-fr">
+                        <span class="feat-dot" style="--c: var(--step-how)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs functional-requirements</span>
+                            <p class="feat-desc">Derive detailed, testable Functional and Non-Functional Requirements, each traced backward to a need and a problem.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="docs-subhead">Validate</p>
+                <div class="feat-list">
+                    <div class="feat-row" id="skill-validate">
+                        <span class="feat-dot" style="--c: var(--step-vision)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs validate</span>
+                            <p class="feat-desc">Walk the CP &rarr; CN &rarr; FR chain to find orphaned problems, unmet needs, and untraceable requirements.</p>
+                        </div>
+                    </div>
+                    <div class="feat-row" id="skill-complexity">
+                        <span class="feat-dot" style="--c: var(--step-nfr)" aria-hidden="true"></span>
+                        <div class="feat-body">
+                            <span class="feat-cmd">/problem-based-srs complexity</span>
+                            <p class="feat-desc">Optional Axiomatic Design pass: score independence, completeness, and information content of the specification.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="section-lead" style="margin-top: var(--space-xl); font-size: var(--text-sm);">
+                    Works with <a href="https://agentskills.io">AgentSkills</a>-compatible tools: GitHub Copilot, Claude Code, Claude.ai, Gemini CLI, and others.
+                </p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer CTA -->
+    <div class="footer-cta">
+        <div class="wrap">
+            <p class="cta-chain reveal" role="img" aria-label="Customer Problem to Customer Need to Functional Requirement">
+                <span class="chain-cp">CP</span><span class="chain-arrow" aria-hidden="true">&rarr;</span><span class="chain-cn">CN</span><span class="chain-arrow" aria-hidden="true">&rarr;</span><span class="chain-fr">FR</span>
+            </p>
+            <h2 class="reveal">Start tracing requirements to problems</h2>
+            <p class="reveal">Install the skill, describe your project, and let your AI assistant guide the process.</p>
+            <div class="hero-actions reveal">
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-primary">View on GitHub</a>
+                <a href="index.html" class="btn-ghost">Back to home</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>Problem-Based SRS &middot; <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.4</a> &middot; Methodology by Gorski &amp; Stadzisz</p>
+            <p class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md">Changelog</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/LICENSE">MIT License</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="assets/site.js" defer></script>
+    <script>
+        (function () {
+            // Sidebar toggle (mobile)
+            var sidebar = document.querySelector('.docs-sidebar');
+            var toggle = sidebar && sidebar.querySelector('.docs-sidebar-toggle');
+            if (toggle) {
+                toggle.addEventListener('click', function () {
+                    var open = sidebar.getAttribute('data-open') === 'true';
+                    sidebar.setAttribute('data-open', String(!open));
+                    toggle.setAttribute('aria-expanded', String(!open));
+                });
+                // Collapse after picking a link on mobile.
+                sidebar.querySelectorAll('.docs-nav a').forEach(function (a) {
+                    a.addEventListener('click', function () {
+                        if (window.matchMedia('(max-width: 939px)').matches) {
+                            sidebar.setAttribute('data-open', 'false');
+                            toggle.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
+            }
+
+            // Scrollspy: highlight the sidebar link for the section in view.
+            var links = Array.prototype.slice.call(document.querySelectorAll('.docs-nav a[href^="#"]'));
+            var byTarget = new Map();
+            links.forEach(function (a) {
+                var el = document.querySelector(a.getAttribute('href'));
+                if (el) byTarget.set(el, a);
+            });
+            if ('IntersectionObserver' in window && byTarget.size) {
+                var spy = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            links.forEach(function (l) { l.classList.remove('is-active'); });
+                            var active = byTarget.get(entry.target);
+                            if (active) active.classList.add('is-active');
+                        }
+                    });
+                }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+                byTarget.forEach(function (a, el) { spy.observe(el); });
+            }
+        })();
+    </script>
+</body>
+</html>
