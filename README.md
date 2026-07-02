@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version 2.2](https://img.shields.io/badge/version-2.2-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.2)
+[![Version 2.3](https://img.shields.io/badge/version-2.3-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.3)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -155,8 +155,10 @@ CRM demo if you haven't created one yet). The extension also bundles the full me
 as agent tools, so every step is available without leaving the panel.
 
 > Prefer a preview first? The [project website](https://rafaelgorski.github.io/Problem-Based-SRS/)
-> plays an app-faithful animation of the chain building itself: Customer Problems first,
-> then the Needs that address them, then the Requirements that satisfy them.
+> plays app-faithful animations of the methodology: the traceability chain building itself
+> (Customer Problems first, then the Needs that address them, then the Requirements that
+> satisfy them), a real 28-node spec with its five Customer Problems highlighted, and a
+> Copilot CLI walkthrough calling each skill in order.
 
 ### Decompose and iterate with the agent
 
