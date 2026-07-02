@@ -1,0 +1,309 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" width="720" height="640" role="img" aria-labelledby="t d" preserveAspectRatio="xMidYMid meet">
+  <title id="t">The SRS Navigator highlighting five Customer Problems</title>
+  <desc id="d">The VagrantChefHubot specification appears in full, then the Needs, Functional and Non-Functional Requirements dim and the five Customer Problems light up, showing that every requirement traces back to a problem.</desc>
+  <style>
+    :root { color-scheme: light; }
+    svg { background: oklch(1 0 0); }
+    text { font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    .wordmark { font-weight: 800; font-size: 16px; letter-spacing: -0.01em; }
+    .wordmark .accent { fill: oklch(0.45 0.16 266); }
+    .toggle-txt { font-size: 12px; font-weight: 650; text-anchor: middle; dominant-baseline: middle; }
+    .chip-txt { font-size: 11.5px; font-weight: 600; fill: oklch(0.30 0.012 264); dominant-baseline: middle; }
+    .badge-txt { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; font-weight: 700; letter-spacing: 0.04em; text-anchor: middle; dominant-baseline: middle; }
+    .stat { font-size: 11px; fill: oklch(0.47 0.012 264); dominant-baseline: middle; }
+    .stat b { font-weight: 700; fill: oklch(0.55 0.17 50); }
+    .legend { font-size: 11px; fill: oklch(0.47 0.012 264); dominant-baseline: middle; }
+    .zoom-glyph { font-size: 14px; fill: oklch(0.47 0.012 264); text-anchor: middle; dominant-baseline: central; }
+    .nid { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; font-weight: 700; fill: oklch(0.19 0.018 264); text-anchor: middle; }
+    .nname { font-size: 9.5px; fill: oklch(0.47 0.012 264); text-anchor: middle; }
+
+    /* Two-phase loop: (1) whole spec present, (2) support dims + CPs pulse. */
+    .node { transform-box: fill-box; transform-origin: center; }
+    .support { animation: dimCycle 9s cubic-bezier(0.25,1,0.5,1) infinite both; }
+    .link { animation: linkCycle 9s cubic-bezier(0.25,1,0.5,1) infinite both; }
+    .cp { animation: cpCycle 9s cubic-bezier(0.25,1,0.5,1) infinite both; animation-delay: calc(var(--i) * 0.12s); }
+    .glow { opacity: 0; transform-box: fill-box; transform-origin: center;
+            animation: glowPulse 9s ease-out infinite both; animation-delay: calc(var(--i) * 0.12s); }
+
+    @keyframes dimCycle { 0%,32%{opacity:1} 46%,88%{opacity:0.28} 100%{opacity:1} }
+    @keyframes linkCycle { 0%{opacity:0} 10%,32%{opacity:0.8} 46%,88%{opacity:0.2} 100%{opacity:0} }
+    @keyframes cpCycle {
+      0%{opacity:0;transform:scale(0.6)} 9%{opacity:1;transform:scale(1)}
+      44%{transform:scale(1)} 52%{transform:scale(1.07)} 60%,88%{transform:scale(1)}
+      96%,100%{opacity:0;transform:scale(1)}
+    }
+    @keyframes glowPulse {
+      0%,42%{opacity:0;transform:scale(1)}
+      54%{opacity:0.55;transform:scale(1)}
+      72%{opacity:0;transform:scale(1.55)}
+      88%,100%{opacity:0;transform:scale(1.55)}
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .support { animation: none; opacity: 0.32; }
+      .link { animation: none; opacity: 0.2; }
+      .cp { animation: none; opacity: 1; transform: none; }
+      .glow { animation: none; opacity: 0.5; transform: none; }
+    }
+  </style>
+
+  <defs>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.1" fill="oklch(0.900 0.006 240)" opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- canvas -->
+  <rect x="0" y="106" width="720" height="534" fill="url(#dots)"/>
+
+  <!-- header chrome -->
+  <text class="wordmark" x="24" y="33"><tspan fill="oklch(0.19 0.018 264)">Problem-Based </tspan><tspan class="accent">SRS</tspan></text>
+  <rect x="196" y="18" width="150" height="22" rx="11" fill="oklch(0.61 0.18 48 / 0.14)"/>
+  <text x="271" y="30" class="badge-txt" fill="oklch(0.55 0.17 50)" style="font-size:9.5px; letter-spacing:0.02em;">5 Customer Problems</text>
+
+  <!-- Graph / Hierarchy toggle -->
+  <rect x="470" y="14" width="152" height="30" rx="9" fill="oklch(0.965 0.004 240)" stroke="oklch(0.900 0.006 240)"/>
+  <rect x="474" y="18" width="74" height="22" rx="6" fill="oklch(0.45 0.16 266)"/>
+  <text class="toggle-txt" x="511" y="30" fill="#fff">Graph</text>
+  <text class="toggle-txt" x="588" y="30" fill="oklch(0.47 0.012 264)">Hierarchy</text>
+
+  <!-- github mark -->
+  <g transform="translate(666 18) scale(0.83)" fill="oklch(0.47 0.012 264)"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></g>
+
+  <!-- file chip -->
+  <rect x="24" y="58" width="164" height="26" rx="8" fill="oklch(0.965 0.004 240)" stroke="oklch(0.900 0.006 240)"/>
+  <text class="chip-txt" x="40" y="72">VagrantChefHubot</text>
+
+  <!-- legend -->
+  <circle cx="300" cy="86" r="6" fill="oklch(0.61 0.18 48)"/><text class="legend" x="312" y="90">Problem</text>
+  <circle cx="392" cy="86" r="6" fill="oklch(0.58 0.10 202)"/><text class="legend" x="404" y="90">Need</text>
+  <circle cx="462" cy="86" r="6" fill="oklch(0.56 0.16 266)"/><text class="legend" x="474" y="90">FR</text>
+  <circle cx="514" cy="86" r="6" fill="oklch(0.54 0.15 320)"/><text class="legend" x="526" y="90">NFR</text>
+
+  <line x1="0" y1="94" x2="720" y2="94" stroke="oklch(0.900 0.006 240)"/>
+  <!-- stats bar -->
+  <text class="stat" x="24" y="101">28 nodes</text>
+  <text class="stat" x="120" y="101">5 need clusters</text>
+  <text class="stat" x="232" y="101"><tspan>100% traceability</tspan></text>
+  <line x1="0" y1="106" x2="720" y2="106" stroke="oklch(0.900 0.006 240)"/>
+
+  <!-- zoom controls -->
+  <g>
+    <rect x="24" y="132" width="28" height="86" rx="9" fill="oklch(1 0 0)" stroke="oklch(0.900 0.006 240)"/>
+    <line x1="28" y1="161" x2="48" y2="161" stroke="oklch(0.900 0.006 240)"/>
+    <line x1="28" y1="189" x2="48" y2="189" stroke="oklch(0.900 0.006 240)"/>
+    <text class="zoom-glyph" x="38" y="147">+</text>
+    <text class="zoom-glyph" x="38" y="175">&#8722;</text>
+    <text class="zoom-glyph" x="38" y="204">&#8635;</text>
+  </g>
+
+  <!-- links (drawn behind nodes) -->
+  <g fill="none" stroke="oklch(0.74 0.02 262)" stroke-width="1.6" stroke-dasharray="4 5" stroke-linecap="round">
+    <path class="link" d="M189.6 203.5 Q240.4 195.2 278.4 160.5"/>
+    <path class="link" d="M191.7 218.0 Q305.2 266.4 428.3 258.0"/>
+    <path class="link" d="M343.9 310.2 Q392.8 304.0 430.1 271.8"/>
+    <path class="link" d="M145.5 432.1 Q181.2 403.6 194.5 359.9"/>
+    <path class="link" d="M470.0 462.0 Q479.8 437.0 470.0 412.0"/>
+    <path class="link" d="M545.2 208.0 Q502.4 217.6 472.8 250.0"/>
+    <path class="link" d="M428.3 258.1 Q358.2 226.6 281.7 233.9"/>
+    <path class="link" d="M447.4 238.5 Q452.2 203.8 434.6 173.5"/>
+    <path class="link" d="M491.8 398.0 Q533.6 434.0 588.2 442.0"/>
+    <path class="link" d="M232.0 338.5 Q412.6 367.4 588.0 315.5"/>
+    <path class="link" d="M280.7 164.3 Q170.2 211.4 93.3 303.7"/>
+    <path class="link" d="M491.3 376.9 Q548.4 365.2 590.7 325.1"/>
+  </g>
+
+  <!-- nodes -->
+  
+  <g transform="translate(168 214)">
+    <g class="node cp" style="--i:0">
+      <circle class="glow" r="24" fill="none" stroke="oklch(0.61 0.18 48)" stroke-width="3" style="--i:0"/>
+      <circle r="24" fill="oklch(0.61 0.18 48)" stroke="oklch(0.51 0.18 48)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM152,176a8,8,0,0,1-8,8H108a8,8,0,0,1-7.41-11l20-48H108a8,8,0,0,1,0-16h36a8,8,0,0,1,7.41,11l-20,48H144A8,8,0,0,1,152,176Z"/>
+      </g>
+      <text class="nid" y="42">CP-1</text>
+      <text class="nname"><tspan x="0" y="56">Slow, error-prone</tspan><tspan x="0" y="68">Hubot + Skype setup</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(132 452)">
+    <g class="node cp" style="--i:1">
+      <circle class="glow" r="24" fill="none" stroke="oklch(0.61 0.18 48)" stroke-width="3" style="--i:1"/>
+      <circle r="24" fill="oklch(0.61 0.18 48)" stroke="oklch(0.51 0.18 48)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM152,176a8,8,0,0,1-8,8H108a8,8,0,0,1-7.41-11l20-48H108a8,8,0,0,1,0-16h36a8,8,0,0,1,7.41,11l-20,48H144A8,8,0,0,1,152,176Z"/>
+      </g>
+      <text class="nid" y="42">CP-2</text>
+      <text class="nname"><tspan x="0" y="56">Environments drift</tspan><tspan x="0" y="68">between machines</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(470 486)">
+    <g class="node cp" style="--i:2">
+      <circle class="glow" r="24" fill="none" stroke="oklch(0.61 0.18 48)" stroke-width="3" style="--i:2"/>
+      <circle r="24" fill="oklch(0.61 0.18 48)" stroke="oklch(0.51 0.18 48)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM152,176a8,8,0,0,1-8,8H108a8,8,0,0,1-7.41-11l20-48H108a8,8,0,0,1,0-16h36a8,8,0,0,1,7.41,11l-20,48H144A8,8,0,0,1,152,176Z"/>
+      </g>
+      <text class="nid" y="42">CP-3</text>
+      <text class="nname"><tspan x="0" y="56">New devs can not ship</tspan><tspan x="0" y="68">bot commands fast</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(566 196)">
+    <g class="node cp" style="--i:3">
+      <circle class="glow" r="24" fill="none" stroke="oklch(0.61 0.18 48)" stroke-width="3" style="--i:3"/>
+      <circle r="24" fill="oklch(0.61 0.18 48)" stroke="oklch(0.51 0.18 48)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM152,176a8,8,0,0,1-8,8H108a8,8,0,0,1-7.41-11l20-48H108a8,8,0,0,1,0-16h36a8,8,0,0,1,7.41,11l-20,48H144A8,8,0,0,1,152,176Z"/>
+      </g>
+      <text class="nid" y="42">CP-4</text>
+      <text class="nname"><tspan x="0" y="56">Rebuilding a broken</tspan><tspan x="0" y="68">box costs a day</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(322 320)">
+    <g class="node cp" style="--i:4">
+      <circle class="glow" r="24" fill="none" stroke="oklch(0.61 0.18 48)" stroke-width="3" style="--i:4"/>
+      <circle r="24" fill="oklch(0.61 0.18 48)" stroke="oklch(0.51 0.18 48)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM152,176a8,8,0,0,1-8,8H108a8,8,0,0,1-7.41-11l20-48H108a8,8,0,0,1,0-16h36a8,8,0,0,1,7.41,11l-20,48H144A8,8,0,0,1,152,176Z"/>
+      </g>
+      <text class="nid" y="42">CP-5</text>
+      <text class="nname"><tspan x="0" y="56">Setup needs undocumented</tspan><tspan x="0" y="68">prerequisites</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(300 150)">
+    <g class="node support" style="--i:5">
+      
+      <circle r="24" fill="oklch(0.58 0.10 202)" stroke="oklch(0.48 0.10 202)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M221.87,83.16l-40-32A8,8,0,0,0,176,48H80a8,8,0,0,0-5.87,2.56l-40,32A8,8,0,0,0,32,88v80a8,8,0,0,0,2.13,5.44l40,44A8,8,0,0,0,80,220h96a8,8,0,0,0,5.87-2.56l40-44A8,8,0,0,0,224,168V88A8,8,0,0,0,221.87,83.16ZM208,165.1l-36.42,40H84.42L48,165.1V90.9l36.42-26.9h87.16L208,90.9Z"/>
+      </g>
+      <text class="nid" y="42">CN-3</text>
+      <text class="nname"><tspan x="0" y="56">All OS deps installed</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(452 262)">
+    <g class="node support" style="--i:6">
+      
+      <circle r="24" fill="oklch(0.58 0.10 202)" stroke="oklch(0.48 0.10 202)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M221.87,83.16l-40-32A8,8,0,0,0,176,48H80a8,8,0,0,0-5.87,2.56l-40,32A8,8,0,0,0,32,88v80a8,8,0,0,0,2.13,5.44l40,44A8,8,0,0,0,80,220h96a8,8,0,0,0,5.87-2.56l40-44A8,8,0,0,0,224,168V88A8,8,0,0,0,221.87,83.16ZM208,165.1l-36.42,40H84.42L48,165.1V90.9l36.42-26.9h87.16L208,90.9Z"/>
+      </g>
+      <text class="nid" y="42">CN-1</text>
+      <text class="nname"><tspan x="0" y="56">Automated provisioning</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(470 388)">
+    <g class="node support" style="--i:7">
+      
+      <circle r="24" fill="oklch(0.58 0.10 202)" stroke="oklch(0.48 0.10 202)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M221.87,83.16l-40-32A8,8,0,0,0,176,48H80a8,8,0,0,0-5.87,2.56l-40,32A8,8,0,0,0,32,88v80a8,8,0,0,0,2.13,5.44l40,44A8,8,0,0,0,80,220h96a8,8,0,0,0,5.87-2.56l40-44A8,8,0,0,0,224,168V88A8,8,0,0,0,221.87,83.16ZM208,165.1l-36.42,40H84.42L48,165.1V90.9l36.42-26.9h87.16L208,90.9Z"/>
+      </g>
+      <text class="nid" y="42">CN-2</text>
+      <text class="nname"><tspan x="0" y="56">Ready-to-run Hubot</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(208 340)">
+    <g class="node support" style="--i:8">
+      
+      <circle r="24" fill="oklch(0.58 0.10 202)" stroke="oklch(0.48 0.10 202)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M221.87,83.16l-40-32A8,8,0,0,0,176,48H80a8,8,0,0,0-5.87,2.56l-40,32A8,8,0,0,0,32,88v80a8,8,0,0,0,2.13,5.44l40,44A8,8,0,0,0,80,220h96a8,8,0,0,0,5.87-2.56l40-44A8,8,0,0,0,224,168V88A8,8,0,0,0,221.87,83.16ZM208,165.1l-36.42,40H84.42L48,165.1V90.9l36.42-26.9h87.16L208,90.9Z"/>
+      </g>
+      <text class="nid" y="42">CN-6</text>
+      <text class="nname"><tspan x="0" y="56">Documented lifecycle</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(258 230)">
+    <g class="node support" style="--i:9">
+      
+      <circle r="24" fill="oklch(0.56 0.16 266)" stroke="oklch(0.46 0.16 266)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.29Zm176,27.7-48-40a8,8,0,1,0-10.24,12.29L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"/>
+      </g>
+      <text class="nid" y="42">FR-2</text>
+      <text class="nname"><tspan x="0" y="56">Chef Solo core stack</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(612 314)">
+    <g class="node support" style="--i:10">
+      
+      <circle r="24" fill="oklch(0.56 0.16 266)" stroke="oklch(0.46 0.16 266)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.29Zm176,27.7-48-40a8,8,0,1,0-10.24,12.29L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"/>
+      </g>
+      <text class="nid" y="42">FR-9</text>
+      <text class="nname"><tspan x="0" y="56">Lifecycle scripts</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(610 452)">
+    <g class="node support" style="--i:11">
+      
+      <circle r="24" fill="oklch(0.56 0.16 266)" stroke="oklch(0.46 0.16 266)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.29Zm176,27.7-48-40a8,8,0,1,0-10.24,12.29L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"/>
+      </g>
+      <text class="nid" y="42">FR-1</text>
+      <text class="nname"><tspan x="0" y="56">Vagrant VM</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(168 560)">
+    <g class="node support" style="--i:12">
+      
+      <circle r="24" fill="oklch(0.56 0.16 266)" stroke="oklch(0.46 0.16 266)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.29Zm176,27.7-48-40a8,8,0,1,0-10.24,12.29L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"/>
+      </g>
+      <text class="nid" y="42">FR-4</text>
+      <text class="nname"><tspan x="0" y="56">Hubot via npm</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(430 150)">
+    <g class="node support" style="--i:13">
+      
+      <circle r="24" fill="oklch(0.54 0.15 320)" stroke="oklch(0.44 0.15 320)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.62,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.77,91-124.39V56A16,16,0,0,0,208,40Zm0,74.79c0,78.42-66.35,104.62-80,109.18-13.53-4.51-80-30.69-80-109.18V56H208ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/>
+      </g>
+      <text class="nid" y="42">NFR-3</text>
+      <text class="nname"><tspan x="0" y="56">CLI over SSH</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(74 318)">
+    <g class="node support" style="--i:14">
+      
+      <circle r="24" fill="oklch(0.54 0.15 320)" stroke="oklch(0.44 0.15 320)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.62,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.77,91-124.39V56A16,16,0,0,0,208,40Zm0,74.79c0,78.42-66.35,104.62-80,109.18-13.53-4.51-80-30.69-80-109.18V56H208ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/>
+      </g>
+      <text class="nid" y="42">NFR-5</text>
+      <text class="nname"><tspan x="0" y="56">Pinned versions</tspan></text>
+    </g>
+  </g>
+  
+  <g transform="translate(590 556)">
+    <g class="node support" style="--i:15">
+      
+      <circle r="24" fill="oklch(0.54 0.15 320)" stroke="oklch(0.44 0.15 320)" stroke-width="2.5"/>
+      <g transform="scale(0.1094) translate(-128 -128)" fill="#fff" opacity="0.97">
+        <path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.62,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.77,91-124.39V56A16,16,0,0,0,208,40Zm0,74.79c0,78.42-66.35,104.62-80,109.18-13.53-4.51-80-30.69-80-109.18V56H208ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/>
+      </g>
+      <text class="nid" y="42">NFR-1</text>
+      <text class="nname"><tspan x="0" y="56">Cross-platform</tspan></text>
+    </g>
+  </g>
+</svg>
