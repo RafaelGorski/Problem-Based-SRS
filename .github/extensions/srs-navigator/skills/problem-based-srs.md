@@ -79,6 +79,28 @@ action (or `full`) to orchestrate the complete methodology end-to-end.
 | `complexity` | `/problem-based-srs complexity` | Optional: Axiomatic Design quality analysis |
 | `full` | `/problem-based-srs` | Run the complete methodology (Step 0 → Step 5) |
 
+### How actions are dispatched
+
+Each action's detailed, step-specific instructions live in a reference file next to
+this skill: **`reference/<action>.md`** (the file name IS the action). When the user
+invokes an action, you MUST read the matching reference file **before** producing any
+artifact, and follow it exactly:
+
+| Action | Reference file |
+|--------|----------------|
+| `business-context` | [`reference/business-context.md`](reference/business-context.md) |
+| `problems` | [`reference/problems.md`](reference/problems.md) |
+| `software-glance` | [`reference/software-glance.md`](reference/software-glance.md) |
+| `needs` | [`reference/needs.md`](reference/needs.md) |
+| `software-vision` | [`reference/software-vision.md`](reference/software-vision.md) |
+| `functional-requirements` | [`reference/functional-requirements.md`](reference/functional-requirements.md) |
+| `validate` | [`reference/validate.md`](reference/validate.md) |
+| `complexity` | [`reference/complexity.md`](reference/complexity.md) |
+| `live` | [`reference/live.md`](reference/live.md) — opens the SRS Navigator canvas (`/live`) |
+
+For a **full** run (bare `/problem-based-srs`), work through the steps in order,
+reading each `reference/<action>.md` as you reach that step.
+
 ## 📁 Saving Progress (CRITICAL)
 
 **IMPORTANT:** At each step, you MUST save the produced artifacts to files. Progress is NOT automatically saved between sessions.
@@ -446,7 +468,7 @@ Gate Check:
 - [x] File saved
 
 → Next: Step 4 - Software Vision
-→ Loading: references/step4-software-vision.md
+→ Loading: reference/software-vision.md
 → Will save to: .spec/04-software-vision.md
 → Input: The CNs documented above
 ```
@@ -505,7 +527,7 @@ For deeper quality analysis, users can explicitly invoke the `/problem-based-srs
 ## Examples
 
 For complete walkthroughs, see:
-- [CRM Example](references/crm-example.md) — Business domain (Customer Relationship Management)
-- [MicroER Example](references/microer-example.md) — Technical domain (Renewable Energy System)
+- [CRM Example](reference/crm-example.md) — Business domain (Customer Relationship Management)
+- [MicroER Example](reference/microer-example.md) — Technical domain (Renewable Energy System)
 
 **Run actions individually** based on current step to minimize context usage.

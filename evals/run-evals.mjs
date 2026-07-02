@@ -2,7 +2,7 @@
 // Live skill-eval runner.
 //
 // For each case in cases/*.case.mjs it:
-//   1. loads the canonical skill markdown (skills/<slug>/SKILL.md),
+//   1. loads the canonical action markdown (skills/problem-based-srs/reference/<action>.md),
 //   2. builds a hermetic prompt and runs it through the Copilot CLI (headless),
 //   3. grades the output with a deterministic rubric, and
 //   4. optionally asks an LLM judge to score qualitative criteria.
@@ -21,7 +21,7 @@ import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runCopilot, isCopilotAvailable } from "./lib/copilot-sdk.mjs";
-import { loadSkill, defaultSkillsRoot } from "./lib/skills.mjs";
+import { loadAction, defaultSkillsRoot } from "./lib/skills.mjs";
 import { gradeRubric, llmJudge } from "./lib/graders.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -107,7 +107,7 @@ function logVerboseRun(c, run, opts) {
 }
 
 async function runCase(c, opts, skillsRoot) {
-  const skill = await loadSkill(c.skill, { skillsRoot });
+  const skill = await loadAction(c.skill, { skillsRoot });
   const prompt = await c.buildPrompt(skill.text);
   logVerboseInputs(c, prompt, skill, opts);
 

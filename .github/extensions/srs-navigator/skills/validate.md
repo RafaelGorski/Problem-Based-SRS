@@ -1,13 +1,3 @@
----
-name: zigzag-validator
-description: Validate traceability and consistency across Customer Problems, Customer Needs, and Functional Requirements domains. Use to check completeness, identify gaps, and ensure all requirements trace to real business problems.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
----
-
 # Zig Zag Decomposition
 
 > **Validation & Consistency Tool** for Problem-Based SRS methodology  

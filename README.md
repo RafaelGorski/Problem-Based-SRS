@@ -238,16 +238,19 @@ Project-level installation means your whole team uses the same methodology autom
 Problem-Based-SRS/
 ├── agents/problem-based-srs/    # Agent orchestrator
 ├── skills/
-│   ├── problem-based-srs/       # Main skill + case study examples
-│   ├── business-context/        # Step 0
-│   ├── customer-problems/       # Step 1
-│   ├── software-glance/         # Step 2
-│   ├── customer-needs/          # Step 3
-│   ├── software-vision/         # Step 4
-│   ├── functional-requirements/ # Step 5
-│   ├── zigzag-validator/        # Traceability validation
-│   ├── complexity-analysis/     # Optional: Axiomatic Design
-│   └── live/                    # Launch the SRS Navigator canvas
+│   └── problem-based-srs/       # The single methodology skill
+│       ├── SKILL.md             # Orchestrator: /problem-based-srs
+│       └── reference/           # One file per action (filename == action)
+│           ├── business-context.md        # Step 0
+│           ├── problems.md                 # Step 1
+│           ├── software-glance.md          # Step 2
+│           ├── needs.md                    # Step 3
+│           ├── software-vision.md          # Step 4
+│           ├── functional-requirements.md  # Step 5
+│           ├── validate.md                 # Traceability validation (ZigZag)
+│           ├── complexity.md               # Optional: Axiomatic Design
+│           ├── live.md                     # Launch the SRS Navigator canvas
+│           └── {crm,microer}-example.md    # Case study walkthroughs
 ├── .github/extensions/
 │   └── srs-navigator/           # Canvas extension (UX) + bundled skills
 ├── .spec/crm-system.json        # Demo specification for the navigator
@@ -256,7 +259,7 @@ Problem-Based-SRS/
 └── .claude-plugin/              # Plugin manifest
 ```
 
-Case studies: [`crm-example.md`](skills/problem-based-srs/references/crm-example.md) and [`microer-example.md`](skills/problem-based-srs/references/microer-example.md) walk through complete sessions.
+Case studies: [`crm-example.md`](skills/problem-based-srs/reference/crm-example.md) and [`microer-example.md`](skills/problem-based-srs/reference/microer-example.md) walk through complete sessions.
 
 ## Two development workflows
 
@@ -277,16 +280,18 @@ This repository is maintained along two complementary tracks:
    publishes packaged archives.
 
 The two tracks are bridged by **skill sync**: the canvas app's bundled `skills/*.md` are
-generated from the canonical `skills/<slug>/SKILL.md` in this repo. Run it locally with:
+generated from the canonical single skill at `skills/problem-based-srs/` (its `SKILL.md`
+orchestrator plus `reference/<action>.md` files) in this repo. Run it locally with:
 
 ```bash
 node .github/extensions/srs-navigator/scripts/sync-skills.mjs   # copy from skills/
 ```
 
-In this monorepo it copies straight from `skills/` on disk — the single source of truth.
-The runtime also reads the canonical `skills/<slug>/SKILL.md` directly, so the bundled
-copies only exist for standalone installs and packaging. Maintainers edit a skill **once**
-in `skills/`, and both the agent plugin and the canvas app stay in sync.
+In this monorepo it copies straight from `skills/problem-based-srs/` on disk — the single
+source of truth. The runtime also reads the canonical `SKILL.md` / `reference/<action>.md`
+directly, so the bundled copies only exist for standalone installs and packaging.
+Maintainers edit a skill **once** in `skills/problem-based-srs/`, and both the agent plugin
+and the canvas app stay in sync.
 
 ## Research and standards
 

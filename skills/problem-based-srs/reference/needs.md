@@ -1,14 +1,3 @@
----
-name: customer-needs
-description: Specify Customer Needs (CN) that define WHAT outcomes software must provide to solve Customer Problems. Use after Software Glance to translate problems into needs. Step 3 of Problem-Based SRS methodology.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
-  step: 3
----
-
 # Customer Needs (CN)
 
 > **Step 3 of 5** in Problem-Based SRS methodology  

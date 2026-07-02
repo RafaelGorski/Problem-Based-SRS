@@ -19,8 +19,8 @@ const UPSTREAM_CPS = `# Customer Problems — RelayDesk
 `;
 
 export default {
-  name: "customer-needs",
-  skill: "customer-needs",
+  name: "needs",
+  skill: "needs",
   threshold: 0.75,
 
   async buildPrompt(skillText) {

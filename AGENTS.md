@@ -25,18 +25,19 @@ Problem-Based-SRS/
 │   └── problem-based-srs/       # Agent orchestrator
 │       └── AGENT.md
 ├── skills/
-│   ├── problem-based-srs/       # Main orchestrator skill
-│   │   ├── SKILL.md
-│   │   └── references/          # Examples only
-│   ├── business-context/        # Step 0: Business context and principles
-│   ├── customer-problems/       # Step 1: WHY
-│   ├── software-glance/         # Step 2: High-level view
-│   ├── customer-needs/          # Step 3: WHAT
-│   ├── software-vision/         # Step 4: Architecture
-│   ├── functional-requirements/ # Step 5: HOW
-│   ├── zigzag-validator/        # Traceability validation
-│   ├── complexity-analysis/     # Optional: Axiomatic Design
-│   └── live/                    # Launch the SRS Navigator canvas (UX)
+│   └── problem-based-srs/       # The single methodology skill
+│       ├── SKILL.md             # Orchestrator: /problem-based-srs <action>
+│       └── reference/           # One file per action (filename == action)
+│           ├── business-context.md        # Step 0: Business context and principles
+│           ├── problems.md                 # Step 1: WHY (customer problems)
+│           ├── software-glance.md          # Step 2: High-level view
+│           ├── needs.md                    # Step 3: WHAT (customer needs)
+│           ├── software-vision.md          # Step 4: Architecture
+│           ├── functional-requirements.md  # Step 5: HOW
+│           ├── validate.md                 # Traceability validation (ZigZag)
+│           ├── complexity.md               # Optional: Axiomatic Design
+│           ├── live.md                     # Launch the SRS Navigator canvas (UX)
+│           └── {crm,microer}-example.md    # Case study walkthroughs
 ├── .github/extensions/
 │   └── srs-navigator/           # Canvas extension: graph UX + bundled skills
 ├── .spec/crm-system.json        # Demo specification for the navigator
@@ -51,18 +52,18 @@ Copilot app.
 ## When Working on This Repository
 
 ### Skills Development (AgentSkills Format)
-- Skills are located in the `skills/` directory
-- Each skill has a `SKILL.md` file with YAML frontmatter (name, description, license)
+- The methodology lives in a single skill: `skills/problem-based-srs/`
+- `SKILL.md` is the orchestrator (YAML frontmatter: name, description, license); each
+  action is a plain-markdown file at `reference/<action>.md` (filename == action)
 - Description field is critical - it determines when the skill triggers
-- Keep SKILL.md content under 500 lines (use references/ for detailed docs)
+- Keep SKILL.md content under 500 lines (use `reference/` for detailed docs)
 - Follow the AgentSkills specification: https://agentskills.io/specification
 - Test skills by using them in practice
 
 ### File Organization
-- **agents/**: Agent orchestrators that coordinate multiple skills
-- **skills/**: AgentSkills format (Claude Code, Claude.ai, GitHub Copilot)
-  - Each skill is a self-contained directory with SKILL.md
-  - Can include optional subdirectories: scripts/, references/, assets/
+- **agents/**: Agent orchestrators that coordinate the skill
+- **skills/problem-based-srs/**: the single AgentSkills-format skill (Claude Code,
+  Claude.ai, GitHub Copilot) — `SKILL.md` orchestrator plus `reference/<action>.md`
 - **docs/**: Research papers and methodology documentation
 
 ### Code Style

@@ -189,5 +189,5 @@ Use the `/problem-based-srs validate` action to check existing artifacts without
 ## Examples
 
 For complete walkthroughs, see:
-- [CRM Example](../skills/problem-based-srs/references/crm-example.md) — Business domain
-- [MicroER Example](../skills/problem-based-srs/references/microer-example.md) — Technical domain
+- [CRM Example](../skills/problem-based-srs/reference/crm-example.md) — Business domain
+- [MicroER Example](../skills/problem-based-srs/reference/microer-example.md) — Technical domain

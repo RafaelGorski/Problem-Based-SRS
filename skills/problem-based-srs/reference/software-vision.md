@@ -1,14 +1,3 @@
----
-name: software-vision
-description: Transform Software Glance and Customer Needs into a detailed Software Vision with positioning, stakeholders, features, and architecture. Use after Customer Needs. Step 4 of Problem-Based SRS methodology.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
-  step: 4
----
-
 # Software Vision
 
 > The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
@@ -35,7 +24,7 @@ Generate a Software Vision document that serves as:
 - **Scope definition**: Establishes clear boundaries to keep requirements within scope
 - **Stakeholder agreement**: A high-level view all parties can review and approve
 
-🔗 **See also:** [Software Glance (Step 2)](../software-glance/SKILL.md) — the initial abstract solution view that this Vision elaborates upon. Use the Glance to review system boundaries and actors before building the Vision.
+🔗 **See also:** [Software Glance (Step 2)](software-glance.md) — the initial abstract solution view that this Vision elaborates upon. Use the Glance to review system boundaries and actors before building the Vision.
 
 ## Prerequisites (Required Inputs)
 
@@ -192,7 +181,7 @@ flowchart TB
 - `sequenceDiagram` — for key interaction flows
 - `classDiagram` — for domain model overview
 
-> 🔗 **Cross-reference:** The system boundaries and actors defined in the [Software Glance (Step 2)](../software-glance/SKILL.md) SHOULD be expanded here with architectural detail. Readers can refer back to the Glance for the original abstract view.
+> 🔗 **Cross-reference:** The system boundaries and actors defined in the [Software Glance (Step 2)](software-glance.md) SHOULD be expanded here with architectural detail. Readers can refer back to the Glance for the original abstract view.
 
 ### Best Practices
 
@@ -268,7 +257,7 @@ Summary:
 
 ### Upstream Dependencies (Required Before This Step)
 - **Step 1**: Customer Problems (customer-problems skill)
-- **Step 2**: [Software Glance](../software-glance/SKILL.md) (software-glance skill) — 🔗 refer back for system boundaries and actors
+- **Step 2**: [Software Glance](software-glance.md) (software-glance action) — 🔗 refer back for system boundaries and actors
 - **Step 3**: Customer Needs (customer-needs skill)
 
 ### Downstream Artifacts (What Uses This Output)

@@ -1,13 +1,3 @@
----
-name: complexity-analysis
-description: Analyze specification quality using Axiomatic Design principles. Optional advanced validation for critical systems. Evaluates independence, completeness, and information content of requirements.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
----
-
 # Complexity Analysis
 
 > **OPTIONAL Advanced Validation Tool** for Problem-Based SRS methodology  

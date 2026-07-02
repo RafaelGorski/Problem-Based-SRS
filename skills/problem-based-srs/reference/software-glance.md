@@ -1,14 +1,3 @@
----
-name: software-glance
-description: Create the first abstract representation of a software solution from Customer Problems. Use after identifying CPs to design high-level system boundaries and components. Step 2 of Problem-Based SRS methodology.
-license: MIT
-metadata:
-  author: rafael-gorski
-  version: "1.2"
-  methodology: problem-based-srs
-  step: 2
----
-
 # Software Glance
 
 > **Step 2 of 5** in the Problem-Based SRS process.
@@ -47,7 +36,7 @@ A **Software Glance (SG)** is the rough idea of a software solution that emerges
 
 > **SG vs Software Vision:** The Software Glance is a rough starting point; the Software Vision (Step 4) enhances it with positioning, stakeholder analysis, feature lists, architecture decisions, and environment constraints. Do not add these details here.
 >
-> 🔗 **See also:** [Software Vision (Step 4)](../software-vision/SKILL.md) — drills down from this glance into detailed positioning, features, and architecture.
+> 🔗 **See also:** [Software Vision (Step 4)](software-vision.md) — drills down from this glance into detailed positioning, features, and architecture.
 
 ## Input (from Steps 0 and 1)
 
@@ -296,7 +285,7 @@ Before accepting the Software Glance output:
 | 1 | customer-problems | ← Input |
 | **2** | **software-glance** | **Current** |
 | 3 | customer-needs | → Next |
-| 4 | [software-vision](../software-vision/SKILL.md) | 🔗 Drills down from this glance |
+| 4 | [software-vision](software-vision.md) | 🔗 Drills down from this glance |
 | 5 | functional-requirements | |
 
 **Next:** Use the Software Glance output with `/problem-based-srs needs` to specify what outcomes the software must provide.

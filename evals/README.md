@@ -1,8 +1,9 @@
 # Problem-Based SRS — Skill Evals
 
 A separate, self-contained harness that tests and evaluates the methodology
-**skills** (`skills/<slug>/SKILL.md`), driven by the **GitHub Copilot CLI SDK**
-(`@github/copilot` in headless mode).
+**skill** (the single consolidated skill at `skills/problem-based-srs/`: its
+`SKILL.md` orchestrator plus `reference/<action>.md` files), driven by the
+**GitHub Copilot CLI SDK** (`@github/copilot` in headless mode).
 
 This is intentionally decoupled from the canvas app's own suite in
 `.github/extensions/srs-navigator/tests/` (which tests UI/renderer code). This
@@ -23,15 +24,16 @@ Pure `node --test` files with no external dependencies:
   arg building, timeout handling) using a fake spawn.
 - `tests/lib.test.mjs` — the SKILL.md loader/parser and the rubric graders.
 - `tests/skills-static.test.mjs` — **the flagship regression guard.** Asserts, over
-  every real `skills/<slug>/SKILL.md`:
-  - `name` frontmatter matches the directory,
+  the consolidated `skills/problem-based-srs/` skill (`SKILL.md` + `reference/<action>.md`):
+  - exactly one skill directory, with `name` frontmatter `problem-based-srs`,
+  - one reference file per action (filename == action), each with no frontmatter,
   - a description contract and a body line cap,
   - **no legacy slash-commands** (`/customer-problems`, `/customer-needs`, …) and
     no `Use skill:` handoffs — i.e. the unified `/problem-based-srs <action>`
     refactor did not regress,
   - all relative links resolve on disk,
-  - per-skill methodology tokens are present, and the orchestrator lists all 8
-    named actions.
+  - per-action methodology tokens are present, and the orchestrator lists all 8
+    named actions and routes each to its `reference/<action>.md`.
 
 Run them:
 
@@ -62,7 +64,7 @@ Run them:
 ```bash
 RUN_SKILL_EVALS=1 node run-evals.mjs
 node run-evals.mjs --force                 # ignore the env gate
-node run-evals.mjs customer-needs          # a single case
+node run-evals.mjs needs                   # a single case
 node run-evals.mjs --no-judge              # rubric only
 node run-evals.mjs --verbose               # show prompt, run metadata, artifact, every check
 node run-evals.mjs -vv                      # even more verbose (no truncation)
@@ -72,9 +74,9 @@ PowerShell helper:
 
 ```powershell
 pwsh evals/scripts/run-evals.ps1
-pwsh evals/scripts/run-evals.ps1 -Case customer-needs
+pwsh evals/scripts/run-evals.ps1 -Case needs
 pwsh evals/scripts/run-evals.ps1 -NoJudge -Model gpt-5.4
-pwsh evals/scripts/run-evals.ps1 -Case customer-problems -Detailed   # verbose troubleshooting
+pwsh evals/scripts/run-evals.ps1 -Case problems -Detailed   # verbose troubleshooting
 pwsh evals/scripts/run-evals.ps1 -Trace                              # full prompt + full artifact
 ```
 
@@ -134,8 +136,8 @@ Create `cases/<name>.case.mjs` with a default export:
 
 ```js
 export default {
-  name: "my-skill",
-  skill: "my-skill",            // skills/<slug>
+  name: "my-action",
+  skill: "my-action",           // skills/problem-based-srs/reference/<action>.md
   threshold: 0.7,
   async buildPrompt(skillText) { /* return the prompt string */ },
   rubric: [ /* graders.check(...) entries */ ],

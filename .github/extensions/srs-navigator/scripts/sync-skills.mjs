@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Refresh the bundled methodology skill markdown files that the canvas extension
 // ships with. The SRS Navigator lives in the Problem-Based-SRS monorepo, so the
-// canonical skills are right here at skills/<slug>/SKILL.md (four levels up from
-// this script). This copies them into the extension's bundled skills/ directory
-// so a standalone/packaged install still carries the methodology.
+// canonical skill is right here at skills/problem-based-srs/ (SKILL.md +
+// reference/<action>.md, four levels up from this script). This copies them into
+// the extension's bundled skills/ directory so a standalone/packaged install
+// still carries the methodology.
 //
 // At runtime the extension reads the canonical skills directly; this bundle is
 // only needed when the extension is installed on its own outside the monorepo.
@@ -25,16 +26,18 @@ const skillsDir = resolve(__dirname, "..", "skills");
 const repoRoot = resolve(__dirname, "..", "..", "..", "..");
 
 // The canonical list of bundled skill files (kept in sync with extension.mjs).
+// "problem-based-srs.md" is the orchestrator (skills/problem-based-srs/SKILL.md);
+// the rest are the per-action reference docs (reference/<action>.md).
 const FILES = [
   "business-context.md",
-  "customer-problems.md",
+  "problems.md",
   "software-glance.md",
-  "customer-needs.md",
+  "needs.md",
   "software-vision.md",
   "functional-requirements.md",
-  "complexity-analysis.md",
+  "complexity.md",
   "problem-based-srs.md",
-  "zigzag-validator.md",
+  "validate.md",
 ];
 
 async function main() {
