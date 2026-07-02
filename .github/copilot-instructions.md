@@ -111,10 +111,15 @@ git push origin main                         # Push to trunk
 **CRITICAL: Always plan and get confirmation before executing tasks.**
 
 1. **Understand the Request**: Clarify what the user wants to accomplish
-2. **Create a Plan**: Present a clear plan of what will be changed/created/deleted
-3. **Ask for Confirmation**: Wait for user approval before executing
-4. **Execute**: Only after confirmation, proceed with the changes
-5. **Verify**: Show what was done and confirm completion
+2. **Identify the Target Module**: Changes may land in one of two places — the **Canvas App**
+   (the SRS Navigator canvas extension in `.github/extensions/srs-navigator/`) or the
+   **GitHub Page** (the project webpage in `docs/`, published via GitHub Pages). Prompt the
+   user to state which module they want to change. If it is not clear from the request, ask.
+   If the user gives no clear reply, apply the change to **both** modules.
+3. **Create a Plan**: Present a clear plan of what will be changed/created/deleted
+4. **Ask for Confirmation**: Wait for user approval before executing
+5. **Execute**: Only after confirmation, proceed with the changes
+6. **Verify**: Show what was done and confirm completion
 
 **Example iteration workflow:**
 ```
