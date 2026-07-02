@@ -149,13 +149,41 @@ export function renderGraphHtml(graphData, options = {}) {
     .badge {
       display: inline-flex;
       align-items: center;
+      gap: 6px;
       padding: var(--space-xs) var(--space-sm);
       border-radius: 9999px;
+      border: 1px solid transparent;
+      font-family: inherit;
       font-size: 12px;
       font-weight: 600;
       background: oklch(0.55 0.16 48);
       color: white;
       white-space: nowrap;
+      cursor: pointer;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+    .badge .badge-cp-count {
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .badge:hover { background: oklch(0.50 0.16 48); transform: translateY(-1px); }
+    .badge:active { transform: translateY(0); }
+    .badge[aria-pressed="true"] {
+      background: oklch(0.46 0.17 48);
+      box-shadow: 0 0 0 3px oklch(0.55 0.16 48 / 0.28);
+    }
+    .badge[disabled] { cursor: default; opacity: 0.75; }
+    .badge[disabled]:hover { background: oklch(0.55 0.16 48); transform: none; }
+    /* Idle affordance: a soft amber ring invites the click, then stops after use. */
+    @keyframes badge-invite {
+      0%, 100% { box-shadow: 0 0 0 0 oklch(0.55 0.16 48 / 0); }
+      50% { box-shadow: 0 0 0 5px oklch(0.55 0.16 48 / 0.24); }
+    }
+    .badge.invite { animation: badge-invite 2.4s ease-in-out infinite; }
+    .badge.invite:hover, .badge[aria-pressed="true"].invite { animation: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .badge.invite { animation: none; }
     }
     .app-version {
       font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -808,6 +836,37 @@ export function renderGraphHtml(graphData, options = {}) {
       animation: hotspot-pulse 2s ease-in-out infinite;
       pointer-events: none;
     }
+
+    /* Customer-Problem highlight ring — shown when the CP badge is toggled on */
+    @keyframes cp-ring-pulse {
+      0%, 100% { r: 30; opacity: 0.85; }
+      50% { r: 38; opacity: 0.30; }
+    }
+    .cp-ring {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+    }
+    .node.problem-active .cp-ring {
+      opacity: 0.85;
+      animation: cp-ring-pulse 1.8s ease-in-out infinite;
+    }
+
+    /* Tier lane guides — reinforce the top-down CP -> CN -> Requirement decomposition */
+    .tier-label {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      pointer-events: none;
+      user-select: none;
+    }
+    .tier-divider { pointer-events: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .node.problem-active .cp-ring { animation: none; opacity: 0.6; r: 32; }
+    }
     @media (prefers-reduced-motion: reduce) {
       .hotspot-ring { animation: none; opacity: 0.25; r: 28; }
       *, *::before, *::after {
@@ -1417,7 +1476,7 @@ export function renderGraphHtml(graphData, options = {}) {
     <div class="toolbar-row">
       <div class="title-section">
         <h1>Problem-Based SRS</h1>
-        <span class="badge" id="problem-badge"></span>
+        <button class="badge" id="problem-badge" type="button" aria-pressed="false" aria-label="Highlight customer problems in the graph"></button>
         ${APP_VERSION ? `<a class="app-version" href="${REPO_URL}/releases" target="_blank" rel="noopener" title="Version ${escapeHtml(APP_VERSION)} — view releases" aria-label="Version ${escapeHtml(APP_VERSION)}, view releases">v${escapeHtml(APP_VERSION)}</a>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -1591,9 +1650,42 @@ export function renderGraphHtml(graphData, options = {}) {
       return;
     }
 
-    // Problem badge
+    // Problem badge — animated count + click-to-highlight
+    let problemHighlight = false;
     const problemCount = graphData.nodes.filter(n => n.type === "problem").length;
-    document.getElementById("problem-badge").textContent = problemCount + " Customer Problem" + (problemCount !== 1 ? "s" : "");
+    const problemBadge = document.getElementById("problem-badge");
+    (function initProblemBadge() {
+      const labelText = "Customer Problem" + (problemCount !== 1 ? "s" : "");
+      problemBadge.innerHTML = '<span class="badge-cp-count">0</span><span class="badge-cp-label">' + labelText + '</span>';
+      const countEl = problemBadge.querySelector(".badge-cp-count");
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Count-up: the tally rises from 0 so the number reads as a live measure.
+      let introPlayed = false;
+      try { introPlayed = sessionStorage.getItem("srsIntroPlayed") === "1"; } catch (e) {}
+      if (reduce || introPlayed || problemCount === 0) {
+        countEl.textContent = problemCount;
+      } else {
+        const dur = Math.min(900, 320 + problemCount * 55);
+        const startT = performance.now();
+        const step = (now) => {
+          const t = Math.min(1, (now - startT) / dur);
+          const eased = 1 - Math.pow(1 - t, 3);
+          countEl.textContent = Math.round(eased * problemCount);
+          if (t < 1) requestAnimationFrame(step);
+          else countEl.textContent = problemCount;
+        };
+        requestAnimationFrame(step);
+      }
+
+      if (problemCount === 0) {
+        problemBadge.setAttribute("disabled", "");
+        problemBadge.setAttribute("aria-disabled", "true");
+        return;
+      }
+      // Idle invite pulse hints the badge is interactive; it stops after first use.
+      if (!reduce) problemBadge.classList.add("invite");
+    })();
 
     // Type indicators
     function updateTypeIndicators() {
@@ -1792,11 +1884,57 @@ export function renderGraphHtml(graphData, options = {}) {
 
     let hotspotFilter = null;
 
+    // === Hierarchical layout: Customer Problems on top, decomposing downward ===
+    // Tier 0 = Customer Problem (WHY), tier 1 = Customer Need (WHAT),
+    // tier 2 = Requirements (HOW). A strong vertical force banks each type into
+    // a horizontal lane so the graph reads top-down as a decomposition tree.
+    const TIER_OF = (t) => t === "problem" ? 0 : t === "need" ? 1 : 2;
+    const TIER_META = [
+      { key: "problem", label: "Customer Problems" },
+      { key: "need", label: "Customer Needs" },
+      { key: "req", label: "Requirements" }
+    ];
+    let layoutW = width;
+    let layoutH = height;
+    const tierY = (t) => (layoutH / (TIER_META.length + 1)) * (TIER_OF(t) + 1);
+
     const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id).distance(150))
-      .force("charge", d3.forceManyBody().strength(-400))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(d => (d._radius || 22) + 35));
+      .force("link", d3.forceLink(links).id(d => d.id).distance(110).strength(0.28))
+      .force("charge", d3.forceManyBody().strength(-380))
+      .force("x", d3.forceX(() => layoutW / 2).strength(0.045))
+      .force("y", d3.forceY(d => tierY(d.type)).strength(0.55))
+      .force("collision", d3.forceCollide().radius(d => (d._radius || 22) + 30));
+
+    // Tier lane guides: a hairline divider + label per tier, drawn behind the
+    // graph so panning/zooming keeps them anchored to the decomposition bands.
+    const laneGroup = g.append("g").attr("class", "lane-group").attr("pointer-events", "none");
+    function renderLanes() {
+      laneGroup.selectAll("*").remove();
+      const span = Math.max(layoutW, 2400);
+      const x0 = layoutW / 2 - span / 2;
+      TIER_META.forEach((tier, i) => {
+        const y = (layoutH / (TIER_META.length + 1)) * (i + 1);
+        if (i > 0) {
+          const dividerY = y - (layoutH / (TIER_META.length + 1)) / 2;
+          laneGroup.append("line")
+            .attr("class", "tier-divider")
+            .attr("x1", x0).attr("x2", x0 + span)
+            .attr("y1", dividerY).attr("y2", dividerY)
+            .attr("stroke", "oklch(0.72 0.02 240)")
+            .attr("stroke-width", 1)
+            .attr("stroke-dasharray", "2,8")
+            .attr("opacity", 0.5);
+        }
+        laneGroup.append("text")
+          .attr("class", "tier-label")
+          .attr("x", 76)
+          .attr("y", y - (layoutH / (TIER_META.length + 1)) / 2 + 20)
+          .attr("fill", (nodeColors[tier.key === "req" ? "fr" : tier.key] || {}).fill || "oklch(0.55 0.02 240)")
+          .attr("opacity", 0.55)
+          .text(tier.label);
+      });
+    }
+    renderLanes();
 
     // Hull group (for selection highlighting)
     const hullGroup = g.append("g").attr("class", "hull-group");
@@ -1838,6 +1976,16 @@ export function renderGraphHtml(graphData, options = {}) {
       .attr("fill", "none")
       .attr("stroke", d => d._hotspotSeverity === 3 ? "oklch(0.61 0.18 48)" : "oklch(0.53 0.10 205)")
       .attr("stroke-width", 2);
+
+    // Customer-Problem highlight ring — hidden until the CP badge is toggled on.
+    nodeElements.filter(d => d.type === "problem")
+      .insert("circle", ":first-child")
+      .attr("class", "cp-ring")
+      .attr("cx", 0).attr("cy", 0)
+      .attr("r", 30)
+      .attr("fill", "none")
+      .attr("stroke", "oklch(0.61 0.18 48)")
+      .attr("stroke-width", 2.5);
 
     // Icon via foreignObject (like original)
     nodeElements.append("foreignObject")
@@ -1894,6 +2042,7 @@ export function renderGraphHtml(graphData, options = {}) {
 
     nodeElements.on("click", (event, d) => {
       event.stopPropagation();
+      if (problemHighlight) setProblemHighlight(false);
       selectedNode = d.id;
       showDetail(d);
       updateVisibility();
@@ -2491,16 +2640,21 @@ export function renderGraphHtml(graphData, options = {}) {
         const matchesSearch = !searchTerm || d.id.toLowerCase().includes(searchTerm) || d.label.toLowerCase().includes(searchTerm);
         const isSelected = d.id === selectedNode;
         const isDownstream = downstreamIds.has(d.id);
+        const isProblem = d.type === "problem";
         const matchesHotspot = !hotspotFilter || d._hotspot === hotspotFilter;
-        const shouldDim = (isFiltered && !isDownstream) || (searchTerm && !matchesSearch) || (hotspotFilter && !matchesHotspot);
+        const dimForCP = problemHighlight && !isProblem;
+        const shouldDim = (isFiltered && !isDownstream) || (searchTerm && !matchesSearch) || (hotspotFilter && !matchesHotspot) || dimForCP;
+        const cpActive = problemHighlight && isProblem && !shouldDim;
 
         if (!shouldDim && searchTerm && matchesSearch && !firstMatch) firstMatch = d;
 
+        el.classed("problem-active", cpActive);
+
         el.select("rect")
           .transition().duration(250)
-          .attr("stroke", isSelected ? "oklch(0.53 0.10 205)" : isDownstream && !isSelected ? "oklch(0.63 0.09 205)" : (nodeColors[d.type]?.stroke || "#ccc"))
-          .attr("stroke-width", isSelected ? 2.5 : isDownstream ? 2 : 1.5)
-          .attr("fill", isSelected ? "oklch(0.95 0.03 205)" : "white");
+          .attr("stroke", isSelected ? "oklch(0.53 0.10 205)" : cpActive ? "oklch(0.61 0.18 48)" : isDownstream && !isSelected ? "oklch(0.63 0.09 205)" : (nodeColors[d.type]?.stroke || "#ccc"))
+          .attr("stroke-width", isSelected ? 2.5 : cpActive ? 2.5 : isDownstream ? 2 : 1.5)
+          .attr("fill", isSelected ? "oklch(0.95 0.03 205)" : cpActive ? "oklch(0.97 0.03 48)" : "white");
 
         el.select("foreignObject")
           .transition().duration(250)
@@ -2559,7 +2713,31 @@ export function renderGraphHtml(graphData, options = {}) {
           svg.transition().duration(750).call(zoom.transform, transform);
         }
       }
+
+      // Keep the full decomposition visible while the CP tier is spotlighted —
+      // no auto-zoom, so the engineer can trace each problem down to its needs
+      // and requirements. Dimming + the pulsing rings carry the focus.
     }
+
+    // Toggle the Customer-Problem spotlight from the badge.
+    function setProblemHighlight(on) {
+      problemHighlight = !!on;
+      problemBadge.setAttribute("aria-pressed", problemHighlight ? "true" : "false");
+      problemBadge.classList.remove("invite");
+      if (problemHighlight) {
+        announce("Highlighting " + problemCount + " customer problem" + (problemCount !== 1 ? "s" : "") + ".");
+      } else {
+        announce("Customer problem highlight cleared.");
+      }
+      updateVisibility();
+    }
+
+    problemBadge.addEventListener("click", () => {
+      if (problemCount === 0) return;
+      // Selecting a node and highlighting are mutually exclusive views.
+      if (selectedNode) { selectedNode = null; hideDetail(); }
+      setProblemHighlight(!problemHighlight);
+    });
 
     // Simulation tick
     simulation.on("tick", () => {
@@ -2644,7 +2822,11 @@ export function renderGraphHtml(graphData, options = {}) {
 
     // Handle resize
     window.addEventListener("resize", () => {
-      simulation.force("center", d3.forceCenter(container.clientWidth / 2, container.clientHeight / 2));
+      layoutW = container.clientWidth;
+      layoutH = container.clientHeight;
+      simulation.force("x", d3.forceX(() => layoutW / 2).strength(0.045));
+      simulation.force("y", d3.forceY(d => tierY(d.type)).strength(0.55));
+      renderLanes();
       simulation.alpha(0.3).restart();
     });
 

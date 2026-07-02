@@ -161,6 +161,23 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes('id="problem-badge"'));
   });
 
+  it("renders the CP badge as an interactive toggle button", () => {
+    const html = renderGraphHtml(sampleGraph);
+    assert.match(html, /<button class="badge" id="problem-badge"[^>]*aria-pressed="false"/,
+      "problem badge is a button with an aria-pressed toggle state");
+    assert.ok(html.includes("setProblemHighlight"), "badge wires a highlight toggle");
+    assert.ok(html.includes("badge-cp-count"), "badge count is animated via a dedicated span");
+  });
+
+  it("lays out the graph hierarchically with tier lanes (CPs on top)", () => {
+    const html = renderGraphHtml(sampleGraph);
+    // Vertical tier force replaces the old radial center force
+    assert.ok(html.includes('d3.forceY'), "uses a vertical tier force");
+    assert.ok(!html.includes('d3.forceCenter'), "no longer uses radial centering");
+    assert.ok(html.includes("Customer Problems") && html.includes("Requirements"),
+      "renders tier lane labels for the decomposition");
+  });
+
   it("includes Space Grotesk and JetBrains Mono fonts", () => {
     const html = renderGraphHtml(sampleGraph);
     assert.ok(html.includes("Space+Grotesk"));
