@@ -24,7 +24,7 @@
                 <li><a href="#problem">The problem</a></li>
                 <li><a href="#methodology">How it works</a></li>
                 <li><a href="#classification">Classification</a></li>
-                <li><a href="app.html">The app</a></li>
+                <li><a href="docs.html">Docs</a></li>
                 <li><a href="#start">Get started</a></li>
                 <li><a href="#commands">Commands</a></li>
                 <li><a href="#research">Research</a></li>
@@ -49,7 +49,7 @@
             </div>
             <div class="hero-actions">
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-primary">View on GitHub</a>
-                <a href="app.html" class="btn-ghost">Explore the app</a>
+                <a href="docs.html#navigator" class="btn-ghost">Explore the app</a>
             </div>
             <div class="hero-meta">
                 <span class="hero-badge">AgentSkills standard</span>
@@ -113,7 +113,7 @@
                             <li>Health metrics surface orphaned problems and unmet needs</li>
                         </ul>
                         <div class="part-cta">
-                            <a class="part-link" href="app.html">Explore the app <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                            <a class="part-link" href="docs.html#navigator">Explore the app <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
                         </div>
                     </div>
                 </div>
@@ -262,6 +262,39 @@
                             <p class="class-desc">Low priority. Missed improvement opportunity if unsolved. Build this last.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- The app: SRS Navigator overview -->
+        <section id="app" class="section">
+            <div class="wrap">
+                <div class="feature-block app-band">
+                    <div class="feature-copy reveal">
+                        <span class="feature-eyebrow">The SRS Navigator</span>
+                        <h2>Your spec, as a living graph</h2>
+                        <p>The methodology also ships as a GitHub Copilot canvas. It renders every customer problem, need, and requirement as one connected graph, then lets you decompose and iterate on it together with the agent, without leaving the panel.</p>
+                        <ul class="band-caps">
+                            <li><span class="bc-dot" style="--c: var(--step-why)" aria-hidden="true"></span><span><strong>Force-directed graph</strong> of every artifact and its traceability.</span></li>
+                            <li><span class="bc-dot" style="--c: var(--step-how)" aria-hidden="true"></span><span><strong>Inline action bar</strong> to derive or decompose any node with the agent.</span></li>
+                            <li><span class="bc-dot" style="--c: var(--step-nfr)" aria-hidden="true"></span><span><strong>Health metrics</strong> that surface orphaned problems and unmet needs.</span></li>
+                        </ul>
+                        <div class="app-actions">
+                            <a href="docs.html#navigator" class="btn-primary">Read the app docs</a>
+                            <a href="https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator" class="btn-ghost">Get the extension</a>
+                        </div>
+                    </div>
+                    <figure class="feature-media reveal">
+                        <div class="app-frame">
+                            <div class="app-frame-bar">
+                                <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
+                            </div>
+                            <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy" decoding="async"
+                                 alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                        </div>
+                    </figure>
                 </div>
             </div>
         </section>
