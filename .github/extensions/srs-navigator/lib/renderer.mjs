@@ -55,7 +55,7 @@ export function renderGraphHtml(graphData, options = {}) {
   <title>${escapeHtml(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://d3js.org/d3.v7.min.js"><\/script>
   <style>
     :root {
@@ -85,11 +85,15 @@ export function renderGraphHtml(graphData, options = {}) {
       --space-2xl: 32px;
       --transition-fast: 0.15s ease-out;
       --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-body: 'Figtree', system-ui, -apple-system, sans-serif;
+      --font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     body {
-      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      font-family: var(--font-body);
       background: var(--background);
       color: var(--foreground);
       overflow: hidden;
@@ -388,9 +392,17 @@ export function renderGraphHtml(graphData, options = {}) {
       background: var(--background);
       min-height: 0;
     }
-    .view-wrap.mode-list .list-view { display: flex; }
+    .view-wrap.mode-list .list-view {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 0px;
+      transition: grid-template-rows var(--transition-normal);
+    }
+    .view-wrap.mode-list .list-view:has(.detail-panel.active) {
+      grid-template-rows: minmax(0, 1fr) clamp(240px, 44vh, 460px);
+    }
     .list-scroll {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       padding: var(--space-xl) var(--space-lg) var(--space-2xl);
     }
@@ -653,7 +665,7 @@ export function renderGraphHtml(graphData, options = {}) {
       pointer-events: none;
     }
     .node text.node-label {
-      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-family: var(--font-body);
       font-size: 10px;
       font-weight: 500;
       fill: oklch(0.30 0.02 240);
@@ -710,18 +722,16 @@ export function renderGraphHtml(graphData, options = {}) {
       opacity: 1;
       transition: transform var(--transition-normal), opacity var(--transition-normal), visibility 0s 0s;
     }
-    /* List mode: bottom drawer that pushes the tree above it (flex child of #list-view) */
+    /* List mode: the tree scrolls in the top grid row; the shared #detail-panel docks
+       as a bottom drawer. The container's grid-template-rows animates between lengths
+       (0px -> clamp), so the drawer opens without animating a layout property on the
+       panel itself. */
     .mode-list .detail-panel {
-      flex: 0 0 auto;
       width: 100%;
-      height: 0;
+      min-height: 0;
       overflow: hidden;
       border-top: 1px solid var(--border);
       box-shadow: 0 -6px 24px oklch(0 0 0 / 0.07);
-      transition: height var(--transition-normal);
-    }
-    .mode-list .detail-panel.active {
-      height: clamp(240px, 44vh, 460px);
     }
     .detail-header {
       display: flex;
@@ -1081,6 +1091,7 @@ export function renderGraphHtml(graphData, options = {}) {
       transition: background var(--transition-fast), box-shadow var(--transition-fast);
     }
     .conn-badge:hover { box-shadow: 0 1px 4px oklch(0 0 0 / 0.08); }
+    .conn-badge:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
     /* Hull polygon for selection */
     .hull-path {
       pointer-events: none;
@@ -1543,7 +1554,7 @@ export function renderGraphHtml(graphData, options = {}) {
       border: none;
       background: transparent;
       color: oklch(0.94 0.02 265);
-      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-family: var(--font-body);
       font-size: 12px;
       font-weight: 400;
       padding: 0 12px;
@@ -2241,8 +2252,8 @@ export function renderGraphHtml(graphData, options = {}) {
           .attr("class", "tier-label")
           .attr("x", 76)
           .attr("y", y - (layoutH / (TIER_META.length + 1)) / 2 + 20)
-          .attr("fill", (nodeColors[tier.key === "req" ? "fr" : tier.key] || {}).fill || "oklch(0.55 0.02 240)")
-          .attr("opacity", 0.55)
+          .attr("fill", (nodeColors[tier.key === "req" ? "fr" : tier.key] || {}).stroke || "oklch(0.42 0.02 240)")
+          .attr("opacity", 1)
           .text(tier.label);
       });
     }
@@ -2357,6 +2368,12 @@ export function renderGraphHtml(graphData, options = {}) {
       if (problemHighlight) setProblemHighlight(false);
       selectedNode = d.id;
       showDetail(d);
+      // Panel composer takes over for this node — dismiss the floating hover bar
+      // so only one composer is ever shown at a time.
+      actionBarLocked = false;
+      actionBarInput.value = "";
+      actionBar.classList.remove("pinned");
+      hideActionBar();
       updateVisibility();
     });
 
@@ -2430,6 +2447,10 @@ export function renderGraphHtml(graphData, options = {}) {
     }
 
     function showActionBar(node, svgElement) {
+      // The floating bar is the quick-action affordance for a hovered node. Once a
+      // node's detail panel is open, its in-panel composer is the single composer
+      // for that node, so suppress the floating bar for the selected node.
+      if (node.id === selectedNode) return;
       if (actionBarLocked && actionBarNode && actionBarNode.id === node.id) return;
       actionBarNode = node;
 
@@ -2893,7 +2914,7 @@ export function renderGraphHtml(graphData, options = {}) {
           for (const id of upstream) {
             const n = nodes.find(x => x.id === id);
             const c = n ? nodeColors[n.type] : nodeColors.need;
-            html += '<span class="conn-badge" data-id="' + escapeHtml(id) + '" style="border-color:' + c.fill + ';color:' + c.fill + '">' + escapeHtml(id) + '</span>';
+            html += '<span class="conn-badge" role="button" tabindex="0" title="Go to ' + escapeHtml(id) + '" data-id="' + escapeHtml(id) + '" style="border-color:' + c.fill + ';color:' + c.fill + '">' + escapeHtml(id) + '</span>';
           }
           html += '</div>';
         }
@@ -2902,7 +2923,7 @@ export function renderGraphHtml(graphData, options = {}) {
           for (const id of downstream) {
             const n = nodes.find(x => x.id === id);
             const c = n ? nodeColors[n.type] : nodeColors.need;
-            html += '<span class="conn-badge" data-id="' + escapeHtml(id) + '" style="border-color:' + c.fill + ';color:' + c.fill + '">' + escapeHtml(id) + '</span>';
+            html += '<span class="conn-badge" role="button" tabindex="0" title="Go to ' + escapeHtml(id) + '" data-id="' + escapeHtml(id) + '" style="border-color:' + c.fill + ';color:' + c.fill + '">' + escapeHtml(id) + '</span>';
           }
           html += '</div>';
         }
@@ -2911,9 +2932,13 @@ export function renderGraphHtml(graphData, options = {}) {
 
       document.getElementById("panel-content").innerHTML = html;
       document.querySelectorAll(".conn-badge").forEach(el => {
-        el.addEventListener("click", () => {
+        const go = () => {
           const target = nodes.find(n => n.id === el.dataset.id);
           if (target) { selectedNode = target.id; showDetail(target); updateVisibility(); }
+        };
+        el.addEventListener("click", go);
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
         });
       });
 

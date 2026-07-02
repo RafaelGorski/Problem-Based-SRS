@@ -188,9 +188,10 @@ describe("renderGraphHtml", () => {
       "renders tier lane labels for the decomposition");
   });
 
-  it("includes Space Grotesk and JetBrains Mono fonts", () => {
+  it("includes Bricolage Grotesque, Figtree, and JetBrains Mono fonts", () => {
     const html = renderGraphHtml(sampleGraph);
-    assert.ok(html.includes("Space+Grotesk"));
+    assert.ok(html.includes("Bricolage+Grotesque"));
+    assert.ok(html.includes("Figtree"));
     assert.ok(html.includes("JetBrains+Mono"));
   });
 

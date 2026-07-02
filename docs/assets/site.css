@@ -465,14 +465,6 @@
         .app-frame img { display: block; width: 100%; height: auto; }
         .app-actions { margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
-        /* ── Iterate section: stacked annotated screenshots ── */
-        .shot-stack { display: grid; gap: var(--space-xl); margin-top: var(--space-xl); }
-        .shot figure { margin: 0; }
-        .shot-copy { margin-bottom: var(--space-md); }
-        .shot-copy h3 { font-size: var(--text-lg); margin: 0 0 0.4rem; }
-        .shot-copy p { color: var(--muted); max-width: 60ch; }
-        .shot figcaption { margin-top: var(--space-sm); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
-
         /* ── Footer CTA ── */
         /* ── Footer CTA — drenched dark panel, the bold close ── */
         .footer-cta {
@@ -710,15 +702,22 @@
 .action-pill.is-decompose { color: var(--primary); border-color: color-mix(in oklch, var(--primary) 30%, transparent); }
 
 /* Health metric chips */
-.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-md); margin-top: var(--space-lg); }
-.metric {
-    padding: var(--space-md); background: var(--bg-elevated);
-    border: 1px solid var(--surface-border); border-radius: 10px;
+.metric-grid {
+    display: flex; margin-top: var(--space-lg);
+    background: var(--bg-elevated); border: 1px solid var(--surface-border);
+    border-radius: 12px; overflow-x: auto;
 }
-.metric .m-count { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: var(--ink-heading); }
-.metric .m-count.alert { color: oklch(0.55 0.19 30); }
-.metric .m-count.ok { color: oklch(0.45 0.15 145); }
-.metric .m-label { font-size: var(--text-sm); color: var(--muted); margin-top: 0.1em; }
+.metric {
+    flex: 1 0 auto; display: flex; align-items: baseline; gap: 0.6ch;
+    padding: var(--space-md) var(--space-lg);
+    border-right: 1px solid var(--surface-border); white-space: nowrap;
+}
+.metric:last-child { border-right: 0; }
+.metric.is-alert { background: oklch(0.55 0.19 30 / 0.06); }
+.metric .m-count { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; color: var(--ink-heading); line-height: 1; }
+.metric .m-count.alert { color: oklch(0.5 0.19 30); }
+.metric .m-count.ok { color: oklch(0.42 0.15 145); }
+.metric .m-label { font-size: var(--text-sm); color: var(--ink-body); margin: 0; }
 
 @media (max-width: 640px) {
     .action-row { grid-template-columns: 1fr; gap: var(--space-sm); }

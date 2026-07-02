@@ -25,18 +25,18 @@ colors:
   demo-badge-text: "oklch(0.35 0.12 80)"
 typography:
   display:
-    fontFamily: "Space Grotesk, system-ui, -apple-system, sans-serif"
+    fontFamily: "Bricolage Grotesque, Figtree, system-ui, sans-serif"
     fontSize: "22px"
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "-0.02em"
   body:
-    fontFamily: "Space Grotesk, system-ui, -apple-system, sans-serif"
+    fontFamily: "Figtree, system-ui, -apple-system, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.65
   label:
-    fontFamily: "Space Grotesk, system-ui, -apple-system, sans-serif"
+    fontFamily: "Figtree, system-ui, -apple-system, sans-serif"
     fontSize: "13px"
     fontWeight: 500
     lineHeight: 1.3
@@ -136,10 +136,11 @@ Warm problem hues cooling toward technical implementation (ember → teal → in
 
 ## 3. Typography
 
-**Body Font:** Space Grotesk (with system-ui, -apple-system, sans-serif fallback)
+**Display Font:** Bricolage Grotesque (with Figtree, system-ui, sans-serif fallback) — headings only
+**Body Font:** Figtree (with system-ui, -apple-system, sans-serif fallback)
 **Mono Font:** JetBrains Mono (with ui-monospace, monospace fallback)
 
-**Character:** Geometric precision meets technical readability. Space Grotesk carries the UI — its squared terminals and open apertures read clearly at small sizes without feeling clinical. JetBrains Mono handles identifiers (CP-1, FR-3, NFR-2) where character distinction matters.
+**Character:** Shared visual language with the project site. Bricolage Grotesque gives headings (page title, node titles) a confident display voice with expressive contrast; Figtree carries dense UI and body text with a high x-height that stays clear at small sizes; JetBrains Mono handles identifiers (CP-1, FR-3, NFR-2) where character distinction matters.
 
 ### Hierarchy
 - **Display** (700, 22px, 1.2): Page title only. One instance per view.
@@ -150,7 +151,7 @@ Warm problem hues cooling toward technical implementation (ember → teal → in
 - **Caption** (600, 11-12px, uppercase 0.04-0.06em tracking): Section headers in detail panel. Uppercase + tracking for structural hierarchy, not decoration.
 
 ### Named Rules
-**The Two-Family Rule.** Only Space Grotesk and JetBrains Mono. No additional typefaces. Weight variation (400/500/600/700) handles hierarchy within each family.
+**The Three-Family Rule.** Bricolage Grotesque (headings), Figtree (UI/body), and JetBrains Mono (identifiers). No additional typefaces. This mirrors the project site's type system so page and canvas speak one visual language. Weight variation handles hierarchy within each family.
 
 ## 4. Elevation
 
@@ -201,7 +202,7 @@ Hybrid: flat canvas with shadows reserved for elevated panels and modal overlays
 
 ### Node (Graph)
 - **Plate:** White rect with 1.5px colored border (node type color). SVG shadow filter for micro-elevation.
-- **Content:** Centered type icon (28px, colored via currentColor) + ID text (JetBrains Mono 11px) + truncated label (Space Grotesk 10px).
+- **Content:** Centered type icon (28px, colored via currentColor) + ID text (JetBrains Mono 11px) + truncated label (Figtree 10px).
 - **Hover:** brightness(1.04) filter.
 - **Links:** Dashed lines (5,5 dasharray), 1.5px stroke, 35% opacity. Neutral hue.
 
@@ -210,7 +211,7 @@ Hybrid: flat canvas with shadows reserved for elevated panels and modal overlays
 ### Do:
 - **Do** use the four semantic node colors exclusively for their assigned node types — never repurpose Ember for a warning or Rose for an error.
 - **Do** keep all interactive elements at 34px minimum height for touch and click targets.
-- **Do** use JetBrains Mono for any identifier-like content (node IDs, file paths, JSON keys) and Space Grotesk for everything else.
+- **Do** use JetBrains Mono for any identifier-like content (node IDs, file paths, JSON keys), Bricolage Grotesque for headings, and Figtree for everything else.
 - **Do** provide `prefers-reduced-motion` alternatives that collapse all animations to instant.
 - **Do** test every text element against its background for 4.5:1 contrast minimum.
 - **Do** use the shadow vocabulary exactly as specified — ambient-low for small floating controls, panel for slide-in surfaces, modal for dialogs.
