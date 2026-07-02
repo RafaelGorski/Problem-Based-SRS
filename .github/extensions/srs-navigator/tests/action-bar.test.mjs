@@ -7,7 +7,12 @@
 import { describe, it, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { renderGraphHtml } from "../lib/renderer.mjs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // --- Renderer Action Bar Tests ---
 
@@ -365,3 +370,27 @@ describe("Action Bar: Queue consume-once semantics", () => {
     assert.equal(queues.get(instanceId).length, 0);
   });
 });
+
+// --- List View Implement Action (server prompt) ---
+
+describe("List View: implement action prompt", () => {
+  const extSource = readFileSync(join(__dirname, "..", "extension.mjs"), "utf8");
+
+  it("buildActionPrompt branches on the implement action", () => {
+    assert.ok(extSource.includes('action.action === "implement"'),
+      "server must special-case the implement action");
+  });
+
+  it("implement prompt is an implementation task, not a skill slash-command", () => {
+    // The implement branch must not route through skillCommand (skill is null).
+    assert.ok(extSource.includes("implement ${action.nodeId} in code"));
+    assert.ok(extSource.includes("production-ready code"));
+    assert.ok(extSource.includes("do not rewrite the specification files"));
+  });
+
+  it("implement prompt preserves traceability to the requirement", () => {
+    assert.ok(extSource.includes("Preserve traceability"));
+    assert.ok(extSource.includes("${action.nodeId}"));
+  });
+});
+

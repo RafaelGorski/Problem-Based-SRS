@@ -380,6 +380,268 @@ export function renderGraphHtml(graphData, options = {}) {
       border-radius: calc(var(--radius) - 2px);
     }
     .zoom-controls .btn-icon svg { width: 15px; height: 15px; }
+
+    /* ===== Hierarchical List View ===== */
+    .list-view {
+      position: relative;
+      flex-direction: column;
+      background: var(--background);
+      min-height: 0;
+    }
+    .view-wrap.mode-list .list-view { display: flex; }
+    .list-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-xl) var(--space-lg) var(--space-2xl);
+    }
+    .list-scroll::-webkit-scrollbar { width: 8px; }
+    .list-scroll::-webkit-scrollbar-track { background: transparent; }
+    .list-scroll::-webkit-scrollbar-thumb { background: oklch(0.82 0 0); border-radius: 4px; }
+    .list-scroll::-webkit-scrollbar-thumb:hover { background: oklch(0.72 0 0); }
+    .list-inner { max-width: 960px; margin: 0 auto; }
+    .list-lead {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    .list-lead h2 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--foreground);
+    }
+    .list-lead .list-hint {
+      font-size: 12.5px;
+      color: var(--muted-foreground);
+    }
+
+    /* Tree groups + rows */
+    .tree-group { position: relative; }
+    .tree-children {
+      margin-left: 15px;
+      padding-left: 15px;
+      border-left: 1px solid var(--border);
+    }
+    .tree-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 7px var(--space-sm) 7px 4px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      position: relative;
+      transition: background var(--transition-fast);
+      min-height: 40px;
+    }
+    .tree-row:hover { background: var(--hover); }
+    .tree-row.selected {
+      background: oklch(0.53 0.10 205 / 0.10);
+      box-shadow: inset 0 0 0 1px oklch(0.53 0.10 205 / 0.35);
+    }
+    .tree-row.dimmed { opacity: 0.32; }
+    .tree-toggle {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--muted-foreground);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+    .tree-toggle:hover { background: oklch(0 0 0 / 0.06); color: var(--foreground); }
+    .tree-toggle svg { width: 14px; height: 14px; transition: transform var(--transition-fast); }
+    .tree-group.collapsed > .tree-row .tree-toggle svg { transform: rotate(-90deg); }
+    .tree-group.collapsed > .tree-children { display: none; }
+    .tree-toggle.leaf { visibility: hidden; cursor: default; }
+
+    .tree-badge {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .tree-badge svg { width: 12px; height: 12px; }
+    .tree-id {
+      flex-shrink: 0;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted-foreground);
+    }
+    .tree-label {
+      flex: 1;
+      min-width: 0;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--foreground);
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tree-complexity {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .tree-complexity .cbar {
+      width: 4px;
+      height: 12px;
+      border-radius: 1px;
+      background: var(--border);
+    }
+    .tree-complexity .cbar.filled { background: oklch(0.62 0.13 266); }
+    .tree-count {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      background: oklch(0 0 0 / 0.04);
+      border-radius: 9999px;
+      padding: 1px 8px;
+    }
+
+    /* Row actions — revealed on hover / keyboard focus, like the graph taskbar */
+    .tree-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+    .tree-row:hover .tree-actions,
+    .tree-row:focus-within .tree-actions,
+    .tree-row.selected .tree-actions { opacity: 1; }
+    @media (hover: none) { .tree-actions { opacity: 1; } }
+    .tree-act {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--foreground);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    }
+    .tree-act svg { width: 13px; height: 13px; }
+    .tree-act:hover { background: var(--hover); border-color: var(--muted); }
+    .tree-act.is-implement {
+      color: var(--primary);
+      border-color: oklch(0.45 0.16 266 / 0.35);
+      background: oklch(0.45 0.16 266 / 0.06);
+    }
+    .tree-act.is-implement:hover {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+
+    /* Unlinked / orphan grouping */
+    .tree-section-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: var(--space-lg) 0 var(--space-xs);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted-foreground);
+    }
+    .tree-section-label.warn { color: oklch(0.55 0.16 48); }
+    .tree-section-label svg { width: 13px; height: 13px; }
+
+    /* Empty state (e.g. no Customer Problems yet) */
+    .list-empty {
+      max-width: 460px;
+      margin: 8vh auto 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .list-empty .list-empty-icon {
+      width: 52px;
+      height: 52px;
+      color: var(--node-problem);
+      opacity: 0.9;
+    }
+    .list-empty h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+    .list-empty p { font-size: 14px; line-height: 1.6; color: var(--muted-foreground); }
+    .list-empty-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: var(--space-xs);
+      height: 38px;
+      padding: 0 16px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .list-empty-cta:hover { background: oklch(0.38 0.16 266); }
+    .list-empty-cta svg { width: 16px; height: 16px; }
+    .list-empty-form {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      width: 100%;
+      margin-top: var(--space-sm);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .list-empty-input {
+      flex: 1;
+      min-width: 220px;
+      height: 38px;
+      padding: 0 var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--foreground);
+      font-family: inherit;
+      font-size: 13.5px;
+    }
+    .list-empty-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px oklch(0.45 0.16 266 / 0.15);
+    }
+    .list-empty-form .list-empty-cta { margin-top: 0; flex-shrink: 0; }
+
     .node { cursor: pointer; }
     .node:hover { filter: brightness(1.04); }
     .node text.node-id {
@@ -406,29 +668,60 @@ export function renderGraphHtml(graphData, options = {}) {
       fill: none;
     }
 
-    /* Detail Panel — uses visibility+opacity for animatable show/hide */
+    /* View wrapper: holds the graph + list views and the shared detail panel.
+       The single #detail-panel docks right in graph mode and bottom in list mode
+       (relocated into #list-view via JS) so all composer/activity wiring is reused. */
+    .view-wrap {
+      position: relative;
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .view-wrap .graph-container,
+    .view-wrap .list-view { flex: 1; min-width: 0; }
+    .view-wrap.mode-graph .list-view { display: none; }
+    .view-wrap.mode-list .graph-container { display: none; }
+
+    /* Detail Panel — shared chrome; docking + slide is mode-scoped below. */
     .detail-panel {
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+    /* Graph mode: right-hand dock (uses visibility+opacity for animatable show/hide) */
+    .mode-graph .detail-panel {
       position: absolute;
       top: 0;
       right: 0;
       width: 360px;
       height: 100%;
-      background: var(--card);
       border-left: 1px solid var(--border);
       box-shadow: -4px 0 24px oklch(0 0 0 / 0.06);
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
       transform: translateX(100%);
       visibility: hidden;
       opacity: 0;
       transition: transform var(--transition-normal), opacity var(--transition-normal), visibility 0s 0.25s;
     }
-    .detail-panel.active {
+    .mode-graph .detail-panel.active {
       transform: translateX(0);
       visibility: visible;
       opacity: 1;
       transition: transform var(--transition-normal), opacity var(--transition-normal), visibility 0s 0s;
+    }
+    /* List mode: bottom drawer that pushes the tree above it (flex child of #list-view) */
+    .mode-list .detail-panel {
+      flex: 0 0 auto;
+      width: 100%;
+      height: 0;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -6px 24px oklch(0 0 0 / 0.07);
+      transition: height var(--transition-normal);
+    }
+    .mode-list .detail-panel.active {
+      height: clamp(240px, 44vh, 460px);
     }
     .detail-header {
       display: flex;
@@ -693,6 +986,12 @@ export function renderGraphHtml(graphData, options = {}) {
       transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
     }
     .composer-chip:hover { background: var(--hover); border-color: var(--muted); }
+    .composer-chip.staged {
+      background: oklch(0.53 0.10 205 / 0.12);
+      border-color: oklch(0.53 0.10 205 / 0.45);
+      color: oklch(0.42 0.10 205);
+      box-shadow: 0 0 0 1px oklch(0.53 0.10 205 / 0.25);
+    }
     .composer-chip svg { width: 13px; height: 13px; flex-shrink: 0; }
     .composer-input-row {
       display: flex;
@@ -1208,7 +1507,7 @@ export function renderGraphHtml(graphData, options = {}) {
       .badge { font-size: 11px; }
       .toolbar-row { gap: var(--space-sm); padding: var(--space-sm) var(--space-md); }
       .search-container { max-width: none; min-width: 100px; }
-      .detail-panel { width: 100%; }
+      .mode-graph .detail-panel { width: 100%; }
       .type-indicators { margin-left: var(--space-xs); padding-left: var(--space-xs); }
       .type-label { display: none; }
     }
@@ -1481,13 +1780,13 @@ export function renderGraphHtml(graphData, options = {}) {
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div class="btn-group">
-          <button class="btn active" id="btn-graph">
+          <button class="btn active" id="btn-graph" aria-pressed="true" title="Force-directed graph view">
             <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M200,152a31.84,31.84,0,0,0-19.53,6.68l-23.11-18A31.65,31.65,0,0,0,160,128a31.28,31.28,0,0,0-1.2-8.63l21.4-11.89A32,32,0,1,0,168,88a31.28,31.28,0,0,0,1.2,8.63l-21.4,11.89A32,32,0,0,0,96,104a31.65,31.65,0,0,0,2.64,12.68L75.53,134.68A32,32,0,1,0,88,168a31.65,31.65,0,0,0-2.64-12.68l23.11-18A31.84,31.84,0,0,0,128,160a32,32,0,0,0,19.53-6.68l23.11,18A32,32,0,1,0,200,152Z"/></svg>
             Graph
           </button>
-          <button class="btn" id="btn-hierarchy" disabled title="Hierarchy view (not available in canvas mode)">
+          <button class="btn" id="btn-hierarchy" aria-pressed="false" title="Hierarchical list view (Customer Problem → Need → Requirement)">
             <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M168,120H136V88h8a16,16,0,0,0,16-16V40a16,16,0,0,0-16-16H112A16,16,0,0,0,96,40V72a16,16,0,0,0,16,16h8v32H88a24,24,0,0,0-24,24v16H56a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16H80V144a8,8,0,0,1,8-8h80a8,8,0,0,1,8,8v16h-8a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V144A24,24,0,0,0,168,120Z"/></svg>
-            Hierarchy
+            List
           </button>
         </div>
         <a class="gh-icon-link" href="${REPO_URL}" target="_blank" rel="noopener" title="View source on GitHub" aria-label="View source on GitHub">${GITHUB_ICON}</a>
@@ -1509,6 +1808,7 @@ export function renderGraphHtml(graphData, options = {}) {
 
   <div class="health-bar" id="health-bar" role="toolbar" aria-label="Specification health metrics"></div>
 
+  <div class="view-wrap mode-graph" id="view-wrap">
   <div class="graph-container" id="graph-container">
     <svg id="graph-svg"></svg>
     <div class="zoom-controls">
@@ -1522,7 +1822,15 @@ export function renderGraphHtml(graphData, options = {}) {
         <svg viewBox="0 0 256 256" fill="currentColor"><path d="M216,48V96a8,8,0,0,1-8,8H160a8,8,0,0,1,0-16h28.69L163.31,62.63A80,80,0,0,0,48,128a8,8,0,0,1-16,0A96,96,0,0,1,174.63,51.37L200,76.69V48a8,8,0,0,1,16,0ZM224,120a8,8,0,0,0-8,8A80,80,0,0,1,92.69,193.37L68,168H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l25.37,25.32A96,96,0,0,0,232,128,8,8,0,0,0,224,120Z"/></svg>
       </button>
     </div>
-    <div class="detail-panel" id="detail-panel">
+  </div>
+
+  <div class="list-view" id="list-view">
+    <div class="list-scroll" id="list-scroll">
+      <div class="list-inner" id="list-inner"></div>
+    </div>
+  </div>
+
+  <div class="detail-panel" id="detail-panel">
       <div class="detail-header">
         <h2 id="detail-header-label">Node Details</h2>
         <button class="detail-close" id="close-panel" aria-label="Close details panel">
@@ -2217,6 +2525,8 @@ export function renderGraphHtml(graphData, options = {}) {
         addCN: "Derive a Customer Need from " + node.id,
         addFR: "Derive a Functional Requirement from " + node.id,
         addNFR: "Derive a Non-Functional Requirement from " + node.id,
+        implement: "Implement " + node.id + " in code",
+        establish_context: "Capture the first customer problem",
       };
       let base = actionKey.startsWith("decompose") ? labels.decompose : (labels[actionKey] || ("Run " + actionKey + " on " + node.id));
       if (prompt) base += " — " + prompt;
@@ -2230,10 +2540,11 @@ export function renderGraphHtml(graphData, options = {}) {
       if (!node) return false;
       prompt = (prompt || "").trim();
 
-      // Every node action is driven by the engineer's input: it tells the agent
-      // what to create. The button alone, with an empty field, must not trigger
-      // anything — prompt the engineer for detail and stop.
-      if (!prompt) {
+      // The "implement" action is self-contained: a fully-specified requirement
+      // needs no extra prose to act on. Every other node action is driven by the
+      // engineer's input — the button alone, with an empty field, must not trigger
+      // anything, so prompt the engineer for detail and stop.
+      if (!prompt && actionKey !== "implement") {
         showToast("Describe what to create, then click the action", { variant: "info" });
         if (actionBar.classList.contains("visible")) actionBarInput.focus();
         else composerInput.focus();
@@ -2257,9 +2568,14 @@ export function renderGraphHtml(graphData, options = {}) {
         context = "Derive a new Functional Requirement (FR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The FR must trace back to this need. Additional context: " + prompt;
       } else if (actionKey === "addNFR") {
         context = "Derive a new Non-Functional Requirement (NFR) from " + nodeLabel + " " + node.id + " (" + node.label + "). The NFR must trace back to this requirement. Additional context: " + prompt;
+      } else if (actionKey === "establish_context") {
+        context = "Establish the initial business context and capture the first Customer Problem(s) for this specification, following the Problem-Based SRS methodology. Engineer's description: " + prompt;
+      } else if (actionKey === "implement") {
+        context = "Implement " + nodeLabel + " " + node.id + " (" + node.label + ") in the codebase. Read the specification for full detail, then write production-ready code that satisfies this requirement while preserving its traceability to the parent needs and problems." + (prompt ? " Additional context: " + prompt : "");
       }
 
-      if (!context || !skillName) return false;
+      if (!context) return false;
+      if (actionKey !== "implement" && !skillName) return false;
 
       // Open the panel for this node so the conversation is visible, then log
       // the ask and a pending agent reply that we mutate through to completion.
@@ -2384,6 +2700,15 @@ export function renderGraphHtml(graphData, options = {}) {
     const composerActionsEl = document.getElementById("composer-actions");
     const composerInput = document.getElementById("composer-input");
     const composerForm = document.getElementById("activity-composer");
+    // When set, the next composer submit runs this staged action (e.g. a list-row
+    // "Decompose" that opened the panel and is waiting for the engineer's context)
+    // instead of the default free-form "submit".
+    let composerStaged = null;
+
+    function clearComposerStage() {
+      composerStaged = null;
+      composerActionsEl.querySelectorAll(".composer-chip.staged").forEach(c => c.classList.remove("staged"));
+    }
 
     function fmtTime(ts) {
       const d = new Date(ts);
@@ -2450,19 +2775,36 @@ export function renderGraphHtml(graphData, options = {}) {
     function renderComposer(node) {
       const actions = getActionsForType(node.type);
       composerActionsEl.innerHTML = "";
+      clearComposerStage();
       actions.forEach(action => {
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "composer-chip";
+        chip.dataset.actionKey = action.key;
         chip.innerHTML = action.icon + '<span>' + action.label + '</span>';
         chip.setAttribute("aria-label", action.label + " for " + node.id);
         chip.addEventListener("click", () => {
           performNodeAction(action.key, action.skill, node, composerInput.value.trim());
           composerInput.value = "";
+          clearComposerStage();
         });
         composerActionsEl.appendChild(chip);
       });
       composerInput.placeholder = "Describe a change to " + node.id + "…";
+    }
+
+    // Stage a chip action so the engineer's next Enter/submit runs it. Used by the
+    // list view's "Decompose" row button, which mirrors the graph taskbar: it opens
+    // the detail panel, focuses the composer, and waits for context before firing.
+    function stageComposerAction(node, actionKey) {
+      clearComposerStage();
+      composerStaged = { actionKey };
+      const chip = composerActionsEl.querySelector('.composer-chip[data-action-key="' + actionKey + '"]');
+      if (chip) chip.classList.add("staged");
+      if (actionKey.startsWith("decompose")) {
+        composerInput.placeholder = "Add context to decompose " + node.id + ", then press Enter…";
+      }
+      composerInput.focus();
     }
 
     // Open (or focus) the detail panel for a node and surface its activity.
@@ -2476,8 +2818,15 @@ export function renderGraphHtml(graphData, options = {}) {
       e.preventDefault();
       const node = nodes.find(n => n.id === currentDetailNodeId);
       if (!node) return;
-      performNodeAction("submit", null, node, composerInput.value.trim());
+      const text = composerInput.value.trim();
+      if (composerStaged) {
+        const stagedAction = getActionsForType(node.type).find(a => a.key === composerStaged.actionKey);
+        performNodeAction(composerStaged.actionKey, stagedAction ? stagedAction.skill : null, node, text);
+      } else {
+        performNodeAction("submit", null, node, text);
+      }
       composerInput.value = "";
+      clearComposerStage();
     });
     document.getElementById("activity-clear").addEventListener("click", () => {
       if (currentDetailNodeId) clearActivity(currentDetailNodeId);
@@ -2690,8 +3039,11 @@ export function renderGraphHtml(graphData, options = {}) {
           .style("display", bothVisible || isDownstream ? null : "none");
       });
 
-      // Auto-zoom to first match
-      if (firstMatch && searchTerm) {
+      // Auto-zoom to first match (skip when graph is hidden, e.g. list view:
+      // applying a zoom transform to a 0x0 SVG yields NaN transforms)
+      const graphContainer = document.getElementById("graph-container");
+      const graphVisible = graphContainer && graphContainer.clientWidth > 0 && graphContainer.clientHeight > 0;
+      if (firstMatch && searchTerm && graphVisible) {
         const scale = 1.2;
         const x = firstMatch.x || width / 2;
         const y = firstMatch.y || height / 2;
@@ -2700,7 +3052,7 @@ export function renderGraphHtml(graphData, options = {}) {
       }
 
       // Auto-zoom to hotspot group
-      if (hotspotFilter && !searchTerm && !selectedNode) {
+      if (hotspotFilter && !searchTerm && !selectedNode && graphVisible) {
         const hotNodes = nodes.filter(n => n._hotspot === hotspotFilter && n.x != null);
         if (hotNodes.length > 0) {
           const xs = hotNodes.map(n => n.x);
@@ -3021,13 +3373,252 @@ export function renderGraphHtml(graphData, options = {}) {
       }, 3000);
     }
 
+    // ===== Hierarchical List View =====
+    // A CP -> CN -> FR/NFR tree that reuses the single #detail-panel (relocated
+    // into #list-view as a bottom drawer) and the same performNodeAction dispatch
+    // as the graph taskbar. Rendered lazily the first time list mode is entered.
+    var viewWrap = document.getElementById("view-wrap");
+    var listView = document.getElementById("list-view");
+    var listInner = document.getElementById("list-inner");
+    var btnGraph = document.getElementById("btn-graph");
+    var btnList = document.getElementById("btn-hierarchy");
+    var listSearchEl = document.getElementById("search");
+    var listCollapsed = {}; // nodeId -> true when its subtree is collapsed
+    function setView(mode) { /* replaced below when list view is wired */ }
+
+    if (viewWrap && listView && listInner && btnGraph && btnList) {
+      var CARET_ICON = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z"/></svg>';
+      var IMPLEMENT_ICON = '<svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="80 96 32 128 80 160"/><polyline points="176 96 224 128 176 160"/><line x1="144" y1="72" x2="112" y2="184"/></svg>';
+      var WARN_ICON = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M236.8,188.09,149.35,36.22a24,24,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/></svg>';
+      var SPARK_ICON = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94l-51.65,19-19,51.61a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.65a15.92,15.92,0,0,1,29.88,0l19,51.65,51.61,19A15.78,15.78,0,0,1,208,144Z"/></svg>';
+
+      var listSmallIcon = function(type) {
+        return (nodeIcons[type] || "").replace('width="28" height="28"', 'width="12" height="12"');
+      };
+
+      // parent -> children from links: problem->need ("addresses"),
+      // need->fr/nfr ("implements"), plus same-type decompose links.
+      var buildTree = function() {
+        var byId = {};
+        nodes.forEach(function(n) { byId[n.id] = n; });
+        var childrenOf = {};
+        var hasParent = {};
+        links.forEach(function(link) {
+          var src = typeof link.source === "object" ? link.source.id : link.source;
+          var tgt = typeof link.target === "object" ? link.target.id : link.target;
+          if (!byId[src] || !byId[tgt]) return;
+          (childrenOf[src] = childrenOf[src] || []).push(tgt);
+          hasParent[tgt] = true;
+        });
+        var roots = nodes.filter(function(n) { return n.type === "problem"; });
+        var orphans = nodes.filter(function(n) { return n.type !== "problem" && !hasParent[n.id]; });
+        return { byId: byId, childrenOf: childrenOf, roots: roots, orphans: orphans };
+      };
+
+      var rowHtml = function(node, tree, seen) {
+        var colors = nodeColors[node.type] || nodeColors.need;
+        var kids = (tree.childrenOf[node.id] || []).filter(function(cid) { return !seen[cid] && tree.byId[cid]; });
+        var isCollapsed = !!listCollapsed[node.id];
+        var html = '<div class="tree-group' + (isCollapsed ? " collapsed" : "") + '" data-group="' + escapeHtml(node.id) + '">';
+        html += '<div class="tree-row" role="treeitem" tabindex="0" data-id="' + escapeHtml(node.id) + '" data-type="' + node.type + '" aria-label="' + escapeHtml(colors.fullLabel + " " + node.id + ": " + node.label) + '">';
+        if (kids.length > 0) {
+          html += '<button class="tree-toggle" type="button" data-toggle="' + escapeHtml(node.id) + '" aria-label="Toggle children of ' + escapeHtml(node.id) + '" aria-expanded="' + (isCollapsed ? "false" : "true") + '">' + CARET_ICON + '</button>';
+        } else {
+          html += '<span class="tree-toggle leaf" aria-hidden="true">' + CARET_ICON + '</span>';
+        }
+        html += '<span class="tree-badge" style="background:' + colors.fill + '">' + listSmallIcon(node.type) + escapeHtml(colors.label) + '</span>';
+        html += '<span class="tree-id">' + escapeHtml(node.id) + '</span>';
+        html += '<span class="tree-label">' + escapeHtml(node.label) + '</span>';
+        if (node.complexity) {
+          html += '<span class="tree-complexity" title="Complexity ' + node.complexity + '/5" aria-label="Complexity ' + node.complexity + ' of 5">';
+          for (var i = 1; i <= 5; i++) html += '<span class="cbar' + (i <= node.complexity ? " filled" : "") + '"></span>';
+          html += '</span>';
+        }
+        if (kids.length > 0) html += '<span class="tree-count" aria-label="' + kids.length + ' children">' + kids.length + '</span>';
+        html += '<span class="tree-actions">';
+        html += '<button class="tree-act" type="button" data-act="decompose" data-id="' + escapeHtml(node.id) + '" title="Break ' + escapeHtml(node.id) + ' into finer-grained sub-items">' + ACTION_ICONS.decompose + 'Decompose</button>';
+        if (node.type === "fr" || node.type === "nfr") {
+          html += '<button class="tree-act is-implement" type="button" data-act="implement" data-id="' + escapeHtml(node.id) + '" title="Ask the agent to implement ' + escapeHtml(node.id) + ' in code">' + IMPLEMENT_ICON + 'Implement</button>';
+        }
+        html += '</span>';
+        html += '</div>';
+        if (kids.length > 0) {
+          var nextSeen = Object.assign({}, seen);
+          nextSeen[node.id] = true;
+          html += '<div class="tree-children" role="group">';
+          kids.forEach(function(cid) { html += rowHtml(tree.byId[cid], tree, nextSeen); });
+          html += '</div>';
+        }
+        html += '</div>';
+        return html;
+      };
+
+      var emptyStateHtml = function() {
+        return '<div class="list-empty">'
+          + '<div class="list-empty-icon">' + WARN_ICON + '</div>'
+          + '<h3>No customer problems yet</h3>'
+          + '<p>The hierarchy starts from Customer Problems. Describe the problem your software must solve and the agent will capture it as the first CP, then every need and requirement traces back from there.</p>'
+          + '<form class="list-empty-form" id="list-empty-form">'
+          + '<input class="list-empty-input" id="list-empty-input" type="text" autocomplete="off" placeholder="Describe a customer problem..." aria-label="Describe a customer problem" />'
+          + '<button class="list-empty-cta" type="submit">' + SPARK_ICON + 'Capture problem</button>'
+          + '</form>'
+          + '</div>';
+      };
+
+      var selectRow = function(node) {
+        selectedNode = node.id;
+        var prev = listInner.querySelectorAll(".tree-row.selected");
+        prev.forEach(function(r) { r.classList.remove("selected"); r.setAttribute("aria-selected", "false"); });
+        var row = listInner.querySelector('.tree-row[data-id="' + node.id + '"]');
+        if (row) { row.classList.add("selected"); row.setAttribute("aria-selected", "true"); }
+        openNodePanel(node);
+      };
+
+      var renderList = function() {
+        var problemCount = nodes.filter(function(n) { return n.type === "problem"; }).length;
+        if (problemCount === 0) {
+          listInner.innerHTML = emptyStateHtml();
+          var form = document.getElementById("list-empty-form");
+          if (form) form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            var inp = document.getElementById("list-empty-input");
+            var text = inp ? inp.value.trim() : "";
+            if (!text) { if (inp) inp.focus(); return; }
+            performNodeAction("establish_context", "customer_problems", { id: "CONTEXT", type: "problem", label: "Business context", data: {} }, text);
+            if (inp) inp.value = "";
+          });
+          return;
+        }
+        var tree = buildTree();
+        var html = '<div class="list-lead"><h2>Specification hierarchy</h2><span class="list-hint">Customer Problem &rarr; Need &rarr; Requirement</span></div>';
+        tree.roots.forEach(function(r) { html += rowHtml(r, tree, {}); });
+        if (tree.orphans.length > 0) {
+          html += '<div class="tree-section-label warn">' + WARN_ICON + 'Unlinked (' + tree.orphans.length + ')</div>';
+          tree.orphans.forEach(function(o) { html += rowHtml(o, tree, {}); });
+        }
+        listInner.innerHTML = html;
+        applyListFilter();
+      };
+
+      var applyListFilter = function() {
+        var term = (listSearchEl ? listSearchEl.value : "").toLowerCase().trim();
+        var rows = listInner.querySelectorAll(".tree-row");
+        if (!term) {
+          rows.forEach(function(r) { r.classList.remove("dimmed"); });
+          return;
+        }
+        rows.forEach(function(r) {
+          var id = (r.getAttribute("data-id") || "").toLowerCase();
+          var labelEl = r.querySelector(".tree-label");
+          var label = labelEl ? labelEl.textContent.toLowerCase() : "";
+          r.dataset.match = (id.indexOf(term) >= 0 || label.indexOf(term) >= 0) ? "1" : "0";
+        });
+        // Reveal a row when its own subtree contains a match; keep matched
+        // ancestors expanded so hits are never hidden inside a collapsed group.
+        listInner.querySelectorAll(".tree-group").forEach(function(g) {
+          if (g.querySelector('.tree-row[data-match="1"]')) {
+            g.classList.remove("collapsed");
+            var tb = g.querySelector(":scope > .tree-row > [data-toggle]");
+            if (tb) tb.setAttribute("aria-expanded", "true");
+          }
+        });
+        rows.forEach(function(r) {
+          var group = r.closest(".tree-group");
+          var hit = group && group.querySelector('.tree-row[data-match="1"]');
+          r.classList.toggle("dimmed", !hit);
+        });
+      };
+
+      listInner.addEventListener("click", function(e) {
+        var toggleBtn = e.target.closest("[data-toggle]");
+        if (toggleBtn) {
+          var gid = toggleBtn.getAttribute("data-toggle");
+          listCollapsed[gid] = !listCollapsed[gid];
+          var group = listInner.querySelector('.tree-group[data-group="' + gid + '"]');
+          if (group) group.classList.toggle("collapsed", !!listCollapsed[gid]);
+          toggleBtn.setAttribute("aria-expanded", listCollapsed[gid] ? "false" : "true");
+          return;
+        }
+        var actBtn = e.target.closest("[data-act]");
+        if (actBtn) {
+          e.stopPropagation();
+          var aid = actBtn.getAttribute("data-id");
+          var anode = nodes.find(function(n) { return n.id === aid; });
+          if (!anode) return;
+          selectRow(anode);
+          if (actBtn.getAttribute("data-act") === "implement") {
+            performNodeAction("implement", null, anode, "");
+          } else {
+            stageComposerAction(anode, "decompose_" + anode.type);
+          }
+          return;
+        }
+        var row = e.target.closest(".tree-row");
+        if (row) {
+          var rnode = nodes.find(function(n) { return n.id === row.getAttribute("data-id"); });
+          if (rnode) selectRow(rnode);
+        }
+      });
+
+      listInner.addEventListener("keydown", function(e) {
+        var row = e.target.closest(".tree-row");
+        if (!row) return;
+        var node = nodes.find(function(n) { return n.id === row.getAttribute("data-id"); });
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (node) selectRow(node);
+        } else if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          var group = row.closest(".tree-group");
+          if (!group) return;
+          var gid = group.getAttribute("data-group");
+          var wantCollapsed = e.key === "ArrowLeft";
+          if (!!listCollapsed[gid] !== wantCollapsed) {
+            e.preventDefault();
+            listCollapsed[gid] = wantCollapsed;
+            group.classList.toggle("collapsed", wantCollapsed);
+            var tb = row.querySelector("[data-toggle]");
+            if (tb) tb.setAttribute("aria-expanded", wantCollapsed ? "false" : "true");
+          }
+        }
+      });
+
+      if (listSearchEl) listSearchEl.addEventListener("input", function() {
+        if (viewWrap.classList.contains("mode-list")) applyListFilter();
+      });
+
+      setView = function(mode) {
+        var isList = mode === "list";
+        viewWrap.classList.toggle("mode-list", isList);
+        viewWrap.classList.toggle("mode-graph", !isList);
+        btnList.classList.toggle("active", isList);
+        btnGraph.classList.toggle("active", !isList);
+        btnList.setAttribute("aria-pressed", isList ? "true" : "false");
+        btnGraph.setAttribute("aria-pressed", isList ? "false" : "true");
+        var panelEl = document.getElementById("detail-panel");
+        if (isList) {
+          listView.appendChild(panelEl); // dock the shared panel as a bottom drawer
+          renderList();
+          if (selectedNode) {
+            var sel = nodes.find(function(n) { return n.id === selectedNode; });
+            if (sel) selectRow(sel);
+          }
+        } else {
+          viewWrap.appendChild(panelEl); // dock the shared panel to the right
+        }
+      };
+
+      btnGraph.addEventListener("click", function() { setView("graph"); });
+      btnList.addEventListener("click", function() { setView("list"); });
+    }
+
     // Public API
     window.srsNavigator = {
-      getState: () => ({ selectedNode, searchTerm }),
+      getState: () => ({ selectedNode, searchTerm, viewMode: viewWrap && viewWrap.classList.contains("mode-list") ? "list" : "graph" }),
       selectNode: (id) => {
         const node = nodes.find(n => n.id === id);
         if (node) { selectedNode = id; showDetail(node); updateVisibility(); }
-      }
+      },
+      setView: (mode) => setView(mode)
     };
   })();
   <\/script>
