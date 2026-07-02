@@ -18,7 +18,7 @@
         <div class="wrap">
             <div class="site-nav-id">
                 <a href="/" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
-                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.2, view releases">v2.2</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.3, view releases">v2.3</a>
             </div>
             <ul class="site-nav-links">
                 <li><a href="#problem">The problem</a></li>
@@ -126,14 +126,29 @@
         <section id="problem" class="section">
             <div class="wrap">
                 <h2 class="reveal">Most requirements start in the wrong place</h2>
-                <div class="problem-before reveal">
-                    <p class="quote">"We need a reporting dashboard with 20 charts."</p>
-                    <p>You build it. Three weeks. Ship it. They use 3 of the 20 charts. The actual problem was slow data access, not visualization. Two weeks of engineering time, gone.</p>
-                </div>
-                <div class="problem-after reveal">
-                    <p>This methodology reverses the order. Instead of starting with the stakeholder's solution, you start with their problem:</p>
-                    <code class="cp">CP.01: "Managers must access sales data within 5 seconds to make decisions."</code>
-                    <p>From that problem, you derive the need (CN: real-time data access), then the requirement (FR: data API + 3 targeted charts). Built in one week. Solves what actually matters.</p>
+                <div class="problem-grid">
+                    <div class="problem-copy">
+                        <div class="problem-before reveal">
+                            <p class="quote">"We need a reporting dashboard with 20 charts."</p>
+                            <p>You build it. Three weeks. Ship it. They use 3 of the 20 charts. The actual problem was slow data access, not visualization. Two weeks of engineering time, gone.</p>
+                        </div>
+                        <div class="problem-after reveal">
+                            <p>This methodology reverses the order. Instead of starting with the stakeholder's solution, you start with their problem:</p>
+                            <code class="cp">CP.01: "Managers must access sales data within 5 seconds to make decisions."</code>
+                            <p>From that problem, you derive the need (CN: real-time data access), then the requirement (FR: data API + 3 targeted charts). Built in one week. Solves what actually matters.</p>
+                        </div>
+                    </div>
+                    <figure class="problem-figure reveal">
+                        <div class="app-frame">
+                            <div class="app-frame-bar">
+                                <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="app-frame-title">srs-navigator &middot; VagrantChefHubot</span>
+                            </div>
+                            <img src="assets/srs-problems.svg" width="720" height="640"
+                                 alt="The SRS Navigator graph of the VagrantChefHubot spec: the whole specification appears, then the Needs and Requirements dim while the five Customer Problems (CP-1 through CP-5) light up." />
+                        </div>
+                        <figcaption>Real spec, 28 nodes. Everything you build traces back to these <strong>five problems</strong>. That is where the work begins.</figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
@@ -144,49 +159,71 @@
                 <h2 class="reveal">How it works</h2>
                 <p class="reveal" style="color: var(--muted); margin-bottom: var(--space-lg);">Six steps. Each builds on the previous. Your AI assistant guides the conversation.</p>
 
-                <div class="flow">
-                    <div class="flow-step reveal" style="--dot-color: var(--step-context)">
-                        <div class="flow-dot"></div>
-                        <div class="flow-name">Business Context</div>
-                        <p class="flow-question">What governs this project?</p>
-                        <p class="flow-desc">Project identity, constraints, success criteria. Establishes principles for all downstream decisions.</p>
-                        <span class="flow-cmd">/business-context</span>
+                <div class="method-grid">
+                    <div class="flow">
+                        <div class="flow-step reveal" style="--dot-color: var(--step-context)">
+                            <div class="flow-dot"></div>
+                            <div class="flow-name">Business Context</div>
+                            <p class="flow-question">What governs this project?</p>
+                            <p class="flow-desc">Project identity, constraints, success criteria. Establishes principles for all downstream decisions.</p>
+                            <span class="flow-cmd">/business-context</span>
+                        </div>
+                        <div class="flow-step reveal" style="--dot-color: var(--step-why)">
+                            <div class="flow-dot"></div>
+                            <div class="flow-name">Customer Problems</div>
+                            <p class="flow-question">What is broken, and for whom?</p>
+                            <p class="flow-desc">Identify and classify problems by severity: Obligation (must solve), Expectation (should solve), Hope (could solve).</p>
+                            <span class="flow-cmd">/customer-problems</span>
+                        </div>
+                        <div class="flow-step reveal" style="--dot-color: var(--step-glance)">
+                            <div class="flow-dot"></div>
+                            <div class="flow-name">Software Glance</div>
+                            <p class="flow-question">What might help?</p>
+                            <p class="flow-desc">High-level solution sketch. Components, boundaries, interfaces. Shared understanding before details.</p>
+                            <span class="flow-cmd">/software-glance</span>
+                        </div>
+                        <div class="flow-step reveal" style="--dot-color: var(--step-what)">
+                            <div class="flow-dot"></div>
+                            <div class="flow-name">Customer Needs</div>
+                            <p class="flow-question">What must the system deliver?</p>
+                            <p class="flow-desc">Required outcomes per problem. Measurable, testable, scoped. Each need traces to a specific problem.</p>
+                            <span class="flow-cmd">/customer-needs</span>
+                        </div>
+                        <div class="flow-step reveal" style="--dot-color: var(--step-vision)">
+                            <div class="flow-dot"></div>
+                            <div class="flow-name">Software Vision</div>
+                            <p class="flow-question">How will it work?</p>
+                            <p class="flow-desc">Architecture, technical approach, constraints, stakeholder alignment. The technical roadmap.</p>
+                            <span class="flow-cmd">/software-vision</span>
+                        </div>
+                        <div class="flow-step reveal" style="--dot-color: var(--step-how)">
+                            <div class="flow-dot"></div>
+                            <div class="flow-name">Functional Requirements</div>
+                            <p class="flow-question">What are the details?</p>
+                            <p class="flow-desc">Detailed, testable behavior specifications. Each requirement traces backward to a need and a problem.</p>
+                            <span class="flow-cmd">/functional-requirements</span>
+                        </div>
                     </div>
-                    <div class="flow-step reveal" style="--dot-color: var(--step-why)">
-                        <div class="flow-dot"></div>
-                        <div class="flow-name">Customer Problems</div>
-                        <p class="flow-question">What is broken, and for whom?</p>
-                        <p class="flow-desc">Identify and classify problems by severity: Obligation (must solve), Expectation (should solve), Hope (could solve).</p>
-                        <span class="flow-cmd">/customer-problems</span>
-                    </div>
-                    <div class="flow-step reveal" style="--dot-color: var(--step-glance)">
-                        <div class="flow-dot"></div>
-                        <div class="flow-name">Software Glance</div>
-                        <p class="flow-question">What might help?</p>
-                        <p class="flow-desc">High-level solution sketch. Components, boundaries, interfaces. Shared understanding before details.</p>
-                        <span class="flow-cmd">/software-glance</span>
-                    </div>
-                    <div class="flow-step reveal" style="--dot-color: var(--step-what)">
-                        <div class="flow-dot"></div>
-                        <div class="flow-name">Customer Needs</div>
-                        <p class="flow-question">What must the system deliver?</p>
-                        <p class="flow-desc">Required outcomes per problem. Measurable, testable, scoped. Each need traces to a specific problem.</p>
-                        <span class="flow-cmd">/customer-needs</span>
-                    </div>
-                    <div class="flow-step reveal" style="--dot-color: var(--step-vision)">
-                        <div class="flow-dot"></div>
-                        <div class="flow-name">Software Vision</div>
-                        <p class="flow-question">How will it work?</p>
-                        <p class="flow-desc">Architecture, technical approach, constraints, stakeholder alignment. The technical roadmap.</p>
-                        <span class="flow-cmd">/software-vision</span>
-                    </div>
-                    <div class="flow-step reveal" style="--dot-color: var(--step-how)">
-                        <div class="flow-dot"></div>
-                        <div class="flow-name">Functional Requirements</div>
-                        <p class="flow-question">What are the details?</p>
-                        <p class="flow-desc">Detailed, testable behavior specifications. Each requirement traces backward to a need and a problem.</p>
-                        <span class="flow-cmd">/functional-requirements</span>
-                    </div>
+
+                    <figure class="method-aside reveal">
+                        <div class="cli-sim" role="img" aria-label="A Copilot CLI session calling each Problem-Based SRS skill in order: business-context, customer-problems, software-glance, customer-needs, software-vision, and functional-requirements, ending with 100% traceability from FR back to CN back to CP.">
+                            <div class="cli-bar">
+                                <div class="cli-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                                <span class="cli-title">copilot &middot; problem-based-srs</span>
+                            </div>
+                            <div class="cli-body" aria-hidden="true">
+                                <div class="cli-line cli-you" style="--i:0"><span class="cli-caret">&rsaquo;</span> Turn the outage postmortem into a spec</div>
+                                <div class="cli-line" style="--i:1"><span class="cli-cmd" style="--c: var(--step-context)">/business-context</span><span class="cli-out">project identity, constraints, success criteria</span></div>
+                                <div class="cli-line" style="--i:2"><span class="cli-cmd" style="--c: var(--step-why)">/customer-problems</span><span class="cli-out">CP&#8209;1&#8230;CP&#8209;5, classified by severity</span></div>
+                                <div class="cli-line" style="--i:3"><span class="cli-cmd" style="--c: var(--step-glance)">/software-glance</span><span class="cli-out">high-level solution sketch</span></div>
+                                <div class="cli-line" style="--i:4"><span class="cli-cmd" style="--c: var(--step-what)">/customer-needs</span><span class="cli-out">each CN traces to a CP</span></div>
+                                <div class="cli-line" style="--i:5"><span class="cli-cmd" style="--c: var(--step-vision)">/software-vision</span><span class="cli-out">architecture and approach</span></div>
+                                <div class="cli-line" style="--i:6"><span class="cli-cmd" style="--c: var(--step-how)">/functional-requirements</span><span class="cli-out">each FR traces to a CN and a CP</span></div>
+                                <div class="cli-line cli-done" style="--i:7"><span class="cli-check">&#10003;</span> 100% traceability &middot; FR &larr; CN &larr; CP<span class="cli-cursor"></span></div>
+                            </div>
+                        </div>
+                        <figcaption>Each step runs as a skill your assistant calls in the terminal.</figcaption>
+                    </figure>
                 </div>
 
                 <div class="flow-trace reveal">
@@ -482,7 +519,7 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
 
     <footer class="site-footer">
         <div class="wrap">
-            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.2</a> · Methodology by Gorski &amp; Stadzisz</p>
+            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.3</a> · Methodology by Gorski &amp; Stadzisz</p>
             <p class="footer-links">
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/CHANGELOG.md">Changelog</a>

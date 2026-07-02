@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3] - 2026-07-01
+
+### Added
+
+- **"Most requirements start in the wrong place" now shows the problem-highlight
+  animation.** `docs/index.html` gains a two-column layout with an app-faithful SRS
+  Navigator graph of the VagrantChefHubot example (`docs/assets/srs-problems.svg`). Its
+  CSS keyframes present the whole 28-node spec, then dim the Needs and Requirements while
+  the five Customer Problems (CP-1 through CP-5) light up with pulsing rings, making the
+  visual argument that requirements begin at the problem. Honors `prefers-reduced-motion`.
+- **"How it works" now opens with a CLI chat simulation.** A dark terminal mockup animates
+  the Copilot CLI calling each methodology skill in order (`/business-context`,
+  `/customer-problems`, `/software-glance`, `/customer-needs`, `/software-vision`,
+  `/functional-requirements`), each command tinted with its step color, ending on
+  100% traceability from FR back to CN back to CP. Built with pure CSS/HTML; the assembled
+  state is the default so it stays readable under reduced motion.
+- **`scripts/build-problem-highlight.mjs`**: generator for `srs-problems.svg`. Node colors
+  and Phosphor icons are sampled verbatim from the extension's `renderer.mjs`; the chrome
+  mirrors the navigator on the VagrantChefHubot spec. The canvas app itself is unchanged.
+
+[2.3]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.3
+
 ## [2.2] - 2026-07-01
 
 ### Changed
