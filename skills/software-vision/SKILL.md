@@ -258,7 +258,7 @@ Summary:
 - Architecture overview complete
 
 → Next Step: 5 - Functional Requirements
-→ Use skill: functional-requirements
+→ Action: /problem-based-srs functional-requirements
 → Input: Customer Needs + Software Vision
 ```
 

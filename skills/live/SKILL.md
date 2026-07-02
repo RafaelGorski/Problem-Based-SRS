@@ -80,4 +80,4 @@ consistent with the methodology naming convention (`CP → CN → FR`).
   the current scope. It lives at `.github/extensions/srs-navigator/`; reload extensions
   so the `srs-navigator` canvas and its tools are registered, then retry `open_canvas`.
 - This skill only handles **visualization**. To create or refine the underlying
-  artifacts, use the methodology skills (`problem-based-srs`, `customer-problems`, etc.).
+  artifacts, use the `/problem-based-srs` command (e.g. `/problem-based-srs problems`).

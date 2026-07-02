@@ -48,11 +48,17 @@ describe("Action Bar: Renderer output", () => {
     assert.ok(html.includes(".action-bar-submit"));
   });
 
-  it("includes SKILL_MAP with correct skill associations", () => {
+  it("includes SKILL_MAP mapping actions to the unified srsAction vocabulary", () => {
     assert.ok(html.includes("SKILL_MAP"));
-    assert.ok(html.includes('"customer_needs"'));
-    assert.ok(html.includes('"customer_problems"'));
-    assert.ok(html.includes('"functional_requirements"'));
+    // The action bar no longer references individual skill tool names; every
+    // button maps to a `srsAction` handled by the single problem_based_srs tool.
+    assert.ok(html.includes("srsAction"));
+    assert.ok(html.includes('"needs"'));
+    assert.ok(html.includes('"problems"'));
+    assert.ok(html.includes('"functional-requirements"'));
+    assert.ok(!html.includes('"customer_needs"'));
+    assert.ok(!html.includes('"customer_problems"'));
+    assert.ok(!html.includes('"functional_requirements"'));
   });
 
   it("includes getActionsForType function", () => {
@@ -83,7 +89,7 @@ describe("Action Bar: Renderer output", () => {
   });
 
   it("includes handleActionBarAction that posts to /api/invoke-skill", () => {
-    assert.ok(html.includes("function handleActionBarAction(actionKey, skillName, node)"));
+    assert.ok(html.includes("function handleActionBarAction(actionKey, srsAction, node)"));
     assert.ok(html.includes("/api/invoke-skill"));
   });
 
@@ -172,7 +178,7 @@ describe("Action Bar: /api/invoke-skill endpoint", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "addCN",
-        skill: "customer_needs",
+        srsAction: "needs",
         nodeId: "CP-1",
         nodeType: "problem",
         nodeLabel: "Track Customers",
@@ -191,7 +197,7 @@ describe("Action Bar: /api/invoke-skill endpoint", () => {
     assert.ok(data.actions.length >= 1);
     const last = data.actions[data.actions.length - 1];
     assert.equal(last.action, "addCN");
-    assert.equal(last.skill, "customer_needs");
+    assert.equal(last.srsAction, "needs");
     assert.equal(last.nodeId, "CP-1");
     assert.equal(last.nodeType, "problem");
     assert.equal(last.context, "Derive a CN from CP-1");
@@ -219,9 +225,9 @@ describe("Action Bar: /api/invoke-skill endpoint", () => {
 
   it("queues multiple actions from different node types", async () => {
     const actions = [
-      { action: "addFR", skill: "functional_requirements", nodeId: "CN-1", nodeType: "need", nodeLabel: "Need 1", context: "Derive FR" },
-      { action: "addNFR", skill: "functional_requirements", nodeId: "FR-1", nodeType: "fr", nodeLabel: "Req 1", context: "Derive NFR" },
-      { action: "decompose_problem", skill: "customer_problems", nodeId: "CP-2", nodeType: "problem", nodeLabel: "Problem 2", context: "Decompose" },
+      { action: "addFR", srsAction: "functional-requirements", nodeId: "CN-1", nodeType: "need", nodeLabel: "Need 1", context: "Derive FR" },
+      { action: "addNFR", srsAction: "functional-requirements", nodeId: "FR-1", nodeType: "fr", nodeLabel: "Req 1", context: "Derive NFR" },
+      { action: "decompose_problem", srsAction: "problems", nodeId: "CP-2", nodeType: "problem", nodeLabel: "Problem 2", context: "Decompose" },
     ];
 
     for (const action of actions) {
@@ -238,42 +244,43 @@ describe("Action Bar: /api/invoke-skill endpoint", () => {
     // Should have original + 3 new
     assert.ok(data.actions.length >= 4);
 
-    const skills = data.actions.map(a => a.skill);
-    assert.ok(skills.includes("customer_needs"));
-    assert.ok(skills.includes("functional_requirements"));
-    assert.ok(skills.includes("customer_problems"));
+    const srsActions = data.actions.map(a => a.srsAction);
+    assert.ok(srsActions.includes("needs"));
+    assert.ok(srsActions.includes("functional-requirements"));
+    assert.ok(srsActions.includes("problems"));
   });
 });
 
 // --- Skill Mapping Correctness Tests ---
 
-describe("Action Bar: Skill mapping correctness", () => {
-  // Verify the SKILL_MAP entries match the registered skill tool names
-  const REGISTERED_SKILLS = [
-    "business_context",
-    "customer_problems",
-    "software_glance",
-    "customer_needs",
-    "software_vision",
-    "functional_requirements",
-    "complexity_analysis",
-    "problem_based_srs",
-    "zigzag_validator",
+describe("Action Bar: Action mapping correctness", () => {
+  // Verify the SKILL_MAP entries map to the unified srsAction vocabulary handled
+  // by the single problem_based_srs tool (no more per-step tool names).
+  const REGISTERED_ACTIONS = [
+    "business-context",
+    "problems",
+    "software-glance",
+    "needs",
+    "software-vision",
+    "functional-requirements",
+    "complexity",
+    "full",
+    "validate",
   ];
 
   const EXPECTED_MAPPINGS = {
-    problem: { addCN: "customer_needs", decompose_problem: "customer_problems" },
-    need: { addFR: "functional_requirements", decompose_need: "customer_needs" },
-    fr: { addNFR: "functional_requirements", decompose_fr: "functional_requirements" },
-    nfr: { decompose_nfr: "functional_requirements" },
+    problem: { addCN: "needs", decompose_problem: "problems" },
+    need: { addFR: "functional-requirements", decompose_need: "needs" },
+    fr: { addNFR: "functional-requirements", decompose_fr: "functional-requirements" },
+    nfr: { decompose_nfr: "functional-requirements" },
   };
 
   for (const [nodeType, actions] of Object.entries(EXPECTED_MAPPINGS)) {
-    for (const [actionKey, skillName] of Object.entries(actions)) {
-      it(`${nodeType} → ${actionKey} maps to registered skill "${skillName}"`, () => {
+    for (const [actionKey, srsAction] of Object.entries(actions)) {
+      it(`${nodeType} → ${actionKey} maps to registered action "${srsAction}"`, () => {
         assert.ok(
-          REGISTERED_SKILLS.includes(skillName),
-          `Skill "${skillName}" for action "${actionKey}" on "${nodeType}" is not in the registered skills list`
+          REGISTERED_ACTIONS.includes(srsAction),
+          `Action "${srsAction}" for button "${actionKey}" on "${nodeType}" is not in the registered actions list`
         );
       });
     }
@@ -325,8 +332,8 @@ describe("Action Bar: Queue consume-once semantics", () => {
 
     // Queue two actions
     queues.set(instanceId, [
-      { id: "a1", skill: "customer_needs", action: "addCN" },
-      { id: "a2", skill: "functional_requirements", action: "addFR" },
+      { id: "a1", srsAction: "needs", action: "addCN" },
+      { id: "a2", srsAction: "functional-requirements", action: "addFR" },
     ]);
 
     // First retrieval returns both and clears
@@ -342,8 +349,8 @@ describe("Action Bar: Queue consume-once semantics", () => {
   it("actions from different instances are isolated", () => {
     const queues = new Map();
 
-    queues.set("inst-a", [{ id: "1", skill: "customer_needs" }]);
-    queues.set("inst-b", [{ id: "2", skill: "functional_requirements" }, { id: "3", skill: "customer_problems" }]);
+    queues.set("inst-a", [{ id: "1", srsAction: "needs" }]);
+    queues.set("inst-b", [{ id: "2", srsAction: "functional-requirements" }, { id: "3", srsAction: "problems" }]);
 
     assert.equal(queues.get("inst-a").length, 1);
     assert.equal(queues.get("inst-b").length, 2);
@@ -361,7 +368,7 @@ describe("Action Bar: Queue consume-once semantics", () => {
 
     // Simulate rapid writes
     for (let i = 0; i < 5; i++) {
-      queues.get(instanceId).push({ id: `action-${i}`, skill: "customer_needs" });
+      queues.get(instanceId).push({ id: `action-${i}`, srsAction: "needs" });
     }
 
     const retrieved = queues.get(instanceId) || [];
@@ -391,6 +398,53 @@ describe("List View: implement action prompt", () => {
   it("implement prompt preserves traceability to the requirement", () => {
     assert.ok(extSource.includes("Preserve traceability"));
     assert.ok(extSource.includes("${action.nodeId}"));
+  });
+});
+
+// --- Unified single-command model (problem_based_srs with action arg) ---
+
+describe("Unified command: single problem_based_srs tool", () => {
+  const extSource = readFileSync(join(__dirname, "..", "extension.mjs"), "utf8");
+
+  it("registers a single problem_based_srs tool", () => {
+    assert.ok(extSource.includes('name: "problem_based_srs"'),
+      "extension must register the unified problem_based_srs tool");
+  });
+
+  it("no longer registers per-step skill tools", () => {
+    for (const legacy of [
+      'name: "customer_problems"',
+      'name: "customer_needs"',
+      'name: "functional_requirements"',
+      'name: "business_context"',
+      'name: "software_glance"',
+      'name: "software_vision"',
+      'name: "zigzag_validator"',
+      'name: "complexity_analysis"',
+    ]) {
+      assert.ok(!extSource.includes(legacy),
+        `legacy skill tool ${legacy} must be removed in favor of an action arg`);
+    }
+  });
+
+  it("exposes the action vocabulary on the tool", () => {
+    for (const action of ["problems", "needs", "functional-requirements", "business-context", "validate"]) {
+      assert.ok(extSource.includes(`"${action}"`),
+        `action "${action}" must be part of the unified tool's vocabulary`);
+    }
+  });
+
+  it("builds slash-command prompts as /problem-based-srs <action>", () => {
+    assert.ok(extSource.includes("/problem-based-srs"),
+      "action prompts must route through the single /problem-based-srs command");
+    // The old per-skill slash mapping (name.replace(_ -> -)) must be gone.
+    assert.ok(!extSource.includes('"/" + String(skill'),
+      "the legacy per-skill slash command builder must be removed");
+  });
+
+  it("action prompts reference the srsAction field, not a skill tool name", () => {
+    assert.ok(extSource.includes("action.srsAction"),
+      "server prompts must read the srsAction field from queued actions");
   });
 });
 

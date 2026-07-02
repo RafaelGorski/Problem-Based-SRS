@@ -53,16 +53,16 @@ graph LR
 
 | Step | Command | You answer | You get |
 |------|---------|------------|---------|
-| 0. Business Context | `/business-context` | Project identity, constraints, success criteria | Governing principles for all decisions |
-| 1. Customer Problems | `/customer-problems` | What's broken and for whom | Prioritized problems (Obligation / Expectation / Hope) |
-| 2. Software Glance | `/software-glance` | High-level solution direction | Shared understanding of scope and boundaries |
-| 3. Customer Needs | `/customer-needs` | Required outcomes per problem | Measurable success criteria |
-| 4. Software Vision | `/software-vision` | Architecture and technical approach | Technical roadmap with stakeholder alignment |
-| 5. Functional Requirements | `/functional-requirements` | Detailed behavior specs | Testable requirements traced to problems |
+| 0. Business Context | `/problem-based-srs business-context` | Project identity, constraints, success criteria | Governing principles for all decisions |
+| 1. Customer Problems | `/problem-based-srs problems` | What's broken and for whom | Prioritized problems (Obligation / Expectation / Hope) |
+| 2. Software Glance | `/problem-based-srs software-glance` | High-level solution direction | Shared understanding of scope and boundaries |
+| 3. Customer Needs | `/problem-based-srs needs` | Required outcomes per problem | Measurable success criteria |
+| 4. Software Vision | `/problem-based-srs software-vision` | Architecture and technical approach | Technical roadmap with stakeholder alignment |
+| 5. Functional Requirements | `/problem-based-srs functional-requirements` | Detailed behavior specs | Testable requirements traced to problems |
 
 Every requirement traces backward: **FR → CN → CP**. You can always answer *"Why are we building this?"*
 
-Use `/zigzag-validator` at any point to verify the chain is complete.
+Use `/problem-based-srs validate` at any point to verify the chain is complete.
 
 ### Problem classification
 
@@ -128,17 +128,20 @@ Every FR traces to a CN, which traces to a CP. The $50k problem is the root. Not
 
 ## Commands
 
+The methodology is driven by a **single command**, `/problem-based-srs`, with an
+**action** argument. Run it with no action (or `full`) for the complete walkthrough.
+
 | Command | Purpose |
 |---------|---------|
 | `/problem-based-srs` | Full methodology, all steps |
-| `/business-context` | Step 0: project identity and constraints |
-| `/customer-problems` | Step 1: identify and classify problems |
-| `/software-glance` | Step 2: sketch solution approach |
-| `/customer-needs` | Step 3: define required outcomes |
-| `/software-vision` | Step 4: architecture and scope |
-| `/functional-requirements` | Step 5: detailed, testable requirements |
-| `/zigzag-validator` | Verify traceability across all artifacts |
-| `/complexity-analysis` | Optional: Axiomatic Design quality analysis |
+| `/problem-based-srs business-context` | Step 0: project identity and constraints |
+| `/problem-based-srs problems` | Step 1: identify and classify problems |
+| `/problem-based-srs software-glance` | Step 2: sketch solution approach |
+| `/problem-based-srs needs` | Step 3: define required outcomes |
+| `/problem-based-srs software-vision` | Step 4: architecture and scope |
+| `/problem-based-srs functional-requirements` | Step 5: detailed, testable requirements |
+| `/problem-based-srs validate` | Verify traceability across all artifacts |
+| `/problem-based-srs complexity` | Optional: Axiomatic Design quality analysis |
 | `/live` | Launch the **SRS Navigator** canvas to visualize the spec as an interactive graph |
 
 ## Visualize it live

@@ -2405,36 +2405,37 @@ export function renderGraphHtml(graphData, options = {}) {
       submit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>',
     };
 
-    // Maps action bar buttons to their corresponding SRS methodology skills
-    // Each action maps to a skill tool name registered in the extension
+    // Maps action bar buttons to their Problem-Based SRS methodology action.
+    // Every button routes through the single problem_based_srs tool, selecting a
+    // step via its srsAction value (no more per-step tool names).
     const SKILL_MAP = {
-      decompose_problem: { skill: "customer_problems", label: "+Sub-CP", icon: "decompose" },
-      decompose_need: { skill: "customer_needs", label: "+Sub-CN", icon: "decompose" },
-      decompose_fr: { skill: "functional_requirements", label: "+Sub-FR", icon: "decompose" },
-      decompose_nfr: { skill: "functional_requirements", label: "+Sub-NFR", icon: "decompose" },
-      addCN: { skill: "customer_needs", label: "+CN", icon: "addCN" },
-      addFR: { skill: "functional_requirements", label: "+FR", icon: "addFR" },
-      addNFR: { skill: "functional_requirements", label: "+NFR", icon: "addNFR" },
-      addCP: { skill: "customer_problems", label: "+CP", icon: "addCP" },
+      decompose_problem: { srsAction: "problems", label: "+Sub-CP", icon: "decompose" },
+      decompose_need: { srsAction: "needs", label: "+Sub-CN", icon: "decompose" },
+      decompose_fr: { srsAction: "functional-requirements", label: "+Sub-FR", icon: "decompose" },
+      decompose_nfr: { srsAction: "functional-requirements", label: "+Sub-NFR", icon: "decompose" },
+      addCN: { srsAction: "needs", label: "+CN", icon: "addCN" },
+      addFR: { srsAction: "functional-requirements", label: "+FR", icon: "addFR" },
+      addNFR: { srsAction: "functional-requirements", label: "+NFR", icon: "addNFR" },
+      addCP: { srsAction: "problems", label: "+CP", icon: "addCP" },
     };
 
     function getActionsForType(type) {
       const actions = [];
       if (type === "problem") {
         // CP can derive CNs and decompose into sub-CPs
-        actions.push({ key: "addCN", label: "+CN", icon: ACTION_ICONS.addCN, skill: SKILL_MAP.addCN.skill });
-        actions.push({ key: "decompose_problem", label: "+Sub-CP", icon: ACTION_ICONS.decompose, skill: SKILL_MAP.decompose_problem.skill });
+        actions.push({ key: "addCN", label: "+CN", icon: ACTION_ICONS.addCN, srsAction: SKILL_MAP.addCN.srsAction });
+        actions.push({ key: "decompose_problem", label: "+Sub-CP", icon: ACTION_ICONS.decompose, srsAction: SKILL_MAP.decompose_problem.srsAction });
       } else if (type === "need") {
         // CN can derive FRs and decompose into sub-CNs
-        actions.push({ key: "addFR", label: "+FR", icon: ACTION_ICONS.addFR, skill: SKILL_MAP.addFR.skill });
-        actions.push({ key: "decompose_need", label: "+Sub-CN", icon: ACTION_ICONS.decompose, skill: SKILL_MAP.decompose_need.skill });
+        actions.push({ key: "addFR", label: "+FR", icon: ACTION_ICONS.addFR, srsAction: SKILL_MAP.addFR.srsAction });
+        actions.push({ key: "decompose_need", label: "+Sub-CN", icon: ACTION_ICONS.decompose, srsAction: SKILL_MAP.decompose_need.srsAction });
       } else if (type === "fr") {
         // FR can derive NFRs and decompose into sub-FRs
-        actions.push({ key: "addNFR", label: "+NFR", icon: ACTION_ICONS.addNFR, skill: SKILL_MAP.addNFR.skill });
-        actions.push({ key: "decompose_fr", label: "+Sub-FR", icon: ACTION_ICONS.decompose, skill: SKILL_MAP.decompose_fr.skill });
+        actions.push({ key: "addNFR", label: "+NFR", icon: ACTION_ICONS.addNFR, srsAction: SKILL_MAP.addNFR.srsAction });
+        actions.push({ key: "decompose_fr", label: "+Sub-FR", icon: ACTION_ICONS.decompose, srsAction: SKILL_MAP.decompose_fr.srsAction });
       } else if (type === "nfr") {
         // NFR can decompose
-        actions.push({ key: "decompose_nfr", label: "+Sub-NFR", icon: ACTION_ICONS.decompose, skill: SKILL_MAP.decompose_nfr.skill });
+        actions.push({ key: "decompose_nfr", label: "+Sub-NFR", icon: ACTION_ICONS.decompose, srsAction: SKILL_MAP.decompose_nfr.srsAction });
       }
       return actions;
     }
@@ -2463,11 +2464,11 @@ export function renderGraphHtml(graphData, options = {}) {
         btn.setAttribute("aria-label", action.label);
         btn.setAttribute("title", action.label);
         btn.dataset.action = action.key;
-        btn.dataset.skill = action.skill;
+        btn.dataset.srsAction = action.srsAction;
         btn.innerHTML = action.icon + '<span class="action-bar-btn-label">' + action.label + '</span>';
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          handleActionBarAction(action.key, action.skill, node);
+          handleActionBarAction(action.key, action.srsAction, node);
         });
         actionBarActions.appendChild(btn);
       });
@@ -2533,8 +2534,8 @@ export function renderGraphHtml(graphData, options = {}) {
     // Thin wrapper kept for the hover action bar: reads its input, dispatches,
     // then resets the bar. The shared work lives in performNodeAction so the
     // in-panel composer can reuse the exact same flow.
-    function handleActionBarAction(actionKey, skillName, node) {
-      const dispatched = performNodeAction(actionKey, skillName, node, actionBarInput.value.trim());
+    function handleActionBarAction(actionKey, srsAction, node) {
+      const dispatched = performNodeAction(actionKey, srsAction, node, actionBarInput.value.trim());
       if (!dispatched) return;
       actionBarInput.value = "";
       actionBarLocked = false;
@@ -2561,7 +2562,7 @@ export function renderGraphHtml(graphData, options = {}) {
     // Dispatch a node action, mirror progress into the node's activity chat,
     // and open the detail panel so the user can watch it happen.
     // Returns true when an action was actually sent.
-    function performNodeAction(actionKey, skillName, node, prompt) {
+    function performNodeAction(actionKey, srsAction, node, prompt) {
       if (!node) return false;
       prompt = (prompt || "").trim();
 
@@ -2582,8 +2583,8 @@ export function renderGraphHtml(graphData, options = {}) {
       let context = "";
 
       if (actionKey === "submit") {
-        const typeSkillMap = { problem: "customer_problems", need: "customer_needs", fr: "functional_requirements", nfr: "functional_requirements" };
-        skillName = typeSkillMap[node.type] || "customer_problems";
+        const typeActionMap = { problem: "problems", need: "needs", fr: "functional-requirements", nfr: "functional-requirements" };
+        srsAction = typeActionMap[node.type] || "problems";
         context = "Regarding " + nodeLabel + " " + node.id + " (" + node.label + "): " + prompt;
       } else if (actionKey.startsWith("decompose")) {
         context = "Decompose " + nodeLabel + " " + node.id + " (" + node.label + ") into finer-grained sub-items of the same type. Additional context: " + prompt;
@@ -2600,7 +2601,7 @@ export function renderGraphHtml(graphData, options = {}) {
       }
 
       if (!context) return false;
-      if (actionKey !== "implement" && !skillName) return false;
+      if (actionKey !== "implement" && !srsAction) return false;
 
       // Open the panel for this node so the conversation is visible, then log
       // the ask and a pending agent reply that we mutate through to completion.
@@ -2615,7 +2616,7 @@ export function renderGraphHtml(graphData, options = {}) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: actionKey,
-          skill: skillName,
+          srsAction: srsAction,
           nodeId: node.id,
           nodeType: node.type,
           nodeLabel: node.label,
@@ -2809,7 +2810,7 @@ export function renderGraphHtml(graphData, options = {}) {
         chip.innerHTML = action.icon + '<span>' + action.label + '</span>';
         chip.setAttribute("aria-label", action.label + " for " + node.id);
         chip.addEventListener("click", () => {
-          performNodeAction(action.key, action.skill, node, composerInput.value.trim());
+          performNodeAction(action.key, action.srsAction, node, composerInput.value.trim());
           composerInput.value = "";
           clearComposerStage();
         });
@@ -2846,7 +2847,7 @@ export function renderGraphHtml(graphData, options = {}) {
       const text = composerInput.value.trim();
       if (composerStaged) {
         const stagedAction = getActionsForType(node.type).find(a => a.key === composerStaged.actionKey);
-        performNodeAction(composerStaged.actionKey, stagedAction ? stagedAction.skill : null, node, text);
+        performNodeAction(composerStaged.actionKey, stagedAction ? stagedAction.srsAction : null, node, text);
       } else {
         performNodeAction("submit", null, node, text);
       }
@@ -3522,7 +3523,7 @@ export function renderGraphHtml(graphData, options = {}) {
             var inp = document.getElementById("list-empty-input");
             var text = inp ? inp.value.trim() : "";
             if (!text) { if (inp) inp.focus(); return; }
-            performNodeAction("establish_context", "customer_problems", { id: "CONTEXT", type: "problem", label: "Business context", data: {} }, text);
+            performNodeAction("establish_context", "problems", { id: "CONTEXT", type: "problem", label: "Business context", data: {} }, text);
             if (inp) inp.value = "";
           });
           return;

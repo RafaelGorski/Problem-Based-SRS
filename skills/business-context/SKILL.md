@@ -484,7 +484,7 @@ Summary:
 The Business Context provides structured foundation for problem discovery.
 
 → Next Step: 1 - Customer Problems
-→ Use skill: customer-problems
+→ Action: /problem-based-srs problems
 → Input: The Business Context above (especially Current Situation and Pain Points)
 ```
 

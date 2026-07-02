@@ -476,7 +476,7 @@ After completing this step:
 
 📁 Updated: traceability-matrix.md
 
-→ MANDATORY: Run zigzag-validator skill for full chain verification
+→ MANDATORY: Run /problem-based-srs validate for full chain verification
 → Engineers can now pick individual FR files to implement
 ```
 
@@ -488,4 +488,4 @@ Based on Problem-Based SRS methodology (Gorski & Stadzisz, 2016)
 
 **Version:** 1.2  
 **Step:** 5 of 5  
-**Validation:** zigzag-validator skill
+**Validation:** `/problem-based-srs validate`
