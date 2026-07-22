@@ -120,7 +120,12 @@ git push origin main                         # Push to trunk
 3. **Create a Plan**: Present a clear plan of what will be changed/created/deleted
 4. **Ask for Confirmation**: Wait for user approval before executing
 5. **Execute**: Only after confirmation, proceed with the changes
-6. **Verify**: Show what was done and confirm completion
+6. **Guard Against Drift with Tests**: Any change to skill/methodology behavior, the
+   canvas app, or the sync mechanism **must** be covered by an automated test that would
+   fail if the behavior regressed (see [Behavior Drift Testing](#-behavior-drift-testing)).
+   Add or update tests in the same change — never ship behavior changes test-free.
+7. **Verify**: Run the relevant test suite (`npm test` at minimum), show what was done,
+   and confirm completion
 
 **Example iteration workflow:**
 ```
@@ -216,7 +221,58 @@ stay in sync.
 The `live` action (`skills/problem-based-srs/reference/live.md`) is the entry point that
 opens the `srs-navigator` canvas inside the GitHub Copilot app.
 
-### Skills Development (AgentSkills Format)
+### 🧪 Behavior Drift Testing
+
+**Every change that affects behavior must ship with a test that fails when that behavior
+drifts.** "Behavior" here includes the methodology's mandatory rules (e.g. the customer
+Discovery Interview), the wording of guardrails, skip conditions, canvas app logic, and
+the skill-sync mechanism. Documentation-only edits are exempt; anything an agent or the
+app *acts on* is not.
+
+**Why this exists:** the mandatory Discovery Interview was silently skipped in autopilot
+mode. A behavior test now fails if that guardrail is ever weakened or removed. Apply the
+same discipline to all future changes.
+
+#### Where tests live
+
+| Test | Path | Guards against |
+|------|------|----------------|
+| **Deterministic drift guard** | `.github/extensions/srs-navigator/tests/interview-guard.test.mjs` | Skill markdown losing the mandatory interview, the autopilot guardrail, or hardened skip conditions; bundled canvas skills falling out of sync with the canonical source. Runs in `npm test`. |
+| **LLM-backed behavior suite** | `.github/extensions/srs-navigator/tests/skill-behavior/` | An agent *actually skipping* the interview when running the skill end-to-end (traces real tool calls: ask-before-write, CP notation, workflow order). Opt-in via `npm run test:skill-behavior`; provider-gated (skips without API keys). |
+| **Canvas/lib unit tests** | `.github/extensions/srs-navigator/tests/*.test.mjs` | Parser, renderer, validation, decompose, and skill-sync regressions. Runs in `npm test`. |
+
+#### Rules for adding/changing behavior
+
+1. **Content assertions for skill rules.** If you add, remove, or reword a mandatory rule,
+   guardrail, or skip condition in `skills/problem-based-srs/**`, add or update an
+   assertion in `interview-guard.test.mjs` (or a sibling deterministic test) so the rule
+   cannot silently disappear. Assert on the canonical source *and* on byte-for-byte sync of
+   the bundled copies.
+2. **Behavioral scenario for agent-facing changes.** If the change alters what the agent
+   should *do* at runtime (ask vs. proceed, order of steps, artifact naming), add or update
+   a scenario in `tests/skill-behavior/` — including a **canary** that would catch the
+   regression you are preventing.
+3. **Use the canonical CRM use case** (`lib/demo-spec.mjs` / `.spec/crm-system.json`) for
+   test fixtures — do not introduce unrelated example domains.
+4. **Negative-test your guard.** Temporarily mutate the source to confirm the new test
+   fails, then restore it. A test that never fails guards nothing.
+5. **Keep the default suite green.** `npm test` must stay fast and deterministic (no network
+   / no API keys). Put anything requiring an LLM or credentials behind
+   `npm run test:skill-behavior`.
+
+#### Required verification before committing a behavior change
+
+```bash
+cd .github/extensions/srs-navigator
+npm test                        # deterministic suite — must pass, includes drift guards
+npm run test:skill-behavior     # opt-in; skips cleanly without API keys, runs with them
+node scripts/sync-skills.mjs    # if canonical skills changed, re-sync bundled copies
+```
+
+Then re-run `python scripts/build-plugin.py validate` from the repo root for skill/manifest
+changes.
+
+
 - The methodology lives in a single skill directory: `skills/problem-based-srs/`
 - `SKILL.md` is the orchestrator (YAML frontmatter: name, description, license); each
   action is a plain-markdown file at `reference/<action>.md` (filename == action name)
@@ -311,6 +367,9 @@ When modifying a skill, verify:
 - [ ] Longer reference files (100+ lines) have table of contents
 - [ ] No time-sensitive information in content
 - [ ] Consistent terminology throughout
+- [ ] **Behavior change is covered by a drift test** (`interview-guard.test.mjs` and/or a
+  `tests/skill-behavior/` scenario) that fails if the rule/guardrail regresses
+- [ ] `npm test` passes and bundled canvas skills are re-synced (`sync-skills.mjs`)
 
 ### Example: Good vs Bad Descriptions
 
