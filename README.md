@@ -1,16 +1,26 @@
 # Problem-Based SRS
 
-[![Version 2.3](https://img.shields.io/badge/version-2.3-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.3)
+[![Version 2.4.1](https://img.shields.io/badge/version-2.4.1-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.4.1)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI-guided requirements engineering that traces every feature back to the customer problem it solves. An [AgentSkill](https://agentskills.io) for GitHub Copilot, Claude Code, and other AI coding assistants.
+**Problem-Based SRS is a plugin that extends your AI harness to handle Software Specifications.** It plugs into GitHub Copilot first — and Claude Code and other AI coding assistants too — turning a general-purpose coding agent into one that can reason about, trace, and evolve requirements instead of just emitting code.
 
-**Version 2.0 ships two things in one project:**
+On top of your harness, the plugin adds three things:
+
+| | What it adds |
+|---|--------------|
+| 🛡️ **AI‑slop prevention** | Guardrails tuned to the specific model that stop the agent from inventing features, skipping steps, or drifting off the actual problem. |
+| 🧭 **A spec language + command palette** | A shared vocabulary (Business Context → CP → CN → FR) and a `/problem-based-srs` command set that steer you toward great design, one decision at a time. |
+| 🌱 **A method for brownfield *and* greenfield** | A rigorous way to evolve existing systems (learn a spec from the code you inherited) as well as specify new ones from scratch. |
+
+It traces every feature back to the customer problem it solves, using the [AgentSkills](https://agentskills.io) open standard.
+
+**The plugin ships two surfaces in one project:**
 
 | | What it is | Where it runs |
 |---|------------|---------------|
-| 🧠 **Skills** | The Problem-Based SRS methodology as agent-native skills (Business Context → CP → CN → FR, with traceability and validation). | GitHub Copilot, Claude Code, and any AgentSkills-compatible assistant |
+| 🧠 **Skills** | The Problem-Based SRS methodology as agent-native skills (Business Context → CP → CN → FR, with traceability and validation). | GitHub Copilot first; Claude Code and any AgentSkills-compatible assistant |
 | 🗺️ **App** | The **SRS Navigator** — a GitHub Copilot canvas app that visualizes your spec as an interactive graph and lets you decompose and iterate requirements with the agent, in place. | The GitHub Copilot side panel (`/live`) |
 
 ![SRS Navigator — interactive force-directed graph of Customer Problems, Customer Needs, and Functional / Non-Functional Requirements](docs/assets/srs-navigator.png)

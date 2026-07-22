@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.4.1] - 2026-07-22
 
 ### Changed
 
+- **Reframed the value proposition across all docs.** The README, project webpage
+  (`docs/index.html`, `docs/docs.html`), `docs/PRODUCT.md`, and `AGENTS.md` now position
+  Problem-Based SRS as a **plugin that extends your AI harness (Copilot first) to handle
+  Software Specifications** — adding AI‑slop prevention tuned to the model, a spec language
+  and command palette that steer toward great design, and a rigorous method for brownfield
+  and greenfield systems.
 - **Consolidated the methodology into a single skill folder.** The 9 previously isolated
   `skills/<slug>/SKILL.md` folders are collapsed into one skill at `skills/problem-based-srs/`:
   the `SKILL.md` orchestrator plus one plain-markdown file per action under
@@ -56,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   field), and the project webpage. The eight step content files under `skills/<slug>/`
   are retained as the backing methodology library.
 
+[2.4.1]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.4.1
 [2.4]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.4
 
 ## [2.3] - 2026-07-01

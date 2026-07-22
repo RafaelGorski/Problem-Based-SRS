@@ -10,7 +10,7 @@ Software engineers working on brownfield projects. They inherit existing codebas
 
 ## Product Purpose
 
-Problem-Based SRS is an AI-guided requirements engineering methodology. It exists because the #1 cause of software project failures is building what stakeholders asked for instead of what they need. The README and project webpage are the primary surfaces: they must convince a skeptical engineer in 30 seconds that this methodology is worth their time. Success looks like an engineer installing the skill and running their first `/problem-based-srs` session within 5 minutes of landing on the page.
+Problem-Based SRS is a plugin that extends your AI harness (GitHub Copilot first; Claude Code and other assistants also supported) to handle Software Specifications. It exists because the #1 cause of software project failures is building what stakeholders asked for instead of what they need — and because a general-purpose coding agent, left alone, produces slop: invented features, skipped steps, code with no traceable reason to exist. The plugin adds three things on top of the harness: AI‑slop prevention tuned to the specific model, a spec language and command palette that steer toward great design, and a rigorous method to evolve brownfield systems as well as build new ones. The README and project webpage are the primary surfaces: they must convince a skeptical engineer in 30 seconds that this plugin is worth their time. Success looks like an engineer installing the plugin and running their first `/problem-based-srs` session within 5 minutes of landing on the page.
 
 ## Brand Personality
 

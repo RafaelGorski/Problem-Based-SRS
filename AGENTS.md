@@ -1,7 +1,9 @@
 # GitHub Copilot Instructions for Problem-Based SRS
 
 ## Project Overview
-This repository provides AgentSkills for following a Problem-Based Software Requirements Specification (SRS) methodology. The focus is on enabling AI-assisted requirements engineering through structured, problem-first approaches.
+Problem-Based SRS is a **plugin that extends your AI harness to handle Software Specifications**. It plugs into **GitHub Copilot first** — and Claude Code and other AI coding assistants too — turning a general-purpose coding agent into one that can reason about, trace, and evolve requirements instead of only emitting code. On top of the harness it adds three things: **AI‑slop prevention** tuned to the specific model, a **spec language and command palette** that steer toward great design, and a **rigorous method** to evolve existing (brownfield) systems as well as build new ones.
+
+The plugin delivers this through AgentSkills for a Problem-Based Software Requirements Specification (SRS) methodology, enabling AI-assisted requirements engineering through structured, problem-first approaches.
 
 The repository follows the **[AgentSkills](https://agentskills.io)** standard and the **Claude Code Plugins** layout. Compatibility priority is **GitHub Copilot first**, then **Claude Code/Claude.ai**.
 
