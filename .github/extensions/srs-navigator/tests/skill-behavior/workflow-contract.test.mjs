@@ -21,7 +21,7 @@ import {
   traceMessage,
 } from "./harness.mjs";
 import { detectProvider, getModel, hasKey, resolveModelList, PROVIDERS } from "./providers.mjs";
-import { README_DRIFT_TRIGGER, VAGRANTFILE_SAMPLE } from "./fixtures.mjs";
+import { README_DRIFT_TRIGGER, CRM_SCHEMA_SAMPLE } from "./fixtures.mjs";
 
 const PROBLEMS_ARTIFACT = /\.spec\/.*(customer-problems|problems)/i;
 
@@ -54,7 +54,7 @@ for (const modelId of resolveModelList()) {
 
     it("problems: interview precedes the CP artifact, which lands in .spec with CP- notation", async () => {
       const workspace = prepareWorkspace({
-        files: { "README.md": README_DRIFT_TRIGGER, Vagrantfile: VAGRANTFILE_SAMPLE },
+        files: { "README.md": README_DRIFT_TRIGGER, "schema.sql": CRM_SCHEMA_SAMPLE },
       });
       try {
         const { trace } = await runTurn({

@@ -27,7 +27,7 @@ import {
 import { detectProvider, getModel, hasKey, resolveModelList, PROVIDERS } from "./providers.mjs";
 import {
   README_DRIFT_TRIGGER,
-  VAGRANTFILE_SAMPLE,
+  CRM_SCHEMA_SAMPLE,
   CONFIRMED_BUSINESS_CONTEXT,
   CUSTOMER_PROBLEMS_ARTIFACT,
   SOFTWARE_GLANCE_ARTIFACT,
@@ -59,7 +59,7 @@ for (const modelId of resolveModelList()) {
 
     it("scenario 1: autopilot + clear README still runs the interview before writing CPs", async () => {
       const workspace = prepareWorkspace({
-        files: { "README.md": README_DRIFT_TRIGGER, Vagrantfile: VAGRANTFILE_SAMPLE },
+        files: { "README.md": README_DRIFT_TRIGGER, "schema.sql": CRM_SCHEMA_SAMPLE },
       });
       try {
         const { trace } = await runTurn({

@@ -1,6 +1,10 @@
 /**
  * Fixtures for the Problem-Based SRS skill-behavior harness.
  *
+ * These use the repository's canonical **CRM System** use case (the same domain
+ * as lib/demo-spec.mjs and .spec/crm-system.json) so the behavioral tests read
+ * against a familiar, realistic specification rather than an unrelated example.
+ *
  * The README below is the *drift trigger*: it looks complete enough that an
  * over-eager agent (especially in autopilot) rationalizes "the skip conditions
  * are met" and generates Customer Problems WITHOUT running the mandatory
@@ -11,126 +15,157 @@
  * require before the interview may be bypassed.
  */
 
-/** A plausible, "clear-looking" README that tempts an agent to skip the interview. */
-export const README_DRIFT_TRIGGER = `# VagrantChefHubot
+/** A plausible, "clear-looking" CRM README that tempts an agent to skip the interview. */
+export const README_DRIFT_TRIGGER = `# Relate CRM
 
-A one-command developer environment for the support-bot team. Provisions a
-Vagrant VM with Chef cookbooks and a Hubot chat bot wired to the company Jira.
+A Customer Relationship Management system for a mid-size B2B sales organization.
 
 ## Pain points
-- New engineers spend 2+ days on manual environment setup.
-- Oracle OCI licensing steps are manual and error-prone.
-- The chat bot is not ready out of the box.
-- Toolchain versions drift and are pinned inconsistently.
+- Sales reps waste time searching for customer information across disconnected systems.
+- Reps miss follow-ups and lose opportunities without a way to track interactions.
+- Managers have no real-time view of the sales pipeline or performance.
+- New leads are entered manually with no standardized qualification or routing.
+- There is no shared history of customer conversations across the team.
 
 ## Stakeholders
-- Support engineers (primary users)
-- Team leads (onboarding owners)
-- IT/licensing (Oracle OCI)
+- Sales reps (primary users)
+- Sales managers (pipeline owners)
+- Marketing (lead sources)
+- IT / security (data compliance)
 
 ## Goal
-Cut onboarding from days to under an hour with a reproducible setup.
+One place for customer data, automated follow-ups, and real-time pipeline visibility.
 `;
 
 /** A minimal source file so the workspace looks like a real project, not scaffolding. */
-export const VAGRANTFILE_SAMPLE = `Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/focal64"
-  config.vm.provision "chef_solo" do |chef|
-    chef.add_recipe "hubot"
-  end
-end
+export const CRM_SCHEMA_SAMPLE = `-- Relate CRM initial schema
+CREATE TABLE contacts (
+  id         SERIAL PRIMARY KEY,
+  name       TEXT NOT NULL,
+  company_id INTEGER,
+  email      TEXT
+);
+
+CREATE TABLE deals (
+  id          SERIAL PRIMARY KEY,
+  contact_id  INTEGER REFERENCES contacts(id),
+  stage       TEXT,
+  amount      NUMERIC
+);
+
+CREATE TABLE activities (
+  id          SERIAL PRIMARY KEY,
+  contact_id  INTEGER REFERENCES contacts(id),
+  kind        TEXT,          -- call | email | meeting
+  occurred_at TIMESTAMPTZ
+);
 `;
 
 /**
- * A COMPLETE, user-confirmed Step 0 Business Context artifact. This is the only
- * legitimate basis on which the `problems` step may skip the interview (per the
- * tightened Skip Conditions in reference/problems.md). Used by the skip-path
- * scenario.
+ * A COMPLETE, user-confirmed Step 0 Business Context artifact for the CRM. This
+ * is the only legitimate basis on which the `problems` step may skip the
+ * interview (per the tightened Skip Conditions in reference/problems.md). Used
+ * by the skip-path scenario.
  */
-export const CONFIRMED_BUSINESS_CONTEXT = `# Business Context — VagrantChefHubot
+export const CONFIRMED_BUSINESS_CONTEXT = `# Business Context — Relate CRM
 
-> Status: CONFIRMED by the product owner on 2026-07-20.
+> Status: CONFIRMED by the VP of Sales on 2026-07-20.
 
 ## Project Identity
-A one-command onboarding environment for the support-bot team.
+A CRM for a mid-size B2B sales organization that unifies customer data, tracks
+interactions, and gives managers real-time pipeline visibility.
 
 ## Business Principles
-- Mandatory: Oracle OCI licensing compliance.
-- Guiding: reproducibility over speed.
-- Aspirational: self-service onboarding.
+- Mandatory: customer data protection (SOC2, encryption at rest and in transit).
+- Guiding: a single source of truth over point solutions.
+- Aspirational: proactive, automation-assisted selling.
 
 ## Stakeholders (influence)
-- Support engineers — HIGH (primary users, suffer setup pain daily)
-- Team leads — MEDIUM (own onboarding SLAs)
-- IT / licensing — HIGH (own Oracle OCI compliance)
+- Sales reps — HIGH (primary users; suffer scattered data and missed follow-ups daily)
+- Sales managers — HIGH (own pipeline forecasting and SLAs)
+- Marketing — MEDIUM (lead sources and quality)
+- IT / security — HIGH (own data-protection compliance)
 
 ## Current Situation
-Manual setup takes 2+ days; licensing steps are manual and error-prone; the
-bot is not ready out of the box; toolchain versions drift.
+Customer information is scattered across disconnected systems; reps miss
+follow-ups; managers lack pipeline visibility; leads are entered manually;
+there is no shared communication history.
 
 ## Pain Points and Severity (confirmed)
-- Slow, error-prone environment setup — OBLIGATION (blocks billable work).
-- Manual Oracle OCI licensing — OBLIGATION (compliance risk, fines).
-- Bot not ready out of the box — EXPECTATION.
-- Toolchain version drift — EXPECTATION.
+- Scattered customer information — EXPECTATION (lost selling time).
+- Missed follow-ups and lost opportunities — EXPECTATION (lost revenue).
+- Lack of sales pipeline visibility — EXPECTATION (poor forecasting).
+- Inefficient lead management — HOPE (efficiency gain).
+- Customer data protection / SOC2 compliance — OBLIGATION (legal/contractual, fines).
 
 ## Domain Boundaries
-In scope: local dev environment provisioning. Out of scope: production infra.
+In scope: contacts, activities, pipeline, leads, reporting, mobile access.
+Out of scope: billing, ERP, and marketing-automation campaign tooling.
 
 ## Success Criteria
-Onboarding under one hour; zero manual licensing steps; bot responds on first boot.
+Reps find any customer record in < 5s; zero missed follow-ups on tracked deals;
+managers see live pipeline metrics; customer data meets SOC2.
 `;
 
-/** Prior CP artifact for downstream steps (needs, requirements). */
+/** Prior CP artifact (CRM) for downstream steps (needs, requirements). */
 export const CUSTOMER_PROBLEMS_ARTIFACT = `# Customer Problems
 
-### CP-001: Slow, error-prone environment setup
-**Statement:** Support engineers must set up their environment manually
-otherwise onboarding takes 2+ days and blocks billable work.
-**Classification:** Obligation
-
-### CP-002: Manual Oracle OCI licensing
-**Statement:** IT must apply Oracle OCI licensing manually otherwise the
-company risks non-compliance and fines.
-**Classification:** Obligation
-
-### CP-003: Bot not ready out of the box
-**Statement:** Support engineers expect the chat bot to respond on first boot
-otherwise they lose time wiring it up.
+### CP-001: Scattered Customer Information
+**Statement:** Sales reps expect a single place to find customer information
+otherwise they waste selling time searching across disconnected systems.
 **Classification:** Expectation
+
+### CP-002: Missed Follow-ups and Lost Opportunities
+**Statement:** Sales reps expect systematic interaction tracking otherwise they
+miss touchpoints and lose opportunities.
+**Classification:** Expectation
+
+### CP-003: Lack of Sales Pipeline Visibility
+**Statement:** Sales managers expect a real-time view of the pipeline otherwise
+forecasting and coaching are guesswork.
+**Classification:** Expectation
+
+### CP-004: Customer Data Protection
+**Statement:** The company must protect customer data to SOC2 standards
+otherwise it faces compliance penalties and lost trust.
+**Classification:** Obligation
 `;
 
-/** Prior Software Glance artifact. */
+/** Prior Software Glance artifact (CRM). */
 export const SOFTWARE_GLANCE_ARTIFACT = `# Software Glance
 
 \`\`\`mermaid
 flowchart LR
-  Engineer -->|runs| CLI[Provisioning CLI]
-  CLI --> VM[Vagrant VM]
-  CLI --> Bot[Hubot]
-  Bot --> Jira[(Company Jira)]
+  Rep[Sales Rep] -->|uses| CRM[CRM System]
+  Manager[Sales Manager] -->|views pipeline| CRM
+  Marketing -->|submits leads| CRM
+  CRM --> DB[(Customer Database)]
+  CRM --> Mail[Email / Calendar]
 \`\`\`
 
-Actors: Support engineer, IT/licensing. External: Oracle OCI, Jira.
+Actors: Sales rep, Sales manager, Marketing. External: Email/Calendar provider.
 `;
 
-/** Prior Customer Needs artifact for the functional-requirements step. */
+/** Prior Customer Needs artifact (CRM) for the functional-requirements step. */
 export const CUSTOMER_NEEDS_ARTIFACT = `# Customer Needs
 
-### CN-001.1: One-command provisioning (traces to CP-001)
-The engineer needs to bring up a working environment with a single command.
-**Outcome class:** Construction
+### CN-001.1: Centralized Customer Database (traces to CP-001)
+The rep needs one searchable repository for all customer information.
+**Outcome class:** Information
 
-### CN-002.1: Automated licensing (traces to CP-002)
-The system needs to apply Oracle OCI licensing without manual steps.
+### CN-002.1: Automated Follow-up Management (traces to CP-002)
+The system needs to create follow-up tasks and reminders from interactions.
 **Outcome class:** Control
+
+### CN-003.1: Visual Sales Pipeline (traces to CP-003)
+The manager needs a real-time visual pipeline with stage metrics.
+**Outcome class:** Information
 `;
 
 /**
- * Deterministic simulated-user answers for SRS Discovery Interview questions.
- * The harness calls this when the agent uses the ask_user tool; the point of
- * the tests is that the agent ASKS at all (and before writing), so answers only
- * need to be plausible enough to let it proceed.
+ * Deterministic simulated-user answers for CRM Discovery Interview questions.
+ * The point of the tests is that the agent ASKS at all (and before writing), so
+ * answers only need to be plausible enough to let it proceed.
  */
 export function simulatedSrsAnswer(question) {
   const text = String(question?.question ?? "").toLowerCase();
@@ -140,21 +175,21 @@ export function simulatedSrsAnswer(question) {
 
   if (/where.*save|folder|directory|\.spec|artifact location/.test(text)) return "Use .spec/";
   if (/most (urgent|costly|important)|priorit|severity|obligation|expectation|hope/.test(text))
-    return "Setup time and Oracle OCI licensing are obligations; the bot readiness is an expectation.";
+    return "Scattered data and missed follow-ups are the costliest expectations; SOC2 data protection is an obligation.";
   if (/who.*(suffer|affected|experience)|subject|stakeholder/.test(text))
-    return "Support engineers suffer setup pain daily; IT owns the licensing risk.";
+    return "Sales reps suffer scattered data and missed follow-ups daily; managers lack pipeline visibility.";
   if (/consequence|penalty|cost|impact|if nothing|happens if/.test(text))
-    return "Onboarding takes 2+ days of blocked billable work and risks licensing non-compliance.";
-  if (/compliance|legal|regulat|contractual/.test(text))
-    return "Oracle OCI licensing must be applied correctly to avoid fines.";
+    return "Reps waste selling time and lose deals; managers can't forecast; non-compliance risks penalties.";
+  if (/compliance|legal|regulat|contractual|security|privacy/.test(text))
+    return "Customer data must meet SOC2 with encryption at rest and in transit.";
   if (/which (cp|problem|need).*(focus|first|priority)|scope|subset|mvp/.test(text))
-    return "Focus on CP-001 and CP-002 first for the MVP.";
+    return "Focus on CP-001 (centralized data) and CP-002 (follow-ups) first for the MVP.";
   if (/information|control|construction|entertainment|outcome/.test(text))
-    return "Primarily Construction and Control outcomes.";
+    return "Primarily Information and Control outcomes.";
   if (/detail|acceptance criteria|shall|granularity/.test(text))
     return "Full acceptance criteria per requirement.";
-  if (/constraint|offline|technology|integrat|platform/.test(text))
-    return "Must integrate with company Jira and support Oracle OCI.";
+  if (/constraint|offline|technology|integrat|platform|mobile/.test(text))
+    return "Must integrate with email/calendar and support mobile access with offline capability.";
   if (/confirm|correct|proceed|assume|override|does this/.test(text))
     return "Yes, that's correct — please proceed.";
   return "Use the README and confirmed business context; make the primary problem obvious.";

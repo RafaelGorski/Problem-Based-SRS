@@ -55,7 +55,7 @@ Each scenario:
 
 | # | Setup | Assertion |
 |---|---|---|
-| 1 | README only + `Vagrantfile`; prompt says **autopilot** + `/problem-based-srs problems` | loads `reference/problems.md`; **calls `ask_user` before** writing the CP artifact — a README is not a valid skip basis |
+| 1 | README only + `schema.sql` (CRM); prompt says **autopilot** + `/problem-based-srs problems` | loads `reference/problems.md`; **calls `ask_user` before** writing the CP artifact — a README is not a valid skip basis |
 | 2 | README only; bare `/problem-based-srs problems` | loads `problems.md`; runs the interview |
 | 3 | README only; `/problem-based-srs business-context` | loads `business-context.md`; asks before writing `00-business-context.md` |
 | 4 | **confirmed** `.spec/00-business-context.md` + explicit problems/severity in prompt | **skip path is legitimate** — does not require `ask_user`, but must still load `problems.md` and write the CP artifact |
