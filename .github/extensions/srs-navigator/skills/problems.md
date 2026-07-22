@@ -45,6 +45,8 @@ Use when you have **draft CP statements** that need quality review and formattin
 
 This is a required interaction, not optional guidance. Ask questions in conversation, adapting based on answers. Do not dump all questions at once; have a natural dialogue. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
 
+> **Autopilot / non-interactive mode does NOT waive this interview.** Conducting it *is* part of the deliverable — it is not an ambiguity to resolve autonomously. Do not treat "the user is away", "bias to action", or "autopilot is active" as grounds to skip. If no user is available to answer, you MUST still post the questions and wait. Proceed without answers ONLY when every Skip Condition below is literally satisfied; inferring context from a README or source code is exactly what this interview prevents and does NOT by itself satisfy those conditions.
+
 #### Interview Cadence
 
 - Ask **2-3 questions per round**, then STOP and wait for answers.
@@ -66,12 +68,12 @@ This is a required interaction, not optional guidance. Ask questions in conversa
 
 #### Skip Conditions
 
-Skip the interview and proceed directly when ALL of these are true:
-- A complete Business Context exists with clear pain points and stakeholder information
-- The user's prompt explicitly states the problems and their severity
+Skip the interview and proceed directly when ALL of these are true. A README, source code, or other repository documentation alone does **NOT** satisfy these — autonomously inferring context from repo files is precisely what the interview exists to prevent:
+- A completed Step 0 Business Context artifact (`.spec/00-business-context.md`) exists **and was reviewed/confirmed by the user** — not merely inferred from a README
+- The user's own prompt (not repository documentation) explicitly states the problems and their severity
 - No ambiguity exists about who suffers and what the consequences are
 
-When skipping, state in one line what you're using as the basis and proceed.
+If these are not ALL literally satisfied, you MUST run the interview — including in autopilot mode. When you do skip, state in one line what you're using as the basis and proceed.
 
 ---
 

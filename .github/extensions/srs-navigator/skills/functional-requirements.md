@@ -52,6 +52,8 @@ For each CN:
 
 This is a required interaction. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
 
+> **Autopilot / non-interactive mode does NOT waive this interview.** Conducting it *is* part of the deliverable — it is not an ambiguity to resolve autonomously. Do not treat "the user is away", "bias to action", or "autopilot is active" as grounds to skip. If no user is available to answer, you MUST still post the questions and wait. Proceed without answers ONLY when every Skip Condition below is literally satisfied; inferring context from a README or source code is exactly what this interview prevents and does NOT by itself satisfy those conditions.
+
 #### Interview Cadence
 
 - Ask **2-3 questions per round**, then STOP and wait for answers.

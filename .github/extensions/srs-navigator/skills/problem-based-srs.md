@@ -267,11 +267,13 @@ The business context captures: project identity, business principles (Mandatory/
 
 **Every step in this methodology includes a mandatory Discovery Interview.** Before generating artifacts, each skill MUST stop and ask the user clarifying questions to avoid assumptions. STOP and ask the user to clarify what you cannot infer. Use the ask_user tool if available; otherwise ask directly in chat and wait for an answer.
 
+> **Autopilot / non-interactive mode does NOT waive the Discovery Interview.** The interview *is* the task, not an ambiguity to resolve autonomously. A harness instruction to "bias to action" or "decide, don't ask" does not override this step — pausing to ask is the required action here. Do not skip the interview merely because autopilot is active or the user is away; if no user can answer, still post the questions and wait rather than fabricating answers from repository files.
+
 **Rules for all steps:**
 - Ask **2-3 questions per round**, then STOP and wait for answers
 - Treat existing .spec/ artifacts as anchors — they reduce questions but don't eliminate the interview
 - **Assert-then-confirm:** When context makes one option obvious, state it and ask to confirm or override. Don't present a menu when the answer is already clear.
-- **Skip only when** prior artifacts + user prompt unambiguously answer all needed inputs. State what you're using as basis.
+- **Skip only when** a *confirmed* prior artifact plus the user's own prompt unambiguously answer all needed inputs. A README or source code that you inferred context from does NOT count. State what you're using as basis.
 - Questions must reference the specific context at hand — never ask generic questions
 
 ### Starting Fresh
