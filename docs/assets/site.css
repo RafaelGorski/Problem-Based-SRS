@@ -568,6 +568,66 @@
     background: var(--hf, var(--primary)); align-self: center;
 }
 
+/* ── Hero install CTA (primary action) ── */
+.hero-install { margin-bottom: var(--space-lg); max-width: 34rem; }
+.hero-install-label {
+    display: flex; align-items: center; gap: 0.5em;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.01em; color: var(--muted);
+    margin-bottom: var(--space-sm);
+}
+.copy-cmd {
+    display: flex; align-items: center; gap: var(--space-sm);
+    background: var(--bg-elevated);
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+    padding: 0.5rem 0.5rem 0.5rem 0.85rem;
+}
+.copy-cmd:focus-within { border-color: var(--muted-light); }
+.copy-cmd-text {
+    flex: 1 1 auto; min-width: 0;
+    background: none; border: none; padding: 0; border-radius: 0;
+    font-family: var(--font-mono); font-size: var(--text-sm);
+    line-height: 1.5; color: var(--ink-heading);
+    white-space: normal; overflow-wrap: anywhere;
+}
+.copy-cmd-btn {
+    flex: 0 0 auto; align-self: stretch;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4em;
+    background: var(--primary); color: var(--on-primary);
+    border: none; border-radius: 6px;
+    padding: 0.5em 0.9em;
+    font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600;
+    white-space: nowrap; cursor: pointer;
+    transition: background 0.2s ease;
+}
+.copy-cmd-btn:hover { background: var(--primary-hover); }
+.copy-cmd-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.copy-cmd-btn.is-copied { background: var(--step-vision); }
+.copy-cmd-icon { width: 15px; height: 15px; flex: 0 0 auto; }
+.copy-cmd-icon--done { display: none; }
+.copy-cmd-btn.is-copied .copy-cmd-icon--copy { display: none; }
+.copy-cmd-btn.is-copied .copy-cmd-icon--done { display: inline; }
+.hero-install-promise {
+    display: flex; align-items: center; gap: 0.5em;
+    margin-top: var(--space-sm);
+    font-size: var(--text-sm); color: var(--muted);
+}
+.hero-install-promise strong { color: var(--ink-heading); font-weight: 600; }
+.hero-install-promise svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--cp-bold); }
+.visually-hidden {
+    position: absolute; width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    clip: rect(0 0 0 0); clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
+@media (max-width: 640px) {
+    .copy-cmd { flex-direction: column; align-items: stretch; gap: 0.6rem; padding: 0.75rem; }
+    .copy-cmd-btn { align-self: stretch; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .copy-cmd-btn { transition: none; }
+}
+
 /* ── Two parts: Skills + App ── */
 .parts-grid { display: grid; gap: var(--space-lg); margin-top: var(--space-xl); }
 @media (min-width: 860px) { .parts-grid { grid-template-columns: 1fr 1fr; } }

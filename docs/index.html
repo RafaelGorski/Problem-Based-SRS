@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <!-- Bump the ?v= query on any assets/site.css or assets/site.js change to bust the 10-min Pages cache. -->
-    <link rel="stylesheet" href="assets/site.css?v=2.4.1">
+    <link rel="stylesheet" href="assets/site.css?v=2.4.2">
 </head>
 <body>
     <a href="#main" class="skip-link">Skip to content</a>
@@ -48,8 +48,24 @@
                 <span class="hero-feature"><span class="hf-dot" style="--hf: var(--step-why)" aria-hidden="true"></span><b>Skills</b> <span class="hf-kind">the methodology</span></span>
                 <span class="hero-feature"><span class="hf-dot" style="--hf: var(--step-how)" aria-hidden="true"></span><b>SRS Navigator</b> <span class="hf-kind">the app</span></span>
             </div>
+            <div class="hero-install">
+                <p class="hero-install-label">Paste into GitHub Copilot or Claude Code</p>
+                <div class="copy-cmd">
+                    <code class="copy-cmd-text" id="hero-install-cmd">Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/</code>
+                    <button type="button" class="copy-cmd-btn" data-copy="#hero-install-cmd" data-copy-status="#copy-status">
+                        <svg class="copy-cmd-icon copy-cmd-icon--copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <svg class="copy-cmd-icon copy-cmd-icon--done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span class="copy-cmd-btn-label">Copy</span>
+                    </button>
+                </div>
+                <p class="hero-install-promise">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                    <span>Then describe your project and get your first traced spec in <strong>5 minutes</strong>.</span>
+                </p>
+                <span id="copy-status" class="visually-hidden" role="status" aria-live="polite"></span>
+            </div>
             <div class="hero-actions">
-                <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-primary">View on GitHub</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS" class="btn-ghost">View on GitHub</a>
                 <a href="docs.html#navigator" class="btn-ghost">Explore the app</a>
             </div>
             <div class="hero-meta">
@@ -442,6 +458,6 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
         </div>
     </footer>
 
-    <script src="assets/site.js?v=2.4.1" defer></script>
+    <script src="assets/site.js?v=2.4.2" defer></script>
 </body>
 </html>

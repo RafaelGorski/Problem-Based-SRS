@@ -30,4 +30,59 @@
             }
         });
     });
+    // ── Copy-to-clipboard commands ────────────────────────────────
+    function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function (resolve, reject) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                var ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                ok ? resolve() : reject(new Error('execCommand failed'));
+            } catch (err) {
+                document.body.removeChild(ta);
+                reject(err);
+            }
+        });
+    }
+
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+        var labelEl = btn.querySelector('.copy-cmd-btn-label');
+        var defaultLabel = labelEl ? labelEl.textContent : 'Copy';
+        var statusEl = document.querySelector(btn.getAttribute('data-copy-status') || '');
+        var resetTimer;
+
+        function reset() {
+            btn.classList.remove('is-copied');
+            if (labelEl) { labelEl.textContent = defaultLabel; }
+        }
+
+        btn.addEventListener('click', function () {
+            var source = document.querySelector(btn.getAttribute('data-copy'));
+            if (!source) { return; }
+            var text = (source.textContent || '').trim();
+            copyText(text).then(function () {
+                btn.classList.add('is-copied');
+                if (labelEl) { labelEl.textContent = 'Copied'; }
+                if (statusEl) { statusEl.textContent = 'Install command copied to clipboard'; }
+            }).catch(function () {
+                if (labelEl) { labelEl.textContent = 'Press Ctrl+C'; }
+                if (statusEl) { statusEl.textContent = 'Copy failed. Select the command and press Ctrl+C.'; }
+            }).then(function () {
+                clearTimeout(resetTimer);
+                resetTimer = setTimeout(function () {
+                    reset();
+                    if (statusEl) { statusEl.textContent = ''; }
+                }, 2200);
+            });
+        });
+    });
 })();
