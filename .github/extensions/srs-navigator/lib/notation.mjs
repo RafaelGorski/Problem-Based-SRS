@@ -31,6 +31,18 @@ export function idSource(prefixes) {
 }
 
 /**
+ * Build an anchored regex that validates a complete identifier, used to gate
+ * specification JSON. Accepts canonical dotted IDs (CP.01, FR.01.1.1) and
+ * legacy hyphen IDs (CP-1, FR-001). Rejecting dotted IDs here used to make the
+ * canvas refuse every spec written in the methodology's own canonical notation.
+ * @param {string[]} prefixes e.g. ["CP", "P"]
+ * @returns {RegExp}
+ */
+export function idPattern(prefixes) {
+  return new RegExp(String.raw`^${idSource(prefixes)}$`, "i");
+}
+
+/**
  * Build a global, case-insensitive regex that finds references to any of the
  * given prefixes in free text (e.g. "Addresses CP.01 and CP-2").
  * @param {string[]} prefixes

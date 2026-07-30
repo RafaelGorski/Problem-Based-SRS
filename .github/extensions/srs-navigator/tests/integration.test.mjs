@@ -43,7 +43,7 @@ describe("Integration: Full specification pipeline", () => {
     // Render
     const html = renderGraphHtml(graphData, { title: DEMO_SPEC.name });
     assert.ok(html.includes("CRM System"));
-    assert.ok(html.includes("CP-1"));
+    assert.ok(html.includes("CP.01"));
     assert.ok(html.length > 1000);
   });
 
@@ -201,7 +201,7 @@ Fix the bug. Related to CP-1.
     const specData = convertJSONToSpecificationData(DEMO_SPEC);
     const graphData = buildGraphData(specData);
 
-    const nodeId = "CP-1";
+    const nodeId = "CP.01";
     const node = graphData.nodes.find(n => n.id === nodeId);
     assert.ok(node);
     assert.equal(node.type, "problem");

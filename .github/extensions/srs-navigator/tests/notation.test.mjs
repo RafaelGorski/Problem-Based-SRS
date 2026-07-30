@@ -14,6 +14,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { parseSpecificationData } from "../lib/parser.mjs";
 import { compileSpecFromFolder } from "../lib/spec-compiler.mjs";
+import { validateSpecificationJSON, validateReferenceIntegrity } from "../lib/validation.mjs";
+import { decomposeNode } from "../lib/decompose.mjs";
+import { DEMO_SPEC } from "../lib/demo-spec.mjs";
 import {
   refPattern,
   extractHeadingId,
@@ -191,5 +194,79 @@ describe("notation: spec-compiler reads a .spec/ folder", () => {
     for (const fr of spec.functionalRequirements) {
       assert.deepEqual(fr.needIds, ["CN.01.1"], `${fr.id} should trace to CN.01.1`);
     }
+  });
+});
+
+describe("specification JSON validation accepts both notations", () => {
+  // The validation gate is the harshest form of the notation bug: a spec written
+  // in the methodology's own canonical notation was not merely mis-linked, it was
+  // rejected outright ("Problem ID must match format").
+  const spec = (ids) => ({
+    name: "T",
+    description: "d",
+    version: "1.0",
+    problems: [{ id: ids.cp, title: "P", description: "d" }],
+    needs: [{ id: ids.cn, title: "N", description: "d", problemIds: [ids.cp] }],
+    functionalRequirements: [{ id: ids.fr, title: "F", description: "d", needIds: [ids.cn] }],
+    nonFunctionalRequirements: [{ id: ids.nfr, title: "Q", description: "d", needIds: [ids.cn] }],
+  });
+
+  it("accepts canonical dotted IDs", () => {
+    const res = validateSpecificationJSON(spec({ cp: "CP.01", cn: "CN.01.1", fr: "FR.01.1.1", nfr: "NFR.01" }));
+    assert.equal(res.success, true, `errors: ${(res.errors || []).join("; ")}`);
+  });
+
+  it("still accepts legacy hyphen IDs", () => {
+    const res = validateSpecificationJSON(spec({ cp: "CP-1", cn: "CN-1", fr: "FR-1", nfr: "NFR-1" }));
+    assert.equal(res.success, true, `errors: ${(res.errors || []).join("; ")}`);
+  });
+
+  it("still rejects malformed IDs", () => {
+    const res = validateSpecificationJSON(spec({ cp: "PROBLEM_ONE", cn: "CN-1", fr: "FR-1", nfr: "NFR-1" }));
+    assert.equal(res.success, false);
+  });
+
+  it("keeps the bundled demo spec on canonical dotted IDs", () => {
+    const res = validateSpecificationJSON(DEMO_SPEC);
+    assert.equal(res.success, true, `errors: ${(res.errors || []).join("; ")}`);
+    const all = [
+      ...DEMO_SPEC.problems,
+      ...DEMO_SPEC.needs,
+      ...DEMO_SPEC.functionalRequirements,
+      ...DEMO_SPEC.nonFunctionalRequirements,
+    ];
+    for (const item of all) {
+      assert.match(item.id, /^(?:CP|CN|FR|NFR)\.\d/, `demo spec id ${item.id} is not canonical dotted`);
+    }
+    assert.equal(validateReferenceIntegrity(res.data).valid, true);
+  });
+});
+
+describe("decomposition follows the notation of the spec", () => {
+  const dotted = {
+    problems: [{ id: "CP.01", title: "Slow", description: "Search is slow. Reports lag." }],
+    needs: [], functionalRequirements: [], nonFunctionalRequirements: [],
+  };
+
+  it("extends the parent ID for dotted specs", () => {
+    const { added } = decomposeNode(dotted, "CP.01");
+    assert.deepEqual(added.map((a) => a.id), ["CP.01.1", "CP.01.2"]);
+  });
+
+  it("does not collide when the same node is decomposed twice", () => {
+    const once = decomposeNode(dotted, "CP.01");
+    const twice = decomposeNode(once.spec, "CP.01");
+    assert.deepEqual(twice.added.map((a) => a.id), ["CP.01.3", "CP.01.4"]);
+    const ids = twice.spec.problems.map((p) => p.id);
+    assert.equal(new Set(ids).size, ids.length, "decomposition produced duplicate IDs");
+  });
+
+  it("keeps sequential IDs for legacy hyphen specs", () => {
+    const legacy = {
+      problems: [{ id: "CP-1", title: "Slow", description: "Search is slow. Reports lag." }],
+      needs: [], functionalRequirements: [], nonFunctionalRequirements: [],
+    };
+    const { added } = decomposeNode(legacy, "CP-1");
+    assert.deepEqual(added.map((a) => a.id), ["CP-2", "CP-3"]);
   });
 });

@@ -642,7 +642,7 @@ const session = await joinSession({
                     inputSchema: {
                         type: "object",
                         properties: {
-                            nodeId: { type: "string", description: "The node ID to inspect (e.g., CP-1, CN-2, FR-3, NFR-1)" }
+                            nodeId: { type: "string", description: "The node ID to inspect (e.g., CP.01, CN.02.1, FR.03.1.1, NFR.01)" }
                         },
                         required: ["nodeId"]
                     },
@@ -829,7 +829,7 @@ const session = await joinSession({
                     inputSchema: {
                         type: "object",
                         properties: {
-                            nodeId: { type: "string", description: "The node ID to decompose (e.g., FR-1, CN-2)" }
+                            nodeId: { type: "string", description: "The node ID to decompose (e.g., FR.01.1.1, CN.02.1)" }
                         },
                         required: ["nodeId"]
                     },

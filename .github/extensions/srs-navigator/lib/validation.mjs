@@ -1,11 +1,15 @@
 // Validation logic ported from the Problem-Based SRS Navigator
 // Validates specification JSON against expected schema and reference integrity
 
+import { idPattern } from "./notation.mjs";
+
+// Canonical dotted IDs and legacy hyphen IDs are both accepted; the shapes come
+// from lib/notation.mjs so this gate can never drift from the two parsers.
 const ID_PATTERNS = {
-  problem: /^(CP|P)-\d+$/,
-  need: /^(CN|N)-\d+$/,
-  fr: /^FR-\d+$/,
-  nfr: /^NFR-\d+$/
+  problem: idPattern(["CP", "P"]),
+  need: idPattern(["CN", "N"]),
+  fr: idPattern(["FR"]),
+  nfr: idPattern(["NFR"])
 };
 
 /**
@@ -69,10 +73,10 @@ export function validateSpecificationJSON(data) {
     return validated;
   };
 
-  const problems = validateArray(data.problems || [], 'problems', ID_PATTERNS.problem, 'Problem (CP-X or P-X)');
-  const needs = validateArray(data.needs || [], 'needs', ID_PATTERNS.need, 'Need (CN-X or N-X)');
-  const functionalRequirements = validateArray(data.functionalRequirements || [], 'functionalRequirements', ID_PATTERNS.fr, 'FR (FR-X)');
-  const nonFunctionalRequirements = validateArray(data.nonFunctionalRequirements || [], 'nonFunctionalRequirements', ID_PATTERNS.nfr, 'NFR (NFR-X)');
+  const problems = validateArray(data.problems || [], 'problems', ID_PATTERNS.problem, 'Problem (CP.01 or CP-1)');
+  const needs = validateArray(data.needs || [], 'needs', ID_PATTERNS.need, 'Need (CN.01.1 or CN-1)');
+  const functionalRequirements = validateArray(data.functionalRequirements || [], 'functionalRequirements', ID_PATTERNS.fr, 'FR (FR.01.1.1 or FR-1)');
+  const nonFunctionalRequirements = validateArray(data.nonFunctionalRequirements || [], 'nonFunctionalRequirements', ID_PATTERNS.nfr, 'NFR (NFR.01 or NFR-1)');
 
   if (errors.length > 0) {
     return { success: false, errors };

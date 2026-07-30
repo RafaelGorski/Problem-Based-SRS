@@ -11,7 +11,10 @@ const TYPE_META = {
   nfr: { key: "nonFunctionalRequirements", prefix: "NFR", linkField: "needIds" },
 };
 
-/** Compute the next sequential id (e.g. "FR-4") given existing ids of a prefix. */
+/**
+ * Compute the next sequential id (e.g. "FR-4") given existing ids of a prefix.
+ * Only used for legacy hyphen specs; dotted specs use {@link childId}.
+ */
 export function nextId(ids, prefix) {
   let max = 0;
   for (const id of ids) {
@@ -19,6 +22,24 @@ export function nextId(ids, prefix) {
     if (m) max = Math.max(max, Number(m[1]));
   }
   return `${prefix}-${max + 1}`;
+}
+
+/**
+ * Compute a child id for canonical dotted notation by appending a level to the
+ * parent, e.g. CP.01 -> CP.01.1, FR.01.1.1 -> FR.01.1.1.1. This keeps the
+ * traceability chain readable in the id itself, which is the whole point of the
+ * dotted scheme, and matches the documented sub-problem convention.
+ */
+export function childId(parentId, existingIds) {
+  const taken = new Set(existingIds.map(String));
+  let k = 1;
+  while (taken.has(`${parentId}.${k}`)) k += 1;
+  return `${parentId}.${k}`;
+}
+
+/** True when an id uses canonical dotted notation (CP.01) rather than legacy hyphen (CP-1). */
+export function isDottedId(id) {
+  return /^[A-Za-z]+\.\d/.test(String(id));
 }
 
 function detectType(spec, nodeId) {
@@ -52,8 +73,9 @@ export function decomposeNode(spec, nodeId) {
   if (sentences.length < 2) return { spec: next, added: [] };
 
   const existingIds = list.map((i) => i.id);
+  const dotted = isDottedId(nodeId);
   const added = sentences.map((sentence) => {
-    const id = nextId(existingIds, meta.prefix);
+    const id = dotted ? childId(nodeId, existingIds) : nextId(existingIds, meta.prefix);
     existingIds.push(id);
     const item = { id, title: sentence.slice(0, 80), description: sentence };
     if (meta.linkField) item[meta.linkField] = [...(parent[meta.linkField] || [])];

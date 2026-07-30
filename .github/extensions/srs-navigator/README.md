@@ -250,16 +250,16 @@ The extension accepts specifications in the Problem-Based SRS JSON format:
   "description": "System description",
   "version": "1.0",
   "problems": [
-    { "id": "CP-1", "title": "...", "description": "..." }
+    { "id": "CP.01", "title": "...", "description": "..." }
   ],
   "needs": [
-    { "id": "CN-1", "title": "...", "description": "...", "problemIds": ["CP-1"] }
+    { "id": "CN.01.1", "title": "...", "description": "...", "problemIds": ["CP.01"] }
   ],
   "functionalRequirements": [
-    { "id": "FR-1", "title": "...", "description": "...", "needIds": ["CN-1"] }
+    { "id": "FR.01.1.1", "title": "...", "description": "...", "needIds": ["CN.01.1"] }
   ],
   "nonFunctionalRequirements": [
-    { "id": "NFR-1", "title": "...", "description": "...", "needIds": ["CN-1"] }
+    { "id": "NFR.01", "title": "...", "description": "...", "needIds": ["CN.01.1"] }
   ]
 }
 ```
