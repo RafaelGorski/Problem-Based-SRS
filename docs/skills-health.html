@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skills Health — Problem-Based SRS</title>
+<meta name="description" content="Test-suite and context-budget health for the Problem-Based SRS plugin and the SRS Navigator canvas app.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .health { max-width: 68rem; margin: 0 auto; padding: var(--space-xl) var(--space-md) var(--space-2xl); }
+  .health h1 { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--ink-heading); margin: 0 0 var(--space-xs); }
+  .health .sub { color: var(--muted); font-size: var(--text-sm); margin: 0 0 var(--space-lg); }
+  .health h2 { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink-heading); margin: var(--space-xl) 0 var(--space-sm); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-sm); }
+  .card { background: var(--bg-elevated); border: 1px solid var(--surface-border); border-radius: 0.75rem; padding: var(--space-md); }
+  .card .k { display: block; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .card .v { display: block; font-family: var(--font-display); font-size: var(--text-2xl); color: var(--ink-heading); line-height: 1.1; }
+  .card.verdict-passed { border-color: oklch(0.55 0.12 150 / 0.45); }
+  .card.verdict-failed { border-color: oklch(0.55 0.18 27 / 0.5); }
+  .card.verdict-passed .v { color: oklch(0.45 0.12 150); }
+  .card.verdict-failed .v { color: oklch(0.50 0.18 27); }
+  table.health-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); background: var(--bg-elevated); border: 1px solid var(--surface-border); border-radius: 0.75rem; overflow: hidden; }
+  .health-table th { text-align: left; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface-border); }
+  .health-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface); vertical-align: top; color: var(--ink); }
+  .health-table tr:last-child td { border-bottom: 0; }
+  .health-table .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .health-table .num.bad { color: oklch(0.50 0.18 27); font-weight: 600; }
+  .health-table .name { font-weight: 600; }
+  .health-table .name code { display: block; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 400; color: var(--muted); margin-top: 0.15rem; }
+  .health-table .note { color: var(--muted); font-size: var(--text-xs); }
+  .pill { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: var(--text-xs); font-weight: 600; }
+  .pill-passed, .pill-ok { background: oklch(0.55 0.12 150 / 0.14); color: oklch(0.40 0.12 150); }
+  .pill-failed, .pill-over { background: oklch(0.55 0.18 27 / 0.14); color: oklch(0.46 0.18 27); }
+  .pill-skipped { background: var(--surface); color: var(--muted); }
+  .pill-watch { background: oklch(0.61 0.18 48 / 0.16); color: oklch(0.45 0.15 48); }
+  .bar-cell { width: 40%; }
+  .bar { display: block; height: 0.4rem; border-radius: 999px; background: var(--surface); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .state-watch .bar i { background: var(--step-why); }
+  .state-over .bar i { background: oklch(0.55 0.18 27); }
+  .legend { color: var(--muted); font-size: var(--text-xs); margin-top: var(--space-sm); }
+</style>
+</head>
+<body>
+<main class="health">
+  <h1>Skills Health</h1>
+  <p class="sub">Problem-Based SRS v1.1.0 · generated 2026-07-30 23:52 UTC · <a href="index.html">back to the site</a></p>
+
+  <div class="cards">
+    <div class="card verdict-passed"><span class="k">Verdict</span><span class="v">Passed</span></div>
+    <div class="card"><span class="k">Tests</span><span class="v">325</span></div>
+    <div class="card"><span class="k">Passing</span><span class="v">325</span></div>
+    <div class="card"><span class="k">Failing</span><span class="v">0</span></div>
+    <div class="card"><span class="k">Suites run</span><span class="v">4/6</span></div>
+    <div class="card"><span class="k">Duration</span><span class="v">56.3s</span></div>
+  </div>
+
+  <h2>Suites</h2>
+  <table class="health-table">
+    <thead><tr><th>Suite</th><th>Result</th><th class="num">Tests</th><th class="num">Pass</th><th class="num">Fail</th><th class="num">Time</th><th>Note</th></tr></thead>
+    <tbody>
+        <tr class="state-passed">
+          <td class="name">Plugin validation<code>python scripts/build-plugin.py validate</code></td>
+          <td><span class="pill pill-passed">Passed</span></td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num ">0</td>
+          <td class="num">0.3s</td>
+          <td class="note"></td>
+        </tr>
+        <tr class="state-passed">
+          <td class="name">Canvas extension<code>npm test</code></td>
+          <td><span class="pill pill-passed">Passed</span></td>
+          <td class="num">215</td>
+          <td class="num">215</td>
+          <td class="num ">0</td>
+          <td class="num">1.4s</td>
+          <td class="note"></td>
+        </tr>
+        <tr class="state-passed">
+          <td class="name">Skill evals<code>pwsh evals/scripts/run-tests.ps1</code></td>
+          <td><span class="pill pill-passed">Passed</span></td>
+          <td class="num">91</td>
+          <td class="num">91</td>
+          <td class="num ">0</td>
+          <td class="num">0.5s</td>
+          <td class="note"></td>
+        </tr>
+        <tr class="state-passed">
+          <td class="name">Canvas e2e<code>npm run test:e2e</code></td>
+          <td><span class="pill pill-passed">Passed</span></td>
+          <td class="num">18</td>
+          <td class="num">18</td>
+          <td class="num ">0</td>
+          <td class="num">54.1s</td>
+          <td class="note"></td>
+        </tr>
+        <tr class="state-skipped">
+          <td class="name">Skill behavior (LLM)<code>npm run test:skill-behavior</code></td>
+          <td><span class="pill pill-skipped">Skipped</span></td>
+          <td class="num">—</td>
+          <td class="num">—</td>
+          <td class="num ">—</td>
+          <td class="num">—</td>
+          <td class="note">not requested (-IncludeSkillBehavior)</td>
+        </tr>
+        <tr class="state-skipped">
+          <td class="name">Live skill evals (LLM)<code>node evals/run-evals.mjs</code></td>
+          <td><span class="pill pill-skipped">Skipped</span></td>
+          <td class="num">—</td>
+          <td class="num">—</td>
+          <td class="num ">—</td>
+          <td class="num">—</td>
+          <td class="note">not requested (-IncludeSkillBehavior)</td>
+        </tr>
+    </tbody>
+  </table>
+
+  <h2>Max context — skill line budget</h2>
+  <table class="health-table">
+    <thead><tr><th>File</th><th class="num">Lines</th><th>Share of cap</th><th>State</th></tr></thead>
+    <tbody>
+        <tr class="state-watch">
+          <td class="name"><code>skills/problem-based-srs/SKILL.md</code></td>
+          <td class="num">549</td>
+          <td class="bar-cell"><span class="bar"><i style="width:91.5%"></i></span></td>
+          <td><span class="pill pill-watch">Watch</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/business-context.md</code></td>
+          <td class="num">491</td>
+          <td class="bar-cell"><span class="bar"><i style="width:81.8%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/complexity.md</code></td>
+          <td class="num">267</td>
+          <td class="bar-cell"><span class="bar"><i style="width:44.5%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/crm-example.md</code></td>
+          <td class="num">179</td>
+          <td class="bar-cell"><span class="bar"><i style="width:29.8%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/functional-requirements.md</code></td>
+          <td class="num">486</td>
+          <td class="bar-cell"><span class="bar"><i style="width:81%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/live.md</code></td>
+          <td class="num">74</td>
+          <td class="bar-cell"><span class="bar"><i style="width:12.3%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/microer-example.md</code></td>
+          <td class="num">215</td>
+          <td class="bar-cell"><span class="bar"><i style="width:35.8%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/needs.md</code></td>
+          <td class="num">248</td>
+          <td class="bar-cell"><span class="bar"><i style="width:41.3%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/problems.md</code></td>
+          <td class="num">375</td>
+          <td class="bar-cell"><span class="bar"><i style="width:62.5%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/software-glance.md</code></td>
+          <td class="num">304</td>
+          <td class="bar-cell"><span class="bar"><i style="width:50.7%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/software-vision.md</code></td>
+          <td class="num">288</td>
+          <td class="bar-cell"><span class="bar"><i style="width:48%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+        <tr class="state-ok">
+          <td class="name"><code>skills/problem-based-srs/reference/validate.md</code></td>
+          <td class="num">296</td>
+          <td class="bar-cell"><span class="bar"><i style="width:49.3%"></i></span></td>
+          <td><span class="pill pill-ok">OK</span></td>
+        </tr>
+    </tbody>
+  </table>
+  <p class="legend">Hard cap 600 lines · soft watch 500 lines. Front matter is excluded; the metric matches <code>evals/lib/skills.mjs</code>.</p>
+</main>
+</body>
+</html>

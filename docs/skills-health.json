@@ -1,0 +1,165 @@
+{
+  "schema": "skills-health/1",
+  "generatedAt": "2026-07-30T23:52:36.9408292Z",
+  "repo": "RafaelGorski/Problem-Based-SRS",
+  "version": "1.1.0",
+  "overall": {
+    "state": "passed",
+    "suites": 6,
+    "suitesRun": 4,
+    "suitesFailed": 0,
+    "suitesSkipped": 2,
+    "tests": 325,
+    "pass": 325,
+    "fail": 0,
+    "skipped": 0,
+    "durationSeconds": 56.3
+  },
+  "suites": [
+    {
+      "name": "Plugin validation",
+      "state": "passed",
+      "command": "python scripts/build-plugin.py validate",
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "skipped": 0,
+      "seconds": 0.3,
+      "reason": ""
+    },
+    {
+      "name": "Canvas extension",
+      "state": "passed",
+      "command": "npm test",
+      "tests": 215,
+      "pass": 215,
+      "fail": 0,
+      "skipped": 0,
+      "seconds": 1.4,
+      "reason": ""
+    },
+    {
+      "name": "Skill evals",
+      "state": "passed",
+      "command": "pwsh evals/scripts/run-tests.ps1",
+      "tests": 91,
+      "pass": 91,
+      "fail": 0,
+      "skipped": 0,
+      "seconds": 0.5,
+      "reason": ""
+    },
+    {
+      "name": "Canvas e2e",
+      "state": "passed",
+      "command": "npm run test:e2e",
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "skipped": 0,
+      "seconds": 54.1,
+      "reason": ""
+    },
+    {
+      "name": "Skill behavior (LLM)",
+      "state": "skipped",
+      "command": "npm run test:skill-behavior",
+      "tests": 0,
+      "pass": 0,
+      "fail": 0,
+      "skipped": 0,
+      "seconds": 0,
+      "reason": "not requested (-IncludeSkillBehavior)"
+    },
+    {
+      "name": "Live skill evals (LLM)",
+      "state": "skipped",
+      "command": "node evals/run-evals.mjs",
+      "tests": 0,
+      "pass": 0,
+      "fail": 0,
+      "skipped": 0,
+      "seconds": 0,
+      "reason": "not requested (-IncludeSkillBehavior)"
+    }
+  ],
+  "maxContext": {
+    "hardCap": 600,
+    "softWatch": 500,
+    "state": "watch",
+    "files": [
+      {
+        "file": "skills/problem-based-srs/SKILL.md",
+        "lines": 549,
+        "state": "watch",
+        "pctOfCap": 91.5
+      },
+      {
+        "file": "skills/problem-based-srs/reference/business-context.md",
+        "lines": 491,
+        "state": "ok",
+        "pctOfCap": 81.8
+      },
+      {
+        "file": "skills/problem-based-srs/reference/complexity.md",
+        "lines": 267,
+        "state": "ok",
+        "pctOfCap": 44.5
+      },
+      {
+        "file": "skills/problem-based-srs/reference/crm-example.md",
+        "lines": 179,
+        "state": "ok",
+        "pctOfCap": 29.8
+      },
+      {
+        "file": "skills/problem-based-srs/reference/functional-requirements.md",
+        "lines": 486,
+        "state": "ok",
+        "pctOfCap": 81
+      },
+      {
+        "file": "skills/problem-based-srs/reference/live.md",
+        "lines": 74,
+        "state": "ok",
+        "pctOfCap": 12.3
+      },
+      {
+        "file": "skills/problem-based-srs/reference/microer-example.md",
+        "lines": 215,
+        "state": "ok",
+        "pctOfCap": 35.8
+      },
+      {
+        "file": "skills/problem-based-srs/reference/needs.md",
+        "lines": 248,
+        "state": "ok",
+        "pctOfCap": 41.3
+      },
+      {
+        "file": "skills/problem-based-srs/reference/problems.md",
+        "lines": 375,
+        "state": "ok",
+        "pctOfCap": 62.5
+      },
+      {
+        "file": "skills/problem-based-srs/reference/software-glance.md",
+        "lines": 304,
+        "state": "ok",
+        "pctOfCap": 50.7
+      },
+      {
+        "file": "skills/problem-based-srs/reference/software-vision.md",
+        "lines": 288,
+        "state": "ok",
+        "pctOfCap": 48
+      },
+      {
+        "file": "skills/problem-based-srs/reference/validate.md",
+        "lines": 296,
+        "state": "ok",
+        "pctOfCap": 49.3
+      }
+    ]
+  }
+}
