@@ -11,6 +11,27 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    name: Test (canvas + skill evals)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # No `npm ci` needed: the deterministic suites import only node:test /
+      # node:assert. Playwright-driven specs are excluded from `npm test`.
+      - name: Canvas extension tests
+        working-directory: .github/extensions/srs-navigator
+        run: npm test
+
+      - name: Deterministic skill evals
+        run: node --test evals/tests/*.test.mjs
+
   build:
     name: Build & validate plugin
     runs-on: ubuntu-latest

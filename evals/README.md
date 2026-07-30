@@ -37,18 +37,19 @@ Pure `node --test` files with no external dependencies:
 
 Run them:
 
-```bash
-npm test                 # from evals/
-# or
-node --test tests/
-```
-
-PowerShell helper:
-
 ```powershell
-pwsh evals/scripts/run-tests.ps1
-pwsh evals/scripts/run-tests.ps1 -File skills-static.test.mjs
+pwsh evals/scripts/run-tests.ps1                             # all deterministic tests
+pwsh evals/scripts/run-tests.ps1 -File skills-static.test.mjs   # a single file
 ```
+
+Or invoke `node --test` directly with an explicit file list (a bare directory
+argument is **not** supported by `node --test`):
+
+```bash
+node --test evals/tests/*.test.mjs    # from the repo root
+```
+
+They also run in CI on every push/PR (`.github/workflows/ci.yml`).
 
 ### 2. Live LLM evals (opt-in)
 
@@ -126,7 +127,6 @@ evals/
 ├── fixtures/                # input briefs for live evals
 ├── scripts/                 # run-tests.ps1, run-evals.ps1
 ├── run-evals.mjs            # live eval runner
-├── package.json
 └── README.md
 ```
 
