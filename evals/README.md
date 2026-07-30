@@ -32,8 +32,15 @@ Pure `node --test` files with no external dependencies:
     no `Use skill:` handoffs — i.e. the unified `/problem-based-srs <action>`
     refactor did not regress,
   - all relative links resolve on disk,
+  - **canonical dotted ID notation** (`CP.01` → `CN.01.1` → `FR.01.1.1`) is declared
+    and no file re-bans it or reverts a template to hyphen IDs, and
   - per-action methodology tokens are present, and the orchestrator lists all 8
     named actions and routes each to its `reference/<action>.md`.
+- `tests/cases.test.mjs` — validates every live eval case **offline**: shape,
+  unique names, the action it targets exists, its fixture exists, its prompt
+  actually embeds both, and its rubric runs. Live cases are opt-in, so without
+  this a broken case would sit unnoticed. Includes a canary asserting the
+  brownfield rubric rejects a technical-debt answer.
 
 Run them:
 
@@ -56,6 +63,19 @@ They also run in CI on every push/PR (`.github/workflows/ci.yml`).
 Each `cases/*.case.mjs` builds a **hermetic prompt** that injects the skill's own
 `SKILL.md` plus a fixture brief, runs it through the Copilot CLI, and grades the
 result with a deterministic rubric and (optionally) an LLM judge.
+
+Cases cover both directions of travel:
+
+| Case | Direction | Fixture | Guards against |
+|------|-----------|---------|----------------|
+| `problems` | greenfield (brief → CPs) | `relaydesk-brief.md` | restating stakeholders' solution ideas as problems |
+| `needs` | greenfield (CPs → CNs) | inline CP artifact | needs written as implementations |
+| `functional-requirements` | greenfield (CNs → FRs) | inline CN artifact | untraceable or untestable requirements |
+| `brownfield` | **reverse (existing system → CPs)** | `northwind-crm-brownfield.md` | restating technical debt ("PHP monolith", "migrate to microservices", "just buy Salesforce") as the customer problem |
+
+The `brownfield` case matters because the ICP inherits undocumented systems rather
+than starting from a brief; its fixture deliberately plants technical-debt bait in
+the CTO quote and the code TODOs.
 
 They are **opt-in** because they call the real model and may consume premium
 requests. They require the `copilot` CLI to be installed and authenticated.

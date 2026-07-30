@@ -9,12 +9,12 @@ import { buildExecutionPrompt } from "./_shared.mjs";
 // not depend on the output of the customer-problems case.
 const UPSTREAM_CPS = `# Customer Problems — RelayDesk
 
-- **CP-1 (Obligation):** High-priority tickets breach the contractual 4-hour
+- **CP.01 (Obligation):** High-priority tickets breach the contractual 4-hour
   first-response SLA ~15% of the time, causing service-credit payouts (~$180k last
   quarter). There is no early warning before a breach.
-- **CP-2 (Expectation):** The same customer questions are answered repeatedly from
+- **CP.02 (Expectation):** The same customer questions are answered repeatedly from
   scratch; there is no shared trustworthy answer, so new hires take 6 weeks to ramp.
-- **CP-3 (Obligation):** Ticket edits overwrite each other; the company cannot
+- **CP.03 (Obligation):** Ticket edits overwrite each other; the company cannot
   reconstruct who changed what, violating a 7-year auditable-history requirement.
 `;
 
@@ -32,8 +32,8 @@ export default {
   },
 
   rubric: [
-    patternCheck("cn-ids", "uses CN notation (CN-1 / CN.1.1)", /\bCN[-.]\s?\d/i, { min: 3, required: true }),
-    patternCheck("cp-traceability", "each need references a CP", /\bCP[-.]\s?\d/i, { min: 3, required: true }),
+    patternCheck("cn-ids", "uses canonical dotted CN notation (CN.01.1)", /\bCN\.\s?\d/, { min: 3, required: true }),
+    patternCheck("cp-traceability", "each need references a CP", /\bCP\.\s?\d/, { min: 3, required: true }),
     patternCheck("sla-need", "need addressing early SLA warning", /warn|alert|before.*breach|at[- ]risk/i, { min: 1 }),
     patternCheck("knowledge-need", "need addressing shared knowledge", /knowledge|reuse|shared answer|canonical/i, { min: 1 }),
     patternCheck("audit-need", "need addressing auditable history", /audit|history|immutable|trail/i, { min: 1 }),
@@ -46,7 +46,7 @@ export default {
 
   judgeCriteria: [
     "Each Customer Need describes WHAT outcome is required, not HOW to build it.",
-    "Every CN explicitly traces to at least one CP (e.g. CN-1 -> CP-1).",
+    "Every CN explicitly traces to at least one CP (e.g. CN.01.1 -> CP.01).",
     "The needs cover SLA early-warning, knowledge reuse, and auditable history.",
     "No CN is actually a solution/technology choice in disguise.",
   ],
