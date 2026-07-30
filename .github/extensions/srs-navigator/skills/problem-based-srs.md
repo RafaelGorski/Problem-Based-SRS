@@ -101,6 +101,30 @@ artifact, and follow it exactly:
 For a **full** run (bare `/problem-based-srs`), work through the steps in order,
 reading each `reference/<action>.md` as you reach that step.
 
+## 🔖 Identifier Notation (CANONICAL)
+
+Every artifact ID uses **dotted notation**, which encodes the traceability chain in
+the ID itself — reading an ID tells you what it descends from:
+
+| Artifact | Format | Example | Reads as |
+|----------|--------|---------|----------|
+| Customer Problem | `CP.{n}` | `CP.01` | the first customer problem |
+| Sub-problem | `CP.{n}.{m}` | `CP.01.1` | first facet of `CP.01` |
+| Customer Need | `CN.{cp}.{n}` | `CN.01.1` | first need addressing `CP.01` |
+| Functional Requirement | `FR.{cp}.{cn}.{n}` | `FR.01.1.1` | first FR implementing `CN.01.1` |
+| Non-Functional Requirement | `NFR.{n}` | `NFR.01` | the first quality requirement |
+
+**Rules:**
+
+1. **Always emit dotted IDs.** `CP.01`, `CN.01.1`, `FR.01.1.1` — never `CP.1.1` for a
+   need or other ad-hoc shapes.
+2. **An ID must state its parent.** `FR.01.1.1` implements `CN.01.1`, which addresses
+   `CP.01`. If you cannot name the parent, the artifact is not ready to be written.
+3. **Hyphen IDs (`CP-001`, `FR-002`) are legacy.** Existing specs that use them stay
+   valid and the tooling still reads them, but do NOT produce new ones.
+4. **Reference IDs verbatim in prose** (e.g. "Addresses CP.01") so traceability can be
+   extracted automatically.
+
 ## 📁 Saving Progress (CRITICAL)
 
 **IMPORTANT:** At each step, you MUST save the produced artifacts to files. Progress is NOT automatically saved between sessions.
@@ -126,12 +150,12 @@ Create the following folder structure as you progress through each step:
 ├── 04-software-vision.md             # Step 4: Architecture and scope
 ├── functional-requirements/          # Step 5: Individual FR files
 │   ├── _index.md                     # FR summary and traceability matrix
-│   ├── FR-001.md                     # Individual FR file
-│   ├── FR-002.md                     # Individual FR file
+│   ├── FR.01.1.1-[short-name].md     # Individual FR file
+│   ├── FR.01.1.2-[short-name].md     # Individual FR file
 │   └── ...                           # One file per FR
 ├── non-functional-requirements/      # NFR files (quality attributes)
 │   ├── _index.md                     # NFR summary
-│   ├── NFR-001.md                    # Individual NFR file
+│   ├── NFR.01-[short-name].md        # Individual NFR file
 │   └── ...                           # One file per NFR
 └── traceability-matrix.md            # CP → CN → FR complete mapping
 ```
@@ -238,14 +262,14 @@ Example handoff for Step 5:
 
 📁 Saved to: .spec/functional-requirements/
    ├── _index.md (summary with 8 FRs)
-   ├── FR-001.md → CN-001 (User Registration)
-   ├── FR-002.md → CN-001 (User Authentication)
-   ├── FR-003.md → CN-002 (Data Validation)
-   ├── FR-004.md → CN-002 (Error Handling)
-   ├── FR-005.md → CN-003 (Report Generation)
-   ├── FR-006.md → CN-003 (Export Functionality)
-   ├── FR-007.md → CN-004 (Search Capability)
-   └── FR-008.md → CN-004 (Filter Options)
+   ├── FR.01.1.1-user-registration.md   → CN.01.1 (User Registration)
+   ├── FR.01.1.2-user-authentication.md → CN.01.1 (User Authentication)
+   ├── FR.01.2.1-data-validation.md     → CN.01.2 (Data Validation)
+   ├── FR.01.2.2-error-handling.md      → CN.01.2 (Error Handling)
+   ├── FR.02.1.1-report-generation.md   → CN.02.1 (Report Generation)
+   ├── FR.02.1.2-export-functionality.md→ CN.02.1 (Export Functionality)
+   ├── FR.02.2.1-search-capability.md   → CN.02.2 (Search Capability)
+   └── FR.02.2.2-filter-options.md      → CN.02.2 (Filter Options)
 
 📁 Updated: .spec/traceability-matrix.md
 
@@ -459,9 +483,9 @@ Example:
 📁 Saved to: .spec/03-customer-needs.md
 
 Outputs:
-- CN-001: [Information] User needs system to display...
-- CN-002: [Control] Admin needs system to manage...
-- CN-003: [Information] Manager needs system to report...
+- CN.01.1: [Information] User needs system to display...
+- CN.01.2: [Control] Admin needs system to manage...
+- CN.02.1: [Information] Manager needs system to report...
 
 Gate Check:
 - [x] All CNs use structured notation

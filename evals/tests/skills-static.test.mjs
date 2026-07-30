@@ -31,6 +31,20 @@ const MAX_BODY_LINES = 600;
 // the slash-COMMAND form and not artifact folder paths like `.spec/functional-requirements/`.
 const LEGACY_COMMANDS = /(?<=^|[\s`(])\/(customer-problems|customer-needs|business-context|software-glance|software-vision|functional-requirements|zigzag-validator|complexity-analysis)\b/gm;
 
+// Canonical artifact IDs are dotted (CP.01 -> CN.01.1 -> FR.01.1.1), which encodes the
+// traceability chain in the ID and is what both canvas parsers treat as canonical
+// (see .github/extensions/srs-navigator/lib/notation.mjs). Hyphen IDs (CP-001) are
+// accepted-legacy for existing specs, so they may only appear in prose that says so.
+// The skill previously taught BOTH schemes and one file explicitly banned dots, which
+// made agent output non-deterministic and dropped every CP->CN->FR link in the canvas.
+const HYPHEN_ID = /\b(?:CP|CN|FR|NFR)-\d/;
+const HYPHEN_ID_HEADING = /^#{1,6}\s*(?:CP|CN|FR|NFR)-[\d[]/gm;
+const HYPHEN_MANDATES = [
+  /do\s+not\s+use\s+dots/i,
+  /(?:always\s+)?use\s+`?(?:CP|CN|FR|NFR)-`?\s+with\s+a\s+dash/i,
+  /never\s+use\s+dotted/i,
+];
+
 // Every action file that must exist under reference/ (filename == action).
 // Keyed by action; value is the list of [id, RegExp] content tokens that must
 // be present in that action's reference file.
@@ -150,6 +164,53 @@ describe("unified-command refactor guard (main + every action)", () => {
     for (const doc of [main, ...actions]) {
       const id = doc.action || doc.slug;
       assert.equal(countMatches(doc.text, /Use skill:/i), 0, `${id}: stale "Use skill:" directive`);
+    }
+  });
+});
+
+describe("canonical ID notation (dotted)", () => {
+  it("SKILL.md declares dotted notation as canonical", () => {
+    assert.ok(
+      hasSection(main.body, /identifier notation/i),
+      "SKILL.md must carry an 'Identifier Notation' section defining the canonical scheme",
+    );
+    for (const shape of [/CP\.\{n\}/, /CN\.\{cp\}\.\{n\}/, /FR\.\{cp\}\.\{cn\}\.\{n\}/]) {
+      assert.match(main.text, shape, `SKILL.md must document the ${shape} ID shape`);
+    }
+  });
+
+  it("no file mandates hyphen IDs or forbids dotted IDs", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      for (const rule of HYPHEN_MANDATES) {
+        assert.equal(
+          countMatches(doc.text, rule),
+          0,
+          `${id}: contradicts canonical dotted notation (matched ${rule})`,
+        );
+      }
+    }
+  });
+
+  it("artifact templates emit dotted IDs in their headings", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      const hits = doc.text.match(HYPHEN_ID_HEADING) || [];
+      assert.equal(hits.length, 0, `${id}: legacy hyphen heading(s) ${[...new Set(hits)].join(", ")}`);
+    }
+  });
+
+  it("mentions hyphen IDs only when labelling them legacy", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      for (const line of doc.text.split(/\r?\n/)) {
+        if (!HYPHEN_ID.test(line)) continue;
+        assert.match(
+          line,
+          /legacy/i,
+          `${id}: hyphen ID outside a legacy note -> ${line.trim()}`,
+        );
+      }
     }
   });
 });

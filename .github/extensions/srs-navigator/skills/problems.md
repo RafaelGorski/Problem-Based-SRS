@@ -152,14 +152,16 @@ Classify each CP by severity:
 
 ## Output Format
 
-**⚠ ID Format:** Always use `CP-` with a dash (e.g., `CP-001`, `CP-002`). Do NOT use dots (e.g., `CP.01`).
+**⚠ ID Format:** Always use canonical dotted notation — `CP.01`, `CP.02`, and `CP.01.1` for
+sub-problems. Hyphen IDs (`CP-001`) are legacy: still readable, but do not produce new ones.
+See "Identifier Notation" in `SKILL.md`.
 
 ### For Mode 1 (Generation)
 
 For each identified problem, produce:
 
 ```markdown
-### CP-001: [Brief Title]
+### CP.01: [Brief Title]
 
 **Statement:** [Subject] [Verb] [Object] [Penalty]
 
@@ -196,7 +198,7 @@ For each identified problem, produce:
 
 ### Example 1: Obligation
 ```markdown
-### CP-001: Regulatory Compliance
+### CP.01: Regulatory Compliance
 
 **Statement:** The company must submit emission compliance reports within 30 days of each quarter end otherwise faces fines up to 5% of revenue.
 
@@ -217,7 +219,7 @@ For each identified problem, produce:
 
 ### Example 2: Expectation
 ```markdown
-### CP-002: Customer Response Time
+### CP.02: Customer Response Time
 
 **Statement:** Customers expect responses to support inquiries within 24 hours otherwise they become dissatisfied and may switch to competitors.
 
@@ -238,7 +240,7 @@ For each identified problem, produce:
 
 ### Example 3: Hope
 ```markdown
-### CP-003: Sales Forecasting
+### CP.03: Sales Forecasting
 
 **Statement:** Management hopes to predict quarterly sales with 85% accuracy otherwise strategic planning remains reactive rather than proactive.
 
@@ -280,37 +282,37 @@ Decompose a CP into sub-CPs when:
 
 | Trigger | Example |
 |---------|---------|
-| Multiple distinct facets | CP-001 has communication AND frequency aspects |
-| Different subjects affected | CP-001 affects both company AND customers |
+| Multiple distinct facets | CP.01 has communication AND frequency aspects |
+| Different subjects affected | CP.01 affects both company AND customers |
 | Independent penalties | Failure of one aspect doesn't cause all penalties |
 | Separate solutions likely | Each facet could be solved by different FRs |
 
 ### Numbering Convention
 
 ```
-CP-001        → Main problem
-CP-001.1      → First sub-problem of CP-001
-CP-001.2      → Second sub-problem of CP-001
-CP-001.2.1    → Sub-sub-problem (rarely needed)
+CP.01          → Main problem
+CP.01.1        → First sub-problem of CP.01
+CP.01.2        → Second sub-problem of CP.01
+CP.01.2.1      → Sub-sub-problem (rarely needed)
 ```
 
 ### Decomposition Example
 
 **Before decomposition:**
 ```
-CP-001: The company must ensure effective communication with customers, 
+CP.01: The company must ensure effective communication with customers, 
       otherwise it loses customers affecting marketing and sales.
 ```
 
 **After decomposition:**
 ```
-CP-001: The company must ensure effective communication with customers, 
+CP.01: The company must ensure effective communication with customers, 
       otherwise it loses customers affecting marketing and sales.
 
-CP-001.1: The company must ensure it can contact all customers 
+CP.01.1: The company must ensure it can contact all customers 
         (having valid contact information).
 
-CP-001.2: The company must ensure each customer is contacted regularly 
+CP.01.2: The company must ensure each customer is contacted regularly 
         (frequency of communication).
 ```
 

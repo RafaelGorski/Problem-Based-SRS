@@ -64,7 +64,7 @@ This is a required interaction. STOP and ask the user to clarify what you cannot
 #### What to Ask (adapt to context)
 
 **Round 1 — Scope and Detail:**
-- Should we specify requirements for ALL Customer Needs, or focus on a specific subset? (e.g., "Start with CN-001 through CN-003 for the MVP")
+- Should we specify requirements for ALL Customer Needs, or focus on a specific subset? (e.g., "Start with CN.01.1 through CN.01.3 for the MVP")
 - What level of detail is needed? (Full acceptance criteria per FR, or high-level "shall" statements first?)
 - Are there known technical constraints that should shape the requirements? (e.g., "must work offline", "must support REST APIs")
 
@@ -92,7 +92,7 @@ When skipping, state in one line what you're using as the basis and proceed.
 **Every FR in the response MUST include:**
 
 1. **The "shall" statement** — written out explicitly using the grammar: `The [System] shall [verb] [object]`
-2. **CN traceability** — each FR MUST show which CN it traces to (e.g., `→ CN-001`)
+2. **CN traceability** — each FR MUST show which CN it traces to (e.g., `→ CN.01.1`)
 3. **Acceptance criteria** — at least 2 testable criteria per FR
 
 **Example of CORRECT response format:**
@@ -100,8 +100,8 @@ When skipping, state in one line what you're using as the basis and proceed.
 ```markdown
 ## Functional Requirements
 
-### FR-001: Client Registration
-**Traces to:** CN-001 — Client data management
+### FR.01.1.1: Client Registration
+**Traces to:** CN.01.1 — Client data management
 
 The CRM system shall allow the Account Manager to register a new client in the database.
 
@@ -109,8 +109,8 @@ The CRM system shall allow the Account Manager to register a new client in the d
 - [ ] System accepts client name, contact info, and company details
 - [ ] System assigns unique client ID upon successful registration
 
-### FR-002: Client Data Update
-**Traces to:** CN-001 — Client data management
+### FR.01.1.2: Client Data Update
+**Traces to:** CN.01.1 — Client data management
 
 The CRM system shall allow the Account Manager to update existing client records.
 
@@ -123,7 +123,7 @@ The CRM system shall allow the Account Manager to update existing client records
 ```
 | CN | Functional Requirements |
 |----|------------------------|
-| CN.1 | FR-001 Registration, FR-002 Update |
+| CN.1 | FR.01.1.1 Registration, FR.01.1.2 Update |
 ```
 
 The wrong format above lacks "shall" statements, acceptance criteria, and proper traceability.
@@ -142,27 +142,30 @@ The wrong format above lacks "shall" statements, acceptance criteria, and proper
 .spec/
 ├── functional-requirements/
 │   ├── _index.md                    # Summary and traceability matrix
-│   ├── FR-001-[short-name].md       # Individual FR file
-│   ├── FR-002-[short-name].md
+│   ├── FR.01.1.1-[short-name].md    # Individual FR file
+│   ├── FR.01.1.2-[short-name].md
 │   └── ...
 └── non-functional-requirements/
     ├── _index.md                    # Summary
-    ├── NFR-001-[short-name].md      # Individual NFR file
+    ├── NFR.01-[short-name].md       # Individual NFR file
     └── ...
 ```
 
 ### File Naming Convention
 
 ```
-FR-[NNN]-[short-descriptive-name].md
-NFR-[NNN]-[short-descriptive-name].md
+FR.[CP].[CN].[N]-[short-descriptive-name].md
+NFR.[N]-[short-descriptive-name].md
 ```
 
+Where `[CP]`/`[CN]` are the parent Customer Problem and Customer Need numbers, so the
+filename itself carries the traceability chain (see "Identifier Notation" in `SKILL.md`).
+
 Examples:
-- `FR-001-client-registration.md`
-- `FR-002-client-data-modification.md`
-- `NFR-001-response-time.md`
-- `NFR-002-data-encryption.md`
+- `FR.01.1.1-client-registration.md`
+- `FR.01.1.2-client-data-modification.md`
+- `NFR.01-response-time.md`
+- `NFR.02-data-encryption.md`
 
 ---
 
@@ -202,11 +205,11 @@ Where:
 Each FR file MUST follow this template:
 
 ```markdown
-## FR-[NNN]: [Brief Title]
+## FR.[CP].[CN].[N]: [Brief Title]
 
 ## Requirement
 
-**ID:** FR-[NNN]  
+**ID:** FR.[CP].[CN].[N]  
 **Title:** [Descriptive title]  
 **Priority:** [Must Have | Should Have | Could Have | Won't Have]  
 **Status:** [Draft | Review | Approved | In Progress | Implemented | Tested]
@@ -219,8 +222,8 @@ The [System] shall [verb] [object] [constraint] [condition].
 
 | Traces To | ID | Description |
 |-----------|-----|-------------|
-| Customer Need | CN-[X] | [CN description] |
-| Customer Problem | CP-[Y] | [CP description] |
+| Customer Need | CN.[CP].[X] | [CN description] |
+| Customer Problem | CP.[Y] | [CP description] |
 
 ## Acceptance Criteria
 
@@ -249,11 +252,11 @@ The [System] shall [verb] [object] [constraint] [condition].
 Each NFR file MUST follow this template:
 
 ```markdown
-## NFR-[NNN]: [Brief Title]
+## NFR.[N]: [Brief Title]
 
 ## Requirement
 
-**ID:** NFR-[NNN]  
+**ID:** NFR.[N]  
 **Title:** [Descriptive title]  
 **Category:** [Performance | Security | Usability | Reliability | Scalability | Maintainability]  
 **Priority:** [Must Have | Should Have | Could Have | Won't Have]  
@@ -267,8 +270,8 @@ The [System] shall [quality attribute] [measurable target] [condition].
 
 | Traces To | ID | Description |
 |-----------|-----|-------------|
-| Customer Need | CN-[X] | [CN description] |
-| Applies To FRs | FR-[A], FR-[B] | [Related FRs] |
+| Customer Need | CN.[CP].[X] | [CN description] |
+| Applies To FRs | FR.[A], FR.[B] | [Related FRs] |
 
 ## Measurement Criteria
 
@@ -339,14 +342,14 @@ Construction and implementation details belong in separate design documents:
 
 ## Examples
 
-### Example FR File: FR-001-client-registration.md
+### Example FR File: FR.01.1.1-client-registration.md
 
 ```markdown
-## FR-001: Client Registration
+## FR.01.1.1: Client Registration
 
 ## Requirement
 
-**ID:** FR-001  
+**ID:** FR.01.1.1  
 **Title:** Client Registration  
 **Priority:** Must Have  
 **Status:** Draft
@@ -359,8 +362,8 @@ The CRM system shall allow the Account Manager to register a new client in the d
 
 | Traces To | ID | Description |
 |-----------|-----|-------------|
-| Customer Need | CN-001 | Account Manager needs system to maintain client records |
-| Customer Problem | CP-001 | Company must maintain accurate client data for compliance |
+| Customer Need | CN.01.1 | Account Manager needs system to maintain client records |
+| Customer Problem | CP.01 | Company must maintain accurate client data for compliance |
 
 ## Acceptance Criteria
 
@@ -375,14 +378,14 @@ The CRM system shall allow the Account Manager to register a new client in the d
 *Author: Requirements Team*
 ```
 
-### Example NFR File: NFR-001-response-time.md
+### Example NFR File: NFR.01-response-time.md
 
 ```markdown
-## NFR-001: Response Time
+## NFR.01: Response Time
 
 ## Requirement
 
-**ID:** NFR-001  
+**ID:** NFR.01  
 **Title:** Search Response Time  
 **Category:** Performance  
 **Priority:** Must Have  
@@ -396,8 +399,8 @@ The CRM system shall return client search results within 2 seconds under normal 
 
 | Traces To | ID | Description |
 |-----------|-----|-------------|
-| Customer Need | CN-002 | Users need quick access to client information |
-| Applies To FRs | FR-004, FR-007 | Client search and filtering functions |
+| Customer Need | CN.01.2 | Users need quick access to client information |
+| Applies To FRs | FR.01.2.1, FR.01.2.2 | Client search and filtering functions |
 
 ## Measurement Criteria
 
@@ -422,7 +425,7 @@ The CRM system shall return client search results within 2 seconds under normal 
 Before finalizing, verify:
 
 - [ ] Every FR uses syntax: The [Subject] shall [Verb] [Object] [Constraint] [Condition]
-- [ ] Every FR saved as individual file (FR-NNN-name.md)
+- [ ] Every FR saved as individual file (`FR.[CP].[CN].[N]-name.md`)
 - [ ] Every FR traces to at least one CN
 - [ ] Every CN from input is addressed by at least one FR
 - [ ] All FRs are testable with clear acceptance criteria
@@ -457,13 +460,13 @@ After completing this step:
 
 📁 Created: functional-requirements/
    ├── _index.md (N FRs total)
-   ├── FR-001-*.md → CN-001
-   ├── FR-002-*.md → CN-001
+   ├── FR.01.1.1-*.md → CN.01.1
+   ├── FR.01.1.2-*.md → CN.01.1
    └── ...
 
 📁 Created: non-functional-requirements/
    ├── _index.md (N NFRs total)
-   └── NFR-001-*.md
+   └── NFR.01-*.md
 
 📁 Updated: traceability-matrix.md
 
