@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!--
+  Captured 2026-07-31 from
+  https://www.skills.sh/rafaelgorski/problem-based-srs/problem-based-srs
+
+  Trimmed to what the drift checker reads, verbatim - this is evidence, not a mock:
+
+    * all three JSON-LD blocks, so the parser has to pick the SoftwareApplication one
+      rather than the first block on the page;
+    * the one server-rendered <h2> the page emits as plain HTML;
+    * every <h2> the Next.js RSC payload carries, in the escaped \u003ch2\u003e form the
+      real page uses, in page order. There are fourteen. The shipped SKILL.md has
+      fifteen `##` sections: the page is missing "Identifier Notation (CANONICAL)" -
+      the section that defines the dotted IDs;
+    * one line of the rendered artifact-tree code block, which still teaches FR-001.md.
+      The shipped skill replaced that notation with FR.{cp}.{cn}.{n}.
+
+  Elided: the site chrome, the search-index payload, and the rest of the rendered body
+  between the headings - none of it is read.
+-->
+<html><head>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"problem-based-srs","description":"Complete Problem-Based Software Requirements Specification methodology following Gorski & Stadzisz research. Use when you need to perform requirements engineering from business problems to functional requirements with full traceability.","url":"https://www.skills.sh/rafaelgorski/problem-based-srs/problem-based-srs","applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform","publisher":{"@type":"Organization","name":"rafaelgorski","url":"https://www.skills.sh/rafaelgorski"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"interactionStatistic":{"@type":"InteractionCounter","interactionType":"https://schema.org/InstallAction","userInteractionCount":31}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Skills","item":"https://www.skills.sh"},{"@type":"ListItem","position":2,"name":"rafaelgorski","item":"https://www.skills.sh/rafaelgorski"},{"@type":"ListItem","position":3,"name":"problem-based-srs","item":"https://www.skills.sh/rafaelgorski/problem-based-srs/problem-based-srs"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Skills","alternateName":"The Agent Skills Directory","url":"https://www.skills.sh","description":"Discover and install skills for AI agents.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.skills.sh/search?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+</head><body><main>
+<h1>problem-based-srs</h1>
+<p>Orchestrate requirements engineering using the Problem-Based SRS methodology (Gorski &#x26; Stadzisz). This skill coordinates a structured process (Step 0 through Step 5) that ensures every requirement traces back to a real business problem.</p>
+<h2>Methodology Overview</h2>
+<script>self.__next_f.push([1,"\u003ch2\u003eMethodology Overview\u003c/h2\u003e\n\u003ch2\u003eAvailable Actions\u003c/h2\u003e\n\u003ch2\u003e📁 Saving Progress (CRITICAL)\u003c/h2\u003e\n\u003cspan class=\"code-line\"\u003e│   ├── FR-001.md                     # Individual FR file\n\u003c/span\u003e\n\u003ch2\u003eHow to Use This Skill\u003c/h2\u003e\n\u003ch2\u003eDetection Heuristics\u003c/h2\u003e\n\u003ch2\u003eThe Steps (Quick Reference)\u003c/h2\u003e\n\u003ch2\u003eQuality Gates\u003c/h2\u003e\n\u003ch2\u003eProblem-First Enforcement\u003c/h2\u003e\n\u003ch2\u003eQuick Syntax Reference\u003c/h2\u003e\n\u003ch2\u003eHandoff Protocol\u003c/h2\u003e\n\u003ch2\u003eUsage Patterns\u003c/h2\u003e\n\u003ch2\u003eWhen to Use Each Action\u003c/h2\u003e\n\u003ch2\u003eOptional: Complexity Analysis\u003c/h2\u003e\n\u003ch2\u003eExamples\u003c/h2\u003e"])</script>
+</main></body></html>

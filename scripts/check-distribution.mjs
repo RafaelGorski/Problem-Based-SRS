@@ -64,22 +64,200 @@ function jsonLdBlocks(html) {
  * contract, so it survives a redesign, and picking the wrong block is detectable (the
  * page also carries a BreadcrumbList and a WebSite block).
  *
+ * `parts` carries the per-skill page URL alongside each name, because the names are the
+ * cheap half of the question. A re-submission makes them agree; whether the page behind
+ * a name still renders the skill this repository ships is a different question, and it
+ * cannot be asked without the address of the page that answers it.
+ *
  * @param {string} html
- * @returns {{skills:string[], description:string|null, declaredCount:number|null, url:string|null}}
+ * @returns {{skills:string[], parts:Array<{name:string,url:string|null}>, description:string|null, declaredCount:number|null, url:string|null}}
  */
 export function parseRegistryListing(html) {
   const page = jsonLdBlocks(html).find((b) => b && b["@type"] === "CollectionPage");
-  if (!page) return { skills: [], description: null, declaredCount: null, url: null };
+  if (!page) return { skills: [], parts: [], description: null, declaredCount: null, url: null };
 
-  const parts = Array.isArray(page.hasPart) ? page.hasPart : [];
+  const hasPart = Array.isArray(page.hasPart) ? page.hasPart : [];
   const description = typeof page.description === "string" ? page.description : null;
   const stated = description?.match(/^(\d+)\s+agent skills/i);
+  const parts = hasPart
+    .filter((p) => typeof p?.name === "string")
+    .map((p) => ({ name: p.name, url: typeof p.url === "string" ? p.url : null }));
 
   return {
-    skills: parts.map((p) => p?.name).filter((n) => typeof n === "string"),
+    // One list, two readings: the names check and the page fetch must not be able to
+    // disagree about what the listing advertises.
+    skills: parts.map((p) => p.name),
+    parts,
     description,
     declaredCount: stated ? Number(stated[1]) : null,
     url: typeof page.url === "string" ? page.url : null,
+  };
+}
+
+/**
+ * Read the skill a per-skill registry page declares.
+ *
+ * Same principle as the collection page: the `SoftwareApplication` JSON-LD block is a
+ * declared contract, and picking the wrong one is detectable (the page also carries a
+ * BreadcrumbList naming the same skill, and a WebSite block).
+ *
+ * `version` is null today for every page skills.sh serves — it publishes no
+ * `softwareVersion`. That is reported as "no answer" rather than quietly dropped: #69's
+ * box asks whether the listing renders the current version, and the honest answer is that
+ * this surface cannot say. The comparison is wired for the moment it can.
+ *
+ * @param {string} html
+ * @returns {{name:string|null, description:string|null, version:string|null, url:string|null}|null}
+ */
+export function parseSkillPage(html) {
+  const app = jsonLdBlocks(html).find((b) => b && b["@type"] === "SoftwareApplication");
+  if (!app) return null;
+  const str = (v) => (typeof v === "string" && v.trim() ? v : null);
+  return {
+    name: str(app.name),
+    description: str(app.description),
+    version: str(app.softwareVersion),
+    url: str(app.url),
+  };
+}
+
+const NAMED_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+
+/**
+ * The text a registry page renders, as close to what a reader sees as is worth getting.
+ *
+ * Three things make this less crude than it looks. Comments and the JSON-LD blocks are
+ * dropped first, so neither the page's own notes nor its declared contract can vouch for
+ * the rendered body — otherwise a page could prove its own freshness with its metadata
+ * block while serving anything at all. The `\u003c` escapes are resolved next, because the
+ * rendered markdown is streamed inside a script payload in that form and nothing would be
+ * found without it. Only then are tags stripped, so the decoded payload's tags go with the
+ * real ones.
+ *
+ * Scraped text is not a contract, which is why nothing concluded from it is ever reported
+ * as drift on its own — see `skillPageDrift`.
+ *
+ * @param {string} html
+ * @returns {string}
+ */
+export function pageText(html) {
+  return String(html ?? "")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<script[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\[nrt]/g, " ")
+    .replace(/\\"/g, '"')
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
+    .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * A heading as it can be looked for in rendered text: decoration dropped, whitespace
+ * collapsed. `## 📁 Saving Progress (CRITICAL)` renders with its emoji intact, so the
+ * comparison has to be a substring of what the page shows, not an equality against what
+ * the file holds.
+ */
+function normalizeHeading(title) {
+  return String(title ?? "")
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * What this repository ships, per skill: the frontmatter description, the frontmatter
+ * `metadata.version`, and the top-level sections of the body.
+ *
+ * Derived from the files rather than restated, so the comparison moves with the skill. A
+ * section list is the coarsest useful shape of a document — it survives every edit to the
+ * prose underneath it, and it is exactly what goes missing when a page serves an older
+ * copy.
+ *
+ * @param {string} [root]
+ * @returns {Array<{name:string, description:string|null, version:string|null, sections:string[]}>}
+ */
+export function repoSkillProfiles(root = REPO_ROOT) {
+  const dir = path.join(root, "skills");
+  if (!fs.existsSync(dir)) return [];
+  const profiles = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const skillMd = path.join(dir, entry.name, "SKILL.md");
+    if (!fs.existsSync(skillMd)) continue;
+    const text = fs.readFileSync(skillMd, "utf8");
+    const { frontmatter, body } = parseFrontmatter(text);
+    // parseFrontmatter only keeps top-level keys, and the version is nested under
+    // `metadata:`. Read it from the raw block rather than widening a shared parser.
+    const block = /^(?:<!--[\s\S]*?-->\s*)?---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
+    const version = /^[ \t]+version:[ \t]*["']?([^"'\r\n]+)["']?[ \t]*$/m.exec(block)?.[1] ?? null;
+    profiles.push({
+      name: frontmatter.name || entry.name,
+      description: frontmatter.description || null,
+      version: version ? version.trim() : null,
+      sections: [...body.matchAll(/^##[ \t]+(.+?)[ \t]*$/gm)]
+        .map((m) => normalizeHeading(m[1]))
+        .filter(Boolean),
+    });
+  }
+  return profiles.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Whitespace-insensitive comparison, since a renderer may reflow a description. */
+const sameText = (a, b) =>
+  String(a ?? "").replace(/\s+/g, " ").trim() === String(b ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * Compare a registry page against the skill it claims to publish.
+ *
+ * The body half is scraped, and the epistemics of scraping decide the shape of the
+ * result. Zero matched sections cannot distinguish "the page renders something else
+ * entirely" from "this extraction broke against a redesign", so that is `readable: false`
+ * and nothing is reported as missing — the same rule the collection page already gets
+ * from `registry-listing-unreadable`. Once some sections match, the extraction has
+ * demonstrably worked, and the ones that did not are real.
+ *
+ * The description and version halves come from JSON-LD, a declared contract, so they stay
+ * answerable even when the body cannot be read.
+ *
+ * @param {{page:object|null, text:string, profile:object|null}} input
+ */
+export function skillPageDrift({ page = null, text = "", profile = null } = {}) {
+  const empty = { readable: false, matched: 0, total: 0, missing: [] };
+  if (!profile || !page) {
+    return { name: profile?.name ?? page?.name ?? null, description: null, version: null, body: empty };
+  }
+
+  const sections = Array.isArray(profile.sections) ? profile.sections : [];
+  const matched = sections.filter((s) => text.includes(s));
+  const readable = sections.length > 0 && matched.length > 0;
+
+  return {
+    name: profile.name,
+    description: page.description
+      ? {
+          expected: profile.description,
+          actual: page.description,
+          matches: sameText(page.description, profile.description),
+        }
+      : null,
+    version:
+      page.version && profile.version
+        ? {
+            expected: profile.version,
+            actual: page.version,
+            matches: sameText(page.version, profile.version),
+          }
+        : null,
+    body: {
+      readable,
+      matched: matched.length,
+      total: sections.length,
+      missing: readable ? sections.filter((s) => !text.includes(s)) : [],
+    },
   };
 }
 
@@ -364,6 +542,8 @@ export function compareVersions(a, b) {
 export function summarize({
   listing = { skills: [], declaredCount: null, url: null },
   repoSkills = [],
+  skillProfiles = [],
+  skillPages = [],
   tagLinks = [],
   publishedTags = [],
   publishedReleases = null,
@@ -440,6 +620,67 @@ export function summarize({
         severity: "error",
         title: "The registry listing disagrees with the repository",
         detail,
+      });
+    }
+  }
+
+  // The names are the cheap half. A re-submission makes them agree, and this is what is
+  // left to check afterwards: whether the page behind a name still renders the skill this
+  // repository ships. Only skills that exist on both sides are compared — a name the
+  // repository deleted is already reported above, and asking a second question about it
+  // would read as two problems with one cause.
+  for (const entry of skillPages) {
+    const profile = skillProfiles.find((p) => p.name === entry?.name);
+    if (!profile) continue;
+
+    const drift = skillPageDrift({ page: entry.page, text: entry.text, profile });
+    const stale = [];
+    if (drift.description && !drift.description.matches) {
+      stale.push(
+        `description on the page: "${drift.description.actual}"`,
+        `description this repository ships: "${drift.description.expected}"`,
+      );
+    }
+    if (drift.version && !drift.version.matches) {
+      stale.push(
+        `version on the page: ${drift.version.actual}; this repository ships ` +
+          `${drift.version.expected}`,
+      );
+    }
+    if (drift.body.missing.length) {
+      stale.push(
+        `the page renders ${drift.body.matched} of the skill's ${drift.body.total} sections; ` +
+          `missing: ${drift.body.missing.join(", ")}`,
+      );
+    }
+
+    if (stale.length) {
+      findings.push({
+        id: "registry-skill-stale",
+        severity: "error",
+        title: `The registry page for ${profile.name} publishes an older copy of the skill`,
+        detail: [
+          `Page: ${entry.url ?? entry.page?.url ?? listing.url ?? REGISTRY_URL}`,
+          ...stale,
+          "The listing is a crawl, not a mirror; re-submit the repository at " +
+            "https://www.skills.sh so the page is rebuilt from what is shipped today.",
+        ],
+      });
+    }
+
+    if (!drift.body.readable) {
+      findings.push({
+        id: "registry-skill-unreadable",
+        severity: "warning",
+        title: `The registry page for ${profile.name} published no readable skill body`,
+        detail: [
+          entry.page
+            ? `${entry.url ?? entry.page.url}: none of the ${profile.sections.length} sections ` +
+              "the shipped skill declares appear on the page."
+            : `${entry.url ?? "the page"} carried no JSON-LD SoftwareApplication block.`,
+          "A page that renders something else and a page this checker can no longer parse " +
+            "look identical from here, so no drift is claimed. Check it by hand.",
+        ],
       });
     }
   }
@@ -560,11 +801,23 @@ export function renderAnnotations(summary) {
 // CLI (the only part that touches the network)
 // ---------------------------------------------------------------------------
 
-export async function fetchRegistryListing({ url = REGISTRY_URL, fetchImpl } = {}) {
+async function fetchHtml({ url, fetchImpl }) {
   const doFetch = fetchImpl ?? globalThis.fetch;
   const res = await doFetch(url, { headers: { accept: "text/html" }, redirect: "follow" });
   if (!res.ok) throw new Error(`${url} responded ${res.status}`);
   return await res.text();
+}
+
+export async function fetchRegistryListing({ url = REGISTRY_URL, fetchImpl } = {}) {
+  return await fetchHtml({ url, fetchImpl });
+}
+
+/**
+ * A per-skill listing page. Shares the listing fetch's guard on purpose: a 404 is not an
+ * empty page, and swallowing it would report the entire skill body as missing.
+ */
+export async function fetchSkillPage({ url, fetchImpl } = {}) {
+  return await fetchHtml({ url, fetchImpl });
 }
 
 /**
@@ -606,6 +859,7 @@ export function readLocalState(root = REPO_ROOT) {
       ? fs.readFileSync(versionFile, "utf8").trim()
       : null,
     repoSkills: repoSkillNames(root),
+    skillProfiles: repoSkillProfiles(root),
     tagLinks: advertisedTagLinks(sources),
     registryUrl: advertisedRegistryUrl(sources),
   };
@@ -617,11 +871,31 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
   const { registryUrl, ...local } = readLocalState(root);
   const errors = [];
 
-  let listing = { skills: [], description: null, declaredCount: null, url: registryUrl };
+  let listing = { skills: [], parts: [], description: null, declaredCount: null, url: registryUrl };
   try {
     listing = parseRegistryListing(await fetchRegistryListing({ url: registryUrl, fetchImpl }));
   } catch (err) {
     errors.push({ surface: "registry", message: `${registryUrl}: ${err.message}` });
+  }
+
+  // Only the pages of skills this repository actually ships. The listing advertises names
+  // the repository deleted; fetching their pages would be requests spent learning what the
+  // names comparison has already reported.
+  const shipped = new Set(local.skillProfiles.map((p) => p.name));
+  const skillPages = [];
+  for (const part of listing.parts ?? []) {
+    if (!part.url || !shipped.has(part.name)) continue;
+    try {
+      const html = await fetchSkillPage({ url: part.url, fetchImpl });
+      skillPages.push({
+        name: part.name,
+        url: part.url,
+        page: parseSkillPage(html),
+        text: pageText(html),
+      });
+    } catch (err) {
+      errors.push({ surface: `registry page for ${part.name}`, message: `${part.url}: ${err.message}` });
+    }
   }
 
   let publishedReleases = [];
@@ -642,6 +916,7 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
   const summary = summarize({
     listing,
     ...local,
+    skillPages,
     publishedTags: publishedReleases.map((r) => r.tag),
     publishedReleases,
     errors,
