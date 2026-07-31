@@ -282,6 +282,37 @@ export function danglingTagLinks(links = [], publishedTags = [], { repo = REPO }
 }
 
 /**
+ * Dangling links for versions the release pipeline can no longer publish at all.
+ *
+ * `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag
+ * against `.claude-plugin/plugin.json` and fails with `version mismatch` for anything else.
+ * The manifest version is therefore the *only* version the current tree can release — so a
+ * changelog link for a version the manifest has already passed names a tag that will never
+ * exist. It is not a release waiting to be cut, and telling a maintainer to cut it produces
+ * a failed workflow run rather than a release.
+ *
+ * That is not hypothetical: 2.4.1 → 2.5.0 → 2.6.0 shipped with no `v2.5` in between, which
+ * also means `extract_notes()` — one section, from the matching heading to the next — would
+ * publish `v2.6` without a word of what 2.5 documented, even though the artifact contains it.
+ *
+ * Scoped and labelled exactly like `unpublishable-release-link`: only reference definitions
+ * in the changelog the plugin pipeline reads make a claim about a plugin version, and only a
+ * labelled link claims a version at all.
+ *
+ * @param {ReturnType<typeof danglingTagLinks>} dangling
+ * @param {string|null} manifestVersion
+ */
+export function strandedReleaseLinks(dangling = [], manifestVersion = null) {
+  const manifest = normalizeVersion(manifestVersion);
+  if (!manifest) return [];
+  return dangling.filter((l) => {
+    if (l.file !== PLUGIN_CHANGELOG) return false;
+    const claimed = l.label ? normalizeVersion(l.label) : null;
+    return claimed !== null && compareVersions(claimed, manifest) < 0;
+  });
+}
+
+/**
  * Compare each release train's advertised version against what is published.
  *
  * The two trains share a tag namespace but not a version file: the plugin's number lives
@@ -445,17 +476,41 @@ export function summarize({
   }
 
   const dangling = danglingTagLinks(tagLinks, tags);
-  // A link that names a tag no pipeline creates is a different job from one that is merely
-  // waiting for a tag push. Reporting both under "cut the missing release" hands the
-  // maintainer an instruction that cannot work: cutting v2.6 leaves a v2.6.0 link 404, so
-  // the run stays red and the advice that produced it is now false.
+  // Three jobs, not one. A link waiting for a tag push is cut; a link naming a tag no
+  // pipeline creates is edited; a link for a version the manifest has already passed is
+  // *folded into the release that will carry it*. Reporting them together hands the
+  // maintainer instructions that cannot all work: cutting v2.6 leaves a v2.6.0 link 404,
+  // and cutting v2.5 fails validation against a manifest that reads 2.6.0.
+  //
+  // Stranded is checked first because it is the deeper answer: correcting a stranded link's
+  // tag shape still leaves it pointing at a release nobody can publish.
+  const stranded = strandedReleaseLinks(dangling, manifestVersion);
   const unpublishable = dangling.filter((l) => {
+    if (stranded.includes(l)) return false;
     if (l.file !== PLUGIN_CHANGELOG) return false;
     const expected = l.label ? pluginReleaseTag(l.label) : null;
     return expected !== null && expected !== l.tag;
   });
-  const pending = dangling.filter((l) => !unpublishable.includes(l));
+  const pending = dangling.filter((l) => !unpublishable.includes(l) && !stranded.includes(l));
 
+  if (stranded.length) {
+    findings.push({
+      id: "stranded-release-link",
+      severity: "error",
+      title: "Published links name versions the pipeline can no longer release",
+      detail: [
+        ...stranded.map(
+          (l) =>
+            `${l.file}:${l.line}  [${l.label}] links ${l.tag}, but the manifest is already ` +
+            `at ${manifestVersion} — \`build-plugin.py --expected-version ${l.label}\` ` +
+            `fails on a version mismatch, so that tag can never be created`,
+        ),
+        `${manifestVersion} is the only version this tree can publish. Fold each section ` +
+          `into ## [${manifestVersion}] and drop the link: build-plugin.py extracts one ` +
+          `section, so those notes reach no release otherwise.`,
+      ],
+    });
+  }
   if (unpublishable.length) {
     findings.push({
       id: "unpublishable-release-link",

@@ -31,6 +31,7 @@ import {
   listingDrift,
   advertisedTagLinks,
   danglingTagLinks,
+  strandedReleaseLinks,
   normalizeVersion,
   compareVersions,
   pluginReleaseTag,
@@ -55,6 +56,7 @@ const LISTING_FIXTURE = read("evals/fixtures/skills-sh-listing-2026-07-31.html")
 const README = read("README.md");
 const CHANGELOG = read("CHANGELOG.md");
 const CHECKER = read("scripts/check-distribution.mjs");
+const MANIFEST = JSON.parse(read(".claude-plugin/plugin.json"));
 
 /** The tags that actually existed when this suite was written (git ls-remote --tags). */
 const PUBLISHED_TAGS = [
@@ -245,7 +247,17 @@ describe("release links the repository publishes", () => {
 
   it("finds every per-tag release URL, with the file and line that carries it", () => {
     const links = advertisedTagLinks(sources());
-    assert.ok(links.length >= 13, `expected the changelog's tag links, found ${links.length}`);
+    // Derived, not restated: every dated section defines a release link, so the floor
+    // moves with the changelog instead of being a number to remember to edit.
+    const sections = [
+      ...CHANGELOG.matchAll(/^##\s*\[\d[^\]]*\]\s*-\s*\d{4}-\d{2}-\d{2}\s*$/gm),
+    ].length;
+    assert.ok(sections >= 12, `the section scan must find the changelog, found ${sections}`);
+    assert.ok(
+      links.length >= sections,
+      `every dated changelog section defines a release link; ${sections} sections but ` +
+        `only ${links.length} links`,
+    );
     const v241 = links.find((l) => l.tag === "v2.4.1");
     assert.ok(v241, "the changelog links every released version");
     assert.equal(v241.file, "CHANGELOG.md");
@@ -275,16 +287,21 @@ describe("release links the repository publishes", () => {
   it("flags the links that name a release nobody ever published", () => {
     const dangling = danglingTagLinks(advertisedTagLinks(sources()), PUBLISHED_TAGS);
     const tags = [...new Set(dangling.map((l) => l.tag))].sort();
-    for (const expected of ["v2.5", "v2.6"]) {
-      assert.ok(
-        tags.includes(expected),
-        `${expected} must be reported: CHANGELOG.md dates a section for it and links its ` +
-          `tag, but neither tag exists — the manifest was bumped twice and the release ` +
-          `workflow never ran. (These read v2.5.0/v2.6.0 until the pipeline's own ` +
-          `normalization showed the release would be cut at v2.5/v2.6.) Found: ` +
-          tags.join(", "),
-      );
-    }
+    const pending = pluginReleaseTag(MANIFEST.version);
+    assert.ok(
+      tags.includes(pending),
+      `${pending} must be reported: CHANGELOG.md dates a section for ${MANIFEST.version} ` +
+        `and links its tag, but the release workflow never ran. (It read v2.6.0 until the ` +
+        `pipeline's own normalization showed the release would be cut at v2.6.) Found: ` +
+        tags.join(", "),
+    );
+    assert.ok(
+      !tags.includes("v2.5"),
+      "v2.5 must *not* be here. It was dangling too, but not as a release to cut: the " +
+        "manifest had already moved to 2.6.0, so `build-plugin.py --expected-version 2.5` " +
+        "fails and no such tag can ever exist. Its section was folded into 2.6.0 rather " +
+        "than left advertising a permanent 404 — see the stranded-link suite below.",
+    );
     assert.ok(
       !tags.includes("v2.4.1"),
       "containment, not equality: every future release adds another changelog link, and " +
@@ -293,8 +310,7 @@ describe("release links the repository publishes", () => {
   });
 
   it("every link to an already-shipped release resolves", () => {
-    // The pending-release links (v2.5.0, v2.6.0) are a maintainer action — a tag push, not
-    // an edit. A link to a version *older* than the newest published release has no such
+    // The pending-release link (v2.6) is a maintainer action — a tag push, not an edit. A link to a version *older* than the newest published release has no such
     // excuse: it is a typo, and it is permanently broken. `[1.0]` pointed at v1.0 for the
     // project's entire life; the tag has always been v1.0.0, and
     //   /releases/tag/v1.0   → 404
@@ -501,7 +517,7 @@ describe("a dangling link that cutting the release would not fix", () => {
           file: "CHANGELOG.md",
           text: [
             "[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6.0",
-            "[2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5",
+            "[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6",
           ].join("\n"),
         },
       ]),
@@ -519,9 +535,9 @@ describe("a dangling link that cutting the release would not fix", () => {
         unpublishable.detail.join(" | "),
     );
     const pending = summary.findings.find((f) => f.id === "dangling-release-links");
-    assert.ok(pending, "v2.5 is unpublished but well-formed — that is a release to cut");
+    assert.ok(pending, "v2.6 is unpublished but publishable — that is a release to cut");
     assert.ok(
-      pending.detail.some((d) => d.includes("v2.5")),
+      pending.detail.some((d) => /\bv2\.6\b/.test(d) && !/v2\.6\.0/.test(d)),
       "the cuttable link stays under the cuttable finding",
     );
     assert.ok(
@@ -624,6 +640,150 @@ describe("a dangling link that cutting the release would not fix", () => {
     assert.ok(
       !canvasWorkflow.includes("CHANGELOG.md"),
       "and the canvas train must not write to it, or the attribution would be ambiguous",
+    );
+  });
+});
+
+// The third kind of dangling link, and the one that kept #69's last box open. `v2.5` was
+// never tagged, and the manifest then moved to 2.6.0 — so create-release.yml, which runs
+// `build-plugin.py build --version <tag>`, now fails that tag on `version mismatch`. The
+// link cannot resolve, ever, and "cut the missing release" is an instruction that produces
+// a red workflow run instead of a release.
+describe("a dangling link the manifest has already moved past", () => {
+  const changelog = (text) => advertisedTagLinks([{ file: "CHANGELOG.md", text }]);
+  const link = (version, tag) =>
+    `[${version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${tag}`;
+
+  const summaryFor = (tagLinks, manifestVersion = "2.6.0") =>
+    summarize({
+      listing: { skills: ["problem-based-srs"], declaredCount: 1, url: REGISTRY_URL },
+      repoSkills: ["problem-based-srs"],
+      tagLinks,
+      publishedReleases: PUBLISHED_RELEASES,
+      manifestVersion,
+      canvasVersion: "1.1.0",
+    });
+
+  it("separates a stranded version from one the pipeline can still publish", () => {
+    const links = changelog([link("2.6.0", "v2.6"), link("2.5.0", "v2.5")].join("\n"));
+    const stranded = strandedReleaseLinks(
+      danglingTagLinks(links, PUBLISHED_TAGS),
+      "2.6.0",
+    );
+    assert.deepEqual(
+      stranded.map((l) => l.tag),
+      ["v2.5"],
+      "only 2.5 is behind the manifest; 2.6 is the version the current tree can build",
+    );
+  });
+
+  it("reports it under its own finding, with advice that can be followed", () => {
+    const summary = summaryFor(
+      changelog([link("2.6.0", "v2.6"), link("2.5.0", "v2.5")].join("\n")),
+    );
+    const finding = summary.findings.find((f) => f.id === "stranded-release-link");
+    assert.ok(
+      finding,
+      "a link the pipeline can never publish is not the same job as one waiting for a " +
+        "tag push, and must not be filed under an instruction that cannot work",
+    );
+    assert.equal(finding.severity, "error");
+    assert.ok(
+      finding.detail.some((d) => d.includes("v2.5") && d.includes("2.6.0")),
+      "it must name the stranded tag and the version that will actually carry it: " +
+        finding.detail.join(" | "),
+    );
+    assert.ok(
+      !finding.detail.some((d) => /cut it with/i.test(d)),
+      "and must not repeat the instruction that fails on a version mismatch",
+    );
+    const pending = summary.findings.find((f) => f.id === "dangling-release-links");
+    assert.ok(pending, "2.6 is still a release to cut");
+    assert.ok(
+      !pending.detail.some((d) => d.includes("v2.5")),
+      "the stranded link must not appear under both headings",
+    );
+  });
+
+  it("wins over the wrong-tag-shape finding, which would give the wrong fix", () => {
+    // `[2.5.0]: …/tag/v2.5.0` is both malformed *and* stranded. Reporting it as a shape
+    // problem tells the maintainer to rewrite it as v2.5 — still a 404, because no
+    // pipeline will ever create that tag either.
+    const summary = summaryFor(changelog(link("2.5.0", "v2.5.0")));
+    assert.ok(
+      summary.findings.some((f) => f.id === "stranded-release-link"),
+      "the deeper problem must be the one reported",
+    );
+    assert.equal(
+      summary.findings.filter((f) => f.id === "unpublishable-release-link").length,
+      0,
+      "correcting the tag name does not make a stranded version publishable",
+    );
+  });
+
+  it("leaves an unlabelled link alone — it claims no version", () => {
+    // Both files, because the two reasons to skip are different and only one is exercised
+    // by a README link: a README link is out of the plugin train's changelog, while a prose
+    // link *inside* CHANGELOG.md is in scope and still states no version. Guessing one
+    // would file a finding about a contradiction nobody made.
+    for (const file of ["README.md", "CHANGELOG.md"]) {
+      const links = advertisedTagLinks([
+        {
+          file,
+          text: "see [the release](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5)",
+        },
+      ]);
+      assert.equal(links.length, 1, `${file}: the link must still be extracted`);
+      assert.equal(links[0].label, null, `${file}: and carry no version claim`);
+      assert.deepEqual(
+        strandedReleaseLinks(danglingTagLinks(links, PUBLISHED_TAGS), "2.6.0"),
+        [],
+        `${file}: an unlabelled link states no version, so "is it behind the manifest?" ` +
+          `is unanswerable`,
+      );
+    }
+  });
+
+  it("leaves the canvas train's changelog alone", () => {
+    const links = advertisedTagLinks([
+      {
+        file: ".github/extensions/srs-navigator/CHANGELOG.md",
+        text: link("1.0.5", "v1.0.5"),
+      },
+    ]);
+    assert.deepEqual(
+      strandedReleaseLinks(danglingTagLinks(links, PUBLISHED_TAGS), "2.6.0"),
+      [],
+      "the plugin manifest says nothing about what the canvas train can publish; " +
+        "comparing 1.0.5 against 2.6.0 is a cross-train category error",
+    );
+  });
+
+  it("says nothing when the version is the manifest's own, or newer", () => {
+    for (const version of ["2.6.0", "2.6", "2.7.0"]) {
+      const links = changelog(link(version, pluginReleaseTag(version)));
+      assert.deepEqual(
+        strandedReleaseLinks(danglingTagLinks(links, PUBLISHED_TAGS), "2.6.0"),
+        [],
+        `${version} is not behind 2.6.0 — the current tree can still build a release ` +
+          `whose validation accepts that tag`,
+      );
+    }
+  });
+
+  it("holds for the links this repository ships today", () => {
+    const summary = summaryFor(
+      advertisedTagLinks([
+        { file: "README.md", text: README },
+        { file: "CHANGELOG.md", text: CHANGELOG },
+      ]),
+      JSON.parse(read(".claude-plugin/plugin.json")).version,
+    );
+    assert.equal(
+      summary.findings.filter((f) => f.id === "stranded-release-link").length,
+      0,
+      "a section left behind by a version bump can never be published and its notes " +
+        "never reach a release. Fold it into the version that will carry it.",
     );
   });
 });
