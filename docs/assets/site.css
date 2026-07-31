@@ -269,6 +269,18 @@
             padding: var(--space-sm) var(--space-md); border-radius: 8px;
             display: block; margin: var(--space-md) 0;
         }
+        .problem-after .cp b {
+            display: block; font-weight: 600; letter-spacing: 0.01em;
+            margin-bottom: var(--space-xs);
+        }
+        .problem-chain {
+            font-family: var(--font-mono); font-size: var(--text-sm);
+            line-height: 1.9; color: var(--muted);
+            border-left: 2px solid var(--surface-border);
+            padding-left: var(--space-md); margin: var(--space-md) 0;
+        }
+        .problem-chain b { color: var(--ink-heading); font-weight: 600; }
+        .problem-chain span { color: var(--accent); padding: 0 0.15rem; }
         .problem-grid {
             display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
             gap: clamp(1.5rem, 1rem + 3vw, 3.5rem); align-items: center;
