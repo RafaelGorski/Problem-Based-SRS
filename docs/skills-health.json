@@ -1,19 +1,20 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-07-31T00:04:41.8437091Z",
+  "generatedAt": "2026-07-31T08:30:56.4283458Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
-  "version": "1.1.0",
+  "version": "2.5.0",
+  "canvasVersion": "1.1.0",
   "overall": {
     "state": "passed",
     "suites": 6,
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 334,
-    "pass": 334,
+    "tests": 451,
+    "pass": 451,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 55.6
+    "durationSeconds": 66.5
   },
   "suites": [
     {
@@ -24,40 +25,40 @@
       "pass": 1,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.4,
+      "seconds": 0.3,
       "reason": ""
     },
     {
       "name": "Canvas extension",
       "state": "passed",
       "command": "npm test",
-      "tests": 215,
-      "pass": 215,
+      "tests": 231,
+      "pass": 231,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.5,
+      "seconds": 1.4,
       "reason": ""
     },
     {
       "name": "Skill evals",
       "state": "passed",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 100,
-      "pass": 100,
+      "tests": 188,
+      "pass": 188,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.5,
+      "seconds": 0.7,
       "reason": ""
     },
     {
       "name": "Canvas e2e",
       "state": "passed",
       "command": "npm run test:e2e",
-      "tests": 18,
-      "pass": 18,
+      "tests": 31,
+      "pass": 31,
       "fail": 0,
       "skipped": 0,
-      "seconds": 53.1,
+      "seconds": 64.1,
       "reason": ""
     },
     {
@@ -74,13 +75,13 @@
     {
       "name": "Live skill evals (LLM)",
       "state": "skipped",
-      "command": "node evals/run-evals.mjs",
+      "command": "node evals/run-evals.mjs --force",
       "tests": 0,
       "pass": 0,
       "fail": 0,
       "skipped": 0,
       "seconds": 0,
-      "reason": "not requested (-IncludeSkillBehavior)"
+      "reason": "not requested (-IncludeLiveEvals)"
     }
   ],
   "maxContext": {

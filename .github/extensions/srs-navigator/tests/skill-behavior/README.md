@@ -65,8 +65,13 @@ Each scenario:
 ## Workflow contract (`workflow-contract.test.mjs`)
 
 Adds stricter end-to-end assertions on the `problems` step: the interview index
-precedes the artifact write, the artifact lands under `.spec/`, and it uses
-`CP-<n>` notation (dash, never dotted `CP.<n>`).
+precedes the artifact write, the artifact lands under `.spec/`, and it uses the
+methodology's **canonical dotted** `CP.<n>` notation — never the accepted-legacy
+hyphen form `CP-<n>`, which exists only so older specs keep parsing.
+
+Because this suite is provider-gated (skipped without keys), the deterministic
+`tests/notation.test.mjs` asserts the contract *source* still requires dotted IDs.
+That way a hyphen-only rule cannot creep back in unnoticed while CI runs key-free.
 
 ## Interpreting failures
 

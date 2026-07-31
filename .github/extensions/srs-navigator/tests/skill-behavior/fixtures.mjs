@@ -110,22 +110,22 @@ managers see live pipeline metrics; customer data meets SOC2.
 /** Prior CP artifact (CRM) for downstream steps (needs, requirements). */
 export const CUSTOMER_PROBLEMS_ARTIFACT = `# Customer Problems
 
-### CP-001: Scattered Customer Information
+### CP.01: Scattered Customer Information
 **Statement:** Sales reps expect a single place to find customer information
 otherwise they waste selling time searching across disconnected systems.
 **Classification:** Expectation
 
-### CP-002: Missed Follow-ups and Lost Opportunities
+### CP.02: Missed Follow-ups and Lost Opportunities
 **Statement:** Sales reps expect systematic interaction tracking otherwise they
 miss touchpoints and lose opportunities.
 **Classification:** Expectation
 
-### CP-003: Lack of Sales Pipeline Visibility
+### CP.03: Lack of Sales Pipeline Visibility
 **Statement:** Sales managers expect a real-time view of the pipeline otherwise
 forecasting and coaching are guesswork.
 **Classification:** Expectation
 
-### CP-004: Customer Data Protection
+### CP.04: Customer Data Protection
 **Statement:** The company must protect customer data to SOC2 standards
 otherwise it faces compliance penalties and lost trust.
 **Classification:** Obligation
@@ -149,15 +149,15 @@ Actors: Sales rep, Sales manager, Marketing. External: Email/Calendar provider.
 /** Prior Customer Needs artifact (CRM) for the functional-requirements step. */
 export const CUSTOMER_NEEDS_ARTIFACT = `# Customer Needs
 
-### CN-001.1: Centralized Customer Database (traces to CP-001)
+### CN.01.1: Centralized Customer Database (traces to CP.01)
 The rep needs one searchable repository for all customer information.
 **Outcome class:** Information
 
-### CN-002.1: Automated Follow-up Management (traces to CP-002)
+### CN.02.1: Automated Follow-up Management (traces to CP.02)
 The system needs to create follow-up tasks and reminders from interactions.
 **Outcome class:** Control
 
-### CN-003.1: Visual Sales Pipeline (traces to CP-003)
+### CN.03.1: Visual Sales Pipeline (traces to CP.03)
 The manager needs a real-time visual pipeline with stage metrics.
 **Outcome class:** Information
 `;
@@ -183,7 +183,7 @@ export function simulatedSrsAnswer(question) {
   if (/compliance|legal|regulat|contractual|security|privacy/.test(text))
     return "Customer data must meet SOC2 with encryption at rest and in transit.";
   if (/which (cp|problem|need).*(focus|first|priority)|scope|subset|mvp/.test(text))
-    return "Focus on CP-001 (centralized data) and CP-002 (follow-ups) first for the MVP.";
+    return "Focus on CP.01 (centralized data) and CP.02 (follow-ups) first for the MVP.";
   if (/information|control|construction|entertainment|outcome/.test(text))
     return "Primarily Information and Control outcomes.";
   if (/detail|acceptance criteria|shall|granularity/.test(text))

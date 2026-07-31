@@ -2,7 +2,8 @@
 #
 #   pwsh run-tests.ps1                          # run all four default suites
 #   pwsh run-tests.ps1 -NoOpen                  # ...without opening the dashboard (CI / agents)
-#   pwsh run-tests.ps1 -IncludeSkillBehavior    # also run the provider-gated LLM suites
+#   pwsh run-tests.ps1 -IncludeSkillBehavior    # also run the provider-gated LLM suite
+#   pwsh run-tests.ps1 -IncludeLiveEvals        # also run the copilot-CLI-gated live evals
 #   pwsh run-tests.ps1 -SkipE2E                 # skip the Playwright visual suite
 #
 # Default suites (nothing is skipped unless you ask):
@@ -11,10 +12,12 @@
 #   3. Skill evals        — evals/ deterministic tests (node --test, offline)
 #   4. Canvas e2e         — Playwright visual suite (auto-starts scripts/serve-canvas.mjs)
 #
-# Opt-in, provider-gated (-IncludeSkillBehavior). These need an API key; without
-# one they are reported as SKIPPED and never fail the run:
-#   5. Skill behavior     — npm run test:skill-behavior (LLM traces the skill)
-#   6. Live skill evals   — node evals/run-evals.mjs (LLM scores the skill)
+# Opt-in suites. They call a model, so each is behind its own switch and has its own
+# prerequisite; without it they are reported as SKIPPED and never fail the run:
+#   5. Skill behavior     — npm run test:skill-behavior (-IncludeSkillBehavior;
+#                           needs a provider API key)
+#   6. Live skill evals   — node evals/run-evals.mjs (-IncludeLiveEvals; needs an
+#                           authenticated `copilot` CLI on PATH)
 #
 # Output: docs/skills-health.html (human) + docs/skills-health.json (machine).
 # Exit code is non-zero when any suite fails.
@@ -26,6 +29,9 @@ param(
     [switch]$SkipEvals,
     [switch]$SkipE2E,
     [switch]$IncludeSkillBehavior,
+    # The live evals drive an authenticated `copilot` CLI, not a provider API key, so
+    # they are a separate switch: asking for one must not launch the other.
+    [switch]$IncludeLiveEvals,
     # Do not open the dashboard in a browser when the run finishes.
     [switch]$NoOpen,
     # Do not write docs/skills-health.{json,html}.
@@ -212,16 +218,13 @@ try {
         }
     }
 
-    # 5 & 6. Provider-gated LLM suites (opt-in, never fail on a missing key).
+    # 5. Provider-gated behavioral suite (opt-in, never fails on a missing key).
     $providerKey = Test-ProviderKey
     if (-not $IncludeSkillBehavior) {
         Add-SkippedSuite 'Skill behavior (LLM)' 'npm run test:skill-behavior' 'not requested (-IncludeSkillBehavior)'
-        Add-SkippedSuite 'Live skill evals (LLM)' 'node evals/run-evals.mjs' 'not requested (-IncludeSkillBehavior)'
     }
     elseif (-not $providerKey) {
-        $why = 'no provider API key set (' + ($ProviderKeys -join ', ') + ')'
-        Add-SkippedSuite 'Skill behavior (LLM)' 'npm run test:skill-behavior' $why
-        Add-SkippedSuite 'Live skill evals (LLM)' 'node evals/run-evals.mjs' $why
+        Add-SkippedSuite 'Skill behavior (LLM)' 'npm run test:skill-behavior' ('no provider API key set (' + ($ProviderKeys -join ', ') + ')')
     }
     else {
         Write-Host ''
@@ -230,8 +233,21 @@ try {
             Install-CanvasDeps
             npm run test:skill-behavior --prefix $CanvasDir
         }
-        Invoke-Suite 'Live skill evals (LLM)' 'node evals/run-evals.mjs' {
-            node (Join-Path $RepoRoot 'evals/run-evals.mjs')
+    }
+
+    # 6. Live skill evals (opt-in). These drive the `copilot` CLI, so they need it on
+    # PATH — a provider API key is neither sufficient nor required. --force is passed
+    # because run-evals.mjs otherwise exits 0 without evaluating anything, which would
+    # report a green suite for a run that never happened.
+    if (-not $IncludeLiveEvals) {
+        Add-SkippedSuite 'Live skill evals (LLM)' 'node evals/run-evals.mjs --force' 'not requested (-IncludeLiveEvals)'
+    }
+    elseif (-not (Get-Command copilot -ErrorAction SilentlyContinue)) {
+        Add-SkippedSuite 'Live skill evals (LLM)' 'node evals/run-evals.mjs --force' 'the `copilot` CLI was not found on PATH'
+    }
+    else {
+        Invoke-Suite 'Live skill evals (LLM)' 'node evals/run-evals.mjs --force' {
+            node (Join-Path $RepoRoot 'evals/run-evals.mjs') --force
         }
     }
 }

@@ -10,8 +10,10 @@
 import { describe, it, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
+import fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseSpecificationData } from "../lib/parser.mjs";
 import { compileSpecFromFolder } from "../lib/spec-compiler.mjs";
 import { validateSpecificationJSON, validateReferenceIntegrity } from "../lib/validation.mjs";
@@ -70,8 +72,9 @@ Implements CN.01.1.
     assert.deepEqual(result.functionalRequirements[0].needIds, ["CN.01.1"]);
   });
 
-  it("parses the bare (unbracketed) heading form the skill templates emit", () => {
-    // skills/problem-based-srs/reference/problems.md emits "### CP-001: Title"
+  it("parses the bare (unbracketed) heading form, including legacy hyphen IDs", () => {
+    // Older specs (and hand-written notes) use "### CP-001: Title". The shipped
+    // templates emit dotted IDs now, but these must keep parsing.
     const md = `# Customer Problems
 
 ### CP-001: Regulatory Compliance
@@ -268,5 +271,69 @@ describe("decomposition follows the notation of the spec", () => {
     };
     const { added } = decomposeNode(legacy, "CP-1");
     assert.deepEqual(added.map((a) => a.id), ["CP-2", "CP-3"]);
+  });
+});
+
+// The provider-backed workflow contract (tests/skill-behavior/) is skipped whenever
+// no API key is present — which is every CI run. It used to assert the OPPOSITE of
+// the shipped methodology: it required `CP-<n>` and rejected `CP.<n>`, so an agent
+// correctly following the skill would have been graded as failing. These
+// deterministic assertions read that suite's own source so the hyphen-only rule
+// cannot come back unnoticed while the live suite sits skipped.
+describe("notation: the provider-backed contract demands canonical dotted IDs", () => {
+  const HERE = path.dirname(fileURLToPath(import.meta.url));
+  const read = (rel) => fs.readFileSync(path.join(HERE, "skill-behavior", rel), "utf8");
+  const CONTRACT = read("workflow-contract.test.mjs");
+  const FIXTURES = read("fixtures.mjs");
+  const BEHAVIOR_README = read("README.md");
+
+  it("requires dotted CP.<n> in the artifact it grades", () => {
+    assert.match(
+      CONTRACT,
+      /const CANONICAL_CP = \/\\bCP\\\.\\d\+\//,
+      "the contract must require canonical dotted CP.<n>",
+    );
+    assert.match(CONTRACT, /assert\.match\(\s*spec,\s*CANONICAL_CP/);
+  });
+
+  it("rejects the accepted-legacy hyphen form in generated artifacts", () => {
+    assert.match(
+      CONTRACT,
+      /const LEGACY_CP = \/\\bCP-\\d\+\//,
+      "the contract must name the legacy hyphen form",
+    );
+    assert.match(CONTRACT, /assert\.doesNotMatch\(\s*spec,\s*LEGACY_CP/);
+  });
+
+  it("never reinstates the inverted hyphen-only rule", () => {
+    assert.doesNotMatch(
+      CONTRACT,
+      /assert\.doesNotMatch\([\s\S]{0,80}\/\\bCP\\\.\\d/,
+      "dotted IDs must never be asserted as forbidden — that inverts the methodology",
+    );
+    assert.doesNotMatch(
+      CONTRACT,
+      /assert\.match\([\s\S]{0,80}\/\\bCP-\\d/,
+      "hyphen IDs must never be asserted as required",
+    );
+  });
+
+  it("seeds the CRM fixtures with dotted IDs only", () => {
+    assert.deepEqual(
+      FIXTURES.match(/\b(?:CP|CN|FR|NFR)-\d+/g) ?? [],
+      [],
+      "skill-behavior fixtures must not teach the model legacy hyphen IDs",
+    );
+    for (const id of ["CP.01", "CN.01.1"]) {
+      assert.ok(FIXTURES.includes(id), `fixtures must use the canonical ID ${id}`);
+    }
+  });
+
+  it("documents the dotted contract for the next reader", () => {
+    assert.match(BEHAVIOR_README, /canonical dotted/i);
+    assert.ok(
+      !/uses\s*\n?`CP-<n>` notation \(dash, never dotted/.test(BEHAVIOR_README),
+      "the obsolete hyphen-only contract must not remain documented",
+    );
   });
 });

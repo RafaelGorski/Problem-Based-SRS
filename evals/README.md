@@ -11,10 +11,15 @@ folder tests the *skill content and the methodology behavior* instead.
 
 ## Two tiers
 
-| Tier | Location | Model calls? | When it runs |
-|------|----------|--------------|--------------|
-| **Deterministic tests** | `tests/*.test.mjs` | No | Always (offline, CI-safe) |
-| **Live LLM evals** | `cases/*.case.mjs` + `run-evals.mjs` | Yes | Opt-in only |
+| Tier | Location | Model calls? | When it runs | How the docs guard treats it |
+|------|----------|--------------|--------------|------------------------------|
+| **Deterministic tests** | `tests/*.test.mjs` | No | Always (offline, CI-safe) | **Offline-executable** — verified by running the suite |
+| **Live LLM evals** | `cases/*.case.mjs` + `run-evals.mjs` | Yes | Opt-in only | **Opt-in/live** — checked structurally only, never executed |
+
+Every command in this file runs **from the repository root**. Offline-executable
+commands are proven by the suite itself; opt-in/live commands need a key or an
+authenticated `copilot` CLI, so `tests/evals-readme.test.mjs` checks that they name
+real files and real flags rather than running them.
 
 ### 1. Deterministic tests (offline)
 
@@ -41,8 +46,32 @@ Pure `node --test` files with no external dependencies:
   actually embeds both, and its rubric runs. Live cases are opt-in, so without
   this a broken case would sit unnoticed. Includes a canary asserting the
   brownfield rubric rejects a technical-debt answer.
+- `tests/evals-readme.test.mjs` — **the docs drift guard.** Parses this README and
+  fails when a documented command names a runner or path that does not exist,
+  reintroduces the phantom `package.json` under `evals/`, passes a bare directory
+  to `node --test`, or writes a live-eval command that is not repo-root relative.
+- `tests/demo-spec-notation.test.mjs` — asserts the **shipped** demo specification
+  (`.spec/crm-system.json` and the canvas's `lib/demo-spec.mjs`) is identical and
+  uses only canonical dotted IDs, with zero legacy hyphen IDs and zero dangling
+  references.
+- `tests/distribution-surfaces.test.mjs` — asserts the Skills Health Dashboard is
+  actually reachable (landing nav + footer, docs page nav, README badge) and that
+  both distribution paths — the `skills.sh` listing and the SRS Navigator canvas
+  extension — are documented on the README **and** the landing page. A published
+  page that nothing links to is a claim nobody can check.
+- `tests/release-hygiene.test.mjs` — ties `.claude-plugin/plugin.json`, the top
+  `CHANGELOG.md` section, and every version a visitor is shown together, and keeps
+  the plugin (`vX.Y`) and canvas (`vX.Y.Z`) release trains from being confused for
+  one another.
+- `tests/scheduled-llm-suite.test.mjs` — asserts the two opt-in model-calling
+  suites keep independent switches with the prerequisite each actually has, that
+  the live runner is invoked with `--force` (without it, it exits 0 having
+  evaluated nothing), and that the scheduled workflow fails loudly when its
+  provider secret is missing rather than reporting a green run that verified
+  nothing.
 
-Run them:
+Run them (**offline** — every command below runs from the **repository root** and
+needs no key, no network, and no login):
 
 ```powershell
 pwsh evals/scripts/run-tests.ps1                             # all deterministic tests
@@ -55,6 +84,10 @@ argument is **not** supported by `node --test`):
 ```bash
 node --test evals/tests/*.test.mjs    # from the repo root
 ```
+
+`tests/evals-readme.test.mjs` guards this file: it parses the commands documented
+here and fails when one names a runner or path that does not exist, reintroduces
+the phantom manifest under `evals/`, or passes a bare directory to `node --test`.
 
 They also run in CI on every push/PR (`.github/workflows/ci.yml`).
 
@@ -78,17 +111,18 @@ than starting from a brief; its fixture deliberately plants technical-debt bait 
 the CTO quote and the code TODOs.
 
 They are **opt-in** because they call the real model and may consume premium
-requests. They require the `copilot` CLI to be installed and authenticated.
+requests. They require the `copilot` CLI to be installed and authenticated, so
+they are checked *structurally* by the docs guard but never executed by it.
 
-Run them:
+Run them (all paths are **repo-root relative**, like the offline commands above):
 
 ```bash
-RUN_SKILL_EVALS=1 node run-evals.mjs
-node run-evals.mjs --force                 # ignore the env gate
-node run-evals.mjs needs                   # a single case
-node run-evals.mjs --no-judge              # rubric only
-node run-evals.mjs --verbose               # show prompt, run metadata, artifact, every check
-node run-evals.mjs -vv                      # even more verbose (no truncation)
+RUN_SKILL_EVALS=1 node evals/run-evals.mjs
+node evals/run-evals.mjs --force                 # ignore the env gate
+node evals/run-evals.mjs needs                   # a single case
+node evals/run-evals.mjs --no-judge              # rubric only
+node evals/run-evals.mjs --verbose               # show prompt, run metadata, artifact, every check
+node evals/run-evals.mjs -vv                     # even more verbose (no truncation)
 ```
 
 PowerShell helper:
@@ -108,16 +142,26 @@ eval can be diagnosed without re-running.
 
 ## Running everything
 
-A repo-root `run-tests.ps1` runs all offline suites in sequence — plugin validation,
-the canvas extension tests, and the deterministic skill evals:
+A repo-root `run-tests.ps1` runs every offline suite in sequence — plugin validation,
+the canvas extension tests, the deterministic skill evals, and the Playwright visual
+suite:
 
 ```powershell
 pwsh run-tests.ps1
+pwsh run-tests.ps1 -NoOpen                     # ...without opening the dashboard (CI / agents)
 pwsh run-tests.ps1 -SkipCanvas -SkipValidate   # skill evals only
 ```
 
-Live LLM evals are **not** part of `run-tests.ps1` (they call the model); run them
-explicitly with `evals/scripts/run-evals.ps1`.
+The two model-calling suites are **opt-in and separately flagged**, because they need
+different credentials: `-IncludeSkillBehavior` needs a provider API key, while
+`-IncludeLiveEvals` needs an authenticated `copilot` CLI.
+
+```powershell
+pwsh run-tests.ps1 -IncludeSkillBehavior   # + npm run test:skill-behavior (provider key)
+pwsh run-tests.ps1 -IncludeLiveEvals       # + node evals/run-evals.mjs (copilot CLI)
+```
+
+`evals/scripts/run-evals.ps1` runs the live evals on their own.
 
 ## The "SDK"
 
