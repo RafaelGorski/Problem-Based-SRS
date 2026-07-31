@@ -27,13 +27,17 @@ Identify, document, and validate Customer Problems from business context. Custom
 
 ---
 
-## Two Modes of Operation
+## Modes of Operation
 
 ### Mode 1: CP Generation
 Use when starting from **business context** to discover and document problems.
 
 ### Mode 2: CP Review & Normalization  
 Use when you have **draft CP statements** that need quality review and formatting.
+
+### Mode 3: Brownfield Discovery
+Use when the software **already exists** and nobody wrote down why. The starting point is a
+running system rather than a brief.
 
 ---
 
@@ -122,8 +126,78 @@ For each draft problem:
 
 ---
 
-## CP Structured Notation
+## Mode 3: Brownfield Discovery (existing system → CPs)
 
+Most systems that need a specification already run in production. The code, the schema, the
+ticket queue and the dashboards are dense evidence about what hurts — but evidence is not a
+specification, and reading it is not the same as knowing why the system must change.
+
+### The governing rule
+
+**Repository evidence is input to the Discovery Interview and never a basis to skip it.**
+
+The Skip Conditions above are unchanged and still apply literally: a README, source code,
+commit history, or issue tracker does **NOT** satisfy them. Harvesting evidence makes the
+interview *shorter and sharper* — you arrive with numbers instead of open questions — but the
+person who owns the system is still the only one who can say which consequences matter and
+what they cost. Producing CPs from a code scan alone is the exact failure this step exists to
+prevent, whether or not a human is present to stop you.
+
+### Step 1 — Harvest the evidence
+
+Read the system for **consequences**, not for architecture. Useful sources:
+
+| Source | What to extract |
+|--------|-----------------|
+| Database schema and data | Volumes that reveal pain — duplicate rows, orphaned records, unused columns |
+| Support tickets / issue tracker | Recurring themes, and what users say they could not do |
+| Analytics and operational metrics | Abandonment, latency, retry, error and rework rates |
+| Code comments, TODOs, workarounds | Where the team keeps patching the same wound |
+| Runbooks and manual processes | Work humans do because the system does not |
+
+Record each finding with its source, so every CP you later write is traceable to observed
+evidence rather than to a guess.
+
+### Step 2 — Bring the evidence to the interview
+
+Use the **assert-then-confirm** cadence from the Discovery Interview: state what the evidence
+suggests and ask the owner to confirm or override. This is a genuine interview turn — you MUST
+wait for the answer.
+
+> "The contacts table holds 41,800 rows for roughly 26,000 real customers, and 22% of support
+> tickets mention a colleague's missing notes. My reading is that reps cannot reconstruct a
+> customer's history, and the cost is repeated work and lost renewals. Is that the consequence
+> that matters, or is something else more urgent?"
+
+### Step 3 — Translate causes into problems
+
+A technical finding is a **cause**. A Customer Problem is the **business consequence** that
+cause produces, stated with a Subject and a Penalty. Technical debt is real, and it belongs in
+the Business Context as a constraint — it is not a Customer Problem.
+
+### Anti-Patterns to Avoid (Brownfield)
+
+| ❌ Wrong (the finding restated) | ✅ Correct (its consequence) |
+|--------------------------------|------------------------------|
+| ❌ "The CRM is a PHP monolith with jQuery front-ends and no tests" | ✅ "Sales managers must wait two weeks for any pipeline change, losing deals that turn on a same-week response" |
+| ❌ "The team must rewrite the legacy system and migrate to microservices" | ✅ "Support agents cannot reconstruct a customer's history, so 22% of conversations repeat work already done" |
+| ❌ "We should build a new CRM system to replace the old one" | ✅ "Account managers lose renewals because no one is alerted when a contract is 30 days from expiry" |
+| ❌ "Buy Salesforce instead" | ✅ "Compliance officers cannot produce a record of who changed a customer's data, breaching the audit obligation" |
+
+Each ❌ names a technology, a rewrite, or a purchase — none of them says who suffers or what it
+costs. Each ✅ names a subject and a penalty, and stays true whichever technology is chosen.
+
+### Mode 3 Checklist
+
+- [ ] Evidence harvested with its source recorded
+- [ ] Findings asserted back to the system's owner and confirmed or overridden
+- [ ] Every CP traces to observed evidence, not to inference from code alone
+- [ ] No CP names a technology, a rewrite, or a product to buy
+- [ ] Technical debt recorded as a constraint, not promoted to a Customer Problem
+
+---
+
+## CP Structured Notation
 Each Customer Problem MUST follow this syntax:
 
 ```

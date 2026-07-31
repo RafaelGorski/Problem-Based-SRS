@@ -1,6 +1,6 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-07-31T11:04:06.7890950Z",
+  "generatedAt": "2026-07-31T17:40:57.9277572Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "2.6.0",
   "canvasVersion": "1.1.0",
@@ -10,11 +10,11 @@
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 488,
-    "pass": 488,
+    "tests": 566,
+    "pass": 566,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 72.4
+    "durationSeconds": 87.8
   },
   "suites": [
     {
@@ -32,22 +32,22 @@
       "name": "Canvas extension",
       "state": "passed",
       "command": "npm test",
-      "tests": 231,
-      "pass": 231,
+      "tests": 244,
+      "pass": 244,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.8,
+      "seconds": 1.5,
       "reason": ""
     },
     {
       "name": "Skill evals",
       "state": "passed",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 215,
-      "pass": 215,
+      "tests": 280,
+      "pass": 280,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.1,
+      "seconds": 2,
       "reason": ""
     },
     {
@@ -58,7 +58,7 @@
       "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 69.1,
+      "seconds": 83.9,
       "reason": ""
     },
     {
@@ -91,9 +91,9 @@
     "files": [
       {
         "file": "skills/problem-based-srs/SKILL.md",
-        "lines": 479,
+        "lines": 482,
         "state": "ok",
-        "pctOfCap": 79.8
+        "pctOfCap": 80.3
       },
       {
         "file": "skills/problem-based-srs/reference/business-context.md",
@@ -121,9 +121,9 @@
       },
       {
         "file": "skills/problem-based-srs/reference/live.md",
-        "lines": 74,
+        "lines": 81,
         "state": "ok",
-        "pctOfCap": 12.3
+        "pctOfCap": 13.5
       },
       {
         "file": "skills/problem-based-srs/reference/microer-example.md",
@@ -139,9 +139,9 @@
       },
       {
         "file": "skills/problem-based-srs/reference/problems.md",
-        "lines": 375,
+        "lines": 449,
         "state": "ok",
-        "pctOfCap": 62.5
+        "pctOfCap": 74.8
       },
       {
         "file": "skills/problem-based-srs/reference/software-glance.md",

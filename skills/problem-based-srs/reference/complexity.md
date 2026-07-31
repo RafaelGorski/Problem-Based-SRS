@@ -73,10 +73,10 @@ For each mapping (CP→CN and CN→FR), check:
 Create a design matrix to visualize relationships:
 
 ```
-         CN.1  CN.2  CN.3
-CP.1     [X]   [ ]   [ ]    ← Ideal: one X per row
-CP.2     [ ]   [X]   [ ]
-CP.3     [ ]   [ ]   [X]
+         CN.01.1  CN.02.1  CN.03.1
+CP.01      [X]      [ ]      [ ]    ← Ideal: one X per row
+CP.02      [ ]      [X]      [ ]
+CP.03      [ ]      [ ]      [X]
 ```
 
 **Matrix Types:**
@@ -96,10 +96,10 @@ Use **C** (Complete) and **P** (Partial) markers to indicate how well each eleme
 ### CP → CN Completeness Matrix
 
 ```
-         CN.1  CN.2  CN.3
-CP.1     [C]   [ ]   [ ]    C = CN completely solves CP
-CP.2     [P]   [P]   [ ]    P = CN partially solves CP
-CP.3     [ ]   [ ]   [C]
+         CN.01.1  CN.02.1  CN.02.2  CN.03.1
+CP.01      [C]      [ ]      [ ]      [ ]    C = CN completely solves CP
+CP.02      [ ]      [P]      [P]      [ ]    P = CN partially solves CP
+CP.03      [ ]      [ ]      [ ]      [C]
 ```
 
 **Interpretation:**
@@ -109,11 +109,16 @@ CP.3     [ ]   [ ]   [C]
 ### CN → FR Completeness Matrix
 
 ```
-         FR.1  FR.2  FR.3  FR.4
-CN.1     [C]   [ ]   [ ]   [ ]
-CN.2     [P]   [P]   [ ]   [ ]
-CN.3     [ ]   [ ]   [C]   [P]
+           FR.01.1.1  FR.01.1.2  FR.02.1.1  FR.03.1.1
+CN.01.1      [C]        [P]        [ ]        [ ]
+CN.02.1      [ ]        [P]        [C]        [ ]
+CN.03.1      [ ]        [ ]        [ ]        [C]
 ```
+
+Canonical IDs make coupling visible before the statements are even read: an
+`FR.{cp}.{cn}.{n}` sits on the diagonal of the `CN.{cp}.{n}` its own ID names. Every mark
+off that diagonal — `FR.01.1.2` in the `CN.02.1` row above — is a shared requirement, and
+each one has to be justified against Axiom 1 rather than discovered later.
 
 ### Completeness Rules
 
@@ -144,7 +149,7 @@ For each CN, estimate:
 
 **Example:**
 ```
-CN.1: Manager needs to know account balances within 24 hours
+CN.01.1: Manager needs to know account balances within 24 hours
 
 Need Range: 0-24 hours (acceptable)
 System Range: 0-2 hours (what system delivers)
@@ -206,7 +211,7 @@ When running complexity analysis, produce:
 
 | CN | Need Range | System Range | Overlap | IC Level |
 |----|------------|--------------|---------|----------|
-| CN.1 | [range] | [range] | [%] | [Low/Med/High] |
+| CN.01.1 | [range] | [range] | [%] | [Low/Med/High] |
 
 ### 5. Recommendations
 
@@ -241,15 +246,15 @@ When running complexity analysis, produce:
 
 **CP → CN Matrix:**
 ```
-         CN.1  CN.2  CN.3  CN.4  CN.5  CN.6
-CP.1     [C]   [P]   [ ]   [ ]   [ ]   [ ]
-CP.2     [ ]   [ ]   [C]   [ ]   [ ]   [ ]
-CP.3     [ ]   [ ]   [ ]   [C]   [ ]   [ ]
-CP.4     [ ]   [ ]   [ ]   [ ]   [C]   [P]
-CP.5     [ ]   [ ]   [ ]   [ ]   [ ]   [C]
+         CN.01.1  CN.01.2  CN.02.1  CN.03.1  CN.04.1  CN.05.1
+CP.01      [C]      [P]      [ ]      [ ]      [ ]      [ ]
+CP.02      [ ]      [ ]      [C]      [ ]      [ ]      [ ]
+CP.03      [ ]      [ ]      [ ]      [C]      [ ]      [ ]
+CP.04      [ ]      [ ]      [ ]      [ ]      [C]      [P]
+CP.05      [ ]      [ ]      [ ]      [ ]      [ ]      [C]
 ```
 
-**Result:** Semi-coupled (triangular tendency). CP.1 and CP.4 have multiple CNs but they don't compete. Acceptable.
+**Result:** Semi-coupled (triangular tendency). CP.01 and CP.04 have multiple CNs but they don't compete. Acceptable.
 
 ---
 

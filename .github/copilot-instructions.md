@@ -451,6 +451,7 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 | **CI workflow** | `.github/workflows/ci.yml` | On every push/PR to `main`: validates the plugin and uploads the packaged zip as a build artifact. |
 | **Release workflow** | `.github/workflows/create-release.yml` | Builds, validates, packages, and publishes a GitHub Release with the zip attached. |
 | **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), packages archives (`scripts/package-extension.mjs`), and publishes a `vX.Y.Z` GitHub Release. |
+| **Distribution monitor** | `.github/workflows/distribution-drift.yml` → `scripts/check-distribution.mjs` | Weekly (and on demand): compares the surfaces this repository does **not** own — the skills.sh listing and GitHub Releases — against what the repository actually ships. Deliberately outside the PR gate. |
 
 > **Two release pipelines, two tag schemes.** The **plugin** release uses `vX.Y` tags
 > (driven by `plugin.json` + `build-plugin.py`). The **canvas app** release uses `vX.Y.Z`
@@ -536,6 +537,46 @@ The workflow validates the plugin, packages `problem-based-srs-vX.Y.zip`, and cr
 Open the **Releases** section and confirm the `vX.Y` release exists, has the expected
 title and notes, and includes the **`problem-based-srs-vX.Y.zip`** asset. It must not
 be a draft or pre-release.
+
+Then run the distribution monitor, which is the only thing that checks the *published*
+side rather than the repository side:
+
+```bash
+node scripts/check-distribution.mjs          # report, always exits 0
+node scripts/check-distribution.mjs --strict # exit 1 on drift (what the workflow runs)
+```
+
+### Distribution surfaces (third-party state)
+
+Two surfaces carry this project and neither lives in the repository, so neither can be
+fixed by a pull request — only observed. `scripts/check-distribution.mjs` observes them;
+`.github/workflows/distribution-drift.yml` runs it weekly and on demand. A red run there
+is a notification, not a broken build: it is out of the PR gate on purpose.
+
+| Finding | Severity | What it means | What to do |
+|---------|----------|---------------|-----------|
+| `registry-listing-drift` | error | The [skills.sh listing](https://www.skills.sh/rafaelgorski/problem-based-srs) advertises skills the repository no longer ships. It is a cached index, so consolidations (like #50, which took nine skills to one) do not propagate. | Re-submit the repository at [skills.sh](https://www.skills.sh) so the listing is re-crawled, then re-run the checker. |
+| `dangling-release-links` | error | A `releases/tag/vX.Y.Z` link in `README.md`/`CHANGELOG.md` names a release that was never published — normally a manifest bump whose tag never got pushed. | Cut the missing release (above), or correct the link. |
+| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
+| `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
+| `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
+| `registry-listing-partial` | warning | The page's own count disagrees with the entries it returned, so the comparison was skipped rather than run on a truncated payload. | Re-run; if it persists, read the page and confirm what it actually advertises. |
+
+**Exit codes.** Only `error` findings fail the run (`--strict` → 1). Warnings print, are
+emitted as `::warning::` annotations, and exit 0 — a monitor that goes red on someone
+else's 503 is a monitor that gets muted, and a muted monitor is the state #69 was already
+in. If warnings persist across runs, treat that as the signal instead of the exit code.
+
+**Version badges must link the `/releases` index, not a per-tag URL.** The documented
+process bumps `plugin.json` *before* the tag exists, so a per-tag badge 404s for the whole
+window in between — it did, across two consecutive versions. Guarded by
+`evals/tests/distribution-drift.test.mjs`.
+
+**Decision — no second registry, for now (2026-07-31).** The one listing we publish
+drifted by eight of nine entries and stayed that way for three passes, because nothing was
+looking. A second surface without a detector doubles that blind spot. Now that the monitor
+exists the question is answerable on maintenance cost instead of on fear of it; revisit
+when there is inbound signal to justify it.
 
 ### Version Numbering
 

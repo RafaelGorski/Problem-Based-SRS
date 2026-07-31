@@ -18,19 +18,19 @@ The company has difficulties maintaining an effective relationship with its cust
 
 | ID | Statement | Class |
 |----|-----------|-------|
-| CP.1 | The company must ensure the existence of a communication channel with all customers, otherwise it risks losing customers, affecting marketing, promotions, feedback, and future sales. | Obligation |
-| CP.1.1 | The company must ensure it can contact all of its customers. | Obligation |
-| CP.1.2 | The company must ensure each customer is contacted regularly. | Obligation |
-| CP.2 | The company must consider customer feedback statistics in planning, otherwise it creates customer dissatisfaction and loses market share. | Obligation |
-| CP.3 | Customers expect the company to respond to their feedback, otherwise they become frustrated and company reputation decreases. | Expectation |
-| CP.4 | The company must align sales strategies with customer behavior, otherwise it misses sales opportunities. | Obligation |
-| CP.5 | The company must project sales, otherwise it loses opportunities and makes inadequate provisions. | Obligation |
+| CP.01 | The company must ensure the existence of a communication channel with all customers, otherwise it risks losing customers, affecting marketing, promotions, feedback, and future sales. | Obligation |
+| CP.01.1 | The company must ensure it can contact all of its customers. | Obligation |
+| CP.01.2 | The company must ensure each customer is contacted regularly. | Obligation |
+| CP.02 | The company must consider customer feedback statistics in planning, otherwise it creates customer dissatisfaction and loses market share. | Obligation |
+| CP.03 | Customers expect the company to respond to their feedback, otherwise they become frustrated and company reputation decreases. | Expectation |
+| CP.04 | The company must align sales strategies with customer behavior, otherwise it misses sales opportunities. | Obligation |
+| CP.05 | The company must project sales, otherwise it loses opportunities and makes inadequate provisions. | Obligation |
 
 ### Decomposition Note
 
-CP.1 was decomposed into CP.1.1 and CP.1.2 to clarify two distinct facets:
-- **CP.1.1:** Ability to contact (having contact information)
-- **CP.1.2:** Regular contact (frequency of communication)
+CP.01 was decomposed into CP.01.1 and CP.01.2 to clarify two distinct facets:
+- **CP.01.1:** Ability to contact (having contact information)
+- **CP.01.2:** Regular contact (frequency of communication)
 
 ---
 
@@ -74,12 +74,16 @@ CRM software will:
 
 | ID | Statement | Outcome Class | Traces To |
 |----|-----------|---------------|-----------|
-| CN.1 | The company needs a CRM software to know who its customers are and have updated contact information. | Information | CP.1.1 |
-| CN.2 | The company needs a CRM software to be aware of when each customer was last contacted. | Information | CP.1.2 |
-| CN.3 | The company needs a CRM software to know customer feedback statistics monthly. | Information | CP.2 |
-| CN.4 | The company needs a CRM software to allow responding to customer feedback. | Construction | CP.3 |
-| CN.5 | The company needs a CRM software to know customer behavior patterns. | Information | CP.4 |
-| CN.6 | The company needs a CRM software to know projected sales forecasts quarterly. | Information | CP.5 |
+| CN.01.1 | The company needs a CRM software to know who its customers are and have updated contact information. | Information | CP.01.1 |
+| CN.01.2 | The company needs a CRM software to be aware of when each customer was last contacted. | Information | CP.01.2 |
+| CN.02.1 | The company needs a CRM software to know customer feedback statistics monthly. | Information | CP.02 |
+| CN.03.1 | The company needs a CRM software to allow responding to customer feedback. | Construction | CP.03 |
+| CN.04.1 | The company needs a CRM software to know customer behavior patterns. | Information | CP.04 |
+| CN.05.1 | The company needs a CRM software to know projected sales forecasts quarterly. | Information | CP.05 |
+
+> **Reading the IDs:** `CN.01.1` and `CN.01.2` are the first and second needs raised by
+> `CP.01` — one per sub-problem. The needs of `CP.02`…`CP.05` restart at `.1` under their
+> own problem, so the ID alone says which problem a need came from.
 
 ---
 
@@ -111,14 +115,18 @@ CRM software for companies with customer relationship difficulties. Unlike gener
 
 | ID | Statement | Traces To |
 |----|-----------|-----------|
-| FR.1 | The CRM shall store and display customer contact information including name, email, phone, and address. | CN.1 |
-| FR.2 | The CRM shall record the date of last contact for each customer. | CN.2 |
-| FR.3 | The CRM shall display customers not contacted within a configurable period. | CN.2 |
-| FR.4 | The CRM shall calculate and display feedback statistics by category monthly. | CN.3 |
-| FR.5 | The CRM shall allow users to compose and send responses to customer feedback. | CN.4 |
-| FR.6 | The CRM shall analyze and display customer purchase behavior patterns. | CN.5 |
-| FR.7 | The CRM shall generate quarterly sales forecasts based on historical data. | CN.6 |
-| FR.8 | The CRM shall send marketing campaigns to selected customer segments. | CN.1, CN.2 |
+| FR.01.1.1 | The CRM shall store and display customer contact information including name, email, phone, and address. | CN.01.1 |
+| FR.01.1.2 | The CRM shall send marketing campaigns to selected customer segments. | CN.01.1, CN.01.2 |
+| FR.01.2.1 | The CRM shall record the date of last contact for each customer. | CN.01.2 |
+| FR.01.2.2 | The CRM shall display customers not contacted within a configurable period. | CN.01.2 |
+| FR.02.1.1 | The CRM shall calculate and display feedback statistics by category monthly. | CN.02.1 |
+| FR.03.1.1 | The CRM shall allow users to compose and send responses to customer feedback. | CN.03.1 |
+| FR.04.1.1 | The CRM shall analyze and display customer purchase behavior patterns. | CN.04.1 |
+| FR.05.1.1 | The CRM shall generate quarterly sales forecasts based on historical data. | CN.05.1 |
+
+> **Reading the IDs:** `FR.01.2.2` is the second requirement implementing `CN.01.2`, which
+> addresses `CP.01`. A shared requirement keeps the ID of its primary need — `FR.01.1.2`
+> belongs to `CN.01.1` — and lists the other needs it serves in **Traces To**.
 
 ---
 
@@ -126,27 +134,27 @@ CRM software for companies with customer relationship difficulties. Unlike gener
 
 ### CP → CN Coverage
 
-|     | CN.1 | CN.2 | CN.3 | CN.4 | CN.5 | CN.6 |
-|-----|------|------|------|------|------|------|
-| CP.1.1 | C |   |   |   |   |   |
-| CP.1.2 |   | C |   |   |   |   |
-| CP.2 |   |   | C |   |   |   |
-| CP.3 |   |   |   | C |   |   |
-| CP.4 |   |   |   |   | C |   |
-| CP.5 |   |   |   |   |   | C |
+|         | CN.01.1 | CN.01.2 | CN.02.1 | CN.03.1 | CN.04.1 | CN.05.1 |
+|---------|---------|---------|---------|---------|---------|---------|
+| CP.01.1 | C       |         |         |         |         |         |
+| CP.01.2 |         | C       |         |         |         |         |
+| CP.02   |         |         | C       |         |         |         |
+| CP.03   |         |         |         | C       |         |         |
+| CP.04   |         |         |         |         | C       |         |
+| CP.05   |         |         |         |         |         | C       |
 
 **C** = Complete coverage ✅
 
 ### CN → FR Coverage
 
-|     | FR.1 | FR.2 | FR.3 | FR.4 | FR.5 | FR.6 | FR.7 | FR.8 |
-|-----|------|------|------|------|------|------|------|------|
-| CN.1 | C |   |   |   |   |   |   | P |
-| CN.2 |   | C | P |   |   |   |   | P |
-| CN.3 |   |   |   | C |   |   |   |   |
-| CN.4 |   |   |   |   | C |   |   |   |
-| CN.5 |   |   |   |   |   | C |   |   |
-| CN.6 |   |   |   |   |   |   | C |   |
+|         | FR.01.1.1 | FR.01.1.2 | FR.01.2.1 | FR.01.2.2 | FR.02.1.1 | FR.03.1.1 | FR.04.1.1 | FR.05.1.1 |
+|---------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| CN.01.1 | C         | P         |           |           |           |           |           |           |
+| CN.01.2 |           | P         | C         | P         |           |           |           |           |
+| CN.02.1 |           |           |           |           | C         |           |           |           |
+| CN.03.1 |           |           |           |           |           | C         |           |           |
+| CN.04.1 |           |           |           |           |           |           | C         |           |
+| CN.05.1 |           |           |           |           |           |           |           | C         |
 
 **C** = Complete, **P** = Partial ✅
 
@@ -168,10 +176,12 @@ CRM software for companies with customer relationship difficulties. Unlike gener
 
 ## Key Learnings
 
-1. **Decomposition:** CP.1 was split into sub-problems for clarity
+1. **Decomposition:** CP.01 was split into sub-problems for clarity
 2. **Outcome Classes:** Most CNs are Information-type (typical for CRM)
-3. **Multiple FRs per CN:** CN.2 needed two FRs to be fully addressed
-4. **Shared FRs:** FR.8 traces to multiple CNs (marketing uses contact data)
+3. **Multiple FRs per CN:** CN.01.2 needed two FRs to be fully addressed
+4. **Shared FRs:** FR.01.1.2 traces to multiple CNs (marketing uses contact data)
+5. **IDs carry the chain:** `FR.01.2.2` → `CN.01.2` → `CP.01` can be read off the ID alone,
+   with no lookup table
 
 ---
 

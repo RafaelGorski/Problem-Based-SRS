@@ -123,7 +123,7 @@ The CRM system shall allow the Account Manager to update existing client records
 ```
 | CN | Functional Requirements |
 |----|------------------------|
-| CN.1 | FR.01.1.1 Registration, FR.01.1.2 Update |
+| CN.01.1 | FR.01.1.1 Registration, FR.01.1.2 Update |
 ```
 
 The wrong format above lacks "shall" statements, acceptance criteria, and proper traceability.

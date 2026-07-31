@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version 2.6.0](https://img.shields.io/badge/version-2.6.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6.0)
+[![Version 2.6.0](https://img.shields.io/badge/version-2.6.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases)
 [![Skills Health](https://img.shields.io/badge/skills%20health-dashboard-brightgreen.svg)](https://rafaelgorski.github.io/Problem-Based-SRS/skills-health.html)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

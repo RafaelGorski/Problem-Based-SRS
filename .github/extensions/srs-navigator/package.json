@@ -9,7 +9,11 @@
     "test": "tests"
   },
   "scripts": {
+<<<<<<< HEAD
     "test": "node --test tests/parser.test.mjs tests/validation.test.mjs tests/renderer.test.mjs tests/action-bar.test.mjs tests/app-prompts.test.mjs tests/integration.test.mjs tests/decompose.test.mjs tests/skill-sync.test.mjs tests/interview-guard.test.mjs tests/http-guard.test.mjs tests/text-refs.test.mjs tests/notation.test.mjs tests/serve-canvas.test.mjs tests/serve-site.test.mjs tests/test-wiring.test.mjs",
+=======
+    "test": "node --test tests/parser.test.mjs tests/validation.test.mjs tests/renderer.test.mjs tests/action-bar.test.mjs tests/integration.test.mjs tests/decompose.test.mjs tests/skill-sync.test.mjs tests/interview-guard.test.mjs tests/brownfield-guard.test.mjs tests/http-guard.test.mjs tests/text-refs.test.mjs tests/notation.test.mjs tests/serve-canvas.test.mjs tests/serve-site.test.mjs tests/test-wiring.test.mjs",
+>>>>>>> origin/main
     "test:skill-behavior": "node --test tests/skill-behavior/*.test.mjs",
     "test:e2e": "playwright test",
     "record-demo": "node scripts/record-demo.mjs",

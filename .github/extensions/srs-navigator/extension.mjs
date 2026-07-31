@@ -18,6 +18,7 @@ import { DEMO_SPEC } from "./lib/demo-spec.mjs";
 import { compileAndSave } from "./lib/spec-compiler.mjs";
 import { decomposeNode } from "./lib/decompose.mjs";
 import { isTrustedLoopbackRequest } from "./lib/http-guard.mjs";
+import { LEARN_PROMPT, LOAD_PROMPT, buildActionPrompt, srsActionCommand } from "./lib/prompts.mjs";
 
 // Content fingerprint of a graph, used to detect *any* change to the loaded
 // specification (not just node/link count changes) so the canvas can reload
@@ -114,13 +115,10 @@ function fileForAction(action) {
     return (match || ACTIONS.find((a) => a.action === "full")).file;
 }
 
-// Map a methodology action (e.g. "needs") to its slash-command form. The whole
-// methodology is a single command; the action is passed as an argument, so
-// "full" (the default) is just `/problem-based-srs`.
-function srsActionCommand(action) {
-    const a = String(action || "full").trim() || "full";
-    return a === "full" ? "/problem-based-srs" : `/problem-based-srs ${a}`;
-}
+// Map a methodology action (e.g. "needs") to its slash-command form: see
+// `srsActionCommand` in lib/prompts.mjs. The whole methodology is a single
+// command; the action is passed as an argument, so "full" (the default) is just
+// `/problem-based-srs`.
 
 // Build the single unified methodology tool. It replaces the former one-tool-per
 // -step registry: callers select a step with the `action` argument.
@@ -310,6 +308,7 @@ async function reloadInstanceFromSource(inst, workspacePath) {
     return true;
 }
 
+<<<<<<< HEAD
 // --- Agent prompts shared by the landing overlay and the graph action bar ---
 //
 // Every prompt the canvas sends must make the agent RUN the methodology skill
@@ -401,6 +400,13 @@ function buildActionPrompt(action) {
         `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. Emit canonical dotted IDs (\`CP.01\`, \`CN.01.1\`, \`FR.01.1.1\`, \`NFR.01\`). After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
     ].join("\n");
 }
+=======
+// --- Agent prompts ---
+//
+// LEARN_PROMPT, LOAD_PROMPT, srsActionCommand and buildActionPrompt live in
+// lib/prompts.mjs so a unit test can assert the values that actually ship;
+// this module imports the copilot-sdk and cannot be loaded by node --test.
+>>>>>>> origin/main
 
 const sendJson = (res, obj, status = 200) => {
     res.statusCode = status;

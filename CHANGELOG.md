@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+<<<<<<< HEAD
 - **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
   itself.** The splash-screen prompt named the `problem_based_srs` tool and then described
   the work ("scan the workspace… generate the artifacts"), so an agent could satisfy it
@@ -27,6 +28,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   schema, and the app's own JSON example uses canonical dotted IDs (`CP.01`, `CN.01.1`,
   `FR.01.1.1`, `NFR.01`) instead of untyped `{id,title,description}` placeholders.
 
+=======
+- **The README's first badge is no longer a 404.** It linked
+  `releases/tag/v2.6.0`, a tag that was never pushed: the documented release process bumps
+  `.claude-plugin/plugin.json` *before* the tag exists, and the release had not been cut for
+  two consecutive versions, so the first clickable thing on the repository page led nowhere.
+  It now points at the `/releases` index, which `docs/index.html` already did, and a guard
+  keeps version badges off per-tag URLs.
+- **The changelog's oldest release link is no longer a 404.** `[1.0]` pointed at
+  `releases/tag/v1.0` for the project's entire life; the tag has always been `v1.0.0`. The
+  drift checker only found it because it compares tags **exactly** — GitHub serves
+  `/releases/tag/<tag>` by tag name, so `/releases/tag/v2.4.0` is a 404 even though release
+  2.4.0 exists as `v2.4`, and any matching that normalizes the two would have called this
+  link healthy.
+>>>>>>> origin/main
 - **The installed skill no longer points at files only the maintainer has.**
   `reference/functional-requirements.md` headed its **Quality Rules** section — the rules
   that decide whether a requirement is well-formed — with a link to
@@ -48,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+<<<<<<< HEAD
 - **Drift guard for the canvas app's agent-facing instructions**
   (`.github/extensions/srs-navigator/tests/app-prompts.test.mjs`, 21 assertions, wired into
   `npm test`). It fails if any canvas prompt loses "run the skill", "do not improvise", or
@@ -56,6 +72,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   own `validateSpecificationJSON` + `validateReferenceIntegrity`. The autopilot marker string
   is shared with `interview-guard.test.mjs`, so the app and the skill can never state
   contradictory rules about waiving the interview.
+=======
+- **Distribution drift is detected instead of rediscovered by hand**
+  (`scripts/check-distribution.mjs`, `evals/tests/distribution-drift.test.mjs`,
+  `.github/workflows/distribution-drift.yml`). Two surfaces carry this project and neither
+  lives in the repository — the skills.sh listing and GitHub Releases — so #69 filed both as
+  untestable and every status comment since has re-quoted a hand-run check from #72. They
+  had drifted: the listing still advertises the **nine pre-#50 skills**, of which eight no
+  longer exist (its own counters put 70 of 101 installs on those names), and the manifest
+  reached 2.6.0 while the newest release stayed **v2.4.1**. `distribution-surfaces.test.mjs`
+  asserts those links *exist*; it never asked whether what they point at still agrees with
+  the repository — presence, not function, the same gap #73 had to disprove for the canvas
+  archive. The checker reads the listing's JSON-LD `CollectionPage`, derives the real skill
+  set from each `SKILL.md`'s frontmatter rather than restating it, and compares both release
+  trains (`vX.Y` plugin, `vX.Y.Z` canvas) against what is published, normalizing `v2.4` to
+  `2.4.0` the way `build-plugin.py` does — but only *within* the plugin train, so a plugin
+  `v1.2` can never be mistaken for a canvas 1.2.0 release that was never cut. Findings carry
+  a severity: only real disagreement fails the run, while an unreachable surface is a
+  warning with a `::warning::` annotation, because a monitor that goes red on someone else's
+  503 is a monitor that gets muted. The comparison is pure and unit-tested offline
+  against a verbatim capture of the live listing; only the weekly workflow touches the
+  network, and it stays out of the PR gate because third-party state is not a property of a
+  pull request.
+>>>>>>> origin/main
 
 - **The skills install is executed, not inferred from a file count**
   (`evals/tests/skills-install.test.mjs`, 14 assertions). #69 checked its "follow the README
@@ -540,4 +579,4 @@ This release includes contributions from the following PRs:
 
 [1.2]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2
 [1.1]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.1
-[1.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0
+[1.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.0.0
