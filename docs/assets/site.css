@@ -477,6 +477,38 @@
         .app-frame img { display: block; width: 100%; height: auto; }
         .app-actions { margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
+        /* ── Recorded /live demo ──
+           The video carries no `autoplay` attribute: the attribute would start
+           playback before site.js could read the reader's motion preference, and by
+           then the opt-out has already been ignored. site.js starts it instead. */
+        .app-demo-stage { position: relative; display: block; }
+        .app-demo { display: block; width: 100%; height: auto; background: var(--bg-elevated); }
+        .demo-toggle {
+            position: absolute; right: 0.75rem; bottom: 0.75rem;
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.42rem 0.8rem; border-radius: 8px;
+            font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600;
+            color: var(--on-deep); background: color-mix(in oklab, var(--primary-deep) 88%, transparent);
+            border: 1px solid color-mix(in oklab, var(--on-deep) 20%, transparent); cursor: pointer;
+            transition: opacity 0.25s var(--ease-out-quart), background 0.25s var(--ease-out-quart);
+        }
+        .demo-toggle:hover { background: var(--primary-deep); }
+        .demo-toggle svg { width: 13px; height: 13px; }
+        .demo-toggle .demo-toggle-pause { display: none; }
+        .demo-toggle[aria-pressed="true"] .demo-toggle-play { display: none; }
+        .demo-toggle[aria-pressed="true"] .demo-toggle-pause { display: inline; }
+        /* While it is playing the control recedes, so the graph is what you look at. */
+        @media (prefers-reduced-motion: no-preference) {
+            .demo-toggle[aria-pressed="true"] { opacity: 0.35; }
+            .app-demo-stage:hover .demo-toggle,
+            .demo-toggle:focus-visible { opacity: 1; }
+        }
+        /* Nothing is moving, so nothing signals that the figure can be played. The
+           control is the only affordance left — it stays put. */
+        @media (prefers-reduced-motion: reduce) {
+            .demo-toggle { opacity: 1; transition: none; }
+        }
+
         /* ── Footer CTA ── */
         /* ── Footer CTA — drenched dark panel, the bold close ── */
         .footer-cta {

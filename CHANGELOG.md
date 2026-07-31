@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-07-31
+
+### Added
+
+- **The landing page shows the `/live` canvas moving instead of describing it.** The
+  `#app` figure is now a recorded, silent, looping WebM of the real SRS Navigator: the
+  graph reveals itself tier by tier, a Customer Problem is selected to open its detail
+  panel and traced hull, then a health metric filters the graph down to one cluster.
+  GitHub traffic showed `assets/srs-navigator.png` was already the third most-visited
+  path in the repo — readers were seeking the visual, and a still could not answer
+  "what does using it feel like?".
+- **`npm run record-demo`** (`.github/extensions/srs-navigator/scripts/record-demo.mjs`).
+  The demo is a build output, not a screencast: Playwright drives the shipped canvas
+  against the shipped CRM spec, records the video, extracts the poster frame, and
+  asserts each beat actually happened before writing anything. A stale or broken take
+  fails the recorder rather than shipping.
+- **Drift guard for the demo** (`evals/tests/live-demo-asset.test.mjs`, 26 offline
+  assertions) plus a Playwright behavior suite (`tests/demo.test.mjs`). Together they
+  pin the reduced-motion contract, the static fallback, the byte budget, the ≤10s
+  runtime, and the fact that the committed metadata matches the committed bytes.
+
+### Changed
+
+- **Motion on the landing page is opt-out-able.** The video carries no `autoplay`
+  attribute; playback is started from `site.js` only after
+  `prefers-reduced-motion` is read, and only while the figure is on screen. A reader
+  who asked their system for no motion gets the poster frame and a visible control.
+
+### Fixed
+
+- **A canvas filter test that never actually ran.** `tests/visual.test.mjs` asserted on
+  a health metric the clean CRM spec does not produce, and read dimming from
+  `getComputedStyle().opacity` — which the renderer never sets, because it dims child
+  `rect`/`text` `opacity` *attributes*. The test now exercises the real
+  `need clusters` filter and counts genuinely dimmed nodes.
+
+[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6.0
+
 ## [2.5.0] - 2026-07-31
 
 ### Added

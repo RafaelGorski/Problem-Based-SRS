@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <!-- Bump the ?v= query on any assets/site.css or assets/site.js change to bust the 10-min Pages cache. -->
-    <link rel="stylesheet" href="assets/site.css?v=2.4.2">
+    <link rel="stylesheet" href="assets/site.css?v=2.6.0">
 </head>
 <body>
     <a href="#main" class="skip-link">Skip to content</a>
@@ -19,7 +19,7 @@
         <div class="wrap">
             <div class="site-nav-id">
                 <a href="/" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
-                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.5.0, view releases">v2.5.0</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.6.0, view releases">v2.6.0</a>
             </div>
             <ul class="site-nav-links">
                 <li><a href="#problem">The problem</a></li>
@@ -311,9 +311,23 @@
                                 <div class="app-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                                 <span class="app-frame-title">Copilot &middot; SRS Navigator</span>
                             </div>
-                            <img src="assets/srs-navigator.png" width="1280" height="796" loading="lazy" decoding="async"
-                                 alt="The SRS Navigator graph of a CRM specification: orange customer-problem nodes, teal customer-need nodes, indigo functional-requirement nodes, and purple non-functional nodes connected by dashed traceability links.">
+                            <div class="app-demo-stage">
+                                <video class="app-demo" id="live-demo" width="1280" height="800"
+                                       poster="assets/srs-navigator-demo.jpg"
+                                       preload="none" muted loop playsinline
+                                       aria-label="A recording of the /live canvas: the shipped CRM specification builds itself as a graph, a customer problem is selected to reveal what traces to it and the agent actions that decompose it, then the graph is filtered to its need clusters.">
+                                    <source src="assets/srs-navigator-demo.webm" type="video/webm">
+                                    <img src="assets/srs-navigator-demo.jpg" width="1280" height="800" loading="lazy" decoding="async"
+                                         alt="The SRS Navigator graph of the shipped CRM specification: five orange customer-problem nodes across the top lane, seven teal customer-need nodes beneath them, and indigo functional-requirement and purple non-functional nodes along the bottom, joined by dashed traceability links.">
+                                </video>
+                                <button type="button" class="demo-toggle" data-demo-toggle="#live-demo" aria-controls="live-demo" aria-pressed="false">
+                                    <svg class="demo-toggle-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                                    <svg class="demo-toggle-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                                    <span class="demo-toggle-label">Play the demo</span>
+                                </button>
+                            </div>
                         </div>
+                        <figcaption>Recorded from <code>/live</code> against <code>.spec/crm-system.json</code> &mdash; the same 29 nodes the plugin ships with, not a mock-up.</figcaption>
                     </figure>
                 </div>
             </div>
@@ -458,7 +472,7 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
 
     <footer class="site-footer">
         <div class="wrap">
-            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.5.0</a> · Methodology by Gorski &amp; Stadzisz</p>
+            <p>Problem-Based SRS · <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.6.0</a> · Methodology by Gorski &amp; Stadzisz</p>
             <p class="footer-links">
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
                 <a href="skills-health.html">Skills Health</a>
@@ -469,6 +483,6 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
         </div>
     </footer>
 
-    <script src="assets/site.js?v=2.4.2" defer></script>
+    <script src="assets/site.js?v=2.6.0" defer></script>
 </body>
 </html>

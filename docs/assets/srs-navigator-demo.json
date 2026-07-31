@@ -1,0 +1,16 @@
+{
+  "source": ".github/extensions/srs-navigator/scripts/record-demo.mjs",
+  "spec": "CRM System",
+  "nodes": 29,
+  "width": 1280,
+  "height": 800,
+  "seconds": 8.56,
+  "videoBytes": 803296,
+  "posterBytes": 83844,
+  "recordedAt": "2026-07-31T10:46:18.838Z",
+  "steps": [
+    "The whole specification lands: 5 problems, 7 needs, 12 requirements, 5 quality attributes.",
+    "A customer problem is selected and its traceability opens beside the graph.",
+    "Filtering to the need clusters dims every node off that path."
+  ]
+}
