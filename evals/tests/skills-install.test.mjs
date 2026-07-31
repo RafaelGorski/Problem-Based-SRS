@@ -42,6 +42,18 @@ const SKILL_SLUG = "problem-based-srs";
 const REPO_ONLY_PATHS = [".github/extensions/srs-navigator", ".spec/crm-system.json"];
 const PROJECT_URL = "https://github.com/RafaelGorski/Problem-Based-SRS";
 
+// A stand-in Identifier Notation table for the parser canaries at the bottom of this
+// file. It deliberately is not the real one: these tests prove the parser reads whatever
+// table it is handed, so the rules themselves can only ever live in SKILL.md.
+const NOTATION_TABLE = [
+  "| Customer Problem | `CP.{n}` | `CP.01` |",
+  "| Sub-problem | `CP.{n}.{m}` | `CP.01.1` |",
+  "| Sub-sub-problem | `CP.{n}.{m}.{k}` | `CP.01.2.1` |",
+  "| Customer Need | `CN.{cp}.{n}` | `CN.01.1` |",
+  "| Functional Requirement | `FR.{cp}.{cn}.{n}` | `FR.01.1.1` |",
+  "| Non-Functional Requirement | `NFR.{n}` | `NFR.01` |",
+].join("\n");
+
 /* ------------------------------------------------------------------ helpers */
 
 /** Every file in a tree, as forward-slash paths relative to it. */
@@ -99,13 +111,6 @@ export function notationArities(skillMd) {
   return arities;
 }
 
-/** Fenced code blocks of the given languages, as raw strings. */
-export function fencedBlocks(md, languages) {
-  const langs = languages.join("|");
-  const re = new RegExp("^```(?:" + langs + ")\\r?\\n([\\s\\S]*?)^```", "gm");
-  return [...md.matchAll(re)].map((m) => m[1]);
-}
-
 /** Every dotted artifact ID in a chunk of text, with its arity. */
 export function dottedIds(text) {
   return [...text.matchAll(/\b(NFR|CP|CN|FR)((?:\.\d+)+)\b/g)].map((m) => ({
@@ -113,6 +118,24 @@ export function dottedIds(text) {
     prefix: m[1],
     arity: m[2].split(".").length - 1,
   }));
+}
+
+/**
+ * IDs whose depth contradicts every arity SKILL.md declares for their prefix, reported
+ * with the 1-based line they sit on. A prefix the table says nothing about is left
+ * alone: this check enforces the table, it does not invent rules the table never made.
+ */
+export function arityOffenders(md, arities) {
+  const offenders = [];
+  md.split(/\r?\n/).forEach((line, i) => {
+    for (const { id, prefix, arity } of dottedIds(line)) {
+      const allowed = arities.get(prefix);
+      if (allowed && !allowed.has(arity)) {
+        offenders.push({ id, line: i + 1, allowed: [...allowed].sort() });
+      }
+    }
+  });
+  return offenders;
 }
 
 /** Actions the orchestrator routes to a reference file, from its dispatch table. */
@@ -241,28 +264,35 @@ describe("the installed skill is self-contained", () => {
   });
 });
 
-describe("machine-readable examples obey the notation table they ship with", () => {
-  it("every ID in a JSON example matches an arity SKILL.md declares", () => {
+// #74 scoped this check to fenced JSON, which is where that pass had found `NFR.1.0`.
+// Machine-readable blocks are not where a skill does its teaching, though: 150 IDs like
+// `CN.1` and `FR.3` sat in prose, tables and diagrams, invisible to it. They are dotted,
+// so the hyphen-ID guard passes them, and they are exactly what Rule 2 forbids — `FR.3`
+// names no parent need, `CN.1` names no parent problem. Examples are the strongest
+// instruction in a skill: an agent that reads a worked walkthrough of `CN.2 → FR.3` emits
+// `CN.2 → FR.3`, and then the canvas has no `{cp}.{cn}` to link with and `validate` can
+// only check traceability by reading prose. So the scope is the whole installed body.
+describe("every example obeys the notation table it ships with", () => {
+  it("every dotted ID in the skill matches an arity SKILL.md declares", () => {
     const arities = notationArities(read("SKILL.md"));
     assert.ok(arities.size >= 4, "SKILL.md must declare CP/CN/FR/NFR formats in its notation table");
 
     const wrong = [];
     for (const rel of staged.filter((f) => f.endsWith(".md"))) {
-      for (const block of fencedBlocks(read(rel), ["json", "jsonc"])) {
-        for (const { id, prefix, arity } of dottedIds(block)) {
-          const allowed = arities.get(prefix);
-          if (allowed && !allowed.has(arity)) {
-            wrong.push(`${rel}: ${id} (${arity} level(s); SKILL.md allows ${[...allowed].join(", ")})`);
-          }
-        }
+      for (const { id, line, allowed } of arityOffenders(read(rel), arities)) {
+        wrong.push(`${rel}:${line}: ${id} (SKILL.md allows ${allowed.join(", ")} level(s))`);
       }
     }
     assert.deepEqual(
       wrong,
       [],
-      "a machine-readable example that contradicts the orchestrator's own notation table " +
-        "teaches an agent to emit IDs the methodology forbids, and the hyphen-ID guard cannot " +
-        "see a wrong-arity dotted ID",
+      "an example that contradicts the orchestrator's own notation table teaches an agent to " +
+        "emit IDs the methodology forbids, and the hyphen-ID guard cannot see a wrong-arity " +
+        "dotted ID. Renumber the example from the parent it actually has — or, if the shape is " +
+        "legitimate methodology, declare it in SKILL.md's Identifier Notation table, which is " +
+        "the only place this test reads the rules from. A truncated ID with a placeholder tail " +
+        "(`FR.01.1.x`) is reported too, and correctly: write partial shapes the way the " +
+        "notation table does, with `{}` placeholders — `FR.{cp}.{cn}.{n}`",
     );
   });
 });
@@ -295,15 +325,10 @@ describe("negative canaries", () => {
   });
 
   it("notationArities() reads the table instead of assuming it", () => {
-    const table = [
-      "| Customer Problem | `CP.{n}` | `CP.01` |",
-      "| Sub-problem | `CP.{n}.{m}` | `CP.01.1` |",
-      "| Customer Need | `CN.{cp}.{n}` | `CN.01.1` |",
-      "| Non-Functional Requirement | `NFR.{n}` | `NFR.01` |",
-    ].join("\n");
-    const arities = notationArities(table);
-    assert.deepEqual([...arities.get("CP")].sort(), [1, 2]);
+    const arities = notationArities(NOTATION_TABLE);
+    assert.deepEqual([...arities.get("CP")].sort(), [1, 2, 3]);
     assert.deepEqual([...arities.get("CN")], [2]);
+    assert.deepEqual([...arities.get("FR")], [3]);
     assert.deepEqual([...arities.get("NFR")], [1]);
     assert.equal(notationArities("no table here").size, 0);
   });
@@ -316,10 +341,26 @@ describe("negative canaries", () => {
     assert.deepEqual(dottedIds("CP-001 is legacy"), []);
   });
 
-  it("fencedBlocks() only returns the requested languages", () => {
-    const md = "```jsonc\n{\"id\":\"CP.01\"}\n```\n\n```bash\necho CP.01.2.3\n```\n";
-    assert.deepEqual(fencedBlocks(md, ["json", "jsonc"]), ['{"id":"CP.01"}\n']);
-    assert.deepEqual(fencedBlocks(md, ["json"]), []);
+  it("arityOffenders() catches the prose shapes a JSON-only scope walked past", () => {
+    const arities = notationArities(NOTATION_TABLE);
+    // A case-study row and a coverage-matrix header — the two shapes that carried the
+    // 150 offenders this check was widened for.
+    assert.deepEqual(
+      arityOffenders("| CN.1 | The company needs a CRM to know its customers. | CP.1.1 |", arities)
+        .map((o) => o.id),
+      ["CN.1"],
+    );
+    assert.deepEqual(
+      arityOffenders("|      | FR.1 | FR.2 |\n| CN.1 | C    |      |", arities)
+        .map((o) => `${o.id}@${o.line}`),
+      ["FR.1@1", "FR.2@1", "CN.1@2"],
+    );
+    // Canonical IDs pass, including the sub-sub-problem — but only because the table
+    // declares it. Teach a shape the table omits and this check fails, by design.
+    assert.deepEqual(arityOffenders("FR.01.1.1 implements CN.01.1 under CP.01.2.1", arities), []);
+    assert.equal(arityOffenders("CP.01.2.1", notationArities("")).length, 0);
+    // A prefix the table never mentions is not this check's business.
+    assert.deepEqual(arityOffenders("REQ.1.2 and CP-001 are not it", arities), []);
   });
 
   it("dispatchTable() reads routes, not prose that mentions an action", () => {
