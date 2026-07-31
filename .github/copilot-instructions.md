@@ -62,10 +62,10 @@ All Problem-Based SRS artifacts are saved to the `.spec/` folder at the project 
 ├── 04-software-vision.md
 ├── functional-requirements/
 │   ├── _index.md
-│   └── FR-001-[short-name].md
+│   └── FR.01.1.1-[short-name].md
 └── non-functional-requirements/
     ├── _index.md
-    └── NFR-001-[short-name].md
+    └── NFR.01-[short-name].md
 ```
 
 When adding or changing features/requirements in the solution, reference the `.spec/` folder for existing artifacts and save new artifacts there. If a legacy folder is detected (`docs/srs/`, `requirements/`), continue using it for consistency.
@@ -75,7 +75,15 @@ When adding or changing features/requirements in the solution, reference the `.s
 - **Customer Problems**: `CP.{n}` or `CP.{n}.{m}` (e.g., CP.01, CP.01.1)
 - **Customer Needs**: `CN.{cp}.{n}` (e.g., CN.01.1 traces to CP.01)
 - **Functional Requirements**: `FR.{cp}.{cn}.{n}` (e.g., FR.01.1.1 traces to CN.01.1)
-- **Non-Functional Requirements**: `NFR.{version}.md` (e.g., NFR.1.0.md)
+- **Non-Functional Requirements**: `NFR.{n}` (e.g., NFR.01)
+
+IDs are **dotted** so the ID itself carries the traceability chain. Requirement filenames
+embed the ID plus a short name: `FR.01.1.1-client-registration.md`, `NFR.01-response-time.md`.
+Hyphen IDs (`CP-001`, `FR-002-name.md`) are accepted-legacy — the parsers still read them,
+but new artifacts must not use them. The canonical definition lives in the "Identifier
+Notation" section of `skills/problem-based-srs/SKILL.md`, is enforced by
+`evals/tests/skills-static.test.mjs`, and is implemented in
+`.github/extensions/srs-navigator/lib/notation.mjs`.
 
 ---
 

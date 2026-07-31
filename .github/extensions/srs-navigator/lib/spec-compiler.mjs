@@ -4,6 +4,11 @@
 import { readFile, readdir, writeFile, stat } from "node:fs/promises";
 import { join, basename } from "node:path";
 import { extractRefs } from "./text-refs.mjs";
+import { refPattern, headingPattern, requirementFilePattern } from "./notation.mjs";
+
+// Rebuilt per use: these carry /g, and a shared instance would retain lastIndex.
+const CP_REFS = () => refPattern(["CP"]);
+const CN_REFS = () => refPattern(["CN"]);
 
 /**
  * Scan .spec/ folder for markdown artifacts and compile into a JSON specification.
@@ -43,7 +48,7 @@ export async function compileSpecFromFolder(specDir) {
                 id: item.id,
                 title: item.title,
                 description: item.description,
-                problemIds: extractRefs(item.description, /\bCP-\d+\b/gi)
+                problemIds: extractRefs(item.description, CP_REFS())
             });
         }
     } catch { /* file may not exist yet */ }
@@ -53,7 +58,7 @@ export async function compileSpecFromFolder(specDir) {
         const frDir = join(specDir, "functional-requirements");
         const frStat = await stat(frDir);
         if (frStat.isDirectory()) {
-            const files = (await readdir(frDir)).filter(f => f.match(/^FR-\d+\.md$/i)).sort();
+            const files = (await readdir(frDir)).filter(f => requirementFilePattern("FR").test(f)).sort();
             for (const file of files) {
                 const content = await readFile(join(frDir, file), "utf-8");
                 const fr = parseSingleRequirement(content, "FR", basename(file, ".md"));
@@ -72,7 +77,7 @@ export async function compileSpecFromFolder(specDir) {
                     id: item.id,
                     title: item.title,
                     description: item.description,
-                    needIds: extractRefs(item.description, /\bCN-\d+\b/gi)
+                    needIds: extractRefs(item.description, CN_REFS())
                 });
             }
         } catch { /* optional */ }
@@ -83,7 +88,7 @@ export async function compileSpecFromFolder(specDir) {
         const nfrDir = join(specDir, "non-functional-requirements");
         const nfrStat = await stat(nfrDir);
         if (nfrStat.isDirectory()) {
-            const files = (await readdir(nfrDir)).filter(f => f.match(/^NFR-\d+\.md$/i)).sort();
+            const files = (await readdir(nfrDir)).filter(f => requirementFilePattern("NFR").test(f)).sort();
             for (const file of files) {
                 const content = await readFile(join(nfrDir, file), "utf-8");
                 const nfr = parseSingleRequirement(content, "NFR", basename(file, ".md"));
@@ -101,7 +106,7 @@ export async function compileSpecFromFolder(specDir) {
                     id: item.id,
                     title: item.title,
                     description: item.description,
-                    needIds: extractRefs(item.description, /\bCN-\d+\b/gi)
+                    needIds: extractRefs(item.description, CN_REFS())
                 });
             }
         } catch { /* optional */ }
@@ -151,14 +156,13 @@ export async function compileAndSave(specDir) {
  *   ### [CP-1] Title
  *   ### CP-1: Title
  *   ### CP-001 Title
+ *   ### CP.01: Title          (canonical dotted notation)
+ *   ### [CN.01.1] Title       (canonical, multi-level)
  */
 function parseItemsFromMarkdown(content, prefix) {
     const items = [];
-    // Match section headers with IDs
-    const headerPattern = new RegExp(
-        `^###\\s+(?:\\[?(${prefix}-\\d+)\\]?[:\\s-]*)\\s*(.+)`,
-        "gmi"
-    );
+    // Match section headers with IDs (dotted canonical or hyphen legacy).
+    const headerPattern = headingPattern(prefix, "###");
 
     let match;
     const matches = [];
@@ -187,8 +191,8 @@ function parseItemsFromMarkdown(content, prefix) {
  * Parse a single FR/NFR file into a requirement object.
  */
 function parseSingleRequirement(content, prefix, fallbackId) {
-    // Extract ID from header: # FR-001: Title or # FR-001 Title
-    const headerMatch = content.match(new RegExp(`^#\\s+(?:\\[?(${prefix}-\\d+)\\]?)[:\\s-]*\\s*(.+)`, "mi"));
+    // Extract ID from header: # FR-001: Title, # FR.01.1.1 Title, # [FR-1] Title
+    const headerMatch = content.match(headingPattern(prefix, "#", "mi"));
     const id = headerMatch ? headerMatch[1].toUpperCase() : fallbackId.toUpperCase();
     const title = headerMatch ? headerMatch[2].trim() : fallbackId;
 
@@ -197,7 +201,7 @@ function parseSingleRequirement(content, prefix, fallbackId) {
     const description = stmtMatch ? stmtMatch[1].trim() : "";
 
     // Extract need references from traceability section or full content
-    const needIds = extractRefs(content, /\bCN-\d+\b/gi);
+    const needIds = extractRefs(content, CN_REFS());
 
     return { id, title, description, needIds };
 }

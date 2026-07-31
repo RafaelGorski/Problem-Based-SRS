@@ -2,8 +2,14 @@
 // Parses markdown and JSON specifications into graph data structures
 
 import { extractRefs } from "./text-refs.mjs";
+import { refPattern, extractHeadingId, stripHeadingId } from "./notation.mjs";
 
 const MAX_INPUT_SIZE = 2 * 1024 * 1024; // 2 MB
+
+// Reference patterns are rebuilt per use because they carry the /g flag
+// (a shared global regex would carry lastIndex between calls).
+const CP_REFS = () => refPattern(["CP", "P"]);
+const CN_REFS = () => refPattern(["CN", "N"]);
 
 /**
  * Parse sub-items from a markdown section using a line-by-line approach
@@ -17,8 +23,8 @@ function parseSubItems(section) {
   for (const line of lines) {
     if (line.startsWith('### ')) {
       if (currentHeader !== undefined) {
-        const id = currentHeader.match(/\[(\w+-\d+)\]/)?.[1]?.toUpperCase();
-        const title = currentHeader.replace(/\[[\w-]+\]\s*/, '').trim();
+        const id = extractHeadingId(currentHeader);
+        const title = stripHeadingId(currentHeader);
         items.push({ id, title, content: currentContent.join('\n').trim() });
       }
       currentHeader = line.slice(4).trim();
@@ -29,8 +35,8 @@ function parseSubItems(section) {
   }
 
   if (currentHeader !== undefined) {
-    const id = currentHeader.match(/\[(\w+-\d+)\]/)?.[1]?.toUpperCase();
-    const title = currentHeader.replace(/\[[\w-]+\]\s*/, '').trim();
+    const id = extractHeadingId(currentHeader);
+    const title = stripHeadingId(currentHeader);
     items.push({ id, title, content: currentContent.join('\n').trim() });
   }
 
@@ -70,7 +76,7 @@ export function parseSpecificationData(rawData) {
           id: id || `N-${needs.length + 1}`,
           title,
           description: content,
-          problemIds: extractRefs(content, /\b(CP-\d+|P-\d+)\b/gi)
+          problemIds: extractRefs(content, CP_REFS())
         });
       }
     } else if (trimmedSection.match(/^#\s+Functional\s*Requirements?/i)) {
@@ -79,7 +85,7 @@ export function parseSpecificationData(rawData) {
           id: id || `FR-${functionalRequirements.length + 1}`,
           title,
           description: content,
-          needIds: extractRefs(content, /\b(CN-\d+|N-\d+)\b/gi)
+          needIds: extractRefs(content, CN_REFS())
         });
       }
     } else if (trimmedSection.match(/^#\s+Non-?Functional\s*Requirements?/i)) {
@@ -88,7 +94,7 @@ export function parseSpecificationData(rawData) {
           id: id || `NFR-${nonFunctionalRequirements.length + 1}`,
           title,
           description: content,
-          needIds: extractRefs(content, /\b(CN-\d+|N-\d+)\b/gi)
+          needIds: extractRefs(content, CN_REFS())
         });
       }
     }

@@ -7,11 +7,11 @@ import { buildExecutionPrompt } from "./_shared.mjs";
 
 const UPSTREAM_CNS = `# Customer Needs — RelayDesk
 
-- **CN-1** (traces to CP-1): Support leadership needs to be warned before a
+- **CN.01.1** (traces to CP.01): Support leadership needs to be warned before a
   high-priority ticket is at risk of breaching the 4-hour first-response SLA.
-- **CN-2** (traces to CP-2): Agents need a single trustworthy, reusable answer
+- **CN.02.1** (traces to CP.02): Agents need a single trustworthy, reusable answer
   for recurring questions so knowledge is not re-derived per ticket.
-- **CN-3** (traces to CP-3): The organization needs a complete, tamper-evident
+- **CN.03.1** (traces to CP.03): The organization needs a complete, tamper-evident
   history of every change to a ticket, retained for 7 years.
 `;
 
@@ -29,14 +29,14 @@ export default {
   },
 
   rubric: [
-    patternCheck("fr-ids", "uses FR notation (FR-1 / FR.1.1.1)", /\bFR[-.]\s?\d/i, { min: 3, required: true }),
-    patternCheck("cn-traceability", "each FR references a CN", /\bCN[-.]\s?\d/i, { min: 3, required: true }),
-    patternCheck("cp-traceability", "traceability reaches back to a CP", /\bCP[-.]\s?\d/i, { min: 1, required: true }),
+    patternCheck("fr-ids", "uses canonical dotted FR notation (FR.01.1.1)", /\bFR\.\s?\d/, { min: 3, required: true }),
+    patternCheck("cn-traceability", "each FR references a CN", /\bCN\.\s?\d/, { min: 3, required: true }),
+    patternCheck("cp-traceability", "traceability reaches back to a CP", /\bCP\.\s?\d/, { min: 1, required: true }),
     patternCheck("shall-language", "uses testable 'shall/must' requirement language", /\b(shall|must)\b/i, { min: 3 }),
     check("addresses-all-needs", "at least one FR per upstream CN", (t) => {
-      const c1 = /CN[-.]\s?1\b/i.test(t);
-      const c2 = /CN[-.]\s?2\b/i.test(t);
-      const c3 = /CN[-.]\s?3\b/i.test(t);
+      const c1 = /CN\.\s?0?1\.\d/.test(t);
+      const c2 = /CN\.\s?0?2\.\d/.test(t);
+      const c3 = /CN\.\s?0?3\.\d/.test(t);
       const n = [c1, c2, c3].filter(Boolean).length;
       return { pass: n === 3, detail: `${n}/3 CNs referenced` };
     }),

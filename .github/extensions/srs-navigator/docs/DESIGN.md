@@ -140,7 +140,7 @@ Warm problem hues cooling toward technical implementation (ember → teal → in
 **Body Font:** Figtree (with system-ui, -apple-system, sans-serif fallback)
 **Mono Font:** JetBrains Mono (with ui-monospace, monospace fallback)
 
-**Character:** Shared visual language with the project site. Bricolage Grotesque gives headings (page title, node titles) a confident display voice with expressive contrast; Figtree carries dense UI and body text with a high x-height that stays clear at small sizes; JetBrains Mono handles identifiers (CP-1, FR-3, NFR-2) where character distinction matters.
+**Character:** Shared visual language with the project site. Bricolage Grotesque gives headings (page title, node titles) a confident display voice with expressive contrast; Figtree carries dense UI and body text with a high x-height that stays clear at small sizes; JetBrains Mono handles identifiers (CP.01, FR.03.1.1, NFR.02) where character distinction matters.
 
 ### Hierarchy
 - **Display** (700, 22px, 1.2): Page title only. One instance per view.

@@ -31,6 +31,20 @@ const MAX_BODY_LINES = 600;
 // the slash-COMMAND form and not artifact folder paths like `.spec/functional-requirements/`.
 const LEGACY_COMMANDS = /(?<=^|[\s`(])\/(customer-problems|customer-needs|business-context|software-glance|software-vision|functional-requirements|zigzag-validator|complexity-analysis)\b/gm;
 
+// Canonical artifact IDs are dotted (CP.01 -> CN.01.1 -> FR.01.1.1), which encodes the
+// traceability chain in the ID and is what both canvas parsers treat as canonical
+// (see .github/extensions/srs-navigator/lib/notation.mjs). Hyphen IDs (CP-001) are
+// accepted-legacy for existing specs, so they may only appear in prose that says so.
+// The skill previously taught BOTH schemes and one file explicitly banned dots, which
+// made agent output non-deterministic and dropped every CP->CN->FR link in the canvas.
+const HYPHEN_ID = /\b(?:CP|CN|FR|NFR)-\d/;
+const HYPHEN_ID_HEADING = /^#{1,6}\s*(?:CP|CN|FR|NFR)-[\d[]/gm;
+const HYPHEN_MANDATES = [
+  /do\s+not\s+use\s+dots/i,
+  /(?:always\s+)?use\s+`?(?:CP|CN|FR|NFR)-`?\s+with\s+a\s+dash/i,
+  /never\s+use\s+dotted/i,
+];
+
 // Every action file that must exist under reference/ (filename == action).
 // Keyed by action; value is the list of [id, RegExp] content tokens that must
 // be present in that action's reference file.
@@ -150,6 +164,112 @@ describe("unified-command refactor guard (main + every action)", () => {
     for (const doc of [main, ...actions]) {
       const id = doc.action || doc.slug;
       assert.equal(countMatches(doc.text, /Use skill:/i), 0, `${id}: stale "Use skill:" directive`);
+    }
+  });
+});
+
+describe("canonical ID notation (dotted)", () => {
+  it("SKILL.md declares dotted notation as canonical", () => {
+    assert.ok(
+      hasSection(main.body, /identifier notation/i),
+      "SKILL.md must carry an 'Identifier Notation' section defining the canonical scheme",
+    );
+    for (const shape of [/CP\.\{n\}/, /CN\.\{cp\}\.\{n\}/, /FR\.\{cp\}\.\{cn\}\.\{n\}/]) {
+      assert.match(main.text, shape, `SKILL.md must document the ${shape} ID shape`);
+    }
+  });
+
+  it("no file mandates hyphen IDs or forbids dotted IDs", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      for (const rule of HYPHEN_MANDATES) {
+        assert.equal(
+          countMatches(doc.text, rule),
+          0,
+          `${id}: contradicts canonical dotted notation (matched ${rule})`,
+        );
+      }
+    }
+  });
+
+  it("artifact templates emit dotted IDs in their headings", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      const hits = doc.text.match(HYPHEN_ID_HEADING) || [];
+      assert.equal(hits.length, 0, `${id}: legacy hyphen heading(s) ${[...new Set(hits)].join(", ")}`);
+    }
+  });
+
+  it("mentions hyphen IDs only when labelling them legacy", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      for (const line of doc.text.split(/\r?\n/)) {
+        if (!HYPHEN_ID.test(line)) continue;
+        assert.match(
+          line,
+          /legacy/i,
+          `${id}: hyphen ID outside a legacy note -> ${line.trim()}`,
+        );
+      }
+    }
+  });
+  it("uses no placeholder IDs in legacy hyphen form", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      const hits = doc.text.match(/\b(?:CP|CN|FR|NFR)-(?:XXX|YYY|NNN|N)\b/g) || [];
+      assert.equal(
+        hits.length,
+        0,
+        `${id}: placeholder ID(s) in hyphen form ${[...new Set(hits)].join(", ")} — use FR.[CP].[CN].[N]`,
+      );
+    }
+  });
+});
+
+// SKILL.md is the orchestrator; detailed artifact shapes belong to the action
+// file that owns the step. Two copies of a template drift, and an agent then
+// emits a different FR depending on which file it happened to load.
+describe("single source of truth for artifact templates", () => {
+  it("the FR and NFR templates live in the Step 5 action file", () => {
+    const frAction = byAction.get("functional-requirements");
+    assert.ok(frAction, "functional-requirements action must be loaded");
+    for (const heading of [/Individual FR File Template/i, /Individual NFR File Template/i]) {
+      assert.match(frAction.text, heading, `functional-requirements.md must own ${heading}`);
+    }
+  });
+
+  it("SKILL.md does not carry a second copy of them", () => {
+    assert.equal(
+      countMatches(main.body, /^#+ .*Individual (?:FR|NFR) File Template/gim),
+      0,
+      "SKILL.md must point at reference/functional-requirements.md instead of duplicating the templates",
+    );
+    assert.equal(
+      countMatches(main.body, /^\*\*ID:\*\* (?:FR|NFR)\./gim),
+      0,
+      "SKILL.md must not restate the requirement template fields",
+    );
+    assert.match(
+      main.body,
+      /reference\/functional-requirements\.md/,
+      "SKILL.md must tell the agent where the templates live",
+    );
+  });
+
+  it("the canonical templates keep the no-code-snippets guardrail", () => {
+    const frAction = byAction.get("functional-requirements");
+    for (const heading of ["Individual FR File Template", "Individual NFR File Template"]) {
+      const start = frAction.text.indexOf(heading);
+      assert.ok(start > 0, `${heading} must exist`);
+      const fence = frAction.text.slice(start);
+      const open = fence.indexOf("```markdown");
+      const close = fence.indexOf("```", open + 3);
+      assert.ok(open > 0 && close > open, `${heading} must contain a fenced template`);
+      assert.match(
+        fence.slice(open, close),
+        /NO CODE SNIPPETS/,
+        `the ${heading} block must warn against embedding implementation detail in a requirement`,
+      );
     }
   });
 });

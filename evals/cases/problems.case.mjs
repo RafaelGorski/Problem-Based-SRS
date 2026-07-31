@@ -22,7 +22,7 @@ export default {
 
   // Deterministic structural rubric applied to the model output.
   rubric: [
-    patternCheck("cp-ids", "uses CP notation (CP-1 / CP.01)", /\bCP[-.]\s?\d+/i, { min: 3, required: true }),
+    patternCheck("cp-ids", "uses canonical dotted CP notation (CP.01)", /\bCP\.\s?\d+/, { min: 3, required: true }),
     patternCheck("classification", "classifies as Obligation/Expectation/Hope", /Obligation|Expectation|Hope/, { min: 2, required: true }),
     patternCheck("sla-problem", "captures the SLA-breach problem", /SLA|first[- ]response|breach/i, { min: 1 }),
     patternCheck("knowledge-problem", "captures the tribal-knowledge problem", /knowledge|onboard|ramp|new[- ]hire/i, { min: 1 }),

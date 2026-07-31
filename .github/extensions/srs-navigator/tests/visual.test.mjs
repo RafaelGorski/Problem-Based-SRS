@@ -5,7 +5,9 @@
  */
 import { test, expect } from '@playwright/test';
 
-const CANVAS_URL = process.env.CANVAS_URL || 'http://127.0.0.1:56107/';
+// Relative so Playwright's baseURL (and the webServer it starts) applies. Set
+// CANVAS_URL to point the suite at an already-running canvas instead.
+const CANVAS_URL = process.env.CANVAS_URL || '/';
 
 test.describe('SRS Navigator Canvas - Visual Rendering', () => {
   test.beforeEach(async ({ page }) => {
