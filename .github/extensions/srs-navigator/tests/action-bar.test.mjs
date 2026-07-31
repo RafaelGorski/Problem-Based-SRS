@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderGraphHtml } from "../lib/renderer.mjs";
+import { buildActionPrompt } from "../lib/prompts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -381,23 +382,33 @@ describe("Action Bar: Queue consume-once semantics", () => {
 // --- List View Implement Action (server prompt) ---
 
 describe("List View: implement action prompt", () => {
-  const extSource = readFileSync(join(__dirname, "..", "extension.mjs"), "utf8");
+  // Asserted against the built prompt rather than extension.mjs source text:
+  // the prompts moved to lib/prompts.mjs precisely so a test can see the value
+  // that ships instead of the substring that happens to be in the file.
+  const built = buildActionPrompt({
+    action: "implement",
+    srsAction: "functional-requirements",
+    nodeId: "FR.01.1.1",
+    nodeType: "fr",
+    nodeLabel: "Client registration",
+    context: "make it real",
+  });
 
   it("buildActionPrompt branches on the implement action", () => {
-    assert.ok(extSource.includes('action.action === "implement"'),
+    assert.ok(built.includes("implement FR.01.1.1 in code"),
       "server must special-case the implement action");
+    assert.ok(!built.includes("/problem-based-srs functional-requirements"),
+      "the implement branch must not route through a methodology slash-command");
   });
 
   it("implement prompt is an implementation task, not a skill slash-command", () => {
-    // The implement branch must not route through skillCommand (skill is null).
-    assert.ok(extSource.includes("implement ${action.nodeId} in code"));
-    assert.ok(extSource.includes("production-ready code"));
-    assert.ok(extSource.includes("do not rewrite the specification files"));
+    assert.ok(built.includes("production-ready code"));
+    assert.ok(built.includes("do not rewrite the specification files"));
   });
 
   it("implement prompt preserves traceability to the requirement", () => {
-    assert.ok(extSource.includes("Preserve traceability"));
-    assert.ok(extSource.includes("${action.nodeId}"));
+    assert.ok(built.includes("Preserve traceability"));
+    assert.ok(built.includes("FR.01.1.1"));
   });
 });
 

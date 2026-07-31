@@ -229,6 +229,9 @@ The business context captures: project identity, business principles (Mandatory/
 - **Assert-then-confirm:** When context makes one option obvious, state it and ask to confirm or override. Don't present a menu when the answer is already clear.
 - **Skip only when** a *confirmed* prior artifact plus the user's own prompt unambiguously answer all needed inputs. A README or source code that you inferred context from does NOT count. State what you're using as basis.
 - Questions must reference the specific context at hand — never ask generic questions
+- **Starting from an existing system?** Scanning the repository is legitimate *preparation* — it
+  gives you evidence to assert and confirm — but it is not a shortcut past the interview. See
+  **Mode 3: Brownfield Discovery** in [`reference/problems.md`](reference/problems.md).
 
 ### Starting Fresh
 When user provides business context or problem description:

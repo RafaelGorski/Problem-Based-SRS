@@ -18,6 +18,7 @@ import { DEMO_SPEC } from "./lib/demo-spec.mjs";
 import { compileAndSave } from "./lib/spec-compiler.mjs";
 import { decomposeNode } from "./lib/decompose.mjs";
 import { isTrustedLoopbackRequest } from "./lib/http-guard.mjs";
+import { LEARN_PROMPT, LOAD_PROMPT, buildActionPrompt, srsActionCommand } from "./lib/prompts.mjs";
 
 // Content fingerprint of a graph, used to detect *any* change to the loaded
 // specification (not just node/link count changes) so the canvas can reload
@@ -114,13 +115,10 @@ function fileForAction(action) {
     return (match || ACTIONS.find((a) => a.action === "full")).file;
 }
 
-// Map a methodology action (e.g. "needs") to its slash-command form. The whole
-// methodology is a single command; the action is passed as an argument, so
-// "full" (the default) is just `/problem-based-srs`.
-function srsActionCommand(action) {
-    const a = String(action || "full").trim() || "full";
-    return a === "full" ? "/problem-based-srs" : `/problem-based-srs ${a}`;
-}
+// Map a methodology action (e.g. "needs") to its slash-command form: see
+// `srsActionCommand` in lib/prompts.mjs. The whole methodology is a single
+// command; the action is passed as an argument, so "full" (the default) is just
+// `/problem-based-srs`.
 
 // Build the single unified methodology tool. It replaces the former one-tool-per
 // -step registry: callers select a step with the `action` argument.
@@ -310,71 +308,11 @@ async function reloadInstanceFromSource(inst, workspacePath) {
     return true;
 }
 
-// --- Agent prompts shared by the landing overlay and the graph action bar ---
-const LEARN_PROMPT = [
-    "## Problem-Based SRS: Learn & Create Specification",
-    "",
-    "The user wants to create a Problem-Based SRS specification for their project.",
-    "Use the `problem_based_srs` tool to run the full methodology.",
-    "Scan the workspace for existing code, README, and documentation to provide context.",
-    "",
-    "**IMPORTANT:** After generating all the .spec/ markdown artifacts (customer problems, needs, requirements),",
-    "you MUST also generate a consolidated JSON specification file at `.spec/<project-name>.json` with this shape:",
-    '{ "name", "version", "problems":[{id,title,description}], "needs":[{id,title,description,problemIds}],',
-    '  "functionalRequirements":[{id,title,description,needIds}], "nonFunctionalRequirements":[{id,title,description,needIds}] }',
-    "",
-    "**CRITICAL - Display the graph:** After creating the JSON file, use the `load_specification` canvas action",
-    "with the ABSOLUTE file path to the JSON file. Do NOT skip this step — the graph will not auto-refresh without it.",
-].join("\n");
-
-const LOAD_PROMPT = [
-    "## Problem-Based SRS: Load Specification",
-    "",
-    "The user wants to load an existing specification file.",
-    "Look for .spec/*.json files in the workspace, or ask the user which file to load.",
-    "Then use the `load_specification` canvas action to display it.",
-].join("\n");
-
-// Map a methodology action (e.g. "needs") to its Problem-Based SRS slash-command
-// form (e.g. "/problem-based-srs needs"). Taskbar actions must run the existing
-// methodology, never improvised free-text instructions. (Defined near the ACTIONS
-// registry as `srsActionCommand`.)
-
-function buildActionPrompt(action) {
-    // "Implement" is not a methodology step — it asks the agent to turn a
-    // fully-specified requirement into real code, so it gets its own prompt
-    // instead of a methodology slash-command.
-    if (action.action === "implement") {
-        const kind = action.nodeType === "nfr" ? "Non-Functional Requirement" : "Functional Requirement";
-        return [
-            `## Problem-Based SRS — implement ${action.nodeId} in code`,
-            "",
-            `Turn the following ${kind} into production-ready code in this repository.`,
-            "",
-            `**Target requirement:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
-            `**Request:** ${action.context}`,
-            "",
-            "Steps:",
-            "1. Read the specification in the `.spec/` folder to understand this requirement in full, including its parent Customer Needs and Customer Problems.",
-            "2. Locate the relevant part of the codebase (or create it) and write real, working code that satisfies the requirement.",
-            `3. Preserve traceability: reference ${action.nodeId} in code comments or the commit message so the implementation maps back to the spec.`,
-            "4. Follow the repository's existing conventions, and add or update tests where the project already has them.",
-            "",
-            "This is an implementation task, not a requirements-authoring task — do not rewrite the specification files. When done, briefly summarize what you built and where.",
-        ].join("\n");
-    }
-    const command = srsActionCommand(action.srsAction);
-    return [
-        `## Problem-Based SRS — run ${command}`,
-        "",
-        `Run the Problem-Based SRS **${command}** action (the \`problem_based_srs\` tool with \`action: "${action.srsAction}"\`) and follow its methodology exactly. Do not improvise a generic answer — the methodology defines the process you must use.`,
-        "",
-        `**Target node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
-        `**Request:** ${action.context}`,
-        "",
-        `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
-    ].join("\n");
-}
+// --- Agent prompts ---
+//
+// LEARN_PROMPT, LOAD_PROMPT, srsActionCommand and buildActionPrompt live in
+// lib/prompts.mjs so a unit test can assert the values that actually ship;
+// this module imports the copilot-sdk and cannot be loaded by node --test.
 
 const sendJson = (res, obj, status = 200) => {
     res.statusCode = status;
