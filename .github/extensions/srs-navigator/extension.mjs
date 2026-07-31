@@ -311,17 +311,37 @@ async function reloadInstanceFromSource(inst, workspacePath) {
 }
 
 // --- Agent prompts shared by the landing overlay and the graph action bar ---
+//
+// Every prompt the canvas sends must make the agent RUN the methodology skill
+// (`problem_based_srs` / `/problem-based-srs`) rather than reproduce it from its
+// own reasoning. The skill owns the process — including a mandatory Discovery
+// Interview — so these prompts always name the command, forbid improvisation,
+// and restate that autopilot does not waive the interview.
 const LEARN_PROMPT = [
     "## Problem-Based SRS: Learn & Create Specification",
     "",
-    "The user wants to create a Problem-Based SRS specification for their project.",
-    "Use the `problem_based_srs` tool to run the full methodology.",
-    "Scan the workspace for existing code, README, and documentation to provide context.",
+    "The user clicked **Learn & Create Spec** in the SRS Navigator and wants a Problem-Based SRS",
+    "specification for this project.",
     "",
-    "**IMPORTANT:** After generating all the .spec/ markdown artifacts (customer problems, needs, requirements),",
-    "you MUST also generate a consolidated JSON specification file at `.spec/<project-name>.json` with this shape:",
-    '{ "name", "version", "problems":[{id,title,description}], "needs":[{id,title,description,problemIds}],',
-    '  "functionalRequirements":[{id,title,description,needIds}], "nonFunctionalRequirements":[{id,title,description,needIds}] }',
+    `**Run the methodology — do not perform it yourself.** Call the \`problem_based_srs\` tool`,
+    `(action \`full\`, i.e. the \`${srsActionCommand("full")}\` command) FIRST and follow the instructions`,
+    "it returns exactly, step by step and in order. Do NOT improvise a specification, do NOT",
+    "paraphrase or shortcut the methodology, and do NOT substitute your own requirements process.",
+    "",
+    "**The Discovery Interview is mandatory.** The methodology requires you to stop, ask the user",
+    "2-3 clarifying questions per round, and WAIT for the answers before writing any artifact.",
+    "Autopilot / non-interactive mode does NOT waive it — asking IS the requested action here.",
+    "Reading the workspace (code, README, docs) only supplies context for those questions —",
+    "it never replaces the interview and is never a basis for skipping it.",
+    "",
+    "**After** the methodology has produced the .spec/ markdown artifacts (customer problems, needs,",
+    "requirements), also write a consolidated JSON specification at `.spec/<project-name>.json`.",
+    "Use canonical dotted IDs (`CP.01`, `CN.01.1`, `FR.01.1.1`, `NFR.01`) — never legacy hyphen IDs:",
+    '{ "name": "<project>", "version": "1.0",',
+    '  "problems": [{ "id": "CP.01", "title": "…", "description": "…" }],',
+    '  "needs": [{ "id": "CN.01.1", "title": "…", "description": "…", "problemIds": ["CP.01"] }],',
+    '  "functionalRequirements": [{ "id": "FR.01.1.1", "title": "…", "description": "…", "needIds": ["CN.01.1"] }],',
+    '  "nonFunctionalRequirements": [{ "id": "NFR.01", "title": "…", "description": "…", "needIds": ["CN.01.1"] }] }',
     "",
     "**CRITICAL - Display the graph:** After creating the JSON file, use the `load_specification` canvas action",
     "with the ABSOLUTE file path to the JSON file. Do NOT skip this step — the graph will not auto-refresh without it.",
@@ -333,6 +353,10 @@ const LOAD_PROMPT = [
     "The user wants to load an existing specification file.",
     "Look for .spec/*.json files in the workspace, or ask the user which file to load.",
     "Then use the `load_specification` canvas action to display it.",
+    "",
+    "This is a load-only request: do NOT author, infer, or invent specification content. If no spec",
+    `file exists, say so and offer to run the \`problem_based_srs\` tool (\`${srsActionCommand("full")}\`)`,
+    "to create one through the methodology — including its mandatory Discovery Interview.",
 ].join("\n");
 
 // Map a methodology action (e.g. "needs") to its Problem-Based SRS slash-command
@@ -372,7 +396,9 @@ function buildActionPrompt(action) {
         `**Target node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
         `**Request:** ${action.context}`,
         "",
-        `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
+        "**Discovery Interview:** this action's methodology requires clarifying questions before any artifact is written. Ask them and wait for the user's answers. Autopilot / non-interactive mode does NOT waive the interview.",
+        "",
+        `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. Emit canonical dotted IDs (\`CP.01\`, \`CN.01.1\`, \`FR.01.1.1\`, \`NFR.01\`). After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
     ].join("\n");
 }
 
@@ -736,20 +762,20 @@ const session = await joinSession({
 
                             return {
                                 ...action,
-                                instruction: `Run the Problem-Based SRS ${srsActionCommand(action.srsAction)} action (the "problem_based_srs" tool with action "${action.srsAction}") and follow its methodology exactly — do not improvise. Apply it to ${action.nodeId} using this request as input:\n\n${action.context}`,
+                                instruction: `Run the Problem-Based SRS ${srsActionCommand(action.srsAction)} action (the "problem_based_srs" tool with action "${action.srsAction}") and follow its methodology exactly — do not improvise. Its Discovery Interview is mandatory: ask the user clarifying questions and wait for answers before writing artifacts. Autopilot / non-interactive mode does NOT waive it. Apply the action to ${action.nodeId} using this request as input:\n\n${action.context}`,
                                 skillContent,
                             };
                         }));
 
                         return {
                             actions: enriched,
-                            message: `${enriched.length} action(s) ready. For each action, run the Problem-Based SRS methodology action named in its instruction with the provided context — do not improvise generic answers.`,
+                            message: `${enriched.length} action(s) ready. For each action, run the Problem-Based SRS methodology action named in its instruction with the provided context — do not improvise generic answers, and do not skip the methodology's mandatory Discovery Interview.`,
                         };
                     }
                 },
                 {
                     name: "learn",
-                    description: "Trigger the Problem-Based SRS methodology to scan the project and generate a specification. This is the primary onboarding action for projects without an existing spec.",
+                    description: "Trigger the Problem-Based SRS methodology to scan the project and generate a specification. This is the primary onboarding action for projects without an existing spec. The agent must run the methodology skill (problem_based_srs) — including its mandatory Discovery Interview — instead of authoring a specification on its own.",
                     inputSchema: {
                         type: "object",
                         properties: {
@@ -771,9 +797,13 @@ const session = await joinSession({
                         }
 
                         return {
-                            instruction: "Use the `problem_based_srs` tool to run the full methodology. After generating the .spec/ markdown artifacts AND the JSON file, you MUST use the `load_specification` canvas action with the ABSOLUTE filePath to the JSON file to display the graph in the navigator. The graph will NOT auto-refresh without this explicit action.",
+                            instruction: [
+                                `Run the Problem-Based SRS methodology with the \`problem_based_srs\` tool (\`${srsActionCommand("full")}\`) and follow the skill content below exactly — do not improvise a specification or substitute your own requirements process.`,
+                                "The methodology's Discovery Interview is mandatory: ask the user clarifying questions and wait for answers before writing any artifact. Autopilot / non-interactive mode does NOT waive it, and scanning the repository is context for those questions, not a replacement for them.",
+                                "After generating the .spec/ markdown artifacts AND the JSON file (canonical dotted IDs: CP.01, CN.01.1, FR.01.1.1, NFR.01), you MUST use the `load_specification` canvas action with the ABSOLUTE filePath to the JSON file to display the graph in the navigator. The graph will NOT auto-refresh without this explicit action.",
+                            ].join(" "),
                             skillContent: result,
-                            message: "Learn action triggered. Run the problem_based_srs methodology and load the result into the canvas."
+                            message: "Learn action triggered. Run the problem_based_srs methodology — including its mandatory Discovery Interview — and load the result into the canvas."
                         };
                     }
                 },

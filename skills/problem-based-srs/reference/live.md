@@ -54,15 +54,25 @@ complete example at
 {
   "name": "My System",
   "version": "1.0",
-  "problems": [ { "id": "CP.01", "label": "…", "description": "…" } ],
-  "needs": [ { "id": "CN.01.1", "label": "…", "problem": "CP.01" } ],
-  "functionalRequirements": [ { "id": "FR.01.1.1", "label": "…", "need": "CN.01.1" } ],
-  "nonFunctionalRequirements": [ { "id": "NFR.01", "label": "…" } ]
+  "problems": [
+    { "id": "CP.01", "title": "…", "description": "…" }
+  ],
+  "needs": [
+    { "id": "CN.01.1", "title": "…", "description": "…", "problemIds": ["CP.01"] }
+  ],
+  "functionalRequirements": [
+    { "id": "FR.01.1.1", "title": "…", "description": "…", "needIds": ["CN.01.1"] }
+  ],
+  "nonFunctionalRequirements": [
+    { "id": "NFR.01", "title": "…", "description": "…", "needIds": ["CN.01.1"] }
+  ]
 }
 ```
 
-Traceability links are derived from the `problem` / `need` references, so keep IDs
-consistent with the methodology naming convention (`CP → CN → FR`).
+`name`, `version`, and every item's `id`, `title`, and `description` are required.
+Traceability links are derived from the `problemIds` / `needIds` arrays, so use canonical
+dotted IDs (`CP.01` → `CN.01.1` → `FR.01.1.1`, plus `NFR.01`).
+Legacy hyphen IDs such as `CP-1` still parse, but MUST NOT be produced for new specs.
 
 ## Notes
 
