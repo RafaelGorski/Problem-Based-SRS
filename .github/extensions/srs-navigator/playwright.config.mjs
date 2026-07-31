@@ -30,7 +30,7 @@ if (!process.env.SITE_URL) {
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['visual.test.mjs', 'site.test.mjs'],
+  testMatch: ['visual.test.mjs', 'site.test.mjs', 'demo.test.mjs'],
   timeout: 30000,
   // Screenshot evidence for the /live graph and the landing page lands here.
   // `test-results/` is git-ignored, so captures are never committed.
@@ -42,7 +42,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'canvas', testMatch: 'visual.test.mjs', use: { baseURL: BASE_URL } },
-    { name: 'site', testMatch: 'site.test.mjs', use: { baseURL: SITE_URL } },
+    { name: 'site', testMatch: /(site|demo)\.test\.mjs/, use: { baseURL: SITE_URL } },
   ],
   webServer: servers.length ? servers : undefined,
 });

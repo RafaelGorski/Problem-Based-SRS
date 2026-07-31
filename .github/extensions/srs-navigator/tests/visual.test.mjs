@@ -197,25 +197,32 @@ test.describe('SRS Navigator Canvas - Visual Rendering', () => {
       expect(result.rings).toBe(result.highSeverityNodes);
     });
 
-    test('clicking a health metric should filter the graph', async ({ page }) => {
-      // Click "orphaned problems" metric
-      const orphanedMetric = page.locator('.health-metric').filter({ hasText: /orphaned/ });
-      if (await orphanedMetric.count() > 0) {
-        await orphanedMetric.first().click();
-        await page.waitForTimeout(500);
+    test('clicking a health metric filters the graph', async ({ page }) => {
+      // This used to look for an "orphaned problems" metric, which the shipped CRM
+      // spec does not have (it is a clean spec), so the whole body was skipped and
+      // the filter behaviour went unchecked. It also read `getComputedStyle(node)`,
+      // while dimming is applied to each node's child shapes via the `opacity`
+      // *attribute* — so even when it did run, it could not have failed.
+      const clusters = page.locator('.health-metric[data-filter="hub"]');
+      await expect(clusters).toHaveCount(1);
 
-        // Some nodes should be dimmed
-        const dimmedNodes = await page.evaluate(() => {
-          const nodes = document.querySelectorAll('.node');
-          let dimmed = 0;
-          nodes.forEach(n => {
-            const opacity = parseFloat(getComputedStyle(n).opacity || window.getComputedStyle(n).opacity);
-            if (opacity < 0.5) dimmed++;
-          });
-          return dimmed;
-        });
-        expect(dimmedNodes).toBeGreaterThan(0);
-      }
+      const dimmed = () =>
+        page.evaluate(
+          () =>
+            [...document.querySelectorAll('.node rect')].filter(
+              (r) => parseFloat(r.getAttribute('opacity')) < 0.5,
+            ).length,
+        );
+
+      expect(await dimmed()).toBe(0);
+      await clusters.click();
+      await expect.poll(dimmed).toBeGreaterThan(0);
+      await expect(clusters).toHaveAttribute('aria-pressed', 'true');
+
+      // Clicking again releases the filter and every node comes back.
+      await clusters.click();
+      await expect.poll(dimmed).toBe(0);
+      await expect(clusters).toHaveAttribute('aria-pressed', 'false');
     });
 
     test('need cluster nodes should be labeled as "Need Clusters" not "hubs"', async ({ page }) => {

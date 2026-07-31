@@ -1,8 +1,8 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-07-31T08:30:56.4283458Z",
+  "generatedAt": "2026-07-31T11:04:06.7890950Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "canvasVersion": "1.1.0",
   "overall": {
     "state": "passed",
@@ -10,11 +10,11 @@
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 451,
-    "pass": 451,
+    "tests": 488,
+    "pass": 488,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 66.5
+    "durationSeconds": 72.4
   },
   "suites": [
     {
@@ -36,29 +36,29 @@
       "pass": 231,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.4,
+      "seconds": 1.8,
       "reason": ""
     },
     {
       "name": "Skill evals",
       "state": "passed",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 188,
-      "pass": 188,
+      "tests": 215,
+      "pass": 215,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.7,
+      "seconds": 1.1,
       "reason": ""
     },
     {
       "name": "Canvas e2e",
       "state": "passed",
       "command": "npm run test:e2e",
-      "tests": 31,
-      "pass": 31,
+      "tests": 41,
+      "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 64.1,
+      "seconds": 69.1,
       "reason": ""
     },
     {

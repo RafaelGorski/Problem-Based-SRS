@@ -85,4 +85,51 @@
             });
         });
     });
+
+    // ── Recorded /live demo ───────────────────────────────────────
+    // The <video> deliberately carries no `autoplay` attribute. The attribute starts
+    // playback before this file runs, so a reader who asked their system for no
+    // motion would have already been shown it by the time we could check. Playback
+    // is started here, behind `reduceMotion`, and nowhere else.
+    document.querySelectorAll('[data-demo-toggle]').forEach(function (btn) {
+        var video = document.querySelector(btn.getAttribute('data-demo-toggle'));
+        if (!video) { return; }
+        var labelEl = btn.querySelector('.demo-toggle-label');
+
+        function sync() {
+            var playing = !video.paused && !video.ended;
+            btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+            if (labelEl) { labelEl.textContent = playing ? 'Pause the demo' : 'Play the demo'; }
+        }
+        video.addEventListener('play', sync);
+        video.addEventListener('pause', sync);
+        video.addEventListener('ended', sync);
+
+        function start() {
+            var attempt = video.play();
+            // Autoplay can still be refused (a data-saver profile, a strict policy).
+            // Refusal is fine — the poster and the control are the fallback.
+            if (attempt && attempt.catch) { attempt.catch(sync); }
+        }
+
+        btn.addEventListener('click', function () {
+            if (video.paused) { start(); } else { video.pause(); }
+        });
+
+        sync();
+        if (reduceMotion) { return; }
+
+        // Play only while the figure is on screen. The video is preload="none", so
+        // until this fires it has cost the reader nothing.
+        if ('IntersectionObserver' in window) {
+            var demoObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) { start(); } else { video.pause(); }
+                });
+            }, { threshold: 0.2 });
+            demoObserver.observe(video);
+        } else {
+            start();
+        }
+    });
 })();
