@@ -62,16 +62,25 @@ export function promptsMissingInterviewObligation(prompts) {
 // --- The prompts themselves -------------------------------------------------
 
 // "Learn & Create Spec" — the primary landing action, and the documented answer
-// to "I inherited a system with no spec". The workspace scan here is raw
-// material for the interview, never a replacement for it: reference/problems.md
-// states that a README or source code alone does NOT satisfy its Skip
-// Conditions, so a prompt that told the agent to derive Customer Problems from a
-// scan would be instructing it to break the methodology it just invoked.
+// to "I inherited a system with no spec". Two rules meet here. First, the agent
+// must RUN the methodology rather than reproduce it: the skill owns the process,
+// so the prompt names the command and forbids improvisation. Second, the
+// workspace scan is raw material for the interview, never a replacement for it:
+// reference/problems.md states that a README or source code alone does NOT
+// satisfy its Skip Conditions, so a prompt that told the agent to derive Customer
+// Problems from a scan would be instructing it to break the methodology it just
+// invoked.
 export const LEARN_PROMPT = [
     "## Problem-Based SRS: Learn & Create Specification",
     "",
-    "The user wants to create a Problem-Based SRS specification for their project.",
-    "Use the `problem_based_srs` tool to run the full methodology.",
+    "The user clicked **Learn & Create Spec** in the SRS Navigator and wants a Problem-Based SRS",
+    "specification for this project.",
+    "",
+    "**Run the methodology — do not perform it yourself.** Call the `problem_based_srs` tool",
+    `(action \`full\`, i.e. the \`${srsActionCommand("full")}\` command) FIRST and follow the instructions`,
+    "it returns exactly, step by step and in order. Do NOT improvise a specification, do NOT",
+    "paraphrase or shortcut the methodology, and do NOT substitute your own requirements process.",
+    "",
     "Scan the workspace for existing code, README, and documentation to gather evidence —",
     "schema and data volumes, recurring ticket themes, TODOs and workarounds, operational metrics.",
     "",
@@ -80,11 +89,16 @@ export const LEARN_PROMPT = [
     "`problems` step. Bring what you found back to the user as assert-then-confirm (\"the data shows",
     "X, so the consequence looks like Y — confirm or correct me\") and wait for the reply before",
     "writing Customer Problems. Do not infer a specification from the codebase on your own.",
+    "Autopilot / non-interactive mode does NOT waive the interview — asking IS the requested action.",
     "",
-    "**IMPORTANT:** After generating all the .spec/ markdown artifacts (customer problems, needs, requirements),",
-    "you MUST also generate a consolidated JSON specification file at `.spec/<project-name>.json` with this shape:",
-    '{ "name", "version", "problems":[{id,title,description}], "needs":[{id,title,description,problemIds}],',
-    '  "functionalRequirements":[{id,title,description,needIds}], "nonFunctionalRequirements":[{id,title,description,needIds}] }',
+    "**After** the methodology has produced the .spec/ markdown artifacts (customer problems, needs,",
+    "requirements), also write a consolidated JSON specification at `.spec/<project-name>.json`.",
+    "Use canonical dotted IDs (`CP.01`, `CN.01.1`, `FR.01.1.1`, `NFR.01`) — never legacy hyphen IDs:",
+    '{ "name": "<project>", "version": "1.0",',
+    '  "problems": [{ "id": "CP.01", "title": "…", "description": "…" }],',
+    '  "needs": [{ "id": "CN.01.1", "title": "…", "description": "…", "problemIds": ["CP.01"] }],',
+    '  "functionalRequirements": [{ "id": "FR.01.1.1", "title": "…", "description": "…", "needIds": ["CN.01.1"] }],',
+    '  "nonFunctionalRequirements": [{ "id": "NFR.01", "title": "…", "description": "…", "needIds": ["CN.01.1"] }] }',
     "",
     "**CRITICAL - Display the graph:** After creating the JSON file, use the `load_specification` canvas action",
     "with the ABSOLUTE file path to the JSON file. Do NOT skip this step — the graph will not auto-refresh without it.",
@@ -96,6 +110,10 @@ export const LOAD_PROMPT = [
     "The user wants to load an existing specification file.",
     "Look for .spec/*.json files in the workspace, or ask the user which file to load.",
     "Then use the `load_specification` canvas action to display it.",
+    "",
+    "This is a load-only request: do NOT author, infer, or invent specification content. If no spec",
+    `file exists, say so and offer to run the \`problem_based_srs\` tool (\`${srsActionCommand("full")}\`)`,
+    "to create one through the methodology — including its mandatory Discovery Interview.",
 ].join("\n");
 
 /**
@@ -141,7 +159,9 @@ export function buildActionPrompt(action) {
         `**Target node:** ${action.nodeId} (${action.nodeType}) — "${action.nodeLabel}"`,
         `**Request:** ${action.context}`,
         "",
-        `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
+        "**Discovery Interview:** this action's methodology requires clarifying questions before any artifact is written. Ask them and wait for the user's answers. Autopilot / non-interactive mode does NOT waive the interview.",
+        "",
+        `Apply the ${command} action to the target node, using the request above as its input and preserving traceability to ${action.nodeId}. Emit canonical dotted IDs (\`CP.01\`, \`CN.01.1\`, \`FR.01.1.1\`, \`NFR.01\`). After the methodology updates the specification, use the \`load_specification\` canvas action to refresh the graph.`,
     ].join("\n");
 }
 

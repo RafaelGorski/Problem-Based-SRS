@@ -157,14 +157,13 @@ SRS Navigator and no specification is loaded, the start screen offers three ways
 | **Load Specification** | Opens an existing `.spec` JSON file from your project |
 | **Explore Demo** | Loads the CRM sample specification to explore features |
 
-<<<<<<< HEAD
-**Learn & Create Spec** is the primary onboarding path. It reads your existing code,
-README, and documentation, runs the full Problem-Based SRS methodology (`problem_based_srs`,
-i.e. `/problem-based-srs`) to work backward from the system to the customer problems it
-solves, writes the resulting artifacts to your `.spec/` folder, and loads them as an
-interactive graph. You then refine the draft with the agent using the action bar (`+CN`,
-`+FR`, `decompose`, and so on). It is the same path the `learn` agent action triggers
-programmatically.
+**Learn & Create Spec** is the primary onboarding path. It reads your existing code, README,
+and documentation to gather evidence — schema volumes, recurring ticket themes, TODOs,
+operational metrics — then runs the full Problem-Based SRS methodology (`problem_based_srs`,
+i.e. `/problem-based-srs`) to work backward from the system to the customer problems it solves,
+writes the resulting artifacts to your `.spec/` folder, and loads them as an interactive graph.
+You then refine the draft with the agent using the action bar (`+CN`, `+FR`, `decompose`, and so
+on). It is the same path the `learn` agent action triggers programmatically.
 
 > **The app runs the skill — it never performs the methodology on the agent's behalf.**
 > Every prompt the canvas sends (splash actions, action-bar actions, queued
@@ -173,15 +172,6 @@ programmatically.
 > Interview is mandatory**: the agent must ask you clarifying questions and wait for
 > answers before writing artifacts. Autopilot / non-interactive mode does not waive it.
 > `tests/app-prompts.test.mjs` fails if any of those directives drift.
-=======
-**Learn & Create Spec** is the primary onboarding path. It reads your existing code, README,
-and documentation to gather evidence — schema volumes, recurring ticket themes, TODOs,
-operational metrics — then runs the full Problem-Based SRS methodology (`problem_based_srs`)
-to work backward from the system to the customer problems it solves, writes the resulting
-artifacts to your `.spec/` folder, and loads them as an interactive graph. You then refine
-the draft with the agent using the action bar (`+CN`, `+FR`, `decompose`, and so on). It is
-the same path the `learn` agent action triggers programmatically.
->>>>>>> origin/main
 
 The scan is *preparation*, not a substitute for you. The methodology's `problems` step carries
 a mandatory Discovery Interview, and reading a repository never satisfies its Skip Conditions —

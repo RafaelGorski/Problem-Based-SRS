@@ -10,12 +10,20 @@
 // These tests fail if any canvas prompt loses the "run the skill", "do not improvise",
 // or "Discovery Interview is mandatory" directives, or if the JSON examples the app
 // hands to the agent drift away from the canonical dotted notation / real schema.
+// The prompt constants are imported from `lib/prompts.mjs`, so the assertions run
+// against the exact strings the extension ships rather than a copy of its source.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { validateSpecificationJSON, validateReferenceIntegrity } from "../lib/validation.mjs";
+import {
+  LEARN_PROMPT,
+  LOAD_PROMPT,
+  buildActionPrompt,
+  carriesInterviewObligation,
+} from "../lib/prompts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../../../..");
@@ -39,12 +47,12 @@ function block(startAnchor, endAnchor) {
 }
 
 describe("Canvas prompts: LEARN_PROMPT (splash 'Learn & Create Spec')", () => {
-  const learn = block("const LEARN_PROMPT = [", '].join("\\n");');
+  const learn = LEARN_PROMPT;
 
   it("routes through the single /problem-based-srs command", () => {
     assert.ok(
-      learn.includes('srsActionCommand("full")'),
-      "LEARN_PROMPT must name the /problem-based-srs command via srsActionCommand",
+      learn.includes("/problem-based-srs"),
+      "LEARN_PROMPT must name the /problem-based-srs command",
     );
     assert.ok(
       learn.includes("problem_based_srs"),
@@ -57,6 +65,11 @@ describe("Canvas prompts: LEARN_PROMPT (splash 'Learn & Create Spec')", () => {
       learn,
       /FIRST and follow the instructions/,
       "LEARN_PROMPT must require calling the skill before producing anything",
+    );
+    assert.match(
+      learn,
+      /Run the methodology — do not perform it yourself/,
+      "LEARN_PROMPT must state the agent runs the skill rather than performing it",
     );
   });
 
@@ -75,7 +88,12 @@ describe("Canvas prompts: LEARN_PROMPT (splash 'Learn & Create Spec')", () => {
 
   it("requires the mandatory Discovery Interview and blocks the autopilot loophole", () => {
     assert.ok(
-      learn.includes("Discovery Interview is mandatory"),
+      carriesInterviewObligation(learn),
+      "LEARN_PROMPT must name the Discovery Interview and disclaim that the scan waives it",
+    );
+    assert.match(
+      learn,
+      /mandatory Discovery Interview/,
       "LEARN_PROMPT must declare the Discovery Interview mandatory",
     );
     assert.ok(
@@ -84,7 +102,7 @@ describe("Canvas prompts: LEARN_PROMPT (splash 'Learn & Create Spec')", () => {
     );
     assert.match(
       learn,
-      /WAIT for the answers before writing any artifact/,
+      /wait for the reply before/i,
       "LEARN_PROMPT must require waiting for the user's answers",
     );
   });
@@ -92,7 +110,7 @@ describe("Canvas prompts: LEARN_PROMPT (splash 'Learn & Create Spec')", () => {
   it("rejects repository scanning as a substitute for the interview", () => {
     assert.match(
       learn,
-      /never\s+replaces the interview/i,
+      /Do not infer a specification from the codebase on your own/i,
       "LEARN_PROMPT must state that reading the workspace does not replace the interview",
     );
   });
@@ -115,7 +133,7 @@ describe("Canvas prompts: LEARN_PROMPT (splash 'Learn & Create Spec')", () => {
 });
 
 describe("Canvas prompts: LOAD_PROMPT (splash 'Load Specification')", () => {
-  const load = block("const LOAD_PROMPT = [", '].join("\\n");');
+  const load = LOAD_PROMPT;
 
   it("is load-only — the agent may not author spec content", () => {
     assert.match(
@@ -127,7 +145,7 @@ describe("Canvas prompts: LOAD_PROMPT (splash 'Load Specification')", () => {
 
   it("offers the methodology (with its interview) when no spec exists", () => {
     assert.ok(
-      load.includes('srsActionCommand("full")'),
+      load.includes("/problem-based-srs"),
       "LOAD_PROMPT must offer the /problem-based-srs command as the way to create a spec",
     );
     assert.ok(
@@ -138,7 +156,14 @@ describe("Canvas prompts: LOAD_PROMPT (splash 'Load Specification')", () => {
 });
 
 describe("Canvas prompts: node action bar (buildActionPrompt)", () => {
-  const build = block("function buildActionPrompt(action) {", "const sendJson =");
+  const build = buildActionPrompt({
+    action: "addCN",
+    srsAction: "needs",
+    nodeId: "CP.01",
+    nodeType: "problem",
+    nodeLabel: "Duplicate customer records",
+    context: "derive the needs",
+  });
 
   it("runs the methodology action rather than a free-text answer", () => {
     assert.ok(build.includes("follow its methodology exactly"));
