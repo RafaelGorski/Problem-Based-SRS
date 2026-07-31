@@ -73,6 +73,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Distribution paths are documented and tested.** The README and landing page name the
   `skills.sh` listing and an explicit install path for the SRS Navigator canvas extension,
   with a deterministic test asserting both surfaces carry them.
+- **Clean-machine install guard** (`evals/tests/install-path.test.mjs`). Stages the canvas
+  archive with the real packager and asserts the documentation against what it emits: one
+  top-level directory, the files the Copilot app needs to load the extension, no development
+  payload, a size budget, and — derived from the packager's own archive root — that every
+  documented extract target is the *parent* of that root rather than the root itself. Also
+  gates the release-fallback link and the AgentSkills CLI install location on both surfaces.
 
 ### Changed
 
@@ -96,6 +102,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   They previously required an undocumented `cd evals` while every neighbouring command ran
   from the repository root.
 - **Corrected stale comments** claiming the shipped skill templates emit legacy hyphen IDs.
+- **The canvas extension extract instruction no longer nests the archive.** The README said
+  to extract into `~/.copilot/extensions/srs-navigator/` while the landing page said
+  `~/.copilot/extensions/`. The archive already contains a `srs-navigator/` root, so the
+  README's version produced `…/srs-navigator/srs-navigator/extension.mjs`, which does not
+  load. Both surfaces now name the parent directory and show the resulting path.
+- **The archive fallback links a release that actually carries the archive.** Both surfaces
+  pointed at the bare releases page, but the canvas app ships on `vX.Y.Z` tags interleaved
+  with the plugin's `vX.Y` releases, so the newest release has no canvas archive at all.
+  They now link a filtered release view and explain the two trains.
+- **The AgentSkills CLI section says where the skill lands.** `npx skills add` installs into
+  `.agents/skills/problem-based-srs/` and writes a `skills-lock.json`; neither was named
+  anywhere, while the surrounding docs pointed readers at `.github/skills/`.
+- **`scripts/package-extension.mjs` is importable without side effects.** `main()` now runs
+  only when the file is invoked as a script, and `ARCHIVE_ROOT`, `EXCLUDE`, `EXCLUDE_FILES`
+  and `stage()` are exported so the install guard derives archive facts from the packager
+  rather than restating them.
 
 [2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5.0
 
