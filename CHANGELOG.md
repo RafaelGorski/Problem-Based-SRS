@@ -23,11 +23,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tag in both findings, so `VERSION` 1.1.1 was reported against `v2.4.1` — a *plugin*
   release. Releases are now classified by the title their own workflow writes
   (`srs-navigator …` versus `🎉 Version …`), each train reports its own newest, and with no
-  titles available the report says the train is unidentifiable instead of guessing.
+  titles available the report says the train is unidentifiable instead of guessing. A train
+  that simply has no releases yet is reported as empty rather than as unidentifiable, so the
+  fallback cannot quietly reintroduce the cross-train citation it exists to prevent.
 - **A dangling link that a release cannot fix is reported as its own finding.**
   `unpublishable-release-link` separates "this names a tag no pipeline creates — correct the
   link" from `dangling-release-links`' "cut the release", so the runbook entry a maintainer
-  follows matches the action that will actually clear the finding.
+  follows matches the action that will actually clear the finding. The plugin's `.0`-stripping
+  rule is applied only to `CHANGELOG.md`, the file `build-plugin.py` reads for release notes;
+  the canvas train tags `v${VERSION}` verbatim, so a canvas link awaiting its release stays a
+  release to cut rather than becoming a link to break.
 
 - **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
   itself.** The splash-screen prompt named the `problem_based_srs` tool and then described

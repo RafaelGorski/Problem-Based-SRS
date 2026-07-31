@@ -35,6 +35,7 @@ import {
   compareVersions,
   pluginReleaseTag,
   releaseTrain,
+  PLUGIN_CHANGELOG,
   releaseDrift,
   summarize,
   renderReport,
@@ -513,7 +514,7 @@ describe("a dangling link that cutting the release would not fix", () => {
         "and one that cannot, under a heading that says 'cut the release'.",
     );
     assert.ok(
-      unpublishable.detail.some((d) => d.includes("v2.6.0") && d.includes("v2.6")),
+      unpublishable.detail.some((d) => /links v2\.6\.0\b/.test(d) && /at v2\.6$/.test(d)),
       `the finding must name both the link's tag and the tag the pipeline creates: ` +
         unpublishable.detail.join(" | "),
     );
@@ -570,6 +571,59 @@ describe("a dangling link that cutting the release would not fix", () => {
       0,
       "every changelog link must name a tag the release pipeline can create. A link that " +
         "cannot resolve even after the release is cut is an edit, not a release.",
+    );
+  });
+
+  it("only applies the plugin's tag rule to the plugin train's own changelog", () => {
+    // The two trains normalize differently: the plugin strips a trailing `.0`, the canvas
+    // tags `v${VERSION}` in full. Applying the plugin rule to a canvas link would call
+    // `[1.2.0]: …/tag/v1.2.0` unpublishable and tell the maintainer to edit a link that a
+    // canvas release will make resolve — the same cross-train category error the per-train
+    // `newest` fix exists to prevent.
+    const summary = summarize({
+      listing: { skills: ["problem-based-srs"], declaredCount: 1, url: REGISTRY_URL },
+      repoSkills: ["problem-based-srs"],
+      tagLinks: advertisedTagLinks([
+        {
+          file: ".github/extensions/srs-navigator/CHANGELOG.md",
+          text: "[1.2.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v1.2.0",
+        },
+      ]),
+      publishedReleases: PUBLISHED_RELEASES,
+      manifestVersion: "2.4.1",
+      canvasVersion: "1.1.0",
+    });
+    assert.equal(
+      summary.findings.filter((f) => f.id === "unpublishable-release-link").length,
+      0,
+      "release-canvas.yml tags v1.2.0 verbatim, so that link resolves the moment the " +
+        "canvas release is cut. Calling it unpublishable would tell the maintainer to " +
+        "break a link that was about to start working.",
+    );
+    assert.ok(
+      summary.findings.some((f) => f.id === "dangling-release-links"),
+      "it is still dangling — it is simply a release to cut, not a link to edit",
+    );
+  });
+
+  it("takes the plugin changelog from the file the release pipeline reads", () => {
+    const build = read("scripts/build-plugin.py");
+    assert.match(
+      build,
+      /CHANGELOG\s*=\s*REPO_ROOT\s*\/\s*"CHANGELOG\.md"/,
+      "the plugin release notes come from CHANGELOG.md, which is what makes a reference " +
+        "definition in that file a *plugin*-train claim. If build-plugin.py reads a " +
+        "different file, PLUGIN_CHANGELOG must move with it.",
+    );
+    assert.equal(
+      PLUGIN_CHANGELOG,
+      "CHANGELOG.md",
+      "the checker must attribute the same file the pipeline does",
+    );
+    const canvasWorkflow = read(".github/workflows/release-canvas.yml");
+    assert.ok(
+      !canvasWorkflow.includes("CHANGELOG.md"),
+      "and the canvas train must not write to it, or the attribution would be ambiguous",
     );
   });
 });
@@ -659,6 +713,46 @@ describe("release drift names the right train's newest release", () => {
     assert.equal(drift.canvas.newest, null, "tags alone carry no train");
     assert.equal(drift.plugin.newest, null);
     assert.equal(drift.newest, "v2.4.1", "the overall newest is still knowable");
+    assert.equal(drift.classified, false, "and it knows that it could not classify");
+  });
+
+  it("tells an empty train apart from an unreadable one", () => {
+    const drift = releaseDrift({
+      manifestVersion: "2.6.0",
+      canvasVersion: "1.0.0",
+      releases: [{ tag: "v2.6", name: "🎉 Version 2.6" }],
+    });
+    assert.equal(drift.canvas.newest, null, "no canvas release exists to be newest");
+    assert.equal(
+      drift.classified,
+      true,
+      "but the titles were there and were read — 'no release yet' is not 'cannot tell'",
+    );
+  });
+
+  it("never falls back to the other train's release for an empty train", () => {
+    const summary = summarize({
+      listing: { skills: ["problem-based-srs"], declaredCount: 1, url: REGISTRY_URL },
+      repoSkills: ["problem-based-srs"],
+      tagLinks: [],
+      publishedReleases: [
+        { tag: "v2.4.1", name: "🎉 Version 2.4.1" },
+        { tag: "v2.6", name: "🎉 Version 2.6" },
+      ],
+      manifestVersion: "2.6.0",
+      canvasVersion: "1.0.0",
+    });
+    const canvas = summary.findings.find((f) => f.id === "canvas-release-missing");
+    assert.ok(canvas, "1.0.0 has no canvas release, so the finding stands");
+    assert.ok(
+      !canvas.detail.some((d) => d.includes("v2.6") || d.includes("v2.4.1")),
+      "citing a plugin release as what the canvas train is behind is the exact defect " +
+        `this classification exists to prevent: ${canvas.detail.join(" | ")}`,
+    );
+    assert.ok(
+      canvas.detail.some((d) => /no .*canvas release/i.test(d)),
+      `it must say the train is empty, not that it is unidentifiable: ${canvas.detail.join(" | ")}`,
+    );
   });
 });
 

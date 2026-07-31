@@ -298,9 +298,13 @@ describe("negative canaries", () => {
   });
 
   it("a changelog link that names an unpublishable tag fails this suite's check", () => {
+    // Build the wrong tag from the right one rather than from the manifest string. `v` +
+    // the raw version is only wrong while the version ends in `.0`; for a patch release
+    // like 2.4.1 it is exactly what the pipeline creates, and a canary written that way
+    // goes red on a correct repository the first time a patch ships.
     const broken = CHANGELOG.replace(
       new RegExp(`^\\[${manifest.version.replace(/\./g, "\\.")}\\]:.*$`, "m"),
-      `[${manifest.version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v${manifest.version}`,
+      `[${manifest.version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${pluginReleaseTag(manifest.version)}.0`,
     );
     const link = changelogTagLinks(broken).find(
       (l) => compareVersions(l.version, manifest.version) === 0,
@@ -309,7 +313,26 @@ describe("negative canaries", () => {
     assert.notEqual(
       link.tag,
       pluginReleaseTag(manifest.version),
-      "reverting to the un-normalized tag must be caught — that was the live defect",
+      "a tag the pipeline never creates must be caught — that was the live defect",
+    );
+  });
+
+  it("the canary's mutation is wrong for every version shape, not just X.Y.0", () => {
+    // The property under test is the canary's own construction, so it is checked directly
+    // against the shapes the manifest can hold rather than only the one it holds today.
+    for (const version of ["2.6.0", "2.4.1", "1.0", "3.0.0", "2.10.4"]) {
+      const published = pluginReleaseTag(version);
+      assert.notEqual(
+        `${published}.0`,
+        published,
+        `${version}: the canary must name a tag the pipeline cannot create`,
+      );
+    }
+    assert.equal(
+      `v${"2.4.1"}`,
+      pluginReleaseTag("2.4.1"),
+      "and the old construction is proven wrong: for a patch release `v` + the manifest " +
+        "version *is* the published tag, so asserting it differs would fail on a healthy repo",
     );
   });
 });

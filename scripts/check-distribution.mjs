@@ -200,6 +200,18 @@ export function pluginReleaseTag(version) {
 const CANVAS_RELEASE_TITLE = /^srs-navigator\b/i;
 
 /**
+ * The changelog the plugin release pipeline reads.
+ *
+ * `build-plugin.py` sets `CHANGELOG = REPO_ROOT / "CHANGELOG.md"` and `create-release.yml`
+ * takes its release notes from that file, so a Keep-a-Changelog reference definition there
+ * is a claim about the *plugin* train. That matters because only the plugin train strips a
+ * trailing `.0`: the canvas train tags `v${VERSION}` verbatim, so applying the plugin rule
+ * to a canvas link would condemn `[1.2.0]: …/tag/v1.2.0` — a link a canvas release makes
+ * resolve — as one that must be edited instead.
+ */
+export const PLUGIN_CHANGELOG = "CHANGELOG.md";
+
+/**
  * Which release train a published release belongs to.
  *
  * The trains cannot be told apart by tag — `v2.4.1` is a plugin release and `v1.1.0` is a
@@ -316,6 +328,11 @@ export function releaseDrift({ manifestVersion, canvasVersion, tags = [], releas
     plugin: train(manifestVersion, pluginTag, "plugin"),
     canvas: train(canvasVersion, exactTag, "canvas"),
     newest: newestIn(list),
+    // Whether any release could be attributed at all. Without it a train with no releases
+    // is indistinguishable from a list that carried no titles, and the report would say
+    // "train not identifiable" — then cite the *other* train's newest release as what this
+    // one is behind, which is the error the per-train split exists to prevent.
+    classified: list.some((r) => releaseTrain(r) !== "unknown"),
   };
 }
 
@@ -433,6 +450,7 @@ export function summarize({
   // maintainer an instruction that cannot work: cutting v2.6 leaves a v2.6.0 link 404, so
   // the run stays red and the advice that produced it is now false.
   const unpublishable = dangling.filter((l) => {
+    if (l.file !== PLUGIN_CHANGELOG) return false;
     const expected = l.label ? pluginReleaseTag(l.label) : null;
     return expected !== null && expected !== l.tag;
   });
@@ -469,11 +487,14 @@ export function summarize({
     releases: releaseList,
   });
   // Naming the other train's release as what this one is behind is the category error the
-  // matching above takes care to avoid; it must not reappear in the prose.
-  const newestLine = (train, label) =>
-    train.newest
-      ? `newest published ${label} release: ${train.newest}`
-      : `newest published release (train not identifiable): ${releases.newest ?? "none"}`;
+  // matching above takes care to avoid; it must not reappear in the prose. "No release on
+  // this train" and "the trains could not be told apart" are different answers, and only
+  // the second one has any business quoting a number from the other train.
+  const newestLine = (train, label) => {
+    if (train.newest) return `newest published ${label} release: ${train.newest}`;
+    if (releases.classified) return `no ${label} release has been published yet`;
+    return `newest published release (train not identifiable): ${releases.newest ?? "none"}`;
+  };
 
   if (manifestVersion && !releases.plugin.published) {
     findings.push({
