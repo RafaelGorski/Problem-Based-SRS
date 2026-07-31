@@ -1,6 +1,6 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-07-31T00:00:03.4842469Z",
+  "generatedAt": "2026-07-31T00:04:41.8437091Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "1.1.0",
   "overall": {
@@ -9,11 +9,11 @@
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 330,
-    "pass": 330,
+    "tests": 334,
+    "pass": 334,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 56.3
+    "durationSeconds": 55.6
   },
   "suites": [
     {
@@ -24,7 +24,7 @@
       "pass": 1,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.3,
+      "seconds": 0.4,
       "reason": ""
     },
     {
@@ -42,8 +42,8 @@
       "name": "Skill evals",
       "state": "passed",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 96,
-      "pass": 96,
+      "tests": 100,
+      "pass": 100,
       "fail": 0,
       "skipped": 0,
       "seconds": 0.5,
@@ -57,7 +57,7 @@
       "pass": 18,
       "fail": 0,
       "skipped": 0,
-      "seconds": 53.8,
+      "seconds": 53.1,
       "reason": ""
     },
     {
@@ -86,13 +86,13 @@
   "maxContext": {
     "hardCap": 600,
     "softWatch": 500,
-    "state": "watch",
+    "state": "ok",
     "files": [
       {
         "file": "skills/problem-based-srs/SKILL.md",
-        "lines": 549,
-        "state": "watch",
-        "pctOfCap": 91.5
+        "lines": 479,
+        "state": "ok",
+        "pctOfCap": 79.8
       },
       {
         "file": "skills/problem-based-srs/reference/business-context.md",
@@ -114,9 +114,9 @@
       },
       {
         "file": "skills/problem-based-srs/reference/functional-requirements.md",
-        "lines": 486,
+        "lines": 492,
         "state": "ok",
-        "pctOfCap": 81
+        "pctOfCap": 82
       },
       {
         "file": "skills/problem-based-srs/reference/live.md",

@@ -213,6 +213,65 @@ describe("canonical ID notation (dotted)", () => {
       }
     }
   });
+  it("uses no placeholder IDs in legacy hyphen form", () => {
+    for (const doc of [main, ...actions]) {
+      const id = doc.action || doc.slug;
+      const hits = doc.text.match(/\b(?:CP|CN|FR|NFR)-(?:XXX|YYY|NNN|N)\b/g) || [];
+      assert.equal(
+        hits.length,
+        0,
+        `${id}: placeholder ID(s) in hyphen form ${[...new Set(hits)].join(", ")} — use FR.[CP].[CN].[N]`,
+      );
+    }
+  });
+});
+
+// SKILL.md is the orchestrator; detailed artifact shapes belong to the action
+// file that owns the step. Two copies of a template drift, and an agent then
+// emits a different FR depending on which file it happened to load.
+describe("single source of truth for artifact templates", () => {
+  it("the FR and NFR templates live in the Step 5 action file", () => {
+    const frAction = byAction.get("functional-requirements");
+    assert.ok(frAction, "functional-requirements action must be loaded");
+    for (const heading of [/Individual FR File Template/i, /Individual NFR File Template/i]) {
+      assert.match(frAction.text, heading, `functional-requirements.md must own ${heading}`);
+    }
+  });
+
+  it("SKILL.md does not carry a second copy of them", () => {
+    assert.equal(
+      countMatches(main.body, /^#+ .*Individual (?:FR|NFR) File Template/gim),
+      0,
+      "SKILL.md must point at reference/functional-requirements.md instead of duplicating the templates",
+    );
+    assert.equal(
+      countMatches(main.body, /^\*\*ID:\*\* (?:FR|NFR)\./gim),
+      0,
+      "SKILL.md must not restate the requirement template fields",
+    );
+    assert.match(
+      main.body,
+      /reference\/functional-requirements\.md/,
+      "SKILL.md must tell the agent where the templates live",
+    );
+  });
+
+  it("the canonical templates keep the no-code-snippets guardrail", () => {
+    const frAction = byAction.get("functional-requirements");
+    for (const heading of ["Individual FR File Template", "Individual NFR File Template"]) {
+      const start = frAction.text.indexOf(heading);
+      assert.ok(start > 0, `${heading} must exist`);
+      const fence = frAction.text.slice(start);
+      const open = fence.indexOf("```markdown");
+      const close = fence.indexOf("```", open + 3);
+      assert.ok(open > 0 && close > open, `${heading} must contain a fenced template`);
+      assert.match(
+        fence.slice(open, close),
+        /NO CODE SNIPPETS/,
+        `the ${heading} block must warn against embedding implementation detail in a requirement`,
+      );
+    }
+  });
 });
 
 describe("cross-reference links resolve (main + every action)", () => {

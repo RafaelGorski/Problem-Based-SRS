@@ -170,82 +170,12 @@ Each Functional Requirement and Non-Functional Requirement is saved as a **separ
 4. **Traceability** is maintained at the file level
 5. **Status tracking** is easier (draft, approved, implemented, tested)
 
-### FR File Template (FR-XXX.md)
+### FR and NFR File Templates
 
-Each FR file follows this template:
-
-```markdown
-# FR-XXX: [Brief Title]
-
-## Requirement
-
-**Statement:** The [System] shall [verb] [object] [constraint] [condition].
-
-**Priority:** [Must Have | Should Have | Could Have | Won't Have]
-**Status:** [Draft | Review | Approved | Implemented | Tested]
-
-## Traceability
-
-| Traces To | ID | Description |
-|-----------|-----|-------------|
-| Customer Need | CN-XXX | [Brief CN description] |
-| Customer Problem | CP-XXX | [Brief CP description] |
-
-## Acceptance Criteria
-
-- [ ] Criterion 1 (testable)
-- [ ] Criterion 2 (testable)
-- [ ] Criterion 3 (testable)
-
-## Notes
-
-[Any additional context, assumptions, or dependencies]
-
-<!-- ⚠️ NO CODE SNIPPETS: Do not include code examples, SQL, or implementation details here.
-     Construction details belong in design/ folder (see design/implementation-notes/) -->
-
----
-*Created: [Date]*
-*Last Updated: [Date]*
-*Author: [Name]*
-```
-
-### NFR File Template (NFR-XXX.md)
-
-```markdown
-# NFR-XXX: [Brief Title]
-
-## Requirement
-
-**Category:** [Performance | Security | Usability | Reliability | Scalability | Maintainability]
-**Statement:** The [System] shall [quality attribute with measurable criteria].
-
-**Priority:** [Must Have | Should Have | Could Have | Won't Have]
-**Status:** [Draft | Review | Approved | Implemented | Tested]
-
-## Traceability
-
-| Traces To | ID | Description |
-|-----------|-----|-------------|
-| Customer Need | CN-XXX | [Brief CN description] |
-| Applies To FRs | FR-XXX, FR-YYY | [Related functional requirements] |
-
-## Acceptance Criteria
-
-- [ ] Criterion 1 (measurable)
-- [ ] Criterion 2 (measurable)
-
-## Measurement Method
-
-[How this NFR will be verified/tested]
-
-<!-- ⚠️ NO CODE SNIPPETS: Do not include code examples or implementation details here.
-     Technical specifications belong in design/ folder -->
-
----
-*Created: [Date]*
-*Last Updated: [Date]*
-```
+Both templates live in the Step 5 action file — see **Individual FR File Template**
+and **Individual NFR File Template** in `reference/functional-requirements.md`.
+Load that file before writing any requirement file so every FR/NFR has the same
+shape, the same traceability table, and the same acceptance-criteria format.
 
 ### Save After Each Step
 
@@ -380,7 +310,7 @@ Determine current step by checking what artifacts exist:
 **Input:** CNs + Software Vision  
 **Output:** Individual FR and NFR files with traceability  
 **Syntax FR:** `The [System] shall [Verb] [Object] [Constraint] [Condition]`  
-**Save to:** `functional-requirements/FR-XXX.md` and `non-functional-requirements/NFR-XXX.md`  
+**Save to:** `functional-requirements/FR.[CP].[CN].[N]-[short-name].md` and `non-functional-requirements/NFR.[N]-[short-name].md`  
 **Action:** `/problem-based-srs functional-requirements`
 
 ## Quality Gates

@@ -235,6 +235,9 @@ The [System] shall [verb] [object] [constraint] [condition].
 
 <!-- Engineers add notes here during implementation -->
 
+<!-- ⚠️ NO CODE SNIPPETS: do not include code examples, SQL, or implementation
+     details in the requirement itself. Construction details belong in design/. -->
+
 ## Test Cases
 
 <!-- QA adds test case references here -->
@@ -287,6 +290,9 @@ The [System] shall [quality attribute] [measurable target] [condition].
 ## Implementation Notes
 
 <!-- Engineers add notes here during implementation -->
+
+<!-- ⚠️ NO CODE SNIPPETS: do not include code examples or technical
+     specifications in the requirement itself; those belong in design/. -->
 
 ---
 *Created: [Date]*  
