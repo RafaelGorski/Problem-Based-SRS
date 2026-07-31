@@ -22,22 +22,22 @@ A residential end user is concerned about rational energy use and has invested i
 
 | ID | Statement | Class |
 |----|-----------|-------|
-| CP.1 | The customer intends to reduce energy consumption to lower costs using a renewable microgeneration system based on solar and wind sources. | Obligation |
-| CP.1.1 | The customer must reduce unnecessary energy consumption to reduce costs. | Obligation |
-| CP.1.2 | The customer must change consumption patterns, otherwise unable to reduce consumption. | Obligation |
-| CP.1.3 | The customer must monitor consumption patterns, otherwise unable to optimize usage. | Obligation |
-| CP.1.4 | The customer must ensure generating unit efficiency, otherwise must consume from public grid. | Obligation |
-| CP.1.5 | The customer must ensure maintenance status of generating unit, otherwise malfunction occurs. | Obligation |
-| CP.2 | The customer intends to contribute to minimizing environmental impacts of public energy sources. | Hope |
-| CP.2.1 | The customer must be aware of the environmental impact of their consumption. | Expectation |
-| CP.2.2 | The customer intends to rationalize energy use. | Hope |
-| CP.3 | The customer intends to contribute to reducing consumption pressure on regional/national energy matrix. | Hope |
-| CP.4 | The customer intends to influence others toward energy and environmental causes. | Hope |
+| CP.01 | The customer intends to reduce energy consumption to lower costs using a renewable microgeneration system based on solar and wind sources. | Obligation |
+| CP.01.1 | The customer must reduce unnecessary energy consumption to reduce costs. | Obligation |
+| CP.01.2 | The customer must change consumption patterns, otherwise unable to reduce consumption. | Obligation |
+| CP.01.3 | The customer must monitor consumption patterns, otherwise unable to optimize usage. | Obligation |
+| CP.01.4 | The customer must ensure generating unit efficiency, otherwise must consume from public grid. | Obligation |
+| CP.01.5 | The customer must ensure maintenance status of generating unit, otherwise malfunction occurs. | Obligation |
+| CP.02 | The customer intends to contribute to minimizing environmental impacts of public energy sources. | Hope |
+| CP.02.1 | The customer must be aware of the environmental impact of their consumption. | Expectation |
+| CP.02.2 | The customer intends to rationalize energy use. | Hope |
+| CP.03 | The customer intends to contribute to reducing consumption pressure on regional/national energy matrix. | Hope |
+| CP.04 | The customer intends to influence others toward energy and environmental causes. | Hope |
 
 ### Decomposition Notes
 
-- **CP.1** decomposed into 5 sub-problems covering: waste reduction, behavior change, monitoring, efficiency, and maintenance
-- **CP.2** decomposed into awareness and rationalization aspects
+- **CP.01** decomposed into 5 sub-problems covering: waste reduction, behavior change, monitoring, efficiency, and maintenance
+- **CP.02** decomposed into awareness and rationalization aspects
 
 ---
 
@@ -88,14 +88,18 @@ MicroER software will:
 
 | ID | Statement | Outcome Class | Traces To |
 |----|-----------|---------------|-----------|
-| CN.1 | The user needs MicroER to know current energy consumption in real-time. | Information | CP.1.1 |
-| CN.2 | The user needs MicroER to control energy distribution based on consumption profiles. | Control | CP.1.2 |
-| CN.3 | The user needs MicroER to know consumption patterns over time. | Information | CP.1.3 |
-| CN.4 | The user needs MicroER to know generating unit efficiency status. | Information | CP.1.4 |
-| CN.5 | The user needs MicroER to be aware of maintenance alerts. | Information | CP.1.5 |
-| CN.6 | The user needs MicroER to know environmental impact metrics. | Information | CP.2.1 |
-| CN.7 | The user needs MicroER to control load prioritization during low generation. | Control | CP.2.2 |
-| CN.8 | The user needs MicroER to create consumption profiles. | Construction | CP.1.2 |
+| CN.01.1 | The user needs MicroER to know current energy consumption in real-time. | Information | CP.01.1 |
+| CN.01.2 | The user needs MicroER to control energy distribution based on consumption profiles. | Control | CP.01.2 |
+| CN.01.3 | The user needs MicroER to know consumption patterns over time. | Information | CP.01.3 |
+| CN.01.4 | The user needs MicroER to know generating unit efficiency status. | Information | CP.01.4 |
+| CN.01.5 | The user needs MicroER to be aware of maintenance alerts. | Information | CP.01.5 |
+| CN.01.6 | The user needs MicroER to create consumption profiles. | Construction | CP.01.2 |
+| CN.02.1 | The user needs MicroER to know environmental impact metrics. | Information | CP.02.1 |
+| CN.02.2 | The user needs MicroER to control load prioritization during low generation. | Control | CP.02.2 |
+
+> **Reading the IDs:** all six needs raised by `CP.01` are numbered under it, including
+> `CN.01.6` — a second, Construction-class need for sub-problem `CP.01.2`. The needs of
+> `CP.02` restart at `.1`, so an ID never has to be looked up to find its problem.
 
 ### Outcome Class Distribution
 
@@ -142,15 +146,15 @@ MicroER is energy management software for residential users with renewable micro
 
 | ID | Statement | Traces To |
 |----|-----------|-----------|
-| FR.1 | MicroER shall display real-time energy consumption in watts and kilowatt-hours. | CN.1 |
-| FR.2 | MicroER shall allow users to define consumption profiles with load priorities. | CN.8 |
-| FR.3 | MicroER shall automatically adjust energy distribution based on active profile. | CN.2 |
-| FR.4 | MicroER shall display hourly, daily, weekly, and monthly consumption graphs. | CN.3 |
-| FR.5 | MicroER shall calculate and display generation efficiency percentage. | CN.4 |
-| FR.6 | MicroER shall generate maintenance alerts when efficiency drops below threshold. | CN.5 |
-| FR.7 | MicroER shall calculate and display CO₂ offset compared to grid consumption. | CN.6 |
-| FR.8 | MicroER shall reduce non-priority loads when generation falls below demand. | CN.7 |
-| FR.9 | MicroER shall log all consumption and generation data for historical analysis. | CN.3 |
+| FR.01.1.1 | MicroER shall display real-time energy consumption in watts and kilowatt-hours. | CN.01.1 |
+| FR.01.2.1 | MicroER shall automatically adjust energy distribution based on active profile. | CN.01.2 |
+| FR.01.3.1 | MicroER shall display hourly, daily, weekly, and monthly consumption graphs. | CN.01.3 |
+| FR.01.3.2 | MicroER shall log all consumption and generation data for historical analysis. | CN.01.3 |
+| FR.01.4.1 | MicroER shall calculate and display generation efficiency percentage. | CN.01.4 |
+| FR.01.5.1 | MicroER shall generate maintenance alerts when efficiency drops below threshold. | CN.01.5 |
+| FR.01.6.1 | MicroER shall allow users to define consumption profiles with load priorities. | CN.01.6 |
+| FR.02.1.1 | MicroER shall calculate and display CO₂ offset compared to grid consumption. | CN.02.1 |
+| FR.02.2.1 | MicroER shall reduce non-priority loads when generation falls below demand. | CN.02.2 |
 
 ---
 
@@ -158,32 +162,36 @@ MicroER is energy management software for residential users with renewable micro
 
 ### CP → CN Coverage (Partial View)
 
-|      | CN.1 | CN.2 | CN.3 | CN.4 | CN.5 | CN.6 | CN.7 | CN.8 |
-|------|------|------|------|------|------|------|------|------|
-| CP.1.1 | C |   |   |   |   |   |   |   |
-| CP.1.2 |   | C |   |   |   |   |   | P |
-| CP.1.3 |   |   | C |   |   |   |   |   |
-| CP.1.4 |   |   |   | C |   |   |   |   |
-| CP.1.5 |   |   |   |   | C |   |   |   |
-| CP.2.1 |   |   |   |   |   | C |   |   |
-| CP.2.2 |   |   |   |   |   |   | C |   |
+|         | CN.01.1 | CN.01.2 | CN.01.3 | CN.01.4 | CN.01.5 | CN.01.6 | CN.02.1 | CN.02.2 |
+|---------|---------|---------|---------|---------|---------|---------|---------|---------|
+| CP.01.1 | C       |         |         |         |         |         |         |         |
+| CP.01.2 |         | C       |         |         |         | P       |         |         |
+| CP.01.3 |         |         | C       |         |         |         |         |         |
+| CP.01.4 |         |         |         | C       |         |         |         |         |
+| CP.01.5 |         |         |         |         | C       |         |         |         |
+| CP.02.1 |         |         |         |         |         |         | C       |         |
+| CP.02.2 |         |         |         |         |         |         |         | C       |
 
 **C** = Complete, **P** = Partial ✅
 
 ### CN → FR Coverage
 
-|     | FR.1 | FR.2 | FR.3 | FR.4 | FR.5 | FR.6 | FR.7 | FR.8 | FR.9 |
-|-----|------|------|------|------|------|------|------|------|------|
-| CN.1 | C |   |   |   |   |   |   |   |   |
-| CN.2 |   |   | C |   |   |   |   |   |   |
-| CN.3 |   |   |   | C |   |   |   |   | P |
-| CN.4 |   |   |   |   | C |   |   |   |   |
-| CN.5 |   |   |   |   |   | C |   |   |   |
-| CN.6 |   |   |   |   |   |   | C |   |   |
-| CN.7 |   |   |   |   |   |   |   | C |   |
-| CN.8 |   | C |   |   |   |   |   |   |   |
+|         | FR.01.1.1 | FR.01.2.1 | FR.01.3.1 | FR.01.3.2 | FR.01.4.1 | FR.01.5.1 | FR.01.6.1 | FR.02.1.1 | FR.02.2.1 |
+|---------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| CN.01.1 | C         |           |           |           |           |           |           |           |           |
+| CN.01.2 |           | C         |           |           |           |           |           |           |           |
+| CN.01.3 |           |           | C         | P         |           |           |           |           |           |
+| CN.01.4 |           |           |           |           | C         |           |           |           |           |
+| CN.01.5 |           |           |           |           |           | C         |           |           |           |
+| CN.01.6 |           |           |           |           |           |           | C         |           |           |
+| CN.02.1 |           |           |           |           |           |           |           | C         |           |
+| CN.02.2 |           |           |           |           |           |           |           |           | C         |
 
 **C** = Complete, **P** = Partial ✅
+
+The matrix is diagonal because the IDs are: an `FR.{cp}.{cn}.{n}` can only carry a **C** in
+the row of the `CN.{cp}.{n}` its own ID names. Anything off the diagonal is a shared
+requirement, and has to be justified as one.
 
 ---
 
@@ -204,10 +212,12 @@ MicroER is energy management software for residential users with renewable micro
 ## Key Learnings
 
 1. **Technical Domain:** Embedded systems require more Control-type CNs
-2. **Deep Decomposition:** CP.1 has 5 sub-problems reflecting system complexity
+2. **Deep Decomposition:** CP.01 has 5 sub-problems reflecting system complexity
 3. **Hardware Integration:** Software Glance must acknowledge hardware boundaries
 4. **Multiple Outcome Classes:** Mix of Information (6), Control (2), and Construction (1)
-5. **Hope-class Problems:** CP.3 and CP.4 are aspirational; may not generate direct FRs
+5. **Hope-class Problems:** CP.03 and CP.04 are aspirational; may not generate direct FRs
+6. **Numbering follows parentage, not order of discovery:** the profile-creation need was
+   found last but belongs to `CP.01`, so it is `CN.01.6` — not the eighth need overall
 
 ---
 

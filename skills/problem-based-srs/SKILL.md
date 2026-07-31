@@ -110,6 +110,7 @@ the ID itself — reading an ID tells you what it descends from:
 |----------|--------|---------|----------|
 | Customer Problem | `CP.{n}` | `CP.01` | the first customer problem |
 | Sub-problem | `CP.{n}.{m}` | `CP.01.1` | first facet of `CP.01` |
+| Sub-sub-problem (rare) | `CP.{n}.{m}.{k}` | `CP.01.2.1` | first facet of `CP.01.2` |
 | Customer Need | `CN.{cp}.{n}` | `CN.01.1` | first need addressing `CP.01` |
 | Functional Requirement | `FR.{cp}.{cn}.{n}` | `FR.01.1.1` | first FR implementing `CN.01.1` |
 | Non-Functional Requirement | `NFR.{n}` | `NFR.01` | the first quality requirement |
