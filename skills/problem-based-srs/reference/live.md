@@ -5,8 +5,9 @@ render the current Problem-Based SRS specification as an interactive, force-dire
 graph. This is the UX layer for navigating the artifacts produced by the methodology
 skills (`business-context` → `customer-problems` → … → `functional-requirements`).
 
-The canvas extension ships in this repository at
-`.github/extensions/srs-navigator/` and registers a canvas with id **`srs-navigator`**
+The canvas extension is installed **separately from these skills**. Its source lives at
+[`.github/extensions/srs-navigator/`](https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator)
+in the Problem-Based-SRS project, and it registers a canvas with id **`srs-navigator`**
 plus the full methodology as agent tools.
 
 ## When to use
@@ -45,8 +46,9 @@ plus the full methodology as agent tools.
 
 ## Specification shape
 
-The navigator expects a JSON object with these arrays (see
-`.spec/crm-system.json` for a complete example):
+The navigator expects a JSON object with these arrays (the project repository ships a
+complete example at
+[`.spec/crm-system.json`](https://github.com/RafaelGorski/Problem-Based-SRS/blob/main/.spec/crm-system.json)):
 
 ```jsonc
 {
@@ -55,7 +57,7 @@ The navigator expects a JSON object with these arrays (see
   "problems": [ { "id": "CP.01", "label": "…", "description": "…" } ],
   "needs": [ { "id": "CN.01.1", "label": "…", "problem": "CP.01" } ],
   "functionalRequirements": [ { "id": "FR.01.1.1", "label": "…", "need": "CN.01.1" } ],
-  "nonFunctionalRequirements": [ { "id": "NFR.1.0", "label": "…" } ]
+  "nonFunctionalRequirements": [ { "id": "NFR.01", "label": "…" } ]
 }
 ```
 
@@ -66,8 +68,13 @@ consistent with the methodology naming convention (`CP → CN → FR`).
 
 - The canvas runs entirely inside the Copilot app on a loopback HTTP server — nothing
   leaves the machine.
-- If the `srs-navigator` canvas is not available, the extension may not be installed in
-  the current scope. It lives at `.github/extensions/srs-navigator/`; reload extensions
-  so the `srs-navigator` canvas and its tools are registered, then retry `open_canvas`.
+- If the `srs-navigator` canvas is not available, the extension is not installed in the
+  current scope. It is a **separate install** from these skills — do not assume its source
+  tree is on disk. Ask the Copilot app to install it from
+  `https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator`,
+  or extract a `srs-navigator-<version>` archive from the
+  [filtered release list](https://github.com/RafaelGorski/Problem-Based-SRS/releases?q=srs-navigator&expanded=true)
+  into `~/.copilot/extensions/` (the archive already carries its own `srs-navigator/`
+  folder, and needs no `npm install`). Then reload extensions and retry `open_canvas`.
 - This skill only handles **visualization**. To create or refine the underlying
   artifacts, use the `/problem-based-srs` command (e.g. `/problem-based-srs problems`).

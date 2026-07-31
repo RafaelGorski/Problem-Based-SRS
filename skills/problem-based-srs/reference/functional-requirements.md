@@ -308,7 +308,7 @@ The [System] shall [quality attribute] [measurable target] [condition].
 - One CN typically requires MULTIPLE FRs
 - Every CN MUST be addressed by at least one FR
 
-## Quality Rules (per [ISO/IEC/IEEE 29148:2018](../../../docs/references/iso-iec-ieee-29148-2018.md))
+## Quality Rules (per [ISO/IEC/IEEE 29148:2018](https://www.iso.org/standard/72089.html))
 
 - **Complete**: All customer needs MUST be met by requirements
 - **Correct**: All requirements MUST meet some customer need
