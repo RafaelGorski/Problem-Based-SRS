@@ -153,17 +153,17 @@ SRS Navigator and no specification is loaded, the start screen offers three ways
 
 | Action | What it does |
 |--------|--------------|
-| **Learn & Create Spec** | Scans your project and generates a specification |
+| **Learn & Create Spec** | Harvests evidence from your project, confirms it with you, and generates a specification |
 | **Load Specification** | Opens an existing `.spec` JSON file from your project |
 | **Explore Demo** | Loads the CRM sample specification to explore features |
 
-**Learn & Create Spec** is the primary onboarding path. It reads your existing code,
-README, and documentation, runs the full Problem-Based SRS methodology (`problem_based_srs`,
-i.e. `/problem-based-srs`) to work backward from the system to the customer problems it
-solves, writes the resulting artifacts to your `.spec/` folder, and loads them as an
-interactive graph. You then refine the draft with the agent using the action bar (`+CN`,
-`+FR`, `decompose`, and so on). It is the same path the `learn` agent action triggers
-programmatically.
+**Learn & Create Spec** is the primary onboarding path. It reads your existing code, README,
+and documentation to gather evidence — schema volumes, recurring ticket themes, TODOs,
+operational metrics — then runs the full Problem-Based SRS methodology (`problem_based_srs`,
+i.e. `/problem-based-srs`) to work backward from the system to the customer problems it solves,
+writes the resulting artifacts to your `.spec/` folder, and loads them as an interactive graph.
+You then refine the draft with the agent using the action bar (`+CN`, `+FR`, `decompose`, and so
+on). It is the same path the `learn` agent action triggers programmatically.
 
 > **The app runs the skill — it never performs the methodology on the agent's behalf.**
 > Every prompt the canvas sends (splash actions, action-bar actions, queued
@@ -172,6 +172,12 @@ programmatically.
 > Interview is mandatory**: the agent must ask you clarifying questions and wait for
 > answers before writing artifacts. Autopilot / non-interactive mode does not waive it.
 > `tests/app-prompts.test.mjs` fails if any of those directives drift.
+
+The scan is *preparation*, not a substitute for you. The methodology's `problems` step carries
+a mandatory Discovery Interview, and reading a repository never satisfies its Skip Conditions —
+so the agent asserts what the evidence suggests and waits for you to confirm or correct it
+before writing Customer Problems. See **Mode 3: Brownfield Discovery** in
+`skills/problem-based-srs/reference/problems.md`.
 
 ## Architecture & Agent Integration
 

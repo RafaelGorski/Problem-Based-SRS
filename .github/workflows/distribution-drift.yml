@@ -1,0 +1,38 @@
+# The project is distributed through surfaces it does not own: the skills.sh listing and
+# GitHub Releases. Both drifted silently — the listing still advertises the nine pre-#50
+# skills, and the manifest reached 2.6.0 while the newest release stayed v2.4.1 — because
+# nothing looked. This is the thing that looks.
+#
+# It is deliberately not part of CI. Third-party state is not a property of a pull
+# request, so gating PRs on someone else's cache would block unrelated work. A red run
+# here is the notification; it clears when the listing is refreshed or the release is cut.
+name: Distribution drift
+
+on:
+  schedule:
+    # Mondays, 09:00 UTC — a weekly nudge, not a pager.
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Compare published surfaces against the repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # No `npm ci`: the checker imports only node: builtins and evals/lib/skills.mjs,
+      # which evals/tests/distribution-drift.test.mjs asserts.
+      - name: Check distribution surfaces
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/check-distribution.mjs --strict
