@@ -28,6 +28,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseFrontmatter } from "../evals/lib/skills.mjs";
+import { nextVersion } from "./bump-version.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..");
@@ -510,6 +511,21 @@ export function summarize({
     });
   }
   if (canvasVersion && !releases.canvas.published) {
+    // Naming the advertised version is not enough: release-canvas.yml *increments* from it, so
+    // running the workflow publishes the next one and the advertised number is skipped forever.
+    // Derive that from bump-version.mjs rather than restating it — the same "advice that cannot
+    // produce the state it asks for" defect the plugin side had.
+    let willPublish = null;
+    try {
+      willPublish = nextVersion(
+        canvasVersion,
+        "patch",
+        publishedReleases.map((r) => r.tag).filter(Boolean),
+      );
+    } catch {
+      // A VERSION the bump script cannot parse is itself worth reporting, and a monitor that
+      // throws on the malformed input it exists to notice reports nothing at all.
+    }
     findings.push({
       id: "canvas-release-missing",
       severity: "error",
@@ -517,7 +533,13 @@ export function summarize({
       detail: [
         `VERSION: ${canvasVersion}`,
         newestLine(releases.canvas, "canvas"),
-        "release-canvas.yml owns this train and bumps VERSION itself.",
+        willPublish
+          ? `release-canvas.yml owns this train and bumps VERSION itself — running it publishes ` +
+            `v${willPublish}, not v${canvasVersion}.`
+          : `release-canvas.yml owns this train, but bump-version.mjs cannot read ${canvasVersion} ` +
+            `as X.Y.Z, so no release can start from it.`,
+        `To publish ${canvasVersion}, reset VERSION and the extension package.json to the ` +
+          `newest published canvas release and let the workflow do the bump.`,
       ],
     });
   }
