@@ -15,7 +15,10 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+
+import { pluginReleaseTag } from "../../scripts/check-distribution.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
@@ -49,6 +52,15 @@ export function compareVersions(a, b) {
 /** The version strings a visitor is shown on the site / README, e.g. "v2.5.0". */
 export function displayedVersions(text) {
   return [...text.matchAll(/\bv(\d+\.\d+(?:\.\d+)?)\b/g)].map((m) => m[1]);
+}
+
+/** Parse Keep-a-Changelog reference definitions: `[2.6.0]: https://…/releases/tag/v2.6`. */
+export function changelogTagLinks(md) {
+  return [...md.matchAll(/^\[([^\]]+)\]:\s*(\S*\/releases\/tag\/(\S+))\s*$/gm)].map((m) => ({
+    version: m[1],
+    url: m[2],
+    tag: m[3],
+  }));
 }
 
 describe("release hygiene — the manifest is the source of truth", () => {
@@ -106,6 +118,46 @@ describe("release hygiene — the manifest is the source of truth", () => {
       body.split("\n").filter((l) => l.trim().startsWith("- ")).length >= 3,
       "a release worth cutting has more than a couple of bullet points",
     );
+  });
+
+  it("links the manifest version at the tag the release pipeline actually creates", () => {
+    // The last open box on #69 is "cut the release". This is what decides whether doing
+    // that produces a working link. create-release.yml builds its tag from the *normalized*
+    // version — `TAG="v${VERSION}"` where VERSION is build-plugin.py's output — and
+    // normalize_version strips a trailing ".0". So manifest 2.6.0 publishes at v2.6.
+    // GitHub serves /releases/tag/<tag> by exact name, so a changelog link naming v2.6.0
+    // stays a 404 *after* the release is cut, and the drift monitor keeps reporting it with
+    // advice ("cut the missing release") that no longer applies.
+    const expected = pluginReleaseTag(manifest.version);
+    assert.ok(expected, `pluginReleaseTag could not read ${manifest.version}`);
+    const links = changelogTagLinks(CHANGELOG);
+    const link = links.find((l) => compareVersions(l.version, manifest.version) === 0);
+    assert.ok(
+      link,
+      `CHANGELOG.md has no [${manifest.version}] link definition. Sections found: ` +
+        links.map((l) => l.version).join(", "),
+    );
+    assert.equal(
+      link.tag,
+      expected,
+      `CHANGELOG.md links ${link.tag} for ${manifest.version}, but the release pipeline ` +
+        `publishes that version at ${expected}. Cutting the release would not fix the link.`,
+    );
+  });
+
+  it("gives every changelog version exactly one release link", () => {
+    const sections = changelogSections(CHANGELOG);
+    const links = changelogTagLinks(CHANGELOG);
+    for (const section of sections) {
+      const matches = links.filter((l) => l.version === section.version);
+      assert.equal(
+        matches.length,
+        1,
+        `## [${section.version}] must have exactly one link definition, found ` +
+          `${matches.length} — the release workflow's notes and the reader's link come ` +
+          `from the same section heading`,
+      );
+    }
   });
 });
 
@@ -227,4 +279,114 @@ describe("negative canaries", () => {
       "the check must actually notice a drifted badge",
     );
   });
+
+  it("changelogTagLinks reads reference definitions, not prose or index links", () => {
+    assert.deepEqual(
+      changelogTagLinks("[2.4]: https://github.com/o/r/releases/tag/v2.4"),
+      [{ version: "2.4", url: "https://github.com/o/r/releases/tag/v2.4", tag: "v2.4" }],
+    );
+    assert.deepEqual(
+      changelogTagLinks("see [2.4]: https://github.com/o/r/releases/tag/v2.4 inline"),
+      [],
+      "only a definition at the start of a line defines a link",
+    );
+    assert.deepEqual(
+      changelogTagLinks("[Unreleased]: https://github.com/o/r/releases"),
+      [],
+      "the /releases index is not a per-tag link and resolves regardless",
+    );
+  });
+
+  it("a changelog link that names an unpublishable tag fails this suite's check", () => {
+    // Build the wrong tag from the right one rather than from the manifest string. `v` +
+    // the raw version is only wrong while the version ends in `.0`; for a patch release
+    // like 2.4.1 it is exactly what the pipeline creates, and a canary written that way
+    // goes red on a correct repository the first time a patch ships.
+    const broken = CHANGELOG.replace(
+      new RegExp(`^\\[${manifest.version.replace(/\./g, "\\.")}\\]:.*$`, "m"),
+      `[${manifest.version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${pluginReleaseTag(manifest.version)}.0`,
+    );
+    const link = changelogTagLinks(broken).find(
+      (l) => compareVersions(l.version, manifest.version) === 0,
+    );
+    assert.ok(link, "the mutation must still produce a link definition");
+    assert.notEqual(
+      link.tag,
+      pluginReleaseTag(manifest.version),
+      "a tag the pipeline never creates must be caught — that was the live defect",
+    );
+  });
+
+  it("the canary's mutation is wrong for every version shape, not just X.Y.0", () => {
+    // The property under test is the canary's own construction, so it is checked directly
+    // against the shapes the manifest can hold rather than only the one it holds today.
+    for (const version of ["2.6.0", "2.4.1", "1.0", "3.0.0", "2.10.4"]) {
+      const published = pluginReleaseTag(version);
+      assert.notEqual(
+        `${published}.0`,
+        published,
+        `${version}: the canary must name a tag the pipeline cannot create`,
+      );
+    }
+    assert.equal(
+      `v${"2.4.1"}`,
+      pluginReleaseTag("2.4.1"),
+      "and the old construction is proven wrong: for a patch release `v` + the manifest " +
+        "version *is* the published tag, so asserting it differs would fail on a healthy repo",
+    );
+  });
 });
+
+describe("the tag rule is derived from the pipeline, not restated", () => {
+  it("create-release.yml tags the version build-plugin.py normalized", () => {
+    const wf = read(".github/workflows/create-release.yml");
+    assert.match(
+      wf,
+      /TAG="v\$\{VERSION\}"/,
+      "the release tag is `v` + VERSION; if that changes, pluginReleaseTag must change with it",
+    );
+    assert.match(
+      wf,
+      /VERSION:\s*\$\{\{\s*steps\.build\.outputs\.version\s*\}\}/,
+      "VERSION comes from build-plugin.py's output, i.e. the *normalized* version — not " +
+        "the raw tag or input. That indirection is why a v2.6.0 link can never resolve.",
+    );
+  });
+
+  it("agrees with build-plugin.py's own normalize_version", (t) => {
+    const cases = ["2.6.0", "2.4.1", "2.4.0", "1.0.0", "3.0.0", "2.10.0", "v2.6.0"];
+    const script =
+      "import importlib.util,sys\n" +
+      "spec=importlib.util.spec_from_file_location('bp', sys.argv[1])\n" +
+      "m=importlib.util.module_from_spec(spec)\n" +
+      "spec.loader.exec_module(m)\n" +
+      "print('\\n'.join(m.normalize_version(v) for v in sys.argv[2:]))\n";
+    let out = null;
+    for (const exe of ["python3", "python"]) {
+      // -B: importing build-plugin.py must not leave a __pycache__ in a tracked directory.
+      const res = spawnSync(
+        exe,
+        ["-B", "-c", script, path.join(repoRoot, "scripts/build-plugin.py"), ...cases],
+        { encoding: "utf8", env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" } },
+      );
+      if (res.status === 0) {
+        out = res.stdout.trim().split(/\r?\n/);
+        break;
+      }
+    }
+    if (!out) {
+      t.skip("no python interpreter available to cross-check normalize_version");
+      return;
+    }
+    assert.equal(out.length, cases.length, "one normalized version per case");
+    cases.forEach((v, i) => {
+      assert.equal(
+        pluginReleaseTag(v),
+        `v${out[i]}`,
+        `pluginReleaseTag(${v}) must equal 'v' + build-plugin.py's normalize_version(${v}) ` +
+          `= v${out[i]} — the JS copy exists only because the checker runs in Node`,
+      );
+    });
+  });
+});
+

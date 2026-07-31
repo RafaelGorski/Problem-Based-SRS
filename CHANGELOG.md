@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
+  pointed at `releases/tag/v2.6.0` and `/v2.5.0`, but `create-release.yml` builds its tag
+  from `build-plugin.py`'s *normalized* version — `TAG="v${VERSION}"` after
+  `normalize_version()` strips the trailing `.0` — so those versions publish at **`v2.6`**
+  and **`v2.5`**. GitHub serves `/releases/tag/<tag>` by exact name, so cutting the release
+  the drift monitor asks for would have left both links 404 and the monitor red, still
+  advising a release that by then existed. Both links now name the tag the pipeline
+  produces, and `release-hygiene.test.mjs` derives that tag by executing
+  `build-plugin.py`'s own `normalize_version` rather than restating its rule.
+- **The drift report told the canvas app it was behind a release of the other product.**
+  `releaseDrift()` matched each train separately and then printed a single global newest
+  tag in both findings, so `VERSION` 1.1.1 was reported against `v2.4.1` — a *plugin*
+  release. Releases are now classified by the title their own workflow writes
+  (`srs-navigator …` versus `🎉 Version …`), each train reports its own newest, and with no
+  titles available the report says the train is unidentifiable instead of guessing. A train
+  that simply has no releases yet is reported as empty rather than as unidentifiable, so the
+  fallback cannot quietly reintroduce the cross-train citation it exists to prevent.
+- **A dangling link that a release cannot fix is reported as its own finding.**
+  `unpublishable-release-link` separates "this names a tag no pipeline creates — correct the
+  link" from `dangling-release-links`' "cut the release", so the runbook entry a maintainer
+  follows matches the action that will actually clear the finding. The plugin's `.0`-stripping
+  rule is applied only to `CHANGELOG.md`, the file `build-plugin.py` reads for release notes;
+  the canvas train tags `v${VERSION}` verbatim, so a canvas link awaiting its release stays a
+  release to cut rather than becoming a link to break.
+
 - **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
   itself.** The splash-screen prompt named the `problem_based_srs` tool and then described
   the work ("scan the workspace… generate the artifacts"), so an agent could satisfy it
@@ -165,7 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file that exists in neither the archive nor the repository — goes with it. The archive is
   22 files / 92 KB compressed, and both surfaces now tell the reader no `npm install` follows.
 
-[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6.0
+[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6
 
 ## [2.5.0] - 2026-07-31
 
@@ -243,7 +268,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `stage()` are exported so the install guard derives archive facts from the packager
   rather than restating them.
 
-[2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5.0
+[2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5
 
 ## [2.4.1] - 2026-07-22
 
