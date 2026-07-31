@@ -1889,7 +1889,7 @@ export function renderGraphHtml(graphData, options = {}) {
             </span>
             <span class="landing-action-text">
               <span class="label">Learn &amp; Create Spec</span>
-              <span class="desc">Scan your project and generate a specification</span>
+              <span class="desc">Scan your project, confirm what hurts, generate a spec</span>
             </span>
           </button>
           <button class="landing-action-btn" id="modal-btn-load" aria-label="Load an existing specification file">
