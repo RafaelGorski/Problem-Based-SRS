@@ -135,6 +135,9 @@ export function listingDrift({ listed = [], actual = [] } = {}) {
 
 const TAG_LINK = /https?:\/\/github\.com\/([\w.-]+\/[\w.-]+)\/releases\/tag\/([^\s)"'\]]+)/g;
 
+/** A Keep-a-Changelog reference definition: `[2.6.0]: <url>` at the start of a line. */
+const REFERENCE_DEF = /^\[([^\]]+)\]:\s*(\S+)/;
+
 /**
  * Every per-tag release URL a set of documents publishes, with file and line.
  *
@@ -142,21 +145,78 @@ const TAG_LINK = /https?:\/\/github\.com\/([\w.-]+\/[\w.-]+)\/releases\/tag\/([^
  * `/releases/download/…` asset URLs: those resolve whether or not a given tag exists, so
  * flagging them would bury the finding that matters.
  *
+ * `label` is the version a reference definition claims the link is for, and it is the only
+ * thing that makes "does this tag match what the release pipeline creates?" answerable. An
+ * inline prose link makes no such claim, so it stays null rather than being guessed at.
+ *
  * @param {Array<{file:string, text:string}>} sources
- * @returns {Array<{file:string, line:number, repo:string, tag:string, url:string}>}
+ * @returns {Array<{file:string, line:number, repo:string, tag:string, url:string, label:string|null}>}
  */
 export function advertisedTagLinks(sources = []) {
   const out = [];
   for (const { file, text } of sources) {
     const lines = String(text ?? "").split(/\r?\n/);
     lines.forEach((line, i) => {
+      const def = line.match(REFERENCE_DEF);
       for (const m of line.matchAll(TAG_LINK)) {
-        out.push({ file, line: i + 1, repo: m[1], tag: m[2], url: m[0] });
+        out.push({
+          file,
+          line: i + 1,
+          repo: m[1],
+          tag: m[2],
+          url: m[0],
+          label: def && def[2] === m[0] ? def[1] : null,
+        });
       }
     });
   }
   return out;
 }
+
+/**
+ * The tag the plugin release pipeline publishes a version at.
+ *
+ * Not cosmetic. `create-release.yml` builds `TAG="v${VERSION}"` from
+ * `steps.build.outputs.version`, i.e. build-plugin.py's *normalized* version, and
+ * `normalize_version()` strips a trailing `.0` down to two parts. So manifest `2.6.0` is
+ * published at `v2.6` — and because GitHub serves `/releases/tag/<tag>` by exact name, a
+ * link naming `v2.6.0` is a 404 that cutting the release does not fix.
+ *
+ * Kept byte-compatible with build-plugin.py's rule; `release-hygiene.test.mjs` executes the
+ * Python function and compares, so the two cannot drift apart silently.
+ *
+ * @param {string} version
+ * @returns {string|null} null when the value is not a dotted numeric version
+ */
+export function pluginReleaseTag(version) {
+  const raw = String(version ?? "").trim().replace(/^v/i, "");
+  if (!/^\d+(\.\d+)*$/.test(raw)) return null;
+  const parts = raw.split(".");
+  while (parts.length > 2 && parts[parts.length - 1] === "0") parts.pop();
+  return `v${parts.join(".")}`;
+}
+
+/** The title prefix `release-canvas.yml` gives every canvas release. */
+const CANVAS_RELEASE_TITLE = /^srs-navigator\b/i;
+
+/**
+ * Which release train a published release belongs to.
+ *
+ * The trains cannot be told apart by tag — `v2.4.1` is a plugin release and `v1.1.0` is a
+ * canvas one — so the only separator is the title each workflow writes:
+ * `--title "srs-navigator ${version}"` versus `TITLE="🎉 Version ${VERSION}"`. Without a
+ * title the answer is "unknown", not a guess: reporting one train's release as the other's
+ * is the mistake this classification exists to prevent.
+ *
+ * @param {{tag?:string, name?:string|null}} release
+ * @returns {"canvas"|"plugin"|"unknown"}
+ */
+export function releaseTrain(release = {}) {
+  const name = typeof release?.name === "string" ? release.name.trim() : "";
+  if (!name) return "unknown";
+  return CANVAS_RELEASE_TITLE.test(name) ? "canvas" : "plugin";
+}
+
 
 /**
  * Normalize a version or tag to X.Y.Z so the plugin train's two-part tags (`v2.4`, stored
@@ -218,25 +278,44 @@ export function danglingTagLinks(links = [], publishedTags = [], { repo = REPO }
  * satisfy a canvas VERSION of 1.2.0 — a release of the *other* product silencing exactly
  * the "bumped but never cut" case this checker exists for.
  *
- * @param {{manifestVersion:string, canvasVersion:string, tags:string[]}} input
+ * The same separation has to hold in what the report *says*, not only in what it matches:
+ * each train carries its own `newest`, derived from the titles the workflows write, so the
+ * canvas finding can never cite a plugin release as the thing the canvas app is behind.
+ * When no titles came back, `newest` is null per train rather than a cross-train guess.
+ *
+ * @param {{manifestVersion:string, canvasVersion:string, tags?:string[], releases?:Array<{tag:string,name?:string|null}>}} input
  */
-export function releaseDrift({ manifestVersion, canvasVersion, tags = [] } = {}) {
-  const train = (advertised, match) => {
-    const matchedTag = advertised ? match(advertised, tags) : null;
-    return { advertised: advertised ?? null, matchedTag, published: matchedTag !== null };
+export function releaseDrift({ manifestVersion, canvasVersion, tags = [], releases } = {}) {
+  const list =
+    Array.isArray(releases) && releases.length
+      ? releases
+      : tags.map((tag) => ({ tag, name: null }));
+  const allTags = list.map((r) => r?.tag).filter(Boolean);
+
+  const newestIn = (entries) => {
+    let newest = null;
+    for (const { tag } of entries) {
+      const v = normalizeVersion(tag);
+      if (!v) continue;
+      if (newest === null || compareVersions(v, normalizeVersion(newest)) > 0) newest = tag;
+    }
+    return newest;
   };
 
-  let newest = null;
-  for (const tag of tags) {
-    const v = normalizeVersion(tag);
-    if (!v) continue;
-    if (newest === null || compareVersions(v, normalizeVersion(newest)) > 0) newest = tag;
-  }
+  const train = (advertised, match, name) => {
+    const matchedTag = advertised ? match(advertised, allTags) : null;
+    return {
+      advertised: advertised ?? null,
+      matchedTag,
+      published: matchedTag !== null,
+      newest: newestIn(list.filter((r) => releaseTrain(r) === name)),
+    };
+  };
 
   return {
-    plugin: train(manifestVersion, pluginTag),
-    canvas: train(canvasVersion, exactTag),
-    newest,
+    plugin: train(manifestVersion, pluginTag, "plugin"),
+    canvas: train(canvasVersion, exactTag, "canvas"),
+    newest: newestIn(list),
   };
 }
 
@@ -270,12 +349,21 @@ export function summarize({
   repoSkills = [],
   tagLinks = [],
   publishedTags = [],
+  publishedReleases = null,
   manifestVersion = null,
   canvasVersion = null,
   errors = [],
 } = {}) {
   const findings = [];
   const failed = new Set(errors.map((e) => e.surface));
+  // One list, one truth. When the caller has the release titles, they also carry the tags;
+  // accepting a second, possibly disagreeing tag list would let a summary report a link as
+  // resolved while the same release is reported as missing.
+  const releaseList =
+    Array.isArray(publishedReleases) && publishedReleases.length
+      ? publishedReleases
+      : publishedTags.map((tag) => ({ tag, name: null }));
+  const tags = releaseList.map((r) => r?.tag).filter(Boolean);
 
   for (const { surface, message } of errors) {
     findings.push({
@@ -339,17 +427,54 @@ export function summarize({
     }
   }
 
-  const dangling = danglingTagLinks(tagLinks, publishedTags);
-  if (dangling.length) {
+  const dangling = danglingTagLinks(tagLinks, tags);
+  // A link that names a tag no pipeline creates is a different job from one that is merely
+  // waiting for a tag push. Reporting both under "cut the missing release" hands the
+  // maintainer an instruction that cannot work: cutting v2.6 leaves a v2.6.0 link 404, so
+  // the run stays red and the advice that produced it is now false.
+  const unpublishable = dangling.filter((l) => {
+    const expected = l.label ? pluginReleaseTag(l.label) : null;
+    return expected !== null && expected !== l.tag;
+  });
+  const pending = dangling.filter((l) => !unpublishable.includes(l));
+
+  if (unpublishable.length) {
+    findings.push({
+      id: "unpublishable-release-link",
+      severity: "error",
+      title: "Published links name tags no release pipeline creates",
+      detail: [
+        ...unpublishable.map(
+          (l) =>
+            `${l.file}:${l.line}  [${l.label}] links ${l.tag}, but the pipeline publishes ` +
+            `that version at ${pluginReleaseTag(l.label)}`,
+        ),
+        "Cutting the release will not fix these — GitHub serves /releases/tag/<tag> by " +
+          "exact name. Correct the link.",
+      ],
+    });
+  }
+  if (pending.length) {
     findings.push({
       id: "dangling-release-links",
       severity: "error",
       title: "Published links point at releases that do not exist",
-      detail: dangling.map((l) => `${l.file}:${l.line}  ${l.tag}  ${l.url}`),
+      detail: pending.map((l) => `${l.file}:${l.line}  ${l.tag}  ${l.url}`),
     });
   }
 
-  const releases = releaseDrift({ manifestVersion, canvasVersion, tags: publishedTags });
+  const releases = releaseDrift({
+    manifestVersion,
+    canvasVersion,
+    releases: releaseList,
+  });
+  // Naming the other train's release as what this one is behind is the category error the
+  // matching above takes care to avoid; it must not reappear in the prose.
+  const newestLine = (train, label) =>
+    train.newest
+      ? `newest published ${label} release: ${train.newest}`
+      : `newest published release (train not identifiable): ${releases.newest ?? "none"}`;
+
   if (manifestVersion && !releases.plugin.published) {
     findings.push({
       id: "plugin-release-missing",
@@ -357,8 +482,9 @@ export function summarize({
       title: `The plugin advertises ${manifestVersion} but no such release is published`,
       detail: [
         `.claude-plugin/plugin.json: ${manifestVersion}`,
-        `newest published release: ${releases.newest ?? "none"}`,
-        "Cut it with `git tag vX.Y && git push origin vX.Y` (create-release.yml).",
+        newestLine(releases.plugin, "plugin"),
+        `Cut it with \`git tag ${pluginReleaseTag(manifestVersion) ?? "vX.Y"} && git push ` +
+          `origin ${pluginReleaseTag(manifestVersion) ?? "vX.Y"}\` (create-release.yml).`,
       ],
     });
   }
@@ -369,7 +495,7 @@ export function summarize({
       title: `The canvas app advertises ${canvasVersion} but no such release is published`,
       detail: [
         `VERSION: ${canvasVersion}`,
-        `newest published release: ${releases.newest ?? "none"}`,
+        newestLine(releases.canvas, "canvas"),
         "release-canvas.yml owns this train and bumps VERSION itself.",
       ],
     });
@@ -420,7 +546,15 @@ export async function fetchRegistryListing({ url = REGISTRY_URL, fetchImpl } = {
   return await res.text();
 }
 
-export async function fetchPublishedTags({ repo = REPO, fetchImpl, token } = {}) {
+/**
+ * Published (non-draft) releases with the title their workflow gave them.
+ *
+ * The title is not decoration: it is the only thing that distinguishes the canvas train
+ * from the plugin train, which share a tag namespace. Dropping it — as this function did
+ * when it returned tags alone — is what let the report tell the canvas app it was behind
+ * `v2.4.1`, a release of the other product.
+ */
+export async function fetchPublishedReleases({ repo = REPO, fetchImpl, token } = {}) {
   const doFetch = fetchImpl ?? globalThis.fetch;
   const headers = { accept: "application/vnd.github+json" };
   if (token) headers.authorization = `Bearer ${token}`;
@@ -429,9 +563,13 @@ export async function fetchPublishedTags({ repo = REPO, fetchImpl, token } = {})
   if (!res.ok) throw new Error(`${url} responded ${res.status}`);
   const body = await res.json();
   return (Array.isArray(body) ? body : [])
-    .filter((r) => !r.draft)
-    .map((r) => r.tag_name)
-    .filter(Boolean);
+    .filter((r) => !r.draft && r.tag_name)
+    .map((r) => ({ tag: r.tag_name, name: typeof r.name === "string" ? r.name : null }));
+}
+
+/** The same list flattened to tag names, for callers that only compare tags. */
+export async function fetchPublishedTags(options = {}) {
+  return (await fetchPublishedReleases(options)).map((r) => r.tag);
 }
 
 export function readLocalState(root = REPO_ROOT) {
@@ -465,9 +603,9 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
     errors.push({ surface: "registry", message: `${registryUrl}: ${err.message}` });
   }
 
-  let publishedTags = [];
+  let publishedReleases = [];
   try {
-    publishedTags = await fetchPublishedTags({
+    publishedReleases = await fetchPublishedReleases({
       fetchImpl,
       token: env.GITHUB_TOKEN || env.GH_TOKEN,
     });
@@ -480,7 +618,13 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
     local.canvasVersion = null;
   }
 
-  const summary = summarize({ listing, ...local, publishedTags, errors });
+  const summary = summarize({
+    listing,
+    ...local,
+    publishedTags: publishedReleases.map((r) => r.tag),
+    publishedReleases,
+    errors,
+  });
   const output = asJson ? JSON.stringify(summary, null, 2) : renderReport(summary);
   console.log(output);
 
