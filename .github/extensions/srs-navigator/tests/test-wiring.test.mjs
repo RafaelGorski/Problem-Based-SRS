@@ -16,7 +16,15 @@ const EXT_ROOT = path.resolve(HERE, "..");
 
 // Playwright-driven suites must NOT run under `node --test` (they import
 // `@playwright/test`, which is only meaningful under the playwright runner).
-const PLAYWRIGHT_ONLY = new Set(["visual.test.mjs"]);
+//
+// Which runner a file belongs to is derived from the file itself rather than kept in
+// a hand-maintained list here. A list is a second place to remember: the previous
+// hardcoded `Set(["visual.test.mjs"])` meant adding a second Playwright suite broke
+// this guard for a reason that had nothing to do with wiring.
+function isPlaywrightSuite(file) {
+  const src = readFileSync(path.join(EXT_ROOT, "tests", file), "utf8");
+  return /from\s+["']@playwright\/test["']/.test(src);
+}
 
 function readTestScript() {
   const pkg = JSON.parse(readFileSync(path.join(EXT_ROOT, "package.json"), "utf8"));
@@ -28,6 +36,8 @@ function listTestFiles() {
     .filter((f) => f.endsWith(".test.mjs"))
     .sort();
 }
+
+const PLAYWRIGHT_ONLY = new Set(listTestFiles().filter(isPlaywrightSuite));
 
 describe("test wiring", () => {
   it("runs every tests/*.test.mjs in the npm test script", () => {
@@ -45,12 +55,24 @@ describe("test wiring", () => {
 
   it("does not run Playwright-only suites under node --test", () => {
     const script = readTestScript();
+    assert.ok(PLAYWRIGHT_ONLY.size > 0, "the Playwright suites should still be detectable");
     for (const f of PLAYWRIGHT_ONLY) {
       assert.ok(
         !script.includes(`tests/${f}`),
         `${f} imports @playwright/test and must stay out of the node --test script.`
       );
     }
+  });
+
+  it("runs every Playwright suite under the playwright config", () => {
+    const config = readFileSync(path.join(EXT_ROOT, "playwright.config.mjs"), "utf8");
+    const unmatched = [...PLAYWRIGHT_ONLY].filter((f) => !config.includes(f));
+    assert.deepEqual(
+      unmatched,
+      [],
+      `Playwright suite(s) not selected by playwright.config.mjs: ${unmatched.join(", ")}. ` +
+        "A spec that no project matches never runs."
+    );
   });
 
   it("only references test files that exist on disk", () => {

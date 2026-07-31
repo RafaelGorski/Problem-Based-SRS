@@ -93,14 +93,26 @@ export function buildSnapshot(results, root = REPO_ROOT) {
   const ran = suites.filter((s) => s.state !== "skipped");
   const failed = suites.filter((s) => s.state === "failed");
 
+  // The dashboard is published on the project site next to the plugin version
+  // badge, so it must report the *plugin* version. It used to read the canvas
+  // extension's VERSION file (1.1.0) and print it beside a site badge that said
+  // 2.4.1 — two different release trains, one confusing number.
+  const manifestFile = path.join(root, ".claude-plugin/plugin.json");
   const versionFile = path.join(root, "VERSION");
-  const version = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, "utf8").trim() : "";
+  let version = "";
+  if (fs.existsSync(manifestFile)) {
+    version = JSON.parse(fs.readFileSync(manifestFile, "utf8")).version ?? "";
+  }
+  const canvasVersion = fs.existsSync(versionFile)
+    ? fs.readFileSync(versionFile, "utf8").trim()
+    : "";
 
   return {
     schema: "skills-health/1",
     generatedAt: results.startedAt ?? new Date().toISOString(),
     repo: "RafaelGorski/Problem-Based-SRS",
     version,
+    canvasVersion,
     overall: {
       state: failed.length ? "failed" : "passed",
       suites: suites.length,
@@ -206,7 +218,7 @@ export function renderDashboard(snap) {
 <body>
 <main class="health">
   <h1>Skills Health</h1>
-  <p class="sub">Problem-Based SRS ${snap.version ? `v${esc(snap.version)} · ` : ""}generated ${esc(stamp)} · <a href="index.html">back to the site</a></p>
+  <p class="sub">Problem-Based SRS ${snap.version ? `v${esc(snap.version)} · ` : ""}${snap.canvasVersion ? `SRS Navigator v${esc(snap.canvasVersion)} · ` : ""}generated ${esc(stamp)} · <a href="index.html">back to the site</a></p>
 
   <div class="cards">
     <div class="card verdict-${esc(o.state)}"><span class="k">Verdict</span><span class="v">${esc(STATE_LABEL[o.state] ?? o.state)}</span></div>

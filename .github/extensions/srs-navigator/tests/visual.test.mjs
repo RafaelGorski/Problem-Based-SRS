@@ -4,10 +4,14 @@
  * hot-spot indicators, health bar, and layout integrity.
  */
 import { test, expect } from '@playwright/test';
+import path from 'node:path';
 
 // Relative so Playwright's baseURL (and the webServer it starts) applies. Set
 // CANVAS_URL to point the suite at an already-running canvas instead.
 const CANVAS_URL = process.env.CANVAS_URL || '/';
+
+/** Screenshot evidence lands in the git-ignored test-results/ directory. */
+const shot = (name) => path.join('test-results', name);
 
 test.describe('SRS Navigator Canvas - Visual Rendering', () => {
   test.beforeEach(async ({ page }) => {
@@ -222,6 +226,41 @@ test.describe('SRS Navigator Canvas - Visual Rendering', () => {
         expect(healthBarText.toLowerCase()).not.toMatch(/\bhubs\b/);
       }
       // If no hubs/clusters exist in demo data, the metric won't render — that's fine
+    });
+  });
+
+  test.describe('Canonical Notation & Evidence', () => {
+    // Issue #54: the shipped demo spec used legacy hyphen IDs while the docs taught
+    // the dotted hierarchy, so the very first graph a user saw contradicted the
+    // methodology. This asserts what the *rendered* canvas shows, not just the file.
+    test('no rendered node label uses legacy hyphen identifiers', async ({ page }) => {
+      const ids = await page.locator('.node-id').allTextContents();
+      expect(ids.length).toBeGreaterThan(0);
+      expect(ids.filter((t) => /\b(?:CP|CN|FR|NFR|P|N)-\d+/.test(t))).toEqual([]);
+    });
+
+    test('every rendered node label uses canonical dotted identifiers', async ({ page }) => {
+      const ids = (await page.locator('.node-id').allTextContents()).map((t) => t.trim());
+      expect(ids.length).toBe(29);
+      const canonical = /^(?:CP\.\d+|CN\.\d+\.\d+|FR\.\d+\.\d+\.\d+|NFR\.\d+)$/;
+      expect(ids.filter((t) => !canonical.test(t))).toEqual([]);
+    });
+
+    test('the health bar reports 29 nodes, 5 need clusters and 100% traceability', async ({ page }) => {
+      const metrics = page.locator('#health-bar .health-metric');
+      const read = async (label) =>
+        (await metrics.filter({ hasText: label }).first().locator('.count').textContent())?.trim();
+
+      expect(await read('nodes')).toBe('29');
+      expect(await read('need clusters')).toBe('5');
+      expect(await read('traceability')).toBe('100%');
+      // A perfect spec has no gap metrics at all.
+      await expect(metrics.filter({ hasText: 'orphaned problems' })).toHaveCount(0);
+      await expect(metrics.filter({ hasText: 'unmet needs' })).toHaveCount(0);
+    });
+
+    test('captures dotted-notation evidence for the /live wow-moment', async ({ page }) => {
+      await page.screenshot({ path: shot('live-dotted-notation.png'), fullPage: true });
     });
   });
 

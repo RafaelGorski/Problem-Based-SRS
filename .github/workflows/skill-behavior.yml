@@ -1,0 +1,110 @@
+name: Skill behavior (LLM)
+
+# The deterministic suites in ci.yml prove the *text* of the skills still says the
+# right thing. They cannot prove an agent reading that text still *behaves* the right
+# way — that needs a real model. Model calls cost money and are non-deterministic, so
+# they do not belong on every push; this workflow runs them on a schedule instead.
+#
+# Prerequisite: the ANTHROPIC_API_KEY repository secret. Without it the job fails
+# loudly rather than reporting a green run in which every scenario was skipped — a
+# silently-skipped behavioral suite is worse than no suite, because it looks like
+# coverage.
+
+on:
+  schedule:
+    # 06:00 UTC every Monday.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      include_live_evals:
+        description: "Also run the live skill evals (needs an authenticated copilot CLI; normally unavailable on hosted runners)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# A scheduled run and a manual run must not race each other into the same provider
+# quota; the newer one wins.
+concurrency:
+  group: skill-behavior-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  behavior:
+    name: Skill behavior suite
+    runs-on: ubuntu-latest
+    # The suite drives a model over several scenarios; without a ceiling a hung
+    # provider call would burn a full 6-hour runner slot.
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Fail before spending any setup time, and say exactly what is missing.
+      - name: Require a provider API key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error title=Missing ANTHROPIC_API_KEY::The skill-behavior suite needs a provider API key. Without it every scenario self-skips and the run would report success having verified nothing. Add ANTHROPIC_API_KEY under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "Provider key present."
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: .github/extensions/srs-navigator/package-lock.json
+
+      - name: Install dependencies
+        working-directory: .github/extensions/srs-navigator
+        run: npm ci
+
+      - name: Run skill-behavior suite
+        working-directory: .github/extensions/srs-navigator
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run test:skill-behavior 2>&1 | tee skill-behavior.log
+
+      # The log is the only record of *why* a behavioral scenario failed: the model's
+      # trace is not reproducible from the exit code.
+      - name: Upload run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-behavior-log
+          path: .github/extensions/srs-navigator/skill-behavior.log
+          if-no-files-found: warn
+          retention-days: 30
+
+  live-evals:
+    name: Live skill evals
+    runs-on: ubuntu-latest
+    if: ${{ inputs.include_live_evals }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # run-evals.mjs exits 0 without evaluating anything unless it is forced, so the
+      # flag is mandatory here: an unforced invocation would report a passing suite
+      # that never ran a single case.
+      - name: Run live evals
+        run: node evals/run-evals.mjs --force
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-eval-results
+          path: evals/results
+          if-no-files-found: ignore
+          retention-days: 30

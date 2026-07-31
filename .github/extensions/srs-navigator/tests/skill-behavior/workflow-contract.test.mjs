@@ -25,6 +25,15 @@ import { README_DRIFT_TRIGGER, CRM_SCHEMA_SAMPLE } from "./fixtures.mjs";
 
 const PROBLEMS_ARTIFACT = /\.spec\/.*(customer-problems|problems)/i;
 
+// The methodology's canonical notation is DOTTED (CP.01 → CN.01.1 → FR.01.1.1);
+// hyphen IDs are accepted-legacy for *reading* old specs only. This contract used
+// to assert the exact opposite — requiring `CP-<n>` and rejecting `CP.<n>` — which
+// meant an agent obeying the shipped skill would have been marked as failing.
+// `tests/notation.test.mjs` carries a deterministic drift assertion so the
+// hyphen-only rule cannot silently return while API keys are absent.
+const CANONICAL_CP = /\bCP\.\d+/;
+const LEGACY_CP = /\bCP-\d+/;
+
 /** Read every .spec/*.md the agent wrote, concatenated. */
 function readSpecArtifacts(workspace) {
   const specDir = path.join(workspace, ".spec");
@@ -52,7 +61,7 @@ for (const modelId of resolveModelList()) {
     }
     const model = getModel(modelId);
 
-    it("problems: interview precedes the CP artifact, which lands in .spec with CP- notation", async () => {
+    it("problems: interview precedes the CP artifact, which lands in .spec with CP. notation", async () => {
       const workspace = prepareWorkspace({
         files: { "README.md": README_DRIFT_TRIGGER, "schema.sql": CRM_SCHEMA_SAMPLE },
       });
@@ -80,18 +89,19 @@ for (const modelId of resolveModelList()) {
           `CP artifact written before the interview.\n${traceMessage(trace)}`,
         );
 
-        // 4. If it wrote a CP artifact, it must be under .spec/ and use CP- notation.
+        // 4. If it wrote a CP artifact, it must be under .spec/ and use the
+        //    canonical dotted notation the skill teaches.
         if (write >= 0) {
           const spec = readSpecArtifacts(workspace);
           assert.match(
             spec,
-            /\bCP-\d+/,
-            `CP artifact should use CP-<n> notation (dash, not dot).\n${traceMessage(trace)}`,
+            CANONICAL_CP,
+            `CP artifact should use canonical dotted CP.<n> notation.\n${traceMessage(trace)}`,
           );
           assert.doesNotMatch(
             spec,
-            /\bCP\.\d/,
-            `CP artifact must not use dotted CP.<n> notation.\n${traceMessage(trace)}`,
+            LEGACY_CP,
+            `CP artifact must not use legacy hyphen CP-<n> notation.\n${traceMessage(trace)}`,
           );
         }
       } finally {

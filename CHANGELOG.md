@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-07-31
+
+### Added
+
+- **Skills Health Dashboard is now reachable in one click.** The published dashboard
+  (`docs/skills-health.html`) is linked from the landing page nav *and* footer, from
+  `docs/docs.html`, and from a README badge + intro line. It was generated, committed
+  and served by GitHub Pages but linked from nowhere, so the self-verifying proof of
+  the anti-drift claim was invisible at the evaluate-before-install moment.
+- **Drift guard for the eval documentation** (`evals/tests/evals-readme.test.mjs` +
+  `evals/lib/readme-contract.mjs`). A pure validator parses every command documented
+  in `evals/README.md` and fails when one names a runner or path that does not exist,
+  reintroduces the phantom manifest under `evals/`, passes a bare directory to
+  `node --test`, or writes a live-eval command that is not repo-root relative.
+- **Whole-spec notation guard** (`evals/tests/demo-spec-notation.test.mjs`). Reads the
+  real shipped `.spec/crm-system.json` and the canvas's `lib/demo-spec.mjs`, deep-compares
+  them, and gates every identifier and every reference edge. Previous guards only covered
+  the imported object and three IDs quoted on the landing page, so a partial revert of the
+  shipped JSON would have slipped through.
+- **Screenshot evidence harness for the project webpage.** `scripts/serve-site.mjs` serves
+  `docs/` statically and Playwright now runs two projects (`canvas`, `site`), each with its
+  own self-starting server. PNG evidence for the `/live` graph, the health-dashboard link,
+  the dashboard itself and the version badge is written to the git-ignored `test-results/`.
+- **Scheduled provider-gated behavioral verification.** `.github/workflows/skill-behavior.yml`
+  runs the LLM-backed skill-behavior suite weekly from a repository secret, fails visibly
+  when the secret is missing instead of reporting a green run in which every model was
+  skipped, and uploads the resulting health snapshot as an artifact.
+- **Distribution paths are documented and tested.** The README and landing page name the
+  `skills.sh` listing and an explicit install path for the SRS Navigator canvas extension,
+  with a deterministic test asserting both surfaces carry them.
+
+### Changed
+
+- **`run-tests.ps1` splits its two model-calling suites.** `-IncludeSkillBehavior` (provider
+  API key) and `-IncludeLiveEvals` (authenticated `copilot` CLI) are now separate switches.
+  Previously one flag enabled both, so requesting the provider suite also launched a runner
+  that needs a CLI a hosted runner does not have. The live runner is now invoked with
+  `--force` so a requested suite actually evaluates instead of exiting 0 having done nothing.
+- **The Skills Health Dashboard reports the plugin version.** It read the canvas extension's
+  `VERSION` (1.1.0) while sitting beside a site badge that said 2.4.1 — two release trains,
+  one confusing number. It now shows the plugin version and names the canvas version separately.
+- **The provider-backed workflow contract requires canonical dotted IDs.** It previously
+  asserted the opposite of the shipped methodology (requiring `CP-<n>`, rejecting `CP.<n>`),
+  so an agent correctly following the skill would have been graded as failing. The CRM
+  fixtures and the skill-behavior README were migrated with it, and a deterministic assertion
+  in `tests/notation.test.mjs` prevents the hyphen-only rule returning while keys are absent.
+
+### Fixed
+
+- **`evals/README.md` live-eval commands are repo-root relative** (`node evals/run-evals.mjs`).
+  They previously required an undocumented `cd evals` while every neighbouring command ran
+  from the repository root.
+- **Corrected stale comments** claiming the shipped skill templates emit legacy hyphen IDs.
+
+[2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5.0
+
 ## [2.4.1] - 2026-07-22
 
 ### Changed
