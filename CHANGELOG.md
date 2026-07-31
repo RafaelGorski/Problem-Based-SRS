@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **The installed skill no longer points at files only the maintainer has.**
+  `reference/functional-requirements.md` headed its **Quality Rules** section — the rules
+  that decide whether a requirement is well-formed — with a link to
+  `../../../docs/references/iso-iec-ieee-29148-2018.md`. `npx skills add` copies
+  `skills/problem-based-srs/**` and nothing else, so once installed that link escapes the
+  skill root into the reader's own `.agents/` directory and finds nothing. It now cites the
+  standard by its public URL, the way every RFC 2119 reference in the skill already did.
+- **`/live`'s recovery instruction works outside the monorepo.** `reference/live.md` told an
+  agent that hit a missing canvas that the extension "lives at
+  `.github/extensions/srs-navigator/`" — a path that exists only for someone who cloned this
+  repository. The one instruction whose job is to fix "the extension is not installed" now
+  hands over the install URL and the filtered release list, and says plainly that the canvas
+  is a separate install from the skills.
+- **`reference/live.md` stopped teaching an ID shape the methodology forbids.** Its
+  machine-readable spec example emitted `"id": "NFR.1.0"` while SKILL.md's own Identifier
+  Notation table declares `NFR.{n}` → `NFR.01`, and the shipped demo spec uses `NFR.01`. The
+  notation guard added in #63/#66 only rejects *hyphen* IDs, so a wrong-arity dotted ID
+  walked straight through.
+
+### Added
+
+- **The skills install is executed, not inferred from a file count**
+  (`evals/tests/skills-install.test.mjs`, 14 assertions). #69 checked its "follow the README
+  install path for the skills" box on the evidence "12 files landed" — presence, which is the
+  same claim #73 had to disprove for the canvas archive. The suite now stages exactly what
+  `npx skills add` copies — derived by walking `skills/problem-based-srs/`, not from a
+  hard-coded list — into a temp directory **outside** the checkout, and asserts the result is
+  self-sufficient: every relative link resolves *inside* the installed skill, every action in
+  the orchestrator's dispatch table is present, the frontmatter still names the directory it
+  landed in, any repository-only path is accompanied by the URL that reaches it, and every ID
+  in a JSON example matches an arity parsed out of SKILL.md's notation table at runtime rather
+  than restated in the test.
+
+  This closes a blind spot rather than adding a second copy of an existing check:
+  `skills-static.test.mjs` does resolve every relative link, but from the file's location *in
+  the checkout*, where `../../../docs/` exists. It was green while the installed copy was
+  broken — the same "exercises the branch an installer never takes" hole #73 found in the
+  canvas skill fallback.
+
 ## [2.6.0] - 2026-07-31
 
 ### Added
