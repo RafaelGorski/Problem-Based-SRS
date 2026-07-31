@@ -259,6 +259,9 @@ The archive already contains a `srs-navigator/` folder, so extract it into the d
 | Personal (all projects) | `~/.copilot/extensions/` | `~/.copilot/extensions/srs-navigator/extension.mjs` |
 | Project (this repo only) | `.github/extensions/` | `.github/extensions/srs-navigator/extension.mjs` |
 
+The extracted folder runs as-is — there is **no `npm install` step**. The archive carries no
+`node_modules/` and declares no dependencies; the Copilot app supplies the host SDK.
+
 Then run `/live` in the Copilot app to open the canvas.
 
 ### Manual

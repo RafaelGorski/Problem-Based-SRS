@@ -25,6 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   assertions) plus a Playwright behavior suite (`tests/demo.test.mjs`). Together they
   pin the reduced-motion contract, the static fallback, the byte budget, the ≤10s
   runtime, and the fact that the committed metadata matches the committed bytes.
+- **From-archive install is executed, not asserted by file listing**
+  (`evals/tests/from-archive-install.test.mjs`). Stages the archive into a temp directory
+  outside the monorepo, gives it a stub of the host SDK as the only thing in its
+  `node_modules`, imports `extension.mjs` from there, and drives it: the `srs-navigator`
+  canvas registers, opening it serves a page carrying the real chain
+  (`CP.01 → CN.01.1 → FR.01.1.1`, `NFR.01`), a caller-supplied spec renders, `onClose`
+  releases the port, and all nine methodology actions answer from the bundled skills —
+  proved by poisoning the staged copy, since the bundled and canonical files are
+  byte-identical and equality cannot say which was read. That standalone fallback is the
+  whole archive install and no test had ever taken that branch.
 
 ### Changed
 
@@ -40,6 +50,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `getComputedStyle().opacity` — which the renderer never sets, because it dims child
   `rect`/`text` `opacity` *attributes*. The test now exercises the real
   `need clusters` filter and counts genuinely dimmed nodes.
+- **The install archive no longer ships what it cannot run.** `scripts/` went out with it —
+  four files of maintainer tooling, one of which (`record-demo.mjs`) imports `playwright`, a
+  devDependency the archive deliberately excludes, and one of which (`sync-skills.mjs`) reads
+  a monorepo path a standalone install does not have.
+- **The archive no longer ships the manifest that rebuilds the tree it removes.** It carried
+  `package.json` with seven devDependencies (Playwright, three `@ai-sdk/*`, `ai`, `zod`) plus
+  `package-lock.json`, so one `npm install` in the extracted directory recreated exactly the
+  4.3 MB Playwright tree that `srs-navigator-1.1.0.zip` shipped by accident. `stage()` now
+  writes an allowlisted install manifest, and the dangling `"main": "index.js"` — naming a
+  file that exists in neither the archive nor the repository — goes with it. The archive is
+  22 files / 92 KB compressed, and both surfaces now tell the reader no `npm install` follows.
 
 [2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6.0
 

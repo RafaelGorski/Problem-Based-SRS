@@ -35,7 +35,7 @@ const LANDING = read("docs/index.html");
 // "latest" release is a link to the methodology plugin. The fallback must be filtered.
 const CANVAS_RELEASE_FILTER = "q=srs-navigator";
 
-// Budgets, set against the measured staging output (26 files / ~402 KB) with headroom.
+// Budgets, set against the measured staging output (22 files / ~363 KB) with headroom.
 // The published srs-navigator-1.1.0.zip carried 223 entries and 4.3 MB because it bundled
 // node_modules/ (Playwright); these bounds make that shape impossible to ship again.
 const MAX_PACKAGED_FILES = 80;
