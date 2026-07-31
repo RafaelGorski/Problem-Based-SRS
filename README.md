@@ -228,6 +228,11 @@ claude --plugin-dir ./Problem-Based-SRS
 npx skills add RafaelGorski/Problem-Based-SRS
 ```
 
+This installs the single skill the repository publishes into
+`.agents/skills/problem-based-srs/` — the shared location AgentSkills-aware agents read,
+GitHub Copilot included — and records what it took in a `skills-lock.json` beside it. That
+is where to look to confirm the install landed; the CLI does not write to `.github/skills/`.
+
 Browse the published listing at
 [**skills.sh/rafaelgorski/problem-based-srs**](https://skills.sh/rafaelgorski/problem-based-srs).
 
@@ -240,14 +245,19 @@ skills. Ask the Copilot app to install it directly from this repository:
 Install the canvas extension from https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator
 ```
 
-Or install it by hand from a
-[release archive](https://github.com/RafaelGorski/Problem-Based-SRS/releases)
-(`srs-navigator-<version>.zip` / `.tar.gz`):
+Or install it by hand from a release archive. The canvas app ships on its own `vX.Y.Z`
+tags, interleaved with the methodology plugin's `vX.Y` releases — so the newest release is
+usually *not* the one that carries it. Use the
+[filtered release list](https://github.com/RafaelGorski/Problem-Based-SRS/releases?q=srs-navigator&expanded=true)
+to find the latest `srs-navigator-<version>.zip` / `.tar.gz`.
 
-| Scope | Extract into |
-|-------|--------------|
-| Personal (all projects) | `~/.copilot/extensions/srs-navigator/` |
-| Project (this repo only) | `.github/extensions/srs-navigator/` |
+The archive already contains a `srs-navigator/` folder, so extract it into the directory
+*above* the one the extension will occupy:
+
+| Scope | Extract into | Produces |
+|-------|--------------|----------|
+| Personal (all projects) | `~/.copilot/extensions/` | `~/.copilot/extensions/srs-navigator/extension.mjs` |
+| Project (this repo only) | `.github/extensions/` | `.github/extensions/srs-navigator/extension.mjs` |
 
 Then run `/live` in the Copilot app to open the canvas.
 

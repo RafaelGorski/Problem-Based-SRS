@@ -23,7 +23,7 @@ import {
   cpSync,
 } from "node:fs";
 import { execFileSync, execSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,15 +31,21 @@ const repoRoot = resolve(__dirname, "..");
 const extDir = resolve(repoRoot, ".github", "extensions", "srs-navigator");
 const buildDir = resolve(repoRoot, "build");
 
+// The single top-level directory every archive unpacks into. Install instructions are
+// written against it: because the archive already carries this folder, the documented
+// extract target must be its *parent*. Exported so the docs guard derives that from the
+// packager instead of restating it.
+export const ARCHIVE_ROOT = "srs-navigator";
+
 // Paths (relative to the extension dir) that must never be packaged.
-const EXCLUDE = new Set([
+export const EXCLUDE = new Set([
   "node_modules",
   "test-results",
   "playwright-report",
   "tests",
   "docs",
 ]);
-const EXCLUDE_FILES = new Set([
+export const EXCLUDE_FILES = new Set([
   ".sync-state.json", // skills/.sync-state.json — per-machine runtime state
   "playwright.config.mjs",
   "README.md",
@@ -54,7 +60,7 @@ function parseArgs(argv) {
   return out;
 }
 
-function resolveVersion(explicit) {
+export function resolveVersion(explicit) {
   if (explicit) return explicit;
   const versionFile = resolve(repoRoot, "VERSION");
   if (existsSync(versionFile)) return readFileSync(versionFile, "utf-8").trim();
@@ -62,8 +68,9 @@ function resolveVersion(explicit) {
   return pkg.version;
 }
 
-function stage(stageRoot) {
-  const dest = resolve(stageRoot, "srs-navigator");
+/** Copy the shippable extension tree into `stageRoot/<ARCHIVE_ROOT>`; returns that path. */
+export function stage(stageRoot) {
+  const dest = resolve(stageRoot, ARCHIVE_ROOT);
   cpSync(extDir, dest, {
     recursive: true,
     filter: (src) => {
@@ -90,7 +97,7 @@ function hasBinary(bin) {
 function main() {
   const { version: explicit } = parseArgs(process.argv.slice(2));
   const version = resolveVersion(explicit);
-  const base = `srs-navigator-${version}`;
+  const base = `${ARCHIVE_ROOT}-${version}`;
 
   rmSync(buildDir, { recursive: true, force: true });
   mkdirSync(buildDir, { recursive: true });
@@ -103,7 +110,7 @@ function main() {
 
   // tar.gz (tar is available on Linux, macOS, and Windows 10+/bsdtar).
   const tgz = resolve(buildDir, `${base}.tar.gz`);
-  execFileSync("tar", ["-czf", tgz, "-C", stageRoot, "srs-navigator"], {
+  execFileSync("tar", ["-czf", tgz, "-C", stageRoot, ARCHIVE_ROOT], {
     stdio: "inherit",
   });
   artifacts.push(tgz);
@@ -112,7 +119,7 @@ function main() {
   // zip (best-effort: only when the zip binary exists, e.g. on CI runners).
   if (hasBinary("zip")) {
     const zip = resolve(buildDir, `${base}.zip`);
-    execSync(`zip -r -q "${zip}" srs-navigator`, { cwd: stageRoot, stdio: "inherit" });
+    execSync(`zip -r -q "${zip}" ${ARCHIVE_ROOT}`, { cwd: stageRoot, stdio: "inherit" });
     artifacts.push(zip);
     console.log(`Created ${zip}`);
   } else {
@@ -128,4 +135,8 @@ function main() {
   console.log(`\nPackaged ${base}: ${artifacts.length} archive(s).`);
 }
 
-main();
+// Only package when run as a script. Importing this module must stay side-effect free so
+// the install-path guard can call stage() into a temp directory without building anything.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
