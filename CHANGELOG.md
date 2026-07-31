@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+<<<<<<< HEAD
+- **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
+  itself.** The splash-screen prompt named the `problem_based_srs` tool and then described
+  the work ("scan the workspace… generate the artifacts"), so an agent could satisfy it
+  end-to-end without ever invoking the skill — and therefore without the methodology's
+  mandatory Discovery Interview. Every agent-facing prompt the canvas emits (`LEARN_PROMPT`,
+  `LOAD_PROMPT`, the `learn` and `pending_actions` canvas actions, and the node action bar)
+  now orders the agent to call the skill *first*, follow the returned methodology exactly,
+  forbids improvising or substituting its own process, and restates that the Discovery
+  Interview is mandatory and that autopilot does not waive it. Reading the repository is
+  explicitly context for the interview, never a replacement for it. `LOAD_PROMPT` is now
+  load-only: it may not invent specification content, only offer to run the methodology.
+- **`reference/live.md` documented a JSON shape the navigator cannot parse.** The `/live`
+  example used `label`, `problem`, and `need` keys; the extension requires `title`,
+  `description`, `problemIds[]`, and `needIds[]`, so an agent that followed the example
+  produced a spec that failed `validateSpecificationJSON`. The example is now the real
+  schema, and the app's own JSON example uses canonical dotted IDs (`CP.01`, `CN.01.1`,
+  `FR.01.1.1`, `NFR.01`) instead of untyped `{id,title,description}` placeholders.
+
+=======
 - **The README's first badge is no longer a 404.** It linked
   `releases/tag/v2.6.0`, a tag that was never pushed: the documented release process bumps
   `.claude-plugin/plugin.json` *before* the tag exists, and the release had not been cut for
@@ -21,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `/releases/tag/<tag>` by tag name, so `/releases/tag/v2.4.0` is a 404 even though release
   2.4.0 exists as `v2.4`, and any matching that normalizes the two would have called this
   link healthy.
+>>>>>>> origin/main
 - **The installed skill no longer points at files only the maintainer has.**
   `reference/functional-requirements.md` headed its **Quality Rules** section — the rules
   that decide whether a requirement is well-formed — with a link to
@@ -42,6 +63,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+<<<<<<< HEAD
+- **Drift guard for the canvas app's agent-facing instructions**
+  (`.github/extensions/srs-navigator/tests/app-prompts.test.mjs`, 21 assertions, wired into
+  `npm test`). It fails if any canvas prompt loses "run the skill", "do not improvise", or
+  "the Discovery Interview is mandatory / autopilot does not waive it", if a prompt shows
+  legacy hyphen IDs, or if `reference/live.md`'s JSON example stops passing the navigator's
+  own `validateSpecificationJSON` + `validateReferenceIntegrity`. The autopilot marker string
+  is shared with `interview-guard.test.mjs`, so the app and the skill can never state
+  contradictory rules about waiving the interview.
+=======
 - **Distribution drift is detected instead of rediscovered by hand**
   (`scripts/check-distribution.mjs`, `evals/tests/distribution-drift.test.mjs`,
   `.github/workflows/distribution-drift.yml`). Two surfaces carry this project and neither
@@ -63,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   against a verbatim capture of the live listing; only the weekly workflow touches the
   network, and it stays out of the PR gate because third-party state is not a property of a
   pull request.
+>>>>>>> origin/main
 
 - **The skills install is executed, not inferred from a file count**
   (`evals/tests/skills-install.test.mjs`, 14 assertions). #69 checked its "follow the README
