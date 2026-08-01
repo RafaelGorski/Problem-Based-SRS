@@ -10,6 +10,13 @@ name: Create Release
 #        - version: defaults to the version in .claude-plugin/plugin.json
 #        - release_name: optional display suffix
 #        - release_body: optional override; defaults to the CHANGELOG.md section
+#
+# The `v*` trigger below is deliberately broad, and it therefore also matches the *other*
+# release train: release-canvas.yml publishes the srs-navigator canvas app at vX.Y.Z. The two
+# trains cannot be told apart by tag shape (v2.4.1 is a plugin release; v1.1.0 is a canvas
+# one), so this workflow used to run against canvas tags and fail on a version mismatch it
+# could do nothing about — run 28527065984, tag v1.1.0, four seconds after the canvas release.
+# The `train` job below attributes the tag first, and publishing runs only for this train.
 on:
   push:
     tags:
@@ -33,8 +40,32 @@ permissions:
   contents: write
 
 jobs:
+  train:
+    name: Which release train is this tag?
+    runs-on: ubuntu-latest
+    outputs:
+      train: ${{ steps.classify.outputs.train || 'plugin' }}
+      reason: ${{ steps.classify.outputs.reason }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # A tag push may belong to either train. A manual dispatch carries no tag, and was asked
+      # for on this workflow by hand, so it is the plugin train by definition.
+      - name: Classify the pushed tag
+        id: classify
+        if: github.event_name == 'push'
+        run: node scripts/release-train.mjs --tag "$GITHUB_REF_NAME"
+
   release:
     name: Build, package & publish release
+    needs: train
+    if: needs.train.outputs.train == 'plugin'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

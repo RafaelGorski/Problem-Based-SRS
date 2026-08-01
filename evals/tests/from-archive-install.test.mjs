@@ -28,6 +28,7 @@ import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
 
 import { ARCHIVE_ROOT, installManifest, stage } from "../../scripts/package-extension.mjs";
+import { installHostStub } from "../tools/open-archive-canvas.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
@@ -79,38 +80,12 @@ export function packageOf(specifier) {
  * Write the smallest possible stand-in for the host SDK into the staged tree's own
  * node_modules, and nothing else. It records the session config the extension registers so
  * the test can drive the same canvas and tool the Copilot app would.
+ *
+ * Lives in `evals/tools/open-archive-canvas.mjs` now, so the tool that boots the canvas for
+ * an archive-driven Playwright capture (#90) and this suite share one boot sequence. Two
+ * copies would let the tool drift from the path this suite proves, and the drift would only
+ * ever show up in evidence nobody re-checks.
  */
-function installHostStub(stagedDir) {
-  const dir = path.join(stagedDir, "node_modules", "@github", "copilot-sdk");
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(
-    path.join(dir, "package.json"),
-    JSON.stringify({
-      name: "@github/copilot-sdk",
-      version: "0.0.0-test-stub",
-      type: "module",
-      exports: { "./extension": "./extension.mjs" },
-    }),
-  );
-  fs.writeFileSync(
-    path.join(dir, "extension.mjs"),
-    [
-      "globalThis.__srsHostCapture = { tools: [], canvases: [], events: [] };",
-      "export class CanvasError extends Error {",
-      "  constructor(code, message) { super(message); this.code = code; }",
-      "}",
-      "export function createCanvas(definition) { return definition; }",
-      "export async function joinSession(config) {",
-      "  globalThis.__srsHostCapture.tools = config.tools || [];",
-      "  globalThis.__srsHostCapture.canvases = config.canvases || [];",
-      "  return {",
-      "    on(event) { globalThis.__srsHostCapture.events.push(event); },",
-      "    log() {}, send() {}, workspacePath: '',",
-      "  };",
-      "}",
-    ].join("\n"),
-  );
-}
 
 /* --------------------------------------------------- the install, actually installed */
 
