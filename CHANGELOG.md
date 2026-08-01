@@ -40,7 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the drift monitor asks for would have left both links 404 and the monitor red, still
   advising a release that by then existed. Both links now name the tag the pipeline
   produces, and `release-hygiene.test.mjs` derives that tag by executing
-  `build-plugin.py`'s own `normalize_version` rather than restating its rule.
+  `build-plugin.py`'s own `normalize_version` rather than restating its rule. (`[2.5.0]` has
+  since been folded into `[2.6.0]` — see above — because naming the right tag was necessary
+  but not sufficient: no pipeline can create `v2.5` while the manifest reads 2.6.0.)
 - **The drift report told the canvas app it was behind a release of the other product.**
   `releaseDrift()` matched each train separately and then printed a single global newest
   tag in both findings, so `VERSION` 1.1.1 was reported against `v2.4.1` — a *plugin*
@@ -158,6 +160,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.0] - 2026-07-31
 
+Carries everything that was documented as **2.5.0 and never released**. The manifest moved
+`2.4.1 → 2.5.0 → 2.6.0` without the `v2.5` tag in between, and `build-plugin.py` publishes
+exactly one changelog section — so the two were folded together rather than leaving a
+section whose notes no release would ever carry and whose link could never resolve.
+
 ### Added
 
 - **The landing page shows the `/live` canvas moving instead of describing it.** The
@@ -186,39 +193,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   proved by poisoning the staged copy, since the bundled and canonical files are
   byte-identical and equality cannot say which was read. That standalone fallback is the
   whole archive install and no test had ever taken that branch.
-
-### Changed
-
-- **Motion on the landing page is opt-out-able.** The video carries no `autoplay`
-  attribute; playback is started from `site.js` only after
-  `prefers-reduced-motion` is read, and only while the figure is on screen. A reader
-  who asked their system for no motion gets the poster frame and a visible control.
-
-### Fixed
-
-- **A canvas filter test that never actually ran.** `tests/visual.test.mjs` asserted on
-  a health metric the clean CRM spec does not produce, and read dimming from
-  `getComputedStyle().opacity` — which the renderer never sets, because it dims child
-  `rect`/`text` `opacity` *attributes*. The test now exercises the real
-  `need clusters` filter and counts genuinely dimmed nodes.
-- **The install archive no longer ships what it cannot run.** `scripts/` went out with it —
-  four files of maintainer tooling, one of which (`record-demo.mjs`) imports `playwright`, a
-  devDependency the archive deliberately excludes, and one of which (`sync-skills.mjs`) reads
-  a monorepo path a standalone install does not have.
-- **The archive no longer ships the manifest that rebuilds the tree it removes.** It carried
-  `package.json` with seven devDependencies (Playwright, three `@ai-sdk/*`, `ai`, `zod`) plus
-  `package-lock.json`, so one `npm install` in the extracted directory recreated exactly the
-  4.3 MB Playwright tree that `srs-navigator-1.1.0.zip` shipped by accident. `stage()` now
-  writes an allowlisted install manifest, and the dangling `"main": "index.js"` — naming a
-  file that exists in neither the archive nor the repository — goes with it. The archive is
-  22 files / 92 KB compressed, and both surfaces now tell the reader no `npm install` follows.
-
-[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6
-
-## [2.5.0] - 2026-07-31
-
-### Added
-
 - **Skills Health Dashboard is now reachable in one click.** The published dashboard
   (`docs/skills-health.html`) is linked from the landing page nav *and* footer, from
   `docs/docs.html`, and from a README badge + intro line. It was generated, committed
@@ -254,6 +228,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Motion on the landing page is opt-out-able.** The video carries no `autoplay`
+  attribute; playback is started from `site.js` only after
+  `prefers-reduced-motion` is read, and only while the figure is on screen. A reader
+  who asked their system for no motion gets the poster frame and a visible control.
 - **`run-tests.ps1` splits its two model-calling suites.** `-IncludeSkillBehavior` (provider
   API key) and `-IncludeLiveEvals` (authenticated `copilot` CLI) are now separate switches.
   Previously one flag enabled both, so requesting the provider suite also launched a runner
@@ -270,6 +248,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A canvas filter test that never actually ran.** `tests/visual.test.mjs` asserted on
+  a health metric the clean CRM spec does not produce, and read dimming from
+  `getComputedStyle().opacity` — which the renderer never sets, because it dims child
+  `rect`/`text` `opacity` *attributes*. The test now exercises the real
+  `need clusters` filter and counts genuinely dimmed nodes.
+- **The install archive no longer ships what it cannot run.** `scripts/` went out with it —
+  four files of maintainer tooling, one of which (`record-demo.mjs`) imports `playwright`, a
+  devDependency the archive deliberately excludes, and one of which (`sync-skills.mjs`) reads
+  a monorepo path a standalone install does not have.
+- **The archive no longer ships the manifest that rebuilds the tree it removes.** It carried
+  `package.json` with seven devDependencies (Playwright, three `@ai-sdk/*`, `ai`, `zod`) plus
+  `package-lock.json`, so one `npm install` in the extracted directory recreated exactly the
+  4.3 MB Playwright tree that `srs-navigator-1.1.0.zip` shipped by accident. `stage()` now
+  writes an allowlisted install manifest, and the dangling `"main": "index.js"` — naming a
+  file that exists in neither the archive nor the repository — goes with it. The archive is
+  22 files / 92 KB compressed, and both surfaces now tell the reader no `npm install` follows.
 - **`evals/README.md` live-eval commands are repo-root relative** (`node evals/run-evals.mjs`).
   They previously required an undocumented `cd evals` while every neighbouring command ran
   from the repository root.
@@ -291,7 +285,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `stage()` are exported so the install guard derives archive facts from the packager
   rather than restating them.
 
-[2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5
+[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6
 
 ## [2.4.1] - 2026-07-22
 

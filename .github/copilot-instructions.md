@@ -597,6 +597,18 @@ and the monitor keeps reporting it under advice that no longer applies. Guarded 
 `evals/tests/release-hygiene.test.mjs`, which derives the expected tag by executing
 `build-plugin.py`'s own `normalize_version` rather than restating the rule.
 
+**Never bump the manifest over a release that was never cut.** The tag push in
+[step 2](#2-publish-the-release) is the *only* thing that publishes a version, and the
+manifest version is the only version the tree can publish — `create-release.yml` validates
+the tag against `plugin.json`, so once the manifest reads `2.6.0` no `v2.5` can ever be
+created. `2.4.1 → 2.5.0 → 2.6.0` shipped that way: a 76-line `## [2.5.0]` section whose link
+was a permanent 404 and whose notes no release would ever carry, because `extract_notes()`
+extracts exactly one section. If a bump has already happened, fold the stranded section into
+the manifest version's — do not try to cut it. Guarded by `evals/tests/release-hygiene.test.mjs`
+(offline, every section below the manifest version must name a tag in `git tag --list`; the
+eval job checks out with `fetch-tags: true` so it has evidence) and reported by
+`stranded-release-link` in the monitor.
+
 **Decision — no second registry, for now (2026-07-31).** The one listing we publish
 drifted by eight of nine entries and stayed that way for three passes, because nothing was
 looking. A second surface without a detector doubles that blind spot. Now that the monitor
