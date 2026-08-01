@@ -58,6 +58,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rule is applied only to `CHANGELOG.md`, the file `build-plugin.py` reads for release notes;
   the canvas train tags `v${VERSION}` verbatim, so a canvas link awaiting its release stays a
   release to cut rather than becoming a link to break.
+- **The registry monitor only compared skill *names*, so a stale page read as healthy.**
+  `check-distribution.mjs` matched the listing's advertised names against the repository and
+  stopped there, which is the cheap half of what the acceptance criteria ask for — the
+  listing is supposed to render the current description, version, and body. Captured
+  2026-07-31, the page for `problem-based-srs` published a description that matched but a
+  body that did not: 14 of the shipped skill's 15 `##` sections, missing **Identifier
+  Notation (CANONICAL)**, and still teaching the `FR-001` hyphen IDs the methodology
+  replaced with dotted notation. Once the maintainer re-submits and the names align, that
+  run would have gone green over a page still teaching superseded methodology. The checker
+  now fetches each per-skill page and reports `registry-skill-stale` when the description,
+  the published version, or the rendered sections disagree with what is shipped. Scraped
+  text is not a contract, so zero matched sections is `registry-skill-unreadable` (a
+  warning) rather than drift — a redesigned page and a broken extractor look identical from
+  here. Guarded by `evals/tests/registry-listing-content.test.mjs` against a verbatim
+  capture of the real page.
 
 - **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
   itself.** The splash-screen prompt named the `problem_based_srs` tool and then described
