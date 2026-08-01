@@ -102,6 +102,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   chain, and `landing-proof.test.mjs` holds it to the spec the way it already held the
   landing page: renaming a problem in `.spec/crm-system.json` now fails both surfaces instead
   of neither.
+- **A moderate XSS advisory sat in the canvas dev tree** (`jsondiffpatch < 0.7.2`,
+  [GHSA-33vc-wfww-vjfv](https://github.com/advisories/GHSA-33vc-wfww-vjfv)), reachable only
+  as a transitive dependency of `ai@4`. `npm audit fix --force` would have taken `ai` from
+  v4 to v7 — a breaking SDK migration whose only consumers are the provider-gated LLM suites,
+  which cannot be run without API keys, so the fix could not have been verified. Pinned with
+  an `overrides` entry instead: `npm audit` drops from 5 findings (2 moderate) to 4 low, and
+  `generateText`/`tool` still resolve on the v4 API the harness documents. The four remaining
+  low advisories all require that migration and are left for a deliberate change.
 
 ### Added
 

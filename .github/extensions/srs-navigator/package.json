@@ -27,5 +27,8 @@
     "ai": "^4.3.19",
     "playwright": "^1.61.1",
     "zod": "^3.25.76"
+  },
+  "overrides": {
+    "jsondiffpatch": "^0.7.2"
   }
 }
