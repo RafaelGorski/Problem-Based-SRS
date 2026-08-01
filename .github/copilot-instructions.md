@@ -457,6 +457,21 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 > (driven by `plugin.json` + `build-plugin.py`). The **canvas app** release uses `vX.Y.Z`
 > tags (driven by `VERSION` + `bump-version.mjs`). Keep them distinct so tags never
 > collide. "Make a release" of the methodology means the plugin pipeline below.
+>
+> They still share one tag namespace, and `create-release.yml` triggers on `v*`, so it sees
+> the canvas train's tags too — and the trains cannot be told apart by shape (`v2.4.1` is a
+> plugin release, `v1.1.0` a canvas one). Publishing the canvas app therefore used to fail
+> `Create Release` on a version mismatch it could do nothing about (run `28527065984`, tag
+> `v1.1.0`). `scripts/release-train.mjs` now attributes the pushed tag first — plugin if its
+> normalized version matches `plugin.json` (the same comparison `build-plugin.py` makes),
+> canvas if it matches `VERSION` / the extension `package.json` verbatim (the tag
+> `bump-version.mjs` pushes) — and the publishing job runs only for the plugin train. A tag
+> matching neither, or both, **fails the run** rather than releasing something arbitrary.
+> Guarded by `evals/tests/release-trains.test.mjs`.
+>
+> **`VERSION` is owned by `release-canvas.yml`.** Do not bump it in a feature branch:
+> `bump-version.mjs` *increments* from the version it finds, so a hand-bumped number is never
+> published — it is skipped. `VERSION` and the extension `package.json` must always agree.
 
 ### Build script commands
 
@@ -558,7 +573,7 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 | `registry-listing-drift` | error | The [skills.sh listing](https://www.skills.sh/rafaelgorski/problem-based-srs) advertises skills the repository no longer ships. It is a cached index, so consolidations (like #50, which took nine skills to one) do not propagate. | Re-submit the repository at [skills.sh](https://www.skills.sh) so the listing is re-crawled, then re-run the checker. |
 | `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it — normally a manifest bump whose tag never got pushed. | Cut the missing release (above). The link is already correct and will resolve when the tag exists. |
 | `unpublishable-release-link` | error | A reference definition **in `CHANGELOG.md`** (the file `build-plugin.py` reads for release notes, so its labels are plugin-train claims) names a tag **no pipeline creates for that version**. `create-release.yml` tags `v${VERSION}` where `VERSION` is `build-plugin.py`'s *normalized* version, so `2.6.0` publishes at `v2.6` — and GitHub serves `/releases/tag/<tag>` by exact name. Links outside that file stay under `dangling-release-links`, because the canvas train tags `v${VERSION}` verbatim and does not strip the `.0`. | Correct the link to the tag named in the finding. Cutting a release will **not** clear this one. |
-| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
+| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. The canvas finding also names the version running `release-canvas.yml` would *actually* publish, derived from `bump-version.mjs`'s own rule — it always increments, so the advertised number is skipped rather than released. | Plugin: cut `vX.Y`. Canvas: run `release-canvas.yml` **or**, if `VERSION` was hand-bumped, reset `VERSION` and the extension `package.json` to the newest published canvas release and let the workflow own the bump. |
 | `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
 | `registry-listing-partial` | warning | The page's own count disagrees with the entries it returned, so the comparison was skipped rather than run on a truncated payload. | Re-run; if it persists, read the page and confirm what it actually advertises. |

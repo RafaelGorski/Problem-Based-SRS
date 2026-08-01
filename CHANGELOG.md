@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Publishing the canvas app failed the plugin's release pipeline.** `create-release.yml`
+  triggers on `push: tags: ["v*"]`, and that glob matches both release trains — the two
+  cannot be told apart by tag shape either, since `v2.4.1` is a plugin release and `v1.1.0`
+  a canvas one. So every canvas release fired the plugin pipeline against a tag that does
+  not match `plugin.json`, and it failed: run `28527065984`, tag `v1.1.0`, four seconds
+  after `release-canvas.yml` published `srs-navigator 1.1.0` — the only failure in that
+  workflow's history, and structural rather than incidental. `scripts/release-train.mjs`
+  now attributes the pushed tag before anything is built, and the publishing job is gated on
+  the answer. The plugin side of the rule is the pipeline's own — `build-plugin.py` compares
+  *normalized* versions, so `v2.6` and `v2.6.0` both build for manifest 2.6.0 and both
+  classify as plugin — and a tag claimed by both trains, or by neither, fails the run rather
+  than publishing something arbitrary.
+- **`VERSION` advertised a canvas version that no release could ever publish.**
+  `VERSION` and the extension `package.json` were hand-bumped to 1.1.1, but
+  `bump-version.mjs` *increments* from the version it finds, so running the workflow would
+  have published 1.1.2 and skipped 1.1.1 forever. Both files are reset to the published
+  1.1.0, restoring the intent — the next canvas release publishes 1.1.1 — and the two files
+  are now asserted to agree, since the bump script reads one and every other surface reads
+  the other. The `canvas-release-missing` finding says which version running the workflow
+  would *actually* publish, derived from `bump-version.mjs` rather than restated; importing
+  that script is now side-effect free, so reading a drift report can no longer rewrite the
+  version files.
+
 - **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
   pointed at `releases/tag/v2.6.0` and `/v2.5.0`, but `create-release.yml` builds its tag
   from `build-plugin.py`'s *normalized* version — `TAG="v${VERSION}"` after
