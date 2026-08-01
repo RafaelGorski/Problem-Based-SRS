@@ -21,6 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   *normalized* versions, so `v2.6` and `v2.6.0` both build for manifest 2.6.0 and both
   classify as plugin — and a tag claimed by both trains, or by neither, fails the run rather
   than publishing something arbitrary.
+- **The tag gate was one-sided: only the pipeline that *receives* a colliding tag checked
+  for one.** `release-canvas.yml` is where a collision starts — it computes the version,
+  pushes the tag and creates the release — so by the time `create-release.yml` classified
+  anything the tag was already on origin, and failing there unpushes nothing. The canvas
+  workflow now runs `release-train.mjs --tag <bumped tag> --expect canvas` between the bump
+  and the commit: after the bump because the classifier reads the version files off the disk
+  and before it the tag belongs to no train, and before the commit because after the push
+  there is nothing left to prevent. The two pipelines act on the same verdict differently on
+  purpose — `create-release.yml` *skips* (it fires on every `v*` tag, most of which are not
+  its business) while `release-canvas.yml` *fails* (it was dispatched deliberately and is
+  about to publish). `--expect` lives in `release-train.mjs` rather than as a comparison in
+  YAML, so there is one copy of the rule; the CLI now also accepts the tag as a bare
+  argument and **refuses** an option it does not recognise, instead of silently dropping it
+  and classifying `$GITHUB_REF_NAME` — which is how `release-train.mjs v2.6` came to answer
+  `unknown` for this repository's own next plugin release.
 - **`VERSION` advertised a canvas version that no release could ever publish.**
   `VERSION` and the extension `package.json` were hand-bumped to 1.1.1, but
   `bump-version.mjs` *increments* from the version it finds, so running the workflow would

@@ -8,9 +8,10 @@ name: Release Canvas Extension
 #   2. Download the latest methodology skills from the upstream Problem-Based-SRS
 #      repo (the extension's "dependencies").
 #   3. Bump an incremental project version (patch by default).
-#   4. Commit the version bump + refreshed skills and push a matching tag.
-#   5. Package the extension into .tar.gz / .zip archives.
-#   6. Create the GitHub Release with those archives attached.
+#   4. Confirm the bumped version's tag belongs to this release train and no other.
+#   5. Commit the version bump + refreshed skills and push a matching tag.
+#   6. Package the extension into .tar.gz / .zip archives.
+#   7. Create the GitHub Release with those archives attached.
 
 on:
   workflow_dispatch:
@@ -62,6 +63,21 @@ jobs:
       - name: Bump project version
         id: bump
         run: node scripts/bump-version.mjs --part "${{ inputs.part }}"
+
+      - name: Confirm this tag is the canvas train's, and only the canvas train's
+        # Both products publish from one repository into one tag namespace, and they cannot be
+        # told apart by tag shape (v2.4.1 is a plugin release, v1.1.0 a canvas one), so
+        # create-release.yml classifies every pushed tag before it publishes. That gate alone
+        # is one-sided: this workflow is where a collision starts. It computes the version,
+        # pushes the tag and creates the release, so by the time the plugin pipeline classifies
+        # anything the tag is already on origin and a failing check there unpushes nothing.
+        #
+        # Placed after the bump on purpose: the classifier reads VERSION and the extension
+        # package.json off the disk, and bump-version.mjs has only just written the version
+        # this release will publish. Run above the bump it would report `unknown` for every
+        # release this workflow ever cuts. Placed before the commit for the same reason the
+        # plugin gate runs before the build — after the push there is nothing left to prevent.
+        run: node scripts/release-train.mjs --tag "${{ steps.bump.outputs.tag }}" --expect canvas
 
       - name: Commit version bump and refreshed skills
         run: |
