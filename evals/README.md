@@ -59,6 +59,14 @@ Pure `node --test` files with no external dependencies:
   both distribution paths — the `skills.sh` listing and the SRS Navigator canvas
   extension — are documented on the README **and** the landing page. A published
   page that nothing links to is a claim nobody can check.
+- `tests/archive-canvas-tool.test.mjs` — guards `tools/open-archive-canvas.mjs`, the tool
+  that boots the canvas out of an **extracted release archive** so a browser can be
+  pointed at the artefact a user downloads. Its most important assertion is a
+  **refusal**: aimed at `.github/extensions/srs-navigator/` the tool would start fine and
+  Playwright would go green, but the capture would be the repository checkout filed as
+  published-archive evidence. It also pins the CLI contract (one loopback URL on stdout,
+  nothing else) and that `playwright.config.mjs` skips its own canvas server when
+  `CANVAS_URL` is set.
 - `tests/release-hygiene.test.mjs` — ties `.claude-plugin/plugin.json`, the top
   `CHANGELOG.md` section, and every version a visitor is shown together, and keeps
   the plugin (`vX.Y`) and canvas (`vX.Y.Z`) release trains from being confused for
@@ -163,6 +171,43 @@ pwsh run-tests.ps1 -IncludeLiveEvals       # + node evals/run-evals.mjs (copilot
 
 `evals/scripts/run-evals.ps1` runs the live evals on their own.
 
+## Driving the canvas from a published release archive
+
+Every other proof of `/live` renders out of this repository. `tools/open-archive-canvas.mjs`
+is the one that does not: give it a directory an **extracted release archive** unpacks to and
+it installs a stub of the host SDK (nothing else — no `npm install`), loads `extension.mjs`
+from that tree, opens the canvas, and prints the loopback URL. Nothing else goes to stdout,
+so the URL composes straight into `CANVAS_URL`.
+
+```bash
+gh release download v1.1.1 -p 'srs-navigator-*.zip' -D /tmp/canvas-archive
+unzip -q /tmp/canvas-archive/srs-navigator-1.1.1.zip -d /tmp/ext
+node evals/tools/open-archive-canvas.mjs /tmp/ext/srs-navigator
+```
+
+Then point the visual suite at that URL instead of the repo dev server — with `CANVAS_URL`
+set, `playwright.config.mjs` starts no canvas server of its own, so the screenshots in
+`test-results/` come from the published artefact:
+
+```bash
+CANVAS_URL=http://127.0.0.1:PORT/ npm --prefix .github/extensions/srs-navigator run test:e2e
+```
+
+```powershell
+$env:CANVAS_URL = "http://127.0.0.1:PORT/"
+npm --prefix .github/extensions/srs-navigator run test:e2e
+```
+
+It refuses a path under `.github/`. That is the whole point: `extension.mjs` treats such a
+path as an in-repo project install and resolves the methodology from `skills/` rather than
+from the archive, so a capture taken there proves the checkout renders — not the release.
+
+| Flag | Effect |
+|------|--------|
+| `--spec <file>` | render a specification JSON instead of the archive's bundled demo |
+| `--instance <id>` | canvas instance id (default `open-archive-canvas`) |
+| `--landing` | keep the extension's first-run landing overlay (off by default, because it swallows the health-bar clicks `visual.test.mjs` makes) |
+
 ## The "SDK"
 
 `lib/copilot-sdk.mjs` wraps the `@github/copilot` CLI in headless mode:
@@ -185,6 +230,8 @@ evals/
 │   ├── skills.mjs           # SKILL.md loader/parser
 │   └── graders.mjs          # rubric grading + LLM judge
 ├── tests/                   # deterministic node --test files (offline)
+├── tools/
+│   └── open-archive-canvas.mjs  # boot the canvas from an extracted release archive
 ├── cases/                   # live eval cases (opt-in)
 │   ├── _shared.mjs
 │   └── *.case.mjs

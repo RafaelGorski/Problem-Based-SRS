@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **The canvas can now be driven from a published release archive**
+  (`evals/tools/open-archive-canvas.mjs`). Every proof of `/live` ran against this
+  repository: `serve-canvas.mjs` renders out of `lib/`, `visual.test.mjs` points at the
+  server it starts, and `from-archive-install.test.mjs` — the one place that stages a real
+  archive — kept the boot sequence sealed inside a `node --test` file. Nothing could hand a
+  browser a URL backed by the artefact a user downloads, so the screenshot #90 asks for could
+  not be taken at all. The tool installs a host-SDK stub and nothing else (no `npm install`,
+  matching the archive's no-`node_modules`/no-lockfile contract), loads `extension.mjs` from
+  the extracted tree, opens the canvas and prints the loopback URL — stdout carries the URL
+  and nothing else, so it feeds `CANVAS_URL` directly and `playwright.config.mjs` then starts
+  no canvas server of its own.
+  - It **refuses any path under `.github/`**, which is the assertion that gives the evidence
+    its value: aimed at `.github/extensions/srs-navigator/` it would boot happily,
+    `extension.mjs` would switch to in-repo mode and resolve the methodology from `skills/`,
+    Playwright would go green — and the capture filed as published-archive evidence would be
+    the checkout. Presence standing in for function is the substitution #69 kept making; a
+    tool that can prove the wrong thing silently makes it cheaper.
+  - By default it passes the archive's **own** `lib/demo-spec.mjs` explicitly rather than
+    letting the extension fall through to its "no spec found" path, which lays a landing
+    overlay over the same graph and swallows the health-bar clicks `visual.test.mjs` makes —
+    an archive-driven run would have failed on the overlay and read as a `/live` regression.
+    `--landing` captures that first-run state deliberately.
+  - `evals/tests/from-archive-install.test.mjs` now imports the stub from the tool instead of
+    keeping its own copy, so the two cannot drift; `archive-canvas-tool.test.mjs` (21 tests)
+    fails if the duplicate comes back, if the `.github` refusal is weakened, if the CLI
+    prints anything but the URL, or if the Playwright config stops honouring `CANVAS_URL`.
+
 ### Fixed
 
 - **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
