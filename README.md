@@ -222,6 +222,37 @@ claude --plugin-dir ./Problem-Based-SRS
 /plugin install https://github.com/RafaelGorski/Problem-Based-SRS
 ```
 
+### Plugin release archive
+
+Both commands above need the repository on disk. Every methodology release also attaches
+**`problem-based-srs-v<version>.zip`** — the same plugin with no repository around it, for
+installing without `git`. The canvas app ships on its own `vX.Y.Z` tags interleaved with
+the methodology's `vX.Y` ones, so check the title: methodology releases are named
+*🎉 Version …*. Download the asset from the
+[releases page](https://github.com/RafaelGorski/Problem-Based-SRS/releases).
+
+The archive already carries its own `problem-based-srs/` folder, so extract it into the
+directory *above* the one the plugin will occupy:
+
+| Scope | Extract into | Produces |
+|-------|--------------|----------|
+| Personal (all projects) | `~/plugins/` | `~/plugins/problem-based-srs/.claude-plugin/plugin.json` |
+| Project (one repo) | `vendor/` | `vendor/problem-based-srs/.claude-plugin/plugin.json` |
+
+Then point Claude Code at the extracted folder — `claude --plugin-dir ~/plugins/problem-based-srs`.
+
+What is inside, and how to use each piece on its own:
+
+| Path inside the archive | What it is |
+|-------------------------|------------|
+| `problem-based-srs/.claude-plugin/plugin.json` | the plugin manifest |
+| `problem-based-srs/skills/problem-based-srs/` | the methodology skill and its `reference/<action>.md` files — copy this one folder into `.github/skills/` (Copilot) or `.claude/skills/` (Claude Code) to use the skill without the plugin wrapper |
+| `problem-based-srs/agents/problem-based-srs/` | the agent that orchestrates the actions |
+
+There is **no `npm install` and no build step**: the archive is markdown plus a JSON
+manifest. It carries the methodology only — the SRS Navigator canvas app is a separate
+download, below.
+
 ### AgentSkills CLI
 
 ```bash

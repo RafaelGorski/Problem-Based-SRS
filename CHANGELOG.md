@@ -81,8 +81,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Notation table declares `NFR.{n}` → `NFR.01`, and the shipped demo spec uses `NFR.01`. The
   notation guard added in #63/#66 only rejects *hyphen* IDs, so a wrong-arity dotted ID
   walked straight through.
+- **The agent shipped two links that resolved outside the release archive.**
+  `agents/problem-based-srs/AGENT.md` linked its worked examples through
+  `../skills/problem-based-srs/reference/…`, which from `agents/problem-based-srs/` lands in
+  `agents/skills/` — a directory that exists in neither the repository nor the archive. It
+  was wrong in every published `problem-based-srs-vX.Y.zip`. `skills-static.test.mjs` does
+  resolve every relative link, but only under `skills/`, and `evals/` contained no reference
+  to `agents/` at all, so nothing looked at one of the five paths `PACKAGE_INCLUDES` ships.
+- **The agent could not dispatch `/live`.** `SKILL.md` routes nine actions, `AGENT.md`
+  advertised eight: the canvas entry point — the one #69 keeps asking about — was missing
+  from the table the plugin archive ships. It now names `/live`, which is the command that
+  actually reaches the canvas: `live` is not an argument the orchestrator accepts, and a
+  guard now rejects any `/problem-based-srs <action>` the agent claims that `SKILL.md`'s
+  Available Actions table does not list.
 
 ### Added
+
+- **The plugin release archive has an install path, and a guard that opens it**
+  (`evals/tests/plugin-archive-install.test.mjs`, 14 assertions). `problem-based-srs-vX.Y.zip`
+  is the only asset attached to every methodology release, and no surface said what to do
+  with it: the README documented four install paths and none of them was the file on the
+  release page. It is now documented — where to extract it, that the archive brings its own
+  `problem-based-srs/` root so the target is the directory *above* it, and which folder to
+  copy for the skill alone. The guard stages what the packager ships into a temp directory
+  outside the checkout and reads it as an installer would: every relative link must resolve
+  *inside* the archive, the agent must advertise every action `SKILL.md` dispatches, and every
+  path the README quotes must be in the tree. Both the include list and the archive root are
+  read out of `build-plugin.py` and `plugin.json`, and one cross-check runs the real
+  `build-plugin.py package` and requires the staged tree to equal the zip — so a change to the
+  archive's layout fails the documentation assertion with it.
 
 - **Drift guard for the canvas app's agent-facing instructions**
   (`.github/extensions/srs-navigator/tests/app-prompts.test.mjs`, 21 assertions, wired into

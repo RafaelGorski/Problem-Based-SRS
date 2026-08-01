@@ -76,6 +76,7 @@ dispatching to a step via an **action** argument:
 | `functional-requirements` | `/problem-based-srs functional-requirements` | Step 5: Generate functional requirements |
 | `validate` | `/problem-based-srs validate` | Validate traceability across domains (ZigZag) |
 | `complexity` | `/problem-based-srs complexity` | Optional: Axiomatic Design quality analysis |
+| `live` | `/live` | Open the SRS Navigator canvas on the current spec |
 | `full` | `/problem-based-srs` | Run the complete methodology (Step 0 → Step 5) |
 
 ## How to Use This Agent
@@ -189,5 +190,5 @@ Use the `/problem-based-srs validate` action to check existing artifacts without
 ## Examples
 
 For complete walkthroughs, see:
-- [CRM Example](../skills/problem-based-srs/reference/crm-example.md) — Business domain
-- [MicroER Example](../skills/problem-based-srs/reference/microer-example.md) — Technical domain
+- [CRM Example](../../skills/problem-based-srs/reference/crm-example.md) — Business domain
+- [MicroER Example](../../skills/problem-based-srs/reference/microer-example.md) — Technical domain
