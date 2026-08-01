@@ -34,6 +34,7 @@ import {
   skillPageDrift,
   summarize,
   renderReport,
+  renderAnnotations,
   fetchSkillPage,
   readLocalState,
   main,
@@ -244,16 +245,22 @@ describe("comparing the page against the skill it claims to publish", () => {
     assert.equal(drift.description.matches, true);
   });
 
-  it("compares the version only when the page publishes one", () => {
+  it("answers the version axis with a status, never a silent null", () => {
     const profile = shipped();
-    const clean = skillPageDrift({
+    // The state every run hits today. `null` said this and "there is nothing here to
+    // compare" with the same value, so the caller could not tell an unanswerable axis
+    // from an absent one — and reported neither.
+    const unpublished = skillPageDrift({
       ...pageFor({ description: profile.description, sections: profile.sections }),
       profile,
     });
+    assert.equal(unpublished.version.status, "page-publishes-none");
+    assert.equal(unpublished.version.matches, null, "no published version is not a pass");
+    assert.equal(unpublished.version.actual, null);
     assert.equal(
-      clean.version,
-      null,
-      "no published version means no answer, not a passing answer",
+      unpublished.version.expected,
+      profile.version,
+      "the axis still knows what it would have compared against",
     );
 
     const stale = skillPageDrift({
@@ -264,9 +271,34 @@ describe("comparing the page against the skill it claims to publish", () => {
       }),
       profile,
     });
+    assert.equal(stale.version.status, "compared");
     assert.equal(stale.version.matches, false);
     assert.equal(stale.version.actual, "1.0");
     assert.equal(stale.version.expected, profile.version);
+
+    const agrees = skillPageDrift({
+      ...pageFor({
+        description: profile.description,
+        version: profile.version,
+        sections: profile.sections,
+      }),
+      profile,
+    });
+    assert.equal(agrees.version.status, "compared");
+    assert.equal(agrees.version.matches, true);
+  });
+
+  it("says which side is silent when this repository is the one with no version", () => {
+    // The mirror image, and it must not be reported as the registry's problem: a skill
+    // that ships no `metadata.version` leaves the axis just as unanswerable.
+    const drift = skillPageDrift({
+      ...pageFor({ description: shipped().description, version: "9.9", sections: shipped().sections }),
+      profile: { ...shipped(), version: null },
+    });
+    assert.equal(drift.version.status, "repo-publishes-none");
+    assert.equal(drift.version.matches, null);
+    assert.equal(drift.version.actual, "9.9");
+    assert.equal(drift.version.expected, null);
   });
 
   it("treats a page that matches nothing as unreadable, never as drift", () => {
@@ -402,6 +434,226 @@ describe("what the maintainer is handed", () => {
     assert.match(report, /Identifier Notation/i);
     assert.match(report, /❌/, "an error must not be rendered as a warning");
   });
+
+  it("marks the section comparison as a staleness signal, not a diff", () => {
+    // Heading presence is a heuristic: fifteen headings can all be present over prose
+    // that moved on years ago. The finding has to say so where it is read, or the next
+    // maintainer treats a clean body check as proof the page is byte-current.
+    const detail = summarizeWith([
+      {
+        name: MAIN_SKILL,
+        url: "https://www.skills.sh/x",
+        page: parseSkillPage(SKILL_PAGE_FIXTURE),
+        text: pageText(SKILL_PAGE_FIXTURE),
+      },
+    ])
+      .findings.find((f) => f.id === "registry-skill-stale")
+      .detail.join("\n");
+    assert.match(detail, /staleness signal/i, "the finding must name what kind of evidence it is");
+    assert.match(detail, /not a byte-level diff/i);
+  });
+
+  it("calls the thing it compares the skill body, never the README", () => {
+    // #69's box said "description, version, and README", and the comparison reads
+    // skills/*/SKILL.md. Carrying that word into the shipped surfaces would send the
+    // next reader to fix the wrong file.
+    const skillPageFindings = summarizeWith([
+      {
+        name: MAIN_SKILL,
+        url: "https://www.skills.sh/x",
+        page: parseSkillPage(SKILL_PAGE_FIXTURE),
+        text: pageText(SKILL_PAGE_FIXTURE),
+      },
+    ]).findings.filter((f) => f.id.startsWith("registry-skill-"));
+    assert.ok(skillPageFindings.length >= 1, "this must actually inspect a skill-page finding");
+    for (const f of skillPageFindings) {
+      assert.ok(
+        !/README/i.test([f.title, ...f.detail].join("\n")),
+        `${f.id} calls the compared document a README; it is the skill body of SKILL.md`,
+      );
+    }
+  });
+});
+
+/* ------------------------------------------------- the axis that cannot be answered */
+
+// The critique on #88: the acceptance criterion promises the version is "reported as
+// unverifiable" when the page publishes none, and #85 dropped it instead — `version`
+// came back null and `summarize()` said nothing at all. A run therefore named one axis
+// (the body) and stayed silent about a second, which reads as "checked, agrees".
+//
+// It is fixed with a third channel rather than a third severity. `ok` is
+// `findings.length === 0`, so a notice-severity *finding* would fire on every run and
+// leave the monitor permanently non-green — the state the runbook already warns produces
+// a muted monitor. `unverified` records the limitation without touching the verdict.
+describe("the axis the surface cannot answer is reported, not dropped", () => {
+  const summarizeWith = (skillPages, extra = {}) =>
+    summarize({
+      listing: { skills: [MAIN_SKILL], declaredCount: 1, url: "https://www.skills.sh/x" },
+      repoSkills: [MAIN_SKILL],
+      skillProfiles: repoSkillProfiles(repoRoot),
+      skillPages,
+      ...extra,
+    });
+
+  /** A page that agrees with the shipped skill on everything the surface publishes. */
+  const agreeingPage = (over = {}) => {
+    const p = shipped();
+    return {
+      name: MAIN_SKILL,
+      url: "https://www.skills.sh/x",
+      ...pageFor({ description: p.description, sections: p.sections, ...over }),
+    };
+  };
+
+  const notices = (summary) =>
+    (summary.unverified ?? []).filter((u) => u.id === "registry-skill-version-unverifiable");
+
+  it("records the version axis as unverified when the page publishes none", () => {
+    const summary = summarizeWith([agreeingPage()]);
+    const [notice] = notices(summary);
+    assert.ok(notice, `expected an unverified version axis, got ${JSON.stringify(summary.unverified)}`);
+    assert.equal(notice.severity, "notice");
+    const text = [notice.title, ...notice.detail].join("\n");
+    assert.match(text, /problem-based-srs/, "which skill");
+    assert.match(text, /https:\/\/www\.skills\.sh\/x/, "and which page");
+    assert.match(text, /metadata\.version/, "and where the expected value comes from");
+    assert.match(text, /\b1\.3\b/, "and what that value is");
+  });
+
+  it("leaves the run's verdict untouched, so the monitor stays usable", () => {
+    const summary = summarizeWith([agreeingPage()]);
+    assert.deepEqual(summary.findings, [], "an unanswerable axis is not a disagreement");
+    assert.equal(summary.ok, true);
+    assert.equal(summary.drifted, false, "--strict must not fail on someone else's limitation");
+    assert.equal(notices(summary).length, 1);
+  });
+
+  it("is the real state of the captured page, alongside the stale body", () => {
+    const summary = summarizeWith([
+      {
+        name: MAIN_SKILL,
+        url: "https://www.skills.sh/x",
+        page: parseSkillPage(SKILL_PAGE_FIXTURE),
+        text: pageText(SKILL_PAGE_FIXTURE),
+      },
+    ]);
+    assert.equal(notices(summary).length, 1, "the captured page carries no softwareVersion");
+    assert.ok(
+      summary.findings.some((f) => f.id === "registry-skill-stale"),
+      "and its body is a section short — the two channels report independently",
+    );
+  });
+
+  it("empties the moment the surface starts publishing a version that agrees", () => {
+    const summary = summarizeWith([agreeingPage({ version: shipped().version })]);
+    assert.deepEqual(notices(summary), [], "a compared axis is not an unverified one");
+    assert.deepEqual(summary.findings, []);
+  });
+
+  it("reports a published version that disagrees as drift, not as unverified", () => {
+    const summary = summarizeWith([agreeingPage({ version: "1.0" })]);
+    assert.deepEqual(notices(summary), []);
+    const stale = summary.findings.find((f) => f.id === "registry-skill-stale");
+    assert.ok(stale, `${summary.findings.map((f) => f.id)}`);
+    assert.match(stale.detail.join("\n"), /1\.0/);
+    assert.equal(summary.drifted, true);
+  });
+
+  it("does not add a second voice when the page could not be read at all", () => {
+    const summary = summarizeWith([
+      { name: MAIN_SKILL, url: "https://www.skills.sh/x", page: null, text: "" },
+    ]);
+    assert.deepEqual(
+      notices(summary),
+      [],
+      "registry-skill-unreadable already says the page told us nothing",
+    );
+    assert.ok(summary.findings.some((f) => f.id === "registry-skill-unreadable"));
+  });
+
+  it("names the skill's own metadata.version and never the plugin release version", () => {
+    const manifest = JSON.parse(read(".claude-plugin/plugin.json")).version;
+    assert.notEqual(
+      shipped().version,
+      manifest,
+      "this assertion is only meaningful while the two version domains actually differ",
+    );
+    const text = notices(
+      summarizeWith([agreeingPage()], {
+        manifestVersion: manifest,
+        canvasVersion: null,
+        publishedTags: [`v${manifest}`],
+      }),
+    )
+      .map((u) => [u.title, ...u.detail].join("\n"))
+      .join("\n");
+    assert.match(text, new RegExp(`\\b${shipped().version.replace(".", "\\.")}\\b`));
+    assert.ok(
+      !text.includes(manifest),
+      `the skill version axis quoted the plugin release version ${manifest}; they are ` +
+        "different domains and mixing them is how a reader is told to bump the wrong file",
+    );
+  });
+
+  it("says what it could not check on a clean run — the only run where silence misleads", () => {
+    const report = renderReport(summarizeWith([agreeingPage()]));
+    assert.match(report, /Not verified this run/i);
+    assert.match(report, /no version/i);
+    assert.ok(
+      !/^Every distribution surface agrees with the repository\.$/m.test(report),
+      "an unqualified all-clear claims the version axis was compared when it was not",
+    );
+  });
+
+  it("still renders the plain all-clear when there was nothing it could not check", () => {
+    const report = renderReport(
+      summarize({
+        listing: { skills: [MAIN_SKILL], declaredCount: 1, url: "https://www.skills.sh/x" },
+        repoSkills: [MAIN_SKILL],
+        skillProfiles: repoSkillProfiles(repoRoot),
+        skillPages: [],
+      }),
+    );
+    assert.match(report, /^Every distribution surface agrees with the repository\.$/m);
+    assert.ok(!/Not verified this run/i.test(report));
+  });
+
+  it("carries the section into a red report too", () => {
+    const report = renderReport(
+      summarizeWith([
+        {
+          name: MAIN_SKILL,
+          url: "https://www.skills.sh/x",
+          page: parseSkillPage(SKILL_PAGE_FIXTURE),
+          text: pageText(SKILL_PAGE_FIXTURE),
+        },
+      ]),
+    );
+    assert.match(report, /Identifier Notation/i, "the finding is still first");
+    assert.match(report, /Not verified this run/i, "and the limitation is not crowded out");
+  });
+
+  it("annotates the Actions UI at notice level, leaving findings at theirs", () => {
+    const lines = renderAnnotations(
+      summarizeWith([
+        {
+          name: MAIN_SKILL,
+          url: "https://www.skills.sh/x",
+          page: parseSkillPage(SKILL_PAGE_FIXTURE),
+          text: pageText(SKILL_PAGE_FIXTURE),
+        },
+      ]),
+    );
+    assert.ok(
+      lines.some((l) => l.startsWith("::notice::") && /version/i.test(l)),
+      `a weekly run is read in the Actions UI, not in this file, ${lines}`,
+    );
+    assert.ok(
+      lines.some((l) => l.startsWith("::error::")),
+      "and the stale body must still page at its own severity",
+    );
+  });
 });
 
 /* -------------------------------------------------------------- the CLI wiring */
@@ -480,6 +732,20 @@ describe("the checker actually fetches the pages", () => {
     );
   });
 
+  it("carries the unverified axis all the way to the CLI's own output", async () => {
+    const fetchImpl = stubFetch({
+      listingHtml: LISTING_FIXTURE,
+      skillHtml: SKILL_PAGE_FIXTURE,
+    });
+    const { report } = await runMain(fetchImpl);
+    assert.match(
+      report,
+      /Not verified this run/i,
+      "the unit tests can pass while main() never renders it; this is the wire",
+    );
+    assert.match(report, /metadata\.version/);
+  });
+
   it("hands the comparison the repository's own skills, read from disk", () => {
     const local = readLocalState(repoRoot);
     assert.ok(
@@ -503,8 +769,12 @@ describe("the checker actually fetches the pages", () => {
 describe("negative canaries", () => {
   it("every finding this suite adds has a row in the runbook, at the severity it is raised at", () => {
     const runbook = read(".github/copilot-instructions.md");
-    for (const id of ["registry-skill-stale", "registry-skill-unreadable"]) {
-      const declared = new RegExp(`id: "${id}",\\s*severity: "(error|warning)"`).exec(CHECKER);
+    for (const id of [
+      "registry-skill-stale",
+      "registry-skill-unreadable",
+      "registry-skill-version-unverifiable",
+    ]) {
+      const declared = new RegExp(`id: "${id}",\\s*severity: "(error|warning|notice)"`).exec(CHECKER);
       assert.ok(declared, `${id} must be a finding the checker can actually raise`);
 
       // A row, not a passing mention: an id named only inside another finding's prose is
@@ -516,6 +786,35 @@ describe("negative canaries", () => {
         declared[1],
         `the runbook files ${id} under the wrong severity, so it tells the operator ` +
           "the wrong thing about whether the run failed",
+      );
+    }
+  });
+
+  it("the runbook says a notice does not fail the run, or the severity is a guess", () => {
+    // A third severity that the exit-code paragraph never mentions leaves an operator
+    // reading `::notice::` in a red-looking log with no way to know it was not the cause.
+    const runbook = read(".github/copilot-instructions.md");
+    const exitCodes = /\*\*Exit codes\.\*\*[\s\S]{0,900}/.exec(runbook)?.[0] ?? "";
+    assert.match(exitCodes, /notice/i, "the exit-code rule must account for notices");
+    assert.match(
+      exitCodes,
+      /`unverified`/,
+      "and name the channel they arrive on, which is not `findings`",
+    );
+  });
+
+  it("the runbook's skill-page rows call it the skill body, not the README", () => {
+    const runbook = read(".github/copilot-instructions.md");
+    for (const id of [
+      "registry-skill-stale",
+      "registry-skill-unreadable",
+      "registry-skill-version-unverifiable",
+    ]) {
+      const row = new RegExp(`^\\|\\s*\`${id}\`\\s*\\|.*$`, "m").exec(runbook);
+      assert.ok(row, `${id} has no runbook row`);
+      assert.ok(
+        !/README/i.test(row[0]),
+        `${id}'s row calls the compared document a README; it is skills/*/SKILL.md`,
       );
     }
   });

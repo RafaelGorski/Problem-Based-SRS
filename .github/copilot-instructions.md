@@ -564,11 +564,21 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
 | `registry-skill-unreadable` | warning | A per-skill page carried no `SoftwareApplication` block, or **none** of the shipped skill's sections appeared in it. A page serving something else and a page this checker can no longer parse look identical from here, so no drift is claimed. | Read the page by hand. If the site was redesigned, update `parseSkillPage`/`pageText`; a clean `registry-skill-stale` proves nothing while this warning stands. |
 | `registry-listing-partial` | warning | The page's own count disagrees with the entries it returned, so the comparison was skipped rather than run on a truncated payload. | Re-run; if it persists, read the page and confirm what it actually advertises. |
+| `registry-skill-version-unverifiable` | notice | An axis that was **not compared**, reported so a green run is not read as a version that was checked. skills.sh publishes no `softwareVersion`, so the page's version cannot be read at all; the value it would have been compared against is the skill's own `metadata.version` in `skills/*/SKILL.md` — **not** the plugin release version in `plugin.json`, which is a different domain. The mirror case (the skill declares no `metadata.version`) is reported the same way, naming the other side. | Nothing, while the surface publishes no version — it is the registry's limitation, not this repository's, and it does not fail the run. If a `metadata.version` is what is missing, add it to the skill's frontmatter and the axis starts answering. |
 
 **Exit codes.** Only `error` findings fail the run (`--strict` → 1). Warnings print, are
 emitted as `::warning::` annotations, and exit 0 — a monitor that goes red on someone
 else's 503 is a monitor that gets muted, and a muted monitor is the state #69 was already
 in. If warnings persist across runs, treat that as the signal instead of the exit code.
+
+**A `notice` is a third channel, not a third severity.** Entries at that severity arrive on
+the summary's `unverified` channel, never on `findings`, so they cannot move `ok`,
+`drifted` or the exit code. That separation is the point: an axis that is unanswerable on
+*every* run — skills.sh has never published a version — would leave the monitor permanently
+non-green if it were filed as a finding, which is the muting problem above. They render
+under **"Not verified this run"**, including on an otherwise clean run, which is the only
+run where staying silent about a skipped comparison actually misleads. Guarded by
+`evals/tests/registry-listing-content.test.mjs`.
 
 **Version badges must link the `/releases` index, not a per-tag URL.** The documented
 process bumps `plugin.json` *before* the tag exists, so a per-tag badge 404s for the whole
