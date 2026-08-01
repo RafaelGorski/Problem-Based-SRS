@@ -28,6 +28,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseFrontmatter } from "../evals/lib/skills.mjs";
+import { nextVersion } from "./bump-version.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..");
@@ -233,6 +234,7 @@ const sameText = (a, b) =>
  *   page-publishes-none the registry page carries none; `matches` is null
  *   repo-publishes-none the skill's frontmatter carries none; `matches` is null
  *
+
  * @param {{page:object|null, text:string, profile:object|null}} input
  */
 export function skillPageDrift({ page = null, text = "", profile = null } = {}) {
@@ -250,6 +252,7 @@ export function skillPageDrift({ page = null, text = "", profile = null } = {}) 
     : !profile.version
       ? "repo-publishes-none"
       : "compared";
+
 
   return {
     name: profile.name,
@@ -474,6 +477,146 @@ export function danglingTagLinks(links = [], publishedTags = [], { repo = REPO }
 }
 
 /**
+ * Versions whose **tag** is on origin but for which no release was ever published.
+ *
+ * Everything else here compares against published releases, so a tag that exists with
+ * nothing behind it is invisible — and two states that need opposite instructions get the
+ * same one:
+ *
+ *   A. the tag was never pushed              -> `git tag vX.Y && git push origin vX.Y`
+ *   B. the tag was pushed and the run failed -> that command does nothing at all
+ *
+ * In state B `git tag` aborts on the collision, and pushing a ref that is already up to
+ * date sends nothing, so no `push` event fires and create-release.yml cannot re-run. The
+ * maintainer follows the advice, sees "Everything up-to-date", and the run stays red.
+ * `Create Release` has already failed on a tag push here (run 28527065984, tag v1.1.0).
+ *
+ * The plugin train is matched through `pluginTag` so a hand-pushed `v2.6.0` counts as the
+ * tag standing in 2.6.0's way; the canvas train tags `v${VERSION}` verbatim and is matched
+ * exactly. A tag no surface advertises is reported as `unknown` rather than attributed by
+ * shape — the trains share a tag namespace, which is why `releaseTrain` reads titles.
+ *
+ * `repoTags` of `null` means "not read": the result is empty, because a refs API that
+ * returned 502 is not evidence that anything is stranded.
+ *
+ * @param {{manifestVersion?:string|null, canvasVersion?:string|null, repoTags?:string[]|null,
+ *          publishedTags?:string[], links?:ReturnType<typeof advertisedTagLinks>, repo?:string}} input
+ * @returns {Array<{tag:string, train:"plugin"|"canvas"|"unknown", advertised:string|null,
+ *                  links:ReturnType<typeof advertisedTagLinks>}>}
+ */
+export function tagsWithoutRelease({
+  manifestVersion = null,
+  canvasVersion = null,
+  repoTags = null,
+  publishedTags = [],
+  links = [],
+  repo = REPO,
+} = {}) {
+  if (!Array.isArray(repoTags)) return [];
+  const released = new Set(publishedTags);
+  const found = new Map();
+
+  const claim = (tag, train, advertised) => {
+    if (!tag || released.has(tag)) return;
+    const existing = found.get(tag);
+    if (existing) {
+      if (existing.train === "unknown") Object.assign(existing, { train, advertised });
+      return;
+    }
+    found.set(tag, { tag, train, advertised, links: [] });
+  };
+
+  claim(manifestVersion ? pluginTag(manifestVersion, repoTags) : null, "plugin", manifestVersion);
+  claim(canvasVersion ? exactTag(canvasVersion, repoTags) : null, "canvas", canvasVersion);
+
+  for (const link of links) {
+    if (link?.repo && String(link.repo).toLowerCase() !== String(repo).toLowerCase()) continue;
+    if (!repoTags.includes(link.tag) || released.has(link.tag)) continue;
+    claim(link.tag, "unknown", null);
+    found.get(link.tag).links.push(link);
+  }
+
+  return [...found.values()];
+}
+
+/**
+ * How to get a release out of a tag that already exists — per train, because they differ.
+ *
+ * The plugin train re-publishes by dispatch: `create-release.yml` accepts a `version` input,
+ * and `gh release create` attaches to a tag that is already there. The canvas train cannot,
+ * because `bump-version.mjs` keeps bumping past any version whose tag exists, so leaving the
+ * tag makes the stranded version unreachable forever — its tag has to go first.
+ *
+ * @param {{tag:string, train:string, advertised:string|null}} entry
+ * @returns {string[]}
+ */
+export function republishInstruction({ tag, train, advertised } = {}) {
+  const noEvent =
+    `Re-pushing ${tag} cannot re-trigger anything: git sends nothing for a ref that is ` +
+    "already up to date, so no push event fires.";
+  if (train === "plugin") {
+    const version = (pluginReleaseTag(advertised) ?? tag).replace(/^v/i, "");
+    return [
+      `Re-publish by dispatch: \`gh workflow run create-release.yml -f version=${version}\`.`,
+      noEvent,
+    ];
+  }
+  if (train === "canvas") {
+    return [
+      `Delete the tag first — \`git push --delete origin ${tag}\` — then re-run ` +
+        "release-canvas.yml.",
+      `bump-version.mjs skips any version whose tag exists, so leaving ${tag} in place makes ` +
+        `the next run skip past ${advertised ?? "it"} permanently.`,
+      noEvent,
+    ];
+  }
+  return [
+    "Re-publish from the workflow that owns this tag, or delete the tag if it was pushed by " +
+      "mistake.",
+    noEvent,
+  ];
+}
+
+/**
+ * Dangling links for versions `main` can no longer publish.
+ *
+ * `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag
+ * against `.claude-plugin/plugin.json` and fails with `version mismatch` for anything else.
+ * The manifest version is therefore the *only* version the current tree can release — so a
+ * changelog link for a version the manifest has already passed is not a release waiting to
+ * be cut, and telling a maintainer to cut it produces a failed workflow run rather than a
+ * release.
+ *
+ * It is not impossible to publish, and this finding must not say that it is: `checkout@v4`
+ * restores the *tagged commit*, so tagging the older commit whose manifest still read that
+ * version would build. What it would publish is the objection — a tree and release notes
+ * that predate most of what the section documents now, because the section kept growing
+ * after that commit. Unreachable from `main`, misleading from anywhere else. A monitor that
+ * overstates its case is one a maintainer learns to discount, which is the failure this
+ * whole checker exists to prevent.
+ *
+ * That is not hypothetical: 2.4.1 → 2.5.0 → 2.6.0 shipped with no `v2.5` in between, which
+ * also means `extract_notes()` — one section, from the matching heading to the next — would
+ * publish `v2.6` without a word of what 2.5 documented, even though the artifact contains it.
+ *
+ * Scoped and labelled exactly like `unpublishable-release-link`: only reference definitions
+ * in the changelog the plugin pipeline reads make a claim about a plugin version, and only a
+ * labelled link claims a version at all.
+ *
+ * @param {ReturnType<typeof danglingTagLinks>} dangling
+ * @param {string|null} manifestVersion
+ */
+export function strandedReleaseLinks(dangling = [], manifestVersion = null) {
+  const manifest = normalizeVersion(manifestVersion);
+  if (!manifest) return [];
+  return dangling.filter((l) => {
+    if (l.file !== PLUGIN_CHANGELOG) return false;
+    const claimed = l.label ? normalizeVersion(l.label) : null;
+    return claimed !== null && compareVersions(claimed, manifest) < 0;
+  });
+}
+
+/**
  * Compare each release train's advertised version against what is published.
  *
  * The two trains share a tag namespace but not a version file: the plugin's number lives
@@ -567,6 +710,7 @@ export function summarize({
   tagLinks = [],
   publishedTags = [],
   publishedReleases = null,
+  repoTags = null,
   manifestVersion = null,
   canvasVersion = null,
   errors = [],
@@ -703,6 +847,7 @@ export function summarize({
       });
     }
 
+
     if (stale.length) {
       findings.push({
         id: "registry-skill-stale",
@@ -737,17 +882,57 @@ export function summarize({
   }
 
   const dangling = danglingTagLinks(tagLinks, tags);
-  // A link that names a tag no pipeline creates is a different job from one that is merely
-  // waiting for a tag push. Reporting both under "cut the missing release" hands the
-  // maintainer an instruction that cannot work: cutting v2.6 leaves a v2.6.0 link 404, so
-  // the run stays red and the advice that produced it is now false.
+  // Three jobs, not one. A link waiting for a tag push is cut; a link naming a tag no
+  // pipeline creates is edited; a link for a version the manifest has already passed is
+  // *folded into the release that will carry it*. Reporting them together hands the
+  // maintainer instructions that cannot all work: cutting v2.6 leaves a v2.6.0 link 404,
+  // and cutting v2.5 fails validation against a manifest that reads 2.6.0.
+  //
+  // Stranded is checked first because it is the deeper answer: correcting a stranded link's
+  // tag shape still leaves it pointing at a release `main` cannot cut.
+  const stranded = strandedReleaseLinks(dangling, manifestVersion);
   const unpublishable = dangling.filter((l) => {
+    if (stranded.includes(l)) return false;
     if (l.file !== PLUGIN_CHANGELOG) return false;
     const expected = l.label ? pluginReleaseTag(l.label) : null;
     return expected !== null && expected !== l.tag;
   });
-  const pending = dangling.filter((l) => !unpublishable.includes(l));
+  const cuttable = dangling.filter((l) => !unpublishable.includes(l) && !stranded.includes(l));
 
+  // Of what is left, a link whose tag is already on origin is not waiting for a tag push:
+  // its release run failed. Same evidence, opposite instruction.
+  const strandedTags = tagsWithoutRelease({
+    manifestVersion,
+    canvasVersion,
+    repoTags,
+    publishedTags: tags,
+    links: cuttable,
+  });
+  const strandedTagNames = new Set(strandedTags.map((s) => s.tag));
+  const strandedTrains = new Set(strandedTags.map((s) => s.train));
+  const pending = cuttable.filter((l) => !strandedTagNames.has(l.tag));
+
+  if (stranded.length) {
+    findings.push({
+      id: "stranded-release-link",
+      severity: "error",
+      title: "Published links name versions `main` can no longer release",
+      detail: [
+        ...stranded.map(
+          (l) =>
+            `${l.file}:${l.line}  [${l.label}] links ${l.tag}, but the manifest is already ` +
+            `at ${manifestVersion} — \`build-plugin.py --expected-version ${l.label}\` ` +
+            `fails on a version mismatch, so that tag is no longer publishable from \`main\``,
+        ),
+        `Tagging the older commit whose manifest still read that version would build — ` +
+          `create-release.yml checks out the tagged commit, not \`main\` — but it would ` +
+          `publish a tree and notes that predate what the section documents now.`,
+        `${manifestVersion} is the only version \`main\` can publish. Fold each section ` +
+          `into ## [${manifestVersion}] and drop the link: build-plugin.py extracts one ` +
+          `section, so those notes reach no release from \`main\` otherwise.`,
+      ],
+    });
+  }
   if (unpublishable.length) {
     findings.push({
       id: "unpublishable-release-link",
@@ -762,6 +947,19 @@ export function summarize({
         "Cutting the release will not fix these — GitHub serves /releases/tag/<tag> by " +
           "exact name. Correct the link.",
       ],
+    });
+  }
+  if (strandedTags.length) {
+    findings.push({
+      id: "release-tag-without-release",
+      severity: "error",
+      title: "Tags exist on origin with no release behind them",
+      detail: strandedTags.flatMap((s) => [
+        `${s.tag} is on origin but nothing was published for it` +
+          (s.advertised ? ` — the ${s.train} train advertises ${s.advertised}` : ""),
+        ...s.links.map((l) => `${l.file}:${l.line} links it  ${l.url}`),
+        ...republishInstruction(s),
+      ]),
     });
   }
   if (pending.length) {
@@ -788,7 +986,10 @@ export function summarize({
     return `newest published release (train not identifiable): ${releases.newest ?? "none"}`;
   };
 
-  if (manifestVersion && !releases.plugin.published) {
+  // A train whose tag is stranded is already covered by release-tag-without-release, which
+  // says the same thing and carries the instruction that works. Reporting both would give
+  // one failure two entries and two contradictory next steps.
+  if (manifestVersion && !releases.plugin.published && !strandedTrains.has("plugin")) {
     findings.push({
       id: "plugin-release-missing",
       severity: "error",
@@ -801,7 +1002,22 @@ export function summarize({
       ],
     });
   }
-  if (canvasVersion && !releases.canvas.published) {
+  if (canvasVersion && !releases.canvas.published && !strandedTrains.has("canvas")) {
+    // Naming the advertised version is not enough: release-canvas.yml *increments* from it, so
+    // running the workflow publishes the next one and the advertised number is skipped forever.
+    // Derive that from bump-version.mjs rather than restating it — the same "advice that cannot
+    // produce the state it asks for" defect the plugin side had.
+    let willPublish = null;
+    try {
+      willPublish = nextVersion(
+        canvasVersion,
+        "patch",
+        publishedReleases.map((r) => r.tag).filter(Boolean),
+      );
+    } catch {
+      // A VERSION the bump script cannot parse is itself worth reporting, and a monitor that
+      // throws on the malformed input it exists to notice reports nothing at all.
+    }
     findings.push({
       id: "canvas-release-missing",
       severity: "error",
@@ -809,7 +1025,13 @@ export function summarize({
       detail: [
         `VERSION: ${canvasVersion}`,
         newestLine(releases.canvas, "canvas"),
-        "release-canvas.yml owns this train and bumps VERSION itself.",
+        willPublish
+          ? `release-canvas.yml owns this train and bumps VERSION itself — running it publishes ` +
+            `v${willPublish}, not v${canvasVersion}.`
+          : `release-canvas.yml owns this train, but bump-version.mjs cannot read ${canvasVersion} ` +
+            `as X.Y.Z, so no release can start from it.`,
+        `To publish ${canvasVersion}, reset VERSION and the extension package.json to the ` +
+          `newest published canvas release and let the workflow do the bump.`,
       ],
     });
   }
@@ -916,6 +1138,27 @@ export async function fetchPublishedReleases({ repo = REPO, fetchImpl, token } =
     .map((r) => ({ tag: r.tag_name, name: typeof r.name === "string" ? r.name : null }));
 }
 
+/**
+ * Every tag on origin, including ones no release was ever published for.
+ *
+ * `fetchPublishedReleases` cannot answer this: its tags are the tags releases *have*, so a
+ * tag left behind by a failed publish run is invisible to it. Read from the refs endpoint
+ * rather than /tags so the payload is unmistakable — a release payload has no `ref`, and
+ * mistaking one for the other would report a release title as a tag name.
+ */
+export async function fetchRepositoryTags({ repo = REPO, fetchImpl, token } = {}) {
+  const doFetch = fetchImpl ?? globalThis.fetch;
+  const headers = { accept: "application/vnd.github+json" };
+  if (token) headers.authorization = `Bearer ${token}`;
+  const url = `https://api.github.com/repos/${repo}/git/matching-refs/tags/?per_page=100`;
+  const res = await doFetch(url, { headers });
+  if (!res.ok) throw new Error(`${url} responded ${res.status}`);
+  const body = await res.json();
+  return (Array.isArray(body) ? body : [])
+    .map((r) => (typeof r?.ref === "string" ? r.ref.replace(/^refs\/tags\//, "") : null))
+    .filter(Boolean);
+}
+
 /** The same list flattened to tag names, for callers that only compare tags. */
 export async function fetchPublishedTags(options = {}) {
   return (await fetchPublishedReleases(options)).map((r) => r.tag);
@@ -988,12 +1231,25 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
     local.canvasVersion = null;
   }
 
+  // Read separately from the releases, because the whole point is the gap between them.
+  // Unreadable means unknown, not "no tags": the classifier is given null and stays quiet.
+  let repoTags = null;
+  try {
+    repoTags = await fetchRepositoryTags({
+      fetchImpl,
+      token: env.GITHUB_TOKEN || env.GH_TOKEN,
+    });
+  } catch (err) {
+    errors.push({ surface: "tags", message: `GitHub tags API: ${err.message}` });
+  }
+
   const summary = summarize({
     listing,
     ...local,
     skillPages,
     publishedTags: publishedReleases.map((r) => r.tag),
     publishedReleases,
+    repoTags,
     errors,
   });
   const output = asJson ? JSON.stringify(summary, null, 2) : renderReport(summary);

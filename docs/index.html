@@ -347,6 +347,14 @@
                 </div>
 
                 <div class="reveal" style="margin-top: var(--space-xl);">
+                    <h3>Claude Code plugin</h3>
+                    <p style="margin-bottom: var(--space-sm);">On Claude Code, add this repository as a plugin marketplace and install the plugin it lists &mdash; no clone required:</p>
+                    <pre><code>/plugin marketplace add RafaelGorski/Problem-Based-SRS
+/plugin install problem-based-srs@problem-based-srs</code></pre>
+                    <p style="color: var(--muted); font-size: var(--text-sm); margin-top: var(--space-sm);">Then <code>/reload-plugins</code>. Plugin skills are namespaced, so the methodology answers to <code>/problem-based-srs:problem-based-srs</code>.</p>
+                </div>
+
+                <div class="reveal" style="margin-top: var(--space-xl);">
                     <h3>Add the app</h3>
                     <p style="margin-bottom: var(--space-sm);">The SRS Navigator graph is a GitHub Copilot canvas extension, installed separately:</p>
                     <pre><code>Install the canvas extension from https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator</code></pre>

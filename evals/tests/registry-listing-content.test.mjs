@@ -434,7 +434,6 @@ describe("what the maintainer is handed", () => {
     assert.match(report, /Identifier Notation/i);
     assert.match(report, /❌/, "an error must not be rendered as a warning");
   });
-
   it("marks the section comparison as a staleness signal, not a diff", () => {
     // Heading presence is a heuristic: fifteen headings can all be present over prose
     // that moved on years ago. The finding has to say so where it is read, or the next
@@ -746,6 +745,7 @@ describe("the checker actually fetches the pages", () => {
     assert.match(report, /metadata\.version/);
   });
 
+
   it("hands the comparison the repository's own skills, read from disk", () => {
     const local = readLocalState(repoRoot);
     assert.ok(
@@ -818,6 +818,7 @@ describe("negative canaries", () => {
       );
     }
   });
+
 
   it("the listing parse still hands over the per-skill URLs the fetch needs", () => {
     const listing = parseRegistryListing(LISTING_FIXTURE);

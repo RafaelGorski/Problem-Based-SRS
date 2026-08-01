@@ -4,8 +4,9 @@
 This script powers the build & release pipeline. It can be run locally or from
 GitHub Actions. It performs three things:
 
-  1. validate  - Validate plugin.json and every skills/*/SKILL.md frontmatter,
-                 and (optionally) check version consistency against --expected-version.
+  1. validate  - Validate plugin.json, the marketplace.json catalog (when present)
+                 and every skills/*/SKILL.md frontmatter, and (optionally) check
+                 version consistency against --expected-version.
   2. notes     - Extract the CHANGELOG.md section for a given version.
   3. package   - Bundle the distributable plugin into dist/<name>-v<version>.zip.
 
@@ -35,6 +36,7 @@ for _stream in (sys.stdout, sys.stderr):
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_MANIFEST = REPO_ROOT / ".claude-plugin" / "plugin.json"
+MARKETPLACE_MANIFEST = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 SKILLS_DIR = REPO_ROOT / "skills"
 CHANGELOG = REPO_ROOT / "CHANGELOG.md"
 
@@ -105,6 +107,103 @@ def get_plugin_meta() -> dict:
     return meta
 
 
+def validate_marketplace(plugin_meta: dict) -> list[str]:
+    """Validate .claude-plugin/marketplace.json, the catalog `/plugin marketplace add` reads.
+
+    The catalog is optional to the plugin itself, so an absent file is not an error.
+    When it is present it is the only thing standing between a reader and a working
+    `/plugin install`, and every field below is one Claude Code resolves at install time:
+    a source that points nowhere, an entry named something the repository does not
+    publish, or a pinned version that has drifted from plugin.json all fail on the
+    reader's machine rather than here. Returns a list of error strings.
+    """
+    if not MARKETPLACE_MANIFEST.exists():
+        print("[validate] no marketplace.json (catalog is optional) — skipped")
+        return []
+
+    errors: list[str] = []
+    catalog = _read_json(MARKETPLACE_MANIFEST)
+
+    name = catalog.get("name")
+    if not name:
+        errors.append("marketplace.json is missing required field: name")
+    owner = catalog.get("owner")
+    if not isinstance(owner, dict) or not owner.get("name"):
+        errors.append("marketplace.json is missing required field: owner.name")
+
+    plugins = catalog.get("plugins")
+    if not isinstance(plugins, list) or not plugins:
+        errors.append("marketplace.json must list at least one plugin")
+        return errors
+
+    for index, entry in enumerate(plugins):
+        label = f"marketplace.json plugins[{index}]"
+        if not isinstance(entry, dict):
+            errors.append(f"{label}: entry must be an object")
+            continue
+        entry_name = entry.get("name")
+        if not entry_name:
+            errors.append(f"{label}: missing required field: name")
+        source = entry.get("source")
+        if not source:
+            errors.append(f"{label}: missing required field: source")
+            continue
+
+        # Relative sources resolve against the marketplace root — the directory holding
+        # .claude-plugin/, not .claude-plugin/ itself. Remote sources (github/url/npm)
+        # are fetched at install time and cannot be checked here.
+        if isinstance(source, str):
+            if not source.startswith("./"):
+                errors.append(f"{label}: a path source must start with './' (got '{source}')")
+                continue
+            target = (REPO_ROOT / source).resolve()
+            if not str(target).startswith(str(REPO_ROOT.resolve())):
+                errors.append(f"{label}: source '{source}' escapes the marketplace root")
+                continue
+            manifest = target / ".claude-plugin" / "plugin.json"
+            if not manifest.exists():
+                errors.append(
+                    f"{label}: source '{source}' has no .claude-plugin/plugin.json behind it"
+                )
+                continue
+            try:
+                sourced = json.loads(manifest.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                errors.append(f"{label}: invalid JSON in {manifest}: {exc}")
+                continue
+            if entry_name and sourced.get("name") != entry_name:
+                errors.append(
+                    f"{label}: entry name '{entry_name}' does not match the plugin at "
+                    f"source '{source}' (named '{sourced.get('name')}')"
+                )
+            if entry.get("version") is not None and entry["version"] != sourced.get("version"):
+                errors.append(
+                    f"{label}: pinned version '{entry['version']}' does not match "
+                    f"plugin.json ({sourced.get('version')}); a stale pin freezes updates"
+                )
+            if (
+                entry.get("description") is not None
+                and entry["description"] != sourced.get("description")
+            ):
+                errors.append(
+                    f"{label}: description has drifted from the plugin.json at source "
+                    f"'{source}'"
+                )
+
+    published = plugin_meta.get("name")
+    if published and not any(
+        isinstance(e, dict) and e.get("name") == published for e in plugins
+    ):
+        errors.append(
+            f"marketplace.json does not catalog '{published}', the plugin this repository "
+            "publishes — nothing an installer can reach"
+        )
+
+    if not errors:
+        print(f"[validate] marketplace OK: {name} ({len(plugins)} plugin(s))")
+    return errors
+
+
 def validate(expected_version: str | None = None) -> dict:
     """Validate manifest + skills. Returns plugin meta on success."""
     errors: list[str] = []
@@ -120,6 +219,8 @@ def validate(expected_version: str | None = None) -> dict:
 
     if not SKILLS_DIR.is_dir():
         raise BuildError(f"skills directory not found: {SKILLS_DIR}")
+
+    errors.extend(validate_marketplace(meta))
 
     skill_count = 0
     for skill_dir in sorted(p for p in SKILLS_DIR.iterdir() if p.is_dir()):
