@@ -15,10 +15,13 @@
 //
 // When run inside GitHub Actions, the new version is also appended to
 // $GITHUB_OUTPUT as `version=` and `tag=` for downstream steps.
+//
+// Importing this module is side-effect free; `nextVersion()` is exported so other tooling
+// can answer "which version would a release publish?" without restating the rule.
 
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "node:fs";
 import { execSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -58,12 +61,36 @@ function bump({ major, minor, patch }, part) {
 
 const fmt = ({ major, minor, patch }) => `${major}.${minor}.${patch}`;
 
-function tagExists(tag) {
+/**
+ * The version a canvas release started from `current` would publish.
+ *
+ * Exported because it is the answer to a question asked outside this script: the drift
+ * monitor reports "VERSION says X but no such release exists", and the only useful next line
+ * is what running the workflow would actually publish. It is never X — this always increments
+ * — so a monitor that restated the rule would be one refactor away from lying about it.
+ *
+ * @param {string} current  the version the release starts from (the extension package.json)
+ * @param {"patch"|"minor"|"major"} [part]
+ * @param {string[]} [takenTags]  tags that already exist, e.g. ["v1.1.1"]
+ * @returns {string} X.Y.Z
+ */
+export function nextVersion(current, part = "patch", takenTags = []) {
+  const taken = new Set(takenTags ?? []);
+  let next = bump(parseSemver(current), part);
+  // Never reuse an existing tag; keep bumping the patch until we find a free one.
+  while (taken.has(`v${fmt(next)}`)) next = bump(next, "patch");
+  return fmt(next);
+}
+
+/** Every tag this checkout knows about, so nextVersion() can skip the taken ones. */
+function existingTags() {
   try {
-    const out = execSync(`git tag --list ${tag}`, { cwd: repoRoot, encoding: "utf-8" });
-    return out.trim().length > 0;
+    return execSync("git tag --list", { cwd: repoRoot, encoding: "utf-8" })
+      .split(/\r?\n/)
+      .map((t) => t.trim())
+      .filter(Boolean);
   } catch {
-    return false;
+    return [];
   }
 }
 
@@ -72,13 +99,8 @@ function main() {
   const pkg = readJson(pkgPath);
   const current = parseSemver(pkg.version);
 
-  let next = bump(current, part);
-  // Never reuse an existing tag; keep bumping the patch until we find a free one.
-  while (tagExists(`v${fmt(next)}`)) {
-    next = bump(next, "patch");
-  }
-
-  const version = fmt(next);
+  const version = nextVersion(pkg.version, part, existingTags());
+  const next = parseSemver(version);
   const tag = `v${version}`;
   console.log(`Current version: ${fmt(current)}`);
   console.log(`Next version:    ${version} (${tag})`);
@@ -109,4 +131,10 @@ function emitOutputs(version, tag) {
   }
 }
 
-main();
+// Only bump when run as a script. Importing this module must stay side-effect free: the drift
+// monitor imports nextVersion() to report which version a canvas release would publish, and an
+// unguarded main() would rewrite VERSION, package.json and copilot-extension.json just for
+// reading a report.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}

@@ -21,6 +21,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -1111,32 +1112,57 @@ describe("the exit code the workflow depends on", () => {
   });
 
   it("reports the canvas train against a canvas release end to end", async () => {
-    const lines = [];
-    const log = console.log;
-    console.log = (...args) => lines.push(args.join(" "));
+    // Staged rather than run against this checkout: the assertion is about what the report
+    // *says* when a canvas version is unpublished, and tying that to the repository's own
+    // health made the test pass only while the repository was broken — it went red the moment
+    // VERSION was reset to the published 1.1.0. The drift belongs in the fixture.
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "srs-drift-"));
     try {
-      await main([], {
-        fetchImpl: stubFetch({
-          listingHtml: LISTING_FIXTURE,
-          releases: PUBLISHED_RELEASES.map((r) => ({
-            tag_name: r.tag,
-            name: r.name,
-            draft: false,
-          })),
-        }),
-        env: {},
-        root: repoRoot,
-      });
+      fs.mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
+      fs.writeFileSync(
+        path.join(root, ".claude-plugin/plugin.json"),
+        JSON.stringify({ name: "problem-based-srs", version: "2.6.0" }),
+      );
+      fs.writeFileSync(path.join(root, "VERSION"), "1.1.1\n");
+
+      const lines = [];
+      const log = console.log;
+      console.log = (...args) => lines.push(args.join(" "));
+      try {
+        await main([], {
+          fetchImpl: stubFetch({
+            listingHtml: LISTING_FIXTURE,
+            releases: PUBLISHED_RELEASES.map((r) => ({
+              tag_name: r.tag,
+              name: r.name,
+              draft: false,
+            })),
+          }),
+          env: {},
+          root,
+        });
+      } finally {
+        console.log = log;
+      }
+      const report = lines.join("\n");
+      const canvas = report.slice(report.indexOf("canvas app advertises"));
+      assert.ok(report.includes("canvas app advertises"), "the canvas finding must be reported");
+      assert.ok(
+        canvas.includes("v1.1.0"),
+        `the CLI must reach the classifier, not just the unit tests: ${canvas.slice(0, 300)}`,
+      );
+      assert.ok(
+        !canvas.slice(0, canvas.indexOf("\n##") + 1 || undefined).includes("v2.4.1"),
+        "and it must never cite a plugin release as what the canvas app is behind",
+      );
+      assert.ok(
+        canvas.includes("v1.1.2"),
+        "the advice must name the version a release would actually publish, since running " +
+          "release-canvas.yml bumps past 1.1.1 rather than publishing it",
+      );
     } finally {
-      console.log = log;
+      fs.rmSync(root, { recursive: true, force: true });
     }
-    const report = lines.join("\n");
-    const canvas = report.slice(report.indexOf("canvas app advertises"));
-    assert.ok(canvas.length > 0, "the canvas finding must be in the printed report");
-    assert.ok(
-      canvas.includes("v1.1.0"),
-      `the CLI must reach the classifier, not just the unit tests: ${canvas.slice(0, 300)}`,
-    );
   });
 });
 
