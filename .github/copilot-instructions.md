@@ -16,7 +16,7 @@ When modifying this repository structure, ensure compliance with these plugin st
 ### Compatibility Priority (GHCP → Claude)
 
 1. **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
-2. **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
+2. **Claude second**: Keep `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
 3. **Consistency over time**: Keep compatibility guidance consistent when it changes.
 
 ## Core Principles
@@ -162,7 +162,8 @@ This repository is structured as a Claude Code plugin:
 ```
 Problem-Based-SRS/
 ├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest (name, version, metadata)
+│   ├── plugin.json              # Plugin manifest (name, version, metadata)
+│   └── marketplace.json         # Catalog `/plugin marketplace add` reads (source: "./")
 ├── agents/
 │   └── problem-based-srs/       # Agent orchestrator
 │       └── AGENT.md
@@ -300,7 +301,10 @@ changes.
 ### File Organization
 - **`AGENTS.md`**: **Customer-facing file** — part of the project methodology for end users. Must NOT contain internal development procedures (e.g., release process, CI/CD instructions, internal workflows). Keep aligned with `agents/problem-based-srs/AGENT.md`.
 - **`.github/copilot-instructions.md`**: Internal development instructions for AI agents working on this repository. All internal procedures (release process, development workflows, etc.) belong here.
-- **`.claude-plugin/`**: Plugin manifest (plugin.json) defining plugin metadata
+- **`.claude-plugin/`**: Plugin manifest (`plugin.json`) plus the marketplace catalog
+  (`marketplace.json`) that makes the repository installable with
+  `/plugin marketplace add`. The catalog's entry must keep agreeing with `plugin.json` —
+  `build-plugin.py validate` and `evals/tests/claude-plugin-install.test.mjs` enforce it.
 - **`skills/`**: AgentSkills (Claude Code, Claude.ai, GitHub Copilot)
   - A single self-contained skill directory: `skills/problem-based-srs/`
   - `SKILL.md` orchestrator + `reference/<action>.md` action files (filename == action)

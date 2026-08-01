@@ -1,0 +1,31 @@
+{
+  "name": "problem-based-srs",
+  "description": "Problem-Based SRS — requirements engineering skills for AI coding assistants, with full CP → CN → FR traceability.",
+  "owner": {
+    "name": "Rafael Gorski",
+    "url": "https://github.com/rafaelgorski"
+  },
+  "plugins": [
+    {
+      "name": "problem-based-srs",
+      "source": "./",
+      "description": "Problem-Based Software Requirements Specification methodology for AI-assisted requirements engineering. Provides structured approach to capture Customer Problems (WHY), Customer Needs (WHAT), and Functional Requirements (HOW) with full traceability.",
+      "author": {
+        "name": "Rafael Gorski",
+        "url": "https://github.com/rafaelgorski"
+      },
+      "homepage": "https://github.com/rafaelgorski/Problem-Based-SRS",
+      "repository": "https://github.com/rafaelgorski/Problem-Based-SRS",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "requirements",
+        "srs",
+        "software-requirements",
+        "problem-based",
+        "requirements-engineering",
+        "traceability"
+      ]
+    }
+  ]
+}
