@@ -454,7 +454,7 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 | **Build script** | `scripts/build-plugin.py` | Validates the manifest + skills, extracts CHANGELOG notes, and packages the `dist/<name>-vX.Y.zip` artifact. Runs locally and in CI. |
 | **CI workflow** | `.github/workflows/ci.yml` | On every push/PR to `main`: validates the plugin and uploads the packaged zip as a build artifact. |
 | **Release workflow** | `.github/workflows/create-release.yml` | Builds, validates, packages, and publishes a GitHub Release with the zip attached. |
-| **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), packages archives (`scripts/package-extension.mjs`), and publishes a `vX.Y.Z` GitHub Release. |
+| **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), packages archives (`scripts/package-extension.mjs`), verifies the archive contract (`evals/tests/from-archive-install.test.mjs`), and publishes a `vX.Y.Z` GitHub Release that creates its own tag. |
 | **Distribution monitor** | `.github/workflows/distribution-drift.yml` → `scripts/check-distribution.mjs` | Weekly (and on demand): compares the surfaces this repository does **not** own — the skills.sh listing and GitHub Releases — against what the repository actually ships. Deliberately outside the PR gate. |
 
 > **Two release pipelines, two tag schemes.** The **plugin** release uses `vX.Y` tags
@@ -476,6 +476,22 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 > **`VERSION` is owned by `release-canvas.yml`.** Do not bump it in a feature branch:
 > `bump-version.mjs` *increments* from the version it finds, so a hand-bumped number is never
 > published — it is skipped. `VERSION` and the extension `package.json` must always agree.
+
+> **The canvas train never pushes a tag by hand; the plugin train always does.** This is a
+> real difference, not an inconsistency. `release-canvas.yml` is dispatch-only, so it
+> publishes with `gh release create <tag> --target <sha>` and GitHub creates the tag *as part
+> of* the release — no tag can outlive a failed publish. `create-release.yml` is triggered
+> **by** a tag push, so its tag already exists when it runs and `--target` is ignored there;
+> that train is tagged by hand on purpose (`git tag v2.6 && git push origin v2.6`), which is
+> why a failed plugin release can leave a tag behind and the canvas one cannot. Adding a
+> `push: tags` trigger to `release-canvas.yml` would silently turn `--target` into a no-op.
+>
+> The canvas rule is therefore: **nothing leaves the runner until the artifact has been built
+> and read**, and a failed or cancelled publish reverts the version bump so a re-run
+> republishes the same version instead of skipping past it — `bump-version.mjs` starts from
+> the bumped `package.json` and skips versions whose tag exists, which is what made the
+> previous strand permanent. Enforced by `evals/tests/release-canvas-ordering.test.mjs`,
+> which reads both workflows.
 
 ### Build script commands
 

@@ -22,6 +22,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A canvas release could advertise a version it had failed to publish.**
+  `release-canvas.yml` pushed the version bump to `main` and pushed the tag *before* it
+  packaged anything, so a failure in `package-extension.mjs` or `gh release create` left the
+  repository advertising a version, a tag on origin, and no release — the drift monitor's
+  `canvas-release-missing`, which is the state `VERSION` 1.1.1 is in today. It was also
+  unrecoverable: `bump-version.mjs` starts from the already-bumped `package.json` and skips
+  versions whose tag exists, so the stranded version was skipped forever. The pipeline now
+  packages **and reads** the archive before anything leaves the runner, and lets
+  `gh release create --target <sha>` create the tag as part of the release. That works here
+  because this workflow is dispatch-only, so the tag never exists beforehand — GitHub
+  ignores `--target` for a tag that already exists, which is why `create-release.yml`, whose
+  trigger *is* a tag push, is not the reference for the mechanism and stays tagged by hand.
+  A publish failure or cancellation now reverts the bump, on top of the branch as it stands
+  and never force-pushed, so a re-run republishes the same version; it stands down when the
+  release did publish, checked against GitHub rather than against step state alone.
+  `release-canvas-ordering.test.mjs` pins all of it, including that the workflow stays
+  dispatch-only, runs only on the default branch, and holds a single global concurrency
+  group.
+- **The canvas release pipeline never opened the archive it published.** It runs the
+  extension's `npm test`, and the only guard that stages and reads the artifact —
+  `evals/tests/from-archive-install.test.mjs` — lives in the eval suite, which that workflow
+  never ran. `srs-navigator-1.1.0.zip` went out at 4.32 MB with a Playwright tree inside
+  through exactly that gap; the packager was fixed afterwards, the pipeline that publishes it
+  was not. It now runs that guard after the skill sync, so it reads the tree that ships, and
+  additionally opens the `.tar.gz` the run actually built — the guard stages its own copy, so
+  without that second read a packaging or tar regression would pass on a tree nobody ships.
 - **A version bump had left a release unreachable, and cutting `v2.6` would have buried its
   notes.** The manifest moved `2.4.1 → 2.5.0 → 2.6.0` with no `v2.5` tag in between. Because
   `create-release.yml` validates the tag against `plugin.json`, `v2.5` is no longer
