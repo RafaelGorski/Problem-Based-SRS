@@ -556,9 +556,10 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 | Finding | Severity | What it means | What to do |
 |---------|----------|---------------|-----------|
 | `registry-listing-drift` | error | The [skills.sh listing](https://www.skills.sh/rafaelgorski/problem-based-srs) advertises skills the repository no longer ships. It is a cached index, so consolidations (like #50, which took nine skills to one) do not propagate. | Re-submit the repository at [skills.sh](https://www.skills.sh) so the listing is re-crawled, then re-run the checker. |
-| `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it — normally a manifest bump whose tag never got pushed. | Cut the missing release (above). The link is already correct and will resolve when the tag exists. |
+| `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it **and no tag on origin** — normally a manifest bump whose tag never got pushed. When the tag does exist, the link moves to `release-tag-without-release` instead. | Cut the missing release (above). The link is already correct and will resolve when the tag exists. |
 | `unpublishable-release-link` | error | A reference definition **in `CHANGELOG.md`** (the file `build-plugin.py` reads for release notes, so its labels are plugin-train claims) names a tag **no pipeline creates for that version**. `create-release.yml` tags `v${VERSION}` where `VERSION` is `build-plugin.py`'s *normalized* version, so `2.6.0` publishes at `v2.6` — and GitHub serves `/releases/tag/<tag>` by exact name. Links outside that file stay under `dangling-release-links`, because the canvas train tags `v${VERSION}` verbatim and does not strip the `.0`. | Correct the link to the tag named in the finding. Cutting a release will **not** clear this one. |
-| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
+| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it, **and no tag for it exists** — the tag was never pushed. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
+| `release-tag-without-release` | error | A tag **is** on origin but no release was published for it — a publish run that failed after the tag existed (`Create Release` run `28527065984` is the precedent). This supersedes the `*-release-missing` finding for that train and takes the link out of `dangling-release-links`, because in this state both of those advise a re-push, and **re-pushing an existing tag emits no `push` event**, so nothing re-runs. | Plugin train: `gh workflow run create-release.yml -f version=X.Y` — `gh release create` attaches to the tag that already exists. Canvas train: `git push --delete origin vX.Y.Z` **first**, then re-run `release-canvas.yml`; `bump-version.mjs` skips any version whose tag exists, so leaving the tag skips that version forever. |
 | `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
 | `registry-listing-partial` | warning | The page's own count disagrees with the entries it returned, so the comparison was skipped rather than run on a truncated payload. | Re-run; if it persists, read the page and confirm what it actually advertises. |
@@ -614,3 +615,19 @@ check repo Settings → Actions → General → Workflow permissions.
 **Tag already exists / re-release:** the workflow updates an existing `vX.Y` release in
 place (notes + asset). To start clean: `git push --delete origin vX.Y` and delete the
 release from the GitHub UI, then re-tag.
+
+**The tag pushed but the run failed (no release exists):** do **not** try to push the tag
+again. Git sends nothing for a ref that is already up to date, so no `push` event fires and
+`create-release.yml` never re-runs — the same reason `git tag vX.Y` aborts on the collision.
+Fix the cause, then re-publish onto the tag that is already there:
+
+```bash
+gh workflow run create-release.yml -f version=X.Y   # gh release create attaches to the tag
+gh run watch --exit-status
+```
+
+On the **canvas** train the equivalent recovery is different: delete the tag first
+(`git push --delete origin vX.Y.Z`) before re-running `release-canvas.yml`, because
+`bump-version.mjs` skips any version whose tag exists and would otherwise walk past the
+stranded version permanently. `check-distribution.mjs` reports this state as
+`release-tag-without-release` and prints the matching command.
