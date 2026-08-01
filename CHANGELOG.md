@@ -9,25 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **A version bump had stranded a release, and cutting `v2.6` would have made it permanent.**
-  The manifest moved `2.4.1 → 2.5.0 → 2.6.0` with no `v2.5` tag in between. Because
-  `create-release.yml` validates the tag against `plugin.json`, `v2.5` can never be created —
-  `build-plugin.py --expected-version 2.5` fails on a version mismatch — so
-  `[2.5.0]: …/releases/tag/v2.5` was a permanent 404 that no maintainer action could clear,
-  while the monitor kept filing it under "cut the missing release". Worse, `extract_notes()`
-  publishes exactly one section: cutting `v2.6` would have shipped an artifact containing
-  2.5's work (the clean-machine install fixes, the health-dashboard links, the eval-README and
-  whole-spec notation guards) with release notes that never mentioned it. The `[2.5.0]`
+- **A version bump had left a release unreachable, and cutting `v2.6` would have buried its
+  notes.** The manifest moved `2.4.1 → 2.5.0 → 2.6.0` with no `v2.5` tag in between. Because
+  `create-release.yml` validates the tag against `plugin.json`, `v2.5` is no longer
+  publishable from `main` — `build-plugin.py --expected-version 2.5` fails on a version
+  mismatch — so `[2.5.0]: …/releases/tag/v2.5` had no release behind it while the monitor
+  kept filing it under "cut the missing release", advice that produces a failed run. Tagging
+  the older commit that still read `2.5.0` *would* build, but would publish a tree and notes
+  that predate most of what the section documented. Worse, `extract_notes()` publishes exactly
+  one section: cutting `v2.6` would have shipped an artifact containing 2.5's work (the
+  clean-machine install fixes, the health-dashboard links, the eval-README and whole-spec
+  notation guards) with release notes that never mentioned it. The `[2.5.0]`
   section is folded into `[2.6.0]`, the release that actually delivers it.
 - **The drift monitor tells the two cases apart.** `stranded-release-link` reports a changelog
   link for a version the manifest has already passed and gives the fix that works — fold the
   section in, delete the link — instead of an instruction that fails the workflow. It takes
   precedence over `unpublishable-release-link`, since correcting a stranded link's tag shape
-  still leaves it pointing at a release nobody can publish.
+  still leaves it pointing at a release `main` cannot cut.
+- **The reason it gives is one the repository's own history supports.** The first version of
+  this finding called the tag impossible to create and its link permanently broken. Neither
+  holds: `checkout@v4` restores the tagged commit, and commit `69dfe88` still carries
+  `plugin.json` at 2.5.0, so `build-plugin.py validate --expected-version 2.5` passes there.
+  The claim is now the narrower one that survives the check, and the same one everywhere it is
+  made. `stranded-release-claim.test.mjs` derives the falsifier from git rather than restating
+  it (it exports the tree at that commit and runs the real validator), forbids a reversion to
+  the strong form across all five surfaces that carry the claim, and requires the finding and
+  its runbook row to name both halves: unreachable from `main`, misleading from anywhere else.
 - **A recurrence now turns CI red at the moment of the bump.** `release-hygiene.test.mjs`
   requires every changelog section below the manifest version to name a tag present in
   `git tag --list`, and the eval job checks out with `fetch-tags` so the guard has evidence
-  rather than skipping. Negative-tested by mutating the real tracked files: 10/10 caught.
+  rather than skipping. That job now also sets up Python, so the two legs that cross-check
+  `build-plugin.py` by executing it stop skipping in CI. Negative-tested by mutating the real
+  tracked files: 14/14 caught.
 
 - **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
   pointed at `releases/tag/v2.6.0` and `/v2.5.0`, but `create-release.yml` builds its tag
@@ -39,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   produces, and `release-hygiene.test.mjs` derives that tag by executing
   `build-plugin.py`'s own `normalize_version` rather than restating its rule. (`[2.5.0]` has
   since been folded into `[2.6.0]` — see above — because naming the right tag was necessary
-  but not sufficient: no pipeline can create `v2.5` while the manifest reads 2.6.0.)
+  but not sufficient: `main` cannot cut `v2.5` while the manifest reads 2.6.0, and a tag on
+  the older commit would publish notes that predate the section.)
 - **The drift report told the canvas app it was behind a release of the other product.**
   `releaseDrift()` matched each train separately and then printed a single global newest
   tag in both findings, so `VERSION` 1.1.1 was reported against `v2.4.1` — a *plugin*
@@ -160,7 +174,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Carries everything that was documented as **2.5.0 and never released**. The manifest moved
 `2.4.1 → 2.5.0 → 2.6.0` without the `v2.5` tag in between, and `build-plugin.py` publishes
 exactly one changelog section — so the two were folded together rather than leaving a
-section whose notes no release would ever carry and whose link could never resolve.
+section whose notes no release cut from `main` would carry and whose link had no release
+behind it.
 
 ### Added
 

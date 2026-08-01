@@ -558,7 +558,7 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 | `registry-listing-drift` | error | The [skills.sh listing](https://www.skills.sh/rafaelgorski/problem-based-srs) advertises skills the repository no longer ships. It is a cached index, so consolidations (like #50, which took nine skills to one) do not propagate. | Re-submit the repository at [skills.sh](https://www.skills.sh) so the listing is re-crawled, then re-run the checker. |
 | `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it — normally a manifest bump whose tag never got pushed. | Cut the missing release (above). The link is already correct and will resolve when the tag exists. |
 | `unpublishable-release-link` | error | A reference definition **in `CHANGELOG.md`** (the file `build-plugin.py` reads for release notes, so its labels are plugin-train claims) names a tag **no pipeline creates for that version**. `create-release.yml` tags `v${VERSION}` where `VERSION` is `build-plugin.py`'s *normalized* version, so `2.6.0` publishes at `v2.6` — and GitHub serves `/releases/tag/<tag>` by exact name. Links outside that file stay under `dangling-release-links`, because the canvas train tags `v${VERSION}` verbatim and does not strip the `.0`. | Correct the link to the tag named in the finding. Cutting a release will **not** clear this one. |
-| `stranded-release-link` | error | A reference definition **in `CHANGELOG.md`** names a version the manifest has **already moved past**. `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag against `plugin.json` — so `v2.5` fails on `version mismatch: plugin.json has 2.6.0` and can never be created. The link is a permanent 404, and because `extract_notes()` publishes exactly one section, that section's notes reach no release either. Deeper than `unpublishable-release-link`, so it wins when a link is both. | **Do not cut it** — that fails the workflow. Fold the section into `## [<manifest version>]`, the release that will actually deliver those changes, and delete the link definition. Guarded offline by `evals/tests/release-hygiene.test.mjs`, which requires every changelog section below the manifest version to name a tag present in `git tag --list`. |
+| `stranded-release-link` | error | A reference definition **in `CHANGELOG.md`** names a version the manifest has **already moved past**. `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag against `plugin.json` — so `v2.5` fails on `version mismatch: plugin.json has 2.6.0` and is no longer publishable from `main`. Not impossible, and the finding says so: `checkout@v4` restores the *tagged commit*, so tagging the older commit that still read `2.5.0` would build — but it would publish a tree and notes that predate what the section documents now, and `extract_notes()` publishes exactly one section, so those notes reach no release from `main` either. Deeper than `unpublishable-release-link`, so it wins when a link is both. | **Do not cut it from `main`** — that fails the workflow, and a historical tag ships the wrong notes. Fold the section into `## [<manifest version>]`, the release that will actually deliver those changes, and delete the link definition. Guarded offline by `evals/tests/release-hygiene.test.mjs`, which requires every changelog section below the manifest version to name a tag present in `git tag --list`, and by `evals/tests/stranded-release-claim.test.mjs`, which holds the wording to what the repository's history supports. |
 | `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
 | `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
@@ -585,14 +585,19 @@ and the monitor keeps reporting it under advice that no longer applies. Guarded 
 
 **Never bump the manifest over a release that was never cut.** The tag push in
 [step 2](#2-publish-the-release) is the *only* thing that publishes a version, and the
-manifest version is the only version the tree can publish — `create-release.yml` validates
-the tag against `plugin.json`, so once the manifest reads `2.6.0` no `v2.5` can ever be
-created. `2.4.1 → 2.5.0 → 2.6.0` shipped that way: a 76-line `## [2.5.0]` section whose link
-was a permanent 404 and whose notes no release would ever carry, because `extract_notes()`
-extracts exactly one section. If a bump has already happened, fold the stranded section into
-the manifest version's — do not try to cut it. Guarded by `evals/tests/release-hygiene.test.mjs`
-(offline, every section below the manifest version must name a tag in `git tag --list`; the
-eval job checks out with `fetch-tags: true` so it has evidence) and reported by
+manifest version is the only version `main` can publish — `create-release.yml` validates
+the tag against `plugin.json`, so once the manifest reads `2.6.0`, `v2.5` is no longer
+reachable from `main`. `2.4.1 → 2.5.0 → 2.6.0` shipped that way: a 76-line `## [2.5.0]`
+section whose link had no release behind it and whose notes no release cut from `main` would
+carry, because `extract_notes()` extracts exactly one section. State that precisely: tagging
+the older commit that still read `2.5.0` *would* build — `checkout@v4` restores the tagged
+commit — but it would publish a tree and notes that predate most of what the section had
+grown to document. If a bump has already happened, fold the stranded section into the
+manifest version's — do not try to cut it from either end. Guarded by
+`evals/tests/release-hygiene.test.mjs` (offline, every section below the manifest version
+must name a tag in `git tag --list`; the eval job checks out with `fetch-tags: true` so it
+has evidence), by `evals/tests/stranded-release-claim.test.mjs` (which derives the falsifier
+from git history and forbids the strong form of the claim), and reported by
 `stranded-release-link` in the monitor.
 
 **Decision — no second registry, for now (2026-07-31).** The one listing we publish
