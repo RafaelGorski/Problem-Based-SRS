@@ -94,6 +94,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   actually reaches the canvas: `live` is not an argument the orchestrator accepts, and a
   guard now rejects any `/problem-based-srs <action>` the agent claims that `SKILL.md`'s
   Available Actions table does not list.
+- **The README and the landing page told two different origin stories.** The site opens on
+  `CP.01 · Scattered Customer Information`, quoted from the shipped `.spec/crm-system.json`;
+  the README opened on an invented reporting-dashboard problem and reused **`CP.01` for
+  different content** — so a reader who met both surfaces in sequence, then installed and ran
+  `/live`, saw a third thing. The README now walks the same `CP.01 → CN.01.1 → FR.01.1.1`
+  chain, and `landing-proof.test.mjs` holds it to the spec the way it already held the
+  landing page: renaming a problem in `.spec/crm-system.json` now fails both surfaces instead
+  of neither.
 
 ### Added
 

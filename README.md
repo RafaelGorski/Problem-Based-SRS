@@ -35,17 +35,30 @@ page always reflects the last full run on `main`.
 
 ## The problem this solves
 
-A stakeholder says: *"We need a reporting dashboard with 20 charts."*
+A stakeholder says: *"We need a CRM — with a mobile app and a dashboard."*
 
-You build it. Three weeks. Ship it. They use 3 charts. The actual problem was slow data access, not visualization. Two weeks wasted, one frustrated team.
+Hand that to an AI agent and you get a feature list in seconds. Six months later nobody can
+say why the dashboard exists, which customer problem it closes, or what breaks if you delete
+it. The requirements were never written down — only the code was.
 
-This happens because requirements start with *what stakeholders ask for* instead of *what they need*. Problem-Based SRS fixes the order: identify the problem first, then derive the solution.
+This happens because requirements start with *what stakeholders ask for* instead of *what
+they need*. Problem-Based SRS fixes the order: identify the problem first, then derive the
+solution.
 
 **With this methodology, the same request becomes:**
 
-> **CP.01**: "Managers must access sales data within 5 seconds to make decisions."
+> **CP.01 · Scattered Customer Information**
+> Sales teams waste valuable time searching for customer information across multiple
+> disconnected systems.
 
-From that problem, you derive the need (CN: real-time data access), then the requirement (FR: data API + 3 targeted charts). Built in one week. Solves the actual problem.
+The need follows from the problem, the requirement from the need. Each identifier names its
+parent, so the chain reads in both directions — forward to what you build, backward to why:
+
+**CP.01** → **CN.01.1** Centralized Customer Database → **FR.01.1.1** Contact and Company Management
+
+That is not an illustration. It is [`.spec/crm-system.json`](.spec/crm-system.json), the
+specification shipped with the plugin: 5 problems, 7 needs, 12 requirements, 5 quality
+attributes, no orphans. Run `/live` and the SRS Navigator opens that graph.
 
 ## How it works
 
