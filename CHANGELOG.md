@@ -216,6 +216,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   warning) rather than drift — a redesigned page and a broken extractor look identical from
   here. Guarded by `evals/tests/registry-listing-content.test.mjs` against a verbatim
   capture of the real page.
+- **An axis the registry cannot answer is now reported, not dropped.** The version half of
+  that comparison returned `null` when the page published no `softwareVersion` — which is
+  every page skills.sh serves — and `summarize()` then said nothing at all about it. So a
+  run named one axis (the body) and stayed silent about a second, which reads as *checked,
+  agrees*: the exact shape of the failure the monitor exists to remove. It is fixed with a
+  third channel rather than a third severity, because `ok` is `findings.length === 0` and a
+  notice-severity *finding* that fires on every run would leave the monitor permanently
+  non-green — the state that gets a monitor muted. `skillPageDrift().version` now carries a
+  status (`compared` / `page-publishes-none` / `repo-publishes-none`), `summarize()` returns
+  an `unverified` channel that cannot move `ok`, `drifted` or the exit code, and the report
+  prints **"Not verified this run"** — including on a clean run, the only run where the
+  silence actually misleads. The value compared is the skill's own `metadata.version`, never
+  the plugin release version; the finding text now says so, and a test fails if the two
+  domains are mixed. `registry-skill-stale` also states its own epistemic limit: section
+  presence is a staleness signal, not a byte-level diff.
 
 - **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
   itself.** The splash-screen prompt named the `problem_based_srs` tool and then described

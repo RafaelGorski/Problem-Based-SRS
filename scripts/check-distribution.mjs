@@ -224,6 +224,17 @@ const sameText = (a, b) =>
  * The description and version halves come from JSON-LD, a declared contract, so they stay
  * answerable even when the body cannot be read.
  *
+ * `version` carries a `status` rather than collapsing to null, because null said two
+ * different things at once — *the surface publishes no version* and *this repository has
+ * none to compare against* — and a caller that cannot tell them apart reports neither.
+ * skills.sh publishes no `softwareVersion` today, so `page-publishes-none` is the state
+ * every real run hits, and #69's box asks about exactly that axis.
+ *
+ *   compared            both sides have a version; `matches` is the answer
+ *   page-publishes-none the registry page carries none; `matches` is null
+ *   repo-publishes-none the skill's frontmatter carries none; `matches` is null
+ *
+
  * @param {{page:object|null, text:string, profile:object|null}} input
  */
 export function skillPageDrift({ page = null, text = "", profile = null } = {}) {
@@ -236,6 +247,13 @@ export function skillPageDrift({ page = null, text = "", profile = null } = {}) 
   const matched = sections.filter((s) => text.includes(s));
   const readable = sections.length > 0 && matched.length > 0;
 
+  const versionStatus = !page.version
+    ? "page-publishes-none"
+    : !profile.version
+      ? "repo-publishes-none"
+      : "compared";
+
+
   return {
     name: profile.name,
     description: page.description
@@ -245,14 +263,12 @@ export function skillPageDrift({ page = null, text = "", profile = null } = {}) 
           matches: sameText(page.description, profile.description),
         }
       : null,
-    version:
-      page.version && profile.version
-        ? {
-            expected: profile.version,
-            actual: page.version,
-            matches: sameText(page.version, profile.version),
-          }
-        : null,
+    version: {
+      status: versionStatus,
+      expected: profile.version ?? null,
+      actual: page.version ?? null,
+      matches: versionStatus === "compared" ? sameText(page.version, profile.version) : null,
+    },
     body: {
       readable,
       matched: matched.length,
@@ -678,6 +694,12 @@ export function compareVersions(a, b) {
  * disagrees with the repository, and only those drive the exit code — a report that cries
  * wolf on a network hiccup is a report that gets ignored.
  *
+ * `unverified` is a third channel, deliberately not a third severity. `ok` is
+ * `findings.length === 0`, so an axis that is unanswerable on *every* run — skills.sh has
+ * never published a version — would leave the monitor permanently non-green if it were a
+ * finding, and a monitor that is never green is a monitor that gets muted. These entries
+ * say what the run could not compare without claiming anything about whether it agrees.
+ *
  * @param {{errors?: Array<{surface:string, message:string}>}} input
  */
 export function summarize({
@@ -694,6 +716,7 @@ export function summarize({
   errors = [],
 } = {}) {
   const findings = [];
+  const unverified = [];
   const failed = new Set(errors.map((e) => e.surface));
   // One list, one truth. When the caller has the release titles, they also carry the tags;
   // accepting a second, possibly disagreeing tag list would let a summary report a link as
@@ -783,10 +806,10 @@ export function summarize({
         `description this repository ships: "${drift.description.expected}"`,
       );
     }
-    if (drift.version && !drift.version.matches) {
+    if (drift.version?.status === "compared" && !drift.version.matches) {
       stale.push(
         `version on the page: ${drift.version.actual}; this repository ships ` +
-          `${drift.version.expected}`,
+          `${drift.version.expected} (skills/${profile.name}/SKILL.md, metadata.version)`,
       );
     }
     if (drift.body.missing.length) {
@@ -796,6 +819,35 @@ export function summarize({
       );
     }
 
+    // A version the page does not publish is not agreement, and it is not drift either.
+    // Dropping it made a run that compared one axis read as a run that compared them all.
+    if (drift.version && drift.version.status !== "compared") {
+      const where = entry.url ?? entry.page?.url ?? listing.url ?? REGISTRY_URL;
+      unverified.push({
+        id: "registry-skill-version-unverifiable",
+        severity: "notice",
+        title: `The version of ${profile.name} was not compared`,
+        detail:
+          drift.version.status === "page-publishes-none"
+            ? [
+                `${where} publishes no version — its JSON-LD carries no softwareVersion — so ` +
+                  "the page's version cannot be read.",
+                `This repository ships metadata.version ${drift.version.expected ?? "(none)"} in ` +
+                  `skills/${profile.name}/SKILL.md — the skill's own version, not the plugin ` +
+                  "release version.",
+                "Recorded so a clean run is not read as a version that was checked and agreed. " +
+                  "It does not fail the run: the limitation is the surface's, not this repository's.",
+              ]
+            : [
+                `${where} publishes version ${drift.version.actual}, but ` +
+                  `skills/${profile.name}/SKILL.md declares no metadata.version to compare it ` +
+                  "against.",
+                "Add metadata.version to the skill's frontmatter and this axis starts answering.",
+              ],
+      });
+    }
+
+
     if (stale.length) {
       findings.push({
         id: "registry-skill-stale",
@@ -804,6 +856,8 @@ export function summarize({
         detail: [
           `Page: ${entry.url ?? entry.page?.url ?? listing.url ?? REGISTRY_URL}`,
           ...stale,
+          "Section presence is a staleness signal, not a byte-level diff: headings that all " +
+            "match do not prove the prose beneath them is current.",
           "The listing is a crawl, not a mirror; re-submit the repository at " +
             "https://www.skills.sh so the page is rebuilt from what is shipped today.",
         ],
@@ -984,9 +1038,11 @@ export function summarize({
 
   return {
     ok: findings.length === 0,
-    // Only real disagreement fails a run; warnings are surfaced, not paged on.
+    // Only real disagreement fails a run; warnings are surfaced, not paged on, and
+    // unverified axes are neither — they are what the run could not ask.
     drifted: findings.some((f) => f.severity === "error"),
     findings,
+    unverified,
     releases,
   };
 }
@@ -994,14 +1050,31 @@ export function summarize({
 /** Render a summary as markdown, for a job summary or a terminal. */
 export function renderReport(summary) {
   const lines = ["# Distribution drift", ""];
+  const unverified = summary.unverified ?? [];
   if (summary.ok) {
-    lines.push("Every distribution surface agrees with the repository.");
-    return lines.join("\n") + "\n";
+    // The unqualified all-clear is only true when nothing went unasked. Saying it over an
+    // axis the run could not compare is the overstatement this section exists to stop.
+    lines.push(
+      unverified.length
+        ? "Every distribution surface agrees with the repository on every axis this run " +
+          "could compare."
+        : "Every distribution surface agrees with the repository.",
+    );
+    if (!unverified.length) return lines.join("\n") + "\n";
+    lines.push("");
+  } else {
+    lines.push(`${summary.findings.length} finding(s).`, "");
+    for (const f of summary.findings) {
+      lines.push(`## ${f.severity === "error" ? "❌" : "⚠️"} ${f.title}`, "");
+      for (const line of f.detail) lines.push(`- ${line}`);
+      lines.push("");
+    }
+    if (!unverified.length) return lines.join("\n");
   }
-  lines.push(`${summary.findings.length} finding(s).`, "");
-  for (const f of summary.findings) {
-    lines.push(`## ${f.severity === "error" ? "❌" : "⚠️"} ${f.title}`, "");
-    for (const line of f.detail) lines.push(`- ${line}`);
+  lines.push(`## ℹ️ Not verified this run (${unverified.length})`, "");
+  for (const u of unverified) {
+    lines.push(`### ${u.title}`, "");
+    for (const line of u.detail) lines.push(`- ${line}`);
     lines.push("");
   }
   return lines.join("\n");
@@ -1010,10 +1083,15 @@ export function renderReport(summary) {
 /**
  * Workflow-command lines so a warning-only run is visible in the Actions UI without
  * failing the job — otherwise "the listing became unparseable" would be a green run whose
- * only trace is a summary nobody opens.
+ * only trace is a summary nobody opens. Unverified axes ride the same path at `::notice::`,
+ * for the same reason: a green run that skipped a comparison has to say so somewhere a
+ * human already looks.
  */
 export function renderAnnotations(summary) {
-  return summary.findings.map((f) => `::${f.severity}::${f.title} — ${f.detail[0] ?? ""}`);
+  return [
+    ...summary.findings.map((f) => `::${f.severity}::${f.title} — ${f.detail[0] ?? ""}`),
+    ...(summary.unverified ?? []).map((u) => `::notice::${u.title} — ${u.detail[0] ?? ""}`),
+  ];
 }
 
 // ---------------------------------------------------------------------------
