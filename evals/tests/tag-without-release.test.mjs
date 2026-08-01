@@ -409,16 +409,21 @@ describe("summarize routes the stranded state to the instruction that works", ()
   });
 
   it("names the tag and the version in the report a human reads", () => {
-    const report = renderReport(
-      summarize({
-        ...base,
-        manifestVersion: "2.6.0",
-        canvasVersion: "1.1.0",
-        repoTags: TAGS_AFTER_A_FAILED_RUN,
-      }),
+    const summary = summarize({
+      ...base,
+      manifestVersion: "2.6.0",
+      canvasVersion: "1.1.0",
+      repoTags: TAGS_AFTER_A_FAILED_RUN,
+    });
+    const detail = finding(summary, "release-tag-without-release").detail;
+    assert.match(
+      detail[0],
+      /^v2\.6\b/,
+      "the finding must open by naming the tag that is in the way — the instruction below " +
+        "is useless without knowing which tag it applies to",
     );
-    assert.match(report, /v2\.6/);
-    assert.match(report, /2\.6\.0/);
+    assert.match(detail[0], /2\.6\.0/, "and the version whose release never appeared");
+    assert.match(renderReport(summary), /v2\.6/);
   });
 });
 
