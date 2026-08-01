@@ -22,6 +22,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A tag with no release behind it was told to push the tag again.** The drift monitor read
+  published *releases* only — `publishedTags` was the release list flattened — so "the tag was
+  never pushed" and "the tag was pushed and the publish run failed" were the same observation,
+  and both were answered with ``git tag vX.Y && git push origin vX.Y``. In the second state
+  that instruction does nothing: `git tag` aborts on the collision, and pushing a ref that is
+  already up to date sends nothing, so **no `push` event fires and `create-release.yml` never
+  re-runs**. `Create Release` has already failed on a tag push here (run `28527065984`), and
+  the very next action on the release backlog is a tag push. `check-distribution.mjs` now reads
+  git refs as well, and reports that state as its own finding —
+  `release-tag-without-release` — carrying the recovery each train actually needs: dispatch for
+  the plugin train (`gh workflow run create-release.yml -f version=X.Y`, since
+  `gh release create` attaches to the tag that already exists), and **deleting the tag first**
+  for the canvas train, because `bump-version.mjs` skips any version whose tag exists and would
+  otherwise walk past the stranded version permanently. A link naming such a tag moves out of
+  `dangling-release-links` with it, whose advice — *"will resolve when the tag exists"* — is
+  false once it does. An unreadable refs API is a warning and changes nothing, and a caller
+  that supplies no tag list gets exactly the previous behaviour.
 - **A canvas release could advertise a version it had failed to publish.**
   `release-canvas.yml` pushed the version bump to `main` and pushed the tag *before* it
   packaged anything, so a failure in `package-extension.mjs` or `gh release create` left the
@@ -142,7 +159,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   would *actually* publish, derived from `bump-version.mjs` rather than restated; importing
   that script is now side-effect free, so reading a drift report can no longer rewrite the
   version files.
-
 - **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
   pointed at `releases/tag/v2.6.0` and `/v2.5.0`, but `create-release.yml` builds its tag
   from `build-plugin.py`'s *normalized* version — `TAG="v${VERSION}"` after
