@@ -28,6 +28,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseFrontmatter } from "../evals/lib/skills.mjs";
+import { nextVersion } from "./bump-version.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..");
@@ -64,22 +65,200 @@ function jsonLdBlocks(html) {
  * contract, so it survives a redesign, and picking the wrong block is detectable (the
  * page also carries a BreadcrumbList and a WebSite block).
  *
+ * `parts` carries the per-skill page URL alongside each name, because the names are the
+ * cheap half of the question. A re-submission makes them agree; whether the page behind
+ * a name still renders the skill this repository ships is a different question, and it
+ * cannot be asked without the address of the page that answers it.
+ *
  * @param {string} html
- * @returns {{skills:string[], description:string|null, declaredCount:number|null, url:string|null}}
+ * @returns {{skills:string[], parts:Array<{name:string,url:string|null}>, description:string|null, declaredCount:number|null, url:string|null}}
  */
 export function parseRegistryListing(html) {
   const page = jsonLdBlocks(html).find((b) => b && b["@type"] === "CollectionPage");
-  if (!page) return { skills: [], description: null, declaredCount: null, url: null };
+  if (!page) return { skills: [], parts: [], description: null, declaredCount: null, url: null };
 
-  const parts = Array.isArray(page.hasPart) ? page.hasPart : [];
+  const hasPart = Array.isArray(page.hasPart) ? page.hasPart : [];
   const description = typeof page.description === "string" ? page.description : null;
   const stated = description?.match(/^(\d+)\s+agent skills/i);
+  const parts = hasPart
+    .filter((p) => typeof p?.name === "string")
+    .map((p) => ({ name: p.name, url: typeof p.url === "string" ? p.url : null }));
 
   return {
-    skills: parts.map((p) => p?.name).filter((n) => typeof n === "string"),
+    // One list, two readings: the names check and the page fetch must not be able to
+    // disagree about what the listing advertises.
+    skills: parts.map((p) => p.name),
+    parts,
     description,
     declaredCount: stated ? Number(stated[1]) : null,
     url: typeof page.url === "string" ? page.url : null,
+  };
+}
+
+/**
+ * Read the skill a per-skill registry page declares.
+ *
+ * Same principle as the collection page: the `SoftwareApplication` JSON-LD block is a
+ * declared contract, and picking the wrong one is detectable (the page also carries a
+ * BreadcrumbList naming the same skill, and a WebSite block).
+ *
+ * `version` is null today for every page skills.sh serves — it publishes no
+ * `softwareVersion`. That is reported as "no answer" rather than quietly dropped: #69's
+ * box asks whether the listing renders the current version, and the honest answer is that
+ * this surface cannot say. The comparison is wired for the moment it can.
+ *
+ * @param {string} html
+ * @returns {{name:string|null, description:string|null, version:string|null, url:string|null}|null}
+ */
+export function parseSkillPage(html) {
+  const app = jsonLdBlocks(html).find((b) => b && b["@type"] === "SoftwareApplication");
+  if (!app) return null;
+  const str = (v) => (typeof v === "string" && v.trim() ? v : null);
+  return {
+    name: str(app.name),
+    description: str(app.description),
+    version: str(app.softwareVersion),
+    url: str(app.url),
+  };
+}
+
+const NAMED_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+
+/**
+ * The text a registry page renders, as close to what a reader sees as is worth getting.
+ *
+ * Three things make this less crude than it looks. Comments and the JSON-LD blocks are
+ * dropped first, so neither the page's own notes nor its declared contract can vouch for
+ * the rendered body — otherwise a page could prove its own freshness with its metadata
+ * block while serving anything at all. The `\u003c` escapes are resolved next, because the
+ * rendered markdown is streamed inside a script payload in that form and nothing would be
+ * found without it. Only then are tags stripped, so the decoded payload's tags go with the
+ * real ones.
+ *
+ * Scraped text is not a contract, which is why nothing concluded from it is ever reported
+ * as drift on its own — see `skillPageDrift`.
+ *
+ * @param {string} html
+ * @returns {string}
+ */
+export function pageText(html) {
+  return String(html ?? "")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<script[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\[nrt]/g, " ")
+    .replace(/\\"/g, '"')
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
+    .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * A heading as it can be looked for in rendered text: decoration dropped, whitespace
+ * collapsed. `## 📁 Saving Progress (CRITICAL)` renders with its emoji intact, so the
+ * comparison has to be a substring of what the page shows, not an equality against what
+ * the file holds.
+ */
+function normalizeHeading(title) {
+  return String(title ?? "")
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * What this repository ships, per skill: the frontmatter description, the frontmatter
+ * `metadata.version`, and the top-level sections of the body.
+ *
+ * Derived from the files rather than restated, so the comparison moves with the skill. A
+ * section list is the coarsest useful shape of a document — it survives every edit to the
+ * prose underneath it, and it is exactly what goes missing when a page serves an older
+ * copy.
+ *
+ * @param {string} [root]
+ * @returns {Array<{name:string, description:string|null, version:string|null, sections:string[]}>}
+ */
+export function repoSkillProfiles(root = REPO_ROOT) {
+  const dir = path.join(root, "skills");
+  if (!fs.existsSync(dir)) return [];
+  const profiles = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const skillMd = path.join(dir, entry.name, "SKILL.md");
+    if (!fs.existsSync(skillMd)) continue;
+    const text = fs.readFileSync(skillMd, "utf8");
+    const { frontmatter, body } = parseFrontmatter(text);
+    // parseFrontmatter only keeps top-level keys, and the version is nested under
+    // `metadata:`. Read it from the raw block rather than widening a shared parser.
+    const block = /^(?:<!--[\s\S]*?-->\s*)?---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
+    const version = /^[ \t]+version:[ \t]*["']?([^"'\r\n]+)["']?[ \t]*$/m.exec(block)?.[1] ?? null;
+    profiles.push({
+      name: frontmatter.name || entry.name,
+      description: frontmatter.description || null,
+      version: version ? version.trim() : null,
+      sections: [...body.matchAll(/^##[ \t]+(.+?)[ \t]*$/gm)]
+        .map((m) => normalizeHeading(m[1]))
+        .filter(Boolean),
+    });
+  }
+  return profiles.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Whitespace-insensitive comparison, since a renderer may reflow a description. */
+const sameText = (a, b) =>
+  String(a ?? "").replace(/\s+/g, " ").trim() === String(b ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * Compare a registry page against the skill it claims to publish.
+ *
+ * The body half is scraped, and the epistemics of scraping decide the shape of the
+ * result. Zero matched sections cannot distinguish "the page renders something else
+ * entirely" from "this extraction broke against a redesign", so that is `readable: false`
+ * and nothing is reported as missing — the same rule the collection page already gets
+ * from `registry-listing-unreadable`. Once some sections match, the extraction has
+ * demonstrably worked, and the ones that did not are real.
+ *
+ * The description and version halves come from JSON-LD, a declared contract, so they stay
+ * answerable even when the body cannot be read.
+ *
+ * @param {{page:object|null, text:string, profile:object|null}} input
+ */
+export function skillPageDrift({ page = null, text = "", profile = null } = {}) {
+  const empty = { readable: false, matched: 0, total: 0, missing: [] };
+  if (!profile || !page) {
+    return { name: profile?.name ?? page?.name ?? null, description: null, version: null, body: empty };
+  }
+
+  const sections = Array.isArray(profile.sections) ? profile.sections : [];
+  const matched = sections.filter((s) => text.includes(s));
+  const readable = sections.length > 0 && matched.length > 0;
+
+  return {
+    name: profile.name,
+    description: page.description
+      ? {
+          expected: profile.description,
+          actual: page.description,
+          matches: sameText(page.description, profile.description),
+        }
+      : null,
+    version:
+      page.version && profile.version
+        ? {
+            expected: profile.version,
+            actual: page.version,
+            matches: sameText(page.version, profile.version),
+          }
+        : null,
+    body: {
+      readable,
+      matched: matched.length,
+      total: sections.length,
+      missing: readable ? sections.filter((s) => !text.includes(s)) : [],
+    },
   };
 }
 
@@ -383,6 +562,45 @@ export function republishInstruction({ tag, train, advertised } = {}) {
 }
 
 /**
+ * Dangling links for versions `main` can no longer publish.
+ *
+ * `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag
+ * against `.claude-plugin/plugin.json` and fails with `version mismatch` for anything else.
+ * The manifest version is therefore the *only* version the current tree can release — so a
+ * changelog link for a version the manifest has already passed is not a release waiting to
+ * be cut, and telling a maintainer to cut it produces a failed workflow run rather than a
+ * release.
+ *
+ * It is not impossible to publish, and this finding must not say that it is: `checkout@v4`
+ * restores the *tagged commit*, so tagging the older commit whose manifest still read that
+ * version would build. What it would publish is the objection — a tree and release notes
+ * that predate most of what the section documents now, because the section kept growing
+ * after that commit. Unreachable from `main`, misleading from anywhere else. A monitor that
+ * overstates its case is one a maintainer learns to discount, which is the failure this
+ * whole checker exists to prevent.
+ *
+ * That is not hypothetical: 2.4.1 → 2.5.0 → 2.6.0 shipped with no `v2.5` in between, which
+ * also means `extract_notes()` — one section, from the matching heading to the next — would
+ * publish `v2.6` without a word of what 2.5 documented, even though the artifact contains it.
+ *
+ * Scoped and labelled exactly like `unpublishable-release-link`: only reference definitions
+ * in the changelog the plugin pipeline reads make a claim about a plugin version, and only a
+ * labelled link claims a version at all.
+ *
+ * @param {ReturnType<typeof danglingTagLinks>} dangling
+ * @param {string|null} manifestVersion
+ */
+export function strandedReleaseLinks(dangling = [], manifestVersion = null) {
+  const manifest = normalizeVersion(manifestVersion);
+  if (!manifest) return [];
+  return dangling.filter((l) => {
+    if (l.file !== PLUGIN_CHANGELOG) return false;
+    const claimed = l.label ? normalizeVersion(l.label) : null;
+    return claimed !== null && compareVersions(claimed, manifest) < 0;
+  });
+}
+
+/**
  * Compare each release train's advertised version against what is published.
  *
  * The two trains share a tag namespace but not a version file: the plugin's number lives
@@ -465,6 +683,8 @@ export function compareVersions(a, b) {
 export function summarize({
   listing = { skills: [], declaredCount: null, url: null },
   repoSkills = [],
+  skillProfiles = [],
+  skillPages = [],
   tagLinks = [],
   publishedTags = [],
   publishedReleases = null,
@@ -546,31 +766,119 @@ export function summarize({
     }
   }
 
+  // The names are the cheap half. A re-submission makes them agree, and this is what is
+  // left to check afterwards: whether the page behind a name still renders the skill this
+  // repository ships. Only skills that exist on both sides are compared — a name the
+  // repository deleted is already reported above, and asking a second question about it
+  // would read as two problems with one cause.
+  for (const entry of skillPages) {
+    const profile = skillProfiles.find((p) => p.name === entry?.name);
+    if (!profile) continue;
+
+    const drift = skillPageDrift({ page: entry.page, text: entry.text, profile });
+    const stale = [];
+    if (drift.description && !drift.description.matches) {
+      stale.push(
+        `description on the page: "${drift.description.actual}"`,
+        `description this repository ships: "${drift.description.expected}"`,
+      );
+    }
+    if (drift.version && !drift.version.matches) {
+      stale.push(
+        `version on the page: ${drift.version.actual}; this repository ships ` +
+          `${drift.version.expected}`,
+      );
+    }
+    if (drift.body.missing.length) {
+      stale.push(
+        `the page renders ${drift.body.matched} of the skill's ${drift.body.total} sections; ` +
+          `missing: ${drift.body.missing.join(", ")}`,
+      );
+    }
+
+    if (stale.length) {
+      findings.push({
+        id: "registry-skill-stale",
+        severity: "error",
+        title: `The registry page for ${profile.name} publishes an older copy of the skill`,
+        detail: [
+          `Page: ${entry.url ?? entry.page?.url ?? listing.url ?? REGISTRY_URL}`,
+          ...stale,
+          "The listing is a crawl, not a mirror; re-submit the repository at " +
+            "https://www.skills.sh so the page is rebuilt from what is shipped today.",
+        ],
+      });
+    }
+
+    if (!drift.body.readable) {
+      findings.push({
+        id: "registry-skill-unreadable",
+        severity: "warning",
+        title: `The registry page for ${profile.name} published no readable skill body`,
+        detail: [
+          entry.page
+            ? `${entry.url ?? entry.page.url}: none of the ${profile.sections.length} sections ` +
+              "the shipped skill declares appear on the page."
+            : `${entry.url ?? "the page"} carried no JSON-LD SoftwareApplication block.`,
+          "A page that renders something else and a page this checker can no longer parse " +
+            "look identical from here, so no drift is claimed. Check it by hand.",
+        ],
+      });
+    }
+  }
+
   const dangling = danglingTagLinks(tagLinks, tags);
-  // A link that names a tag no pipeline creates is a different job from one that is merely
-  // waiting for a tag push. Reporting both under "cut the missing release" hands the
-  // maintainer an instruction that cannot work: cutting v2.6 leaves a v2.6.0 link 404, so
-  // the run stays red and the advice that produced it is now false.
+  // Three jobs, not one. A link waiting for a tag push is cut; a link naming a tag no
+  // pipeline creates is edited; a link for a version the manifest has already passed is
+  // *folded into the release that will carry it*. Reporting them together hands the
+  // maintainer instructions that cannot all work: cutting v2.6 leaves a v2.6.0 link 404,
+  // and cutting v2.5 fails validation against a manifest that reads 2.6.0.
+  //
+  // Stranded is checked first because it is the deeper answer: correcting a stranded link's
+  // tag shape still leaves it pointing at a release `main` cannot cut.
+  const stranded = strandedReleaseLinks(dangling, manifestVersion);
   const unpublishable = dangling.filter((l) => {
+    if (stranded.includes(l)) return false;
     if (l.file !== PLUGIN_CHANGELOG) return false;
     const expected = l.label ? pluginReleaseTag(l.label) : null;
     return expected !== null && expected !== l.tag;
   });
-  const cuttable = dangling.filter((l) => !unpublishable.includes(l));
+  const cuttable = dangling.filter((l) => !unpublishable.includes(l) && !stranded.includes(l));
 
   // Of what is left, a link whose tag is already on origin is not waiting for a tag push:
   // its release run failed. Same evidence, opposite instruction.
-  const stranded = tagsWithoutRelease({
+  const strandedTags = tagsWithoutRelease({
     manifestVersion,
     canvasVersion,
     repoTags,
     publishedTags: tags,
     links: cuttable,
   });
-  const strandedTags = new Set(stranded.map((s) => s.tag));
-  const strandedTrains = new Set(stranded.map((s) => s.train));
-  const pending = cuttable.filter((l) => !strandedTags.has(l.tag));
+  const strandedTagNames = new Set(strandedTags.map((s) => s.tag));
+  const strandedTrains = new Set(strandedTags.map((s) => s.train));
+  const pending = cuttable.filter((l) => !strandedTagNames.has(l.tag));
 
+  if (stranded.length) {
+    findings.push({
+      id: "stranded-release-link",
+      severity: "error",
+      title: "Published links name versions `main` can no longer release",
+      detail: [
+        ...stranded.map(
+          (l) =>
+            `${l.file}:${l.line}  [${l.label}] links ${l.tag}, but the manifest is already ` +
+            `at ${manifestVersion} — \`build-plugin.py --expected-version ${l.label}\` ` +
+            `fails on a version mismatch, so that tag is no longer publishable from \`main\``,
+        ),
+        `Tagging the older commit whose manifest still read that version would build — ` +
+          `create-release.yml checks out the tagged commit, not \`main\` — but it would ` +
+          `publish a tree and notes that predate what the section documents now.`,
+        `${manifestVersion} is the only version \`main\` can publish. Fold each section ` +
+          `into ## [${manifestVersion}] and drop the link: build-plugin.py extracts one ` +
+          `section, so those notes reach no release from \`main\` otherwise.`,
+      ],
+    });
+  }
   if (unpublishable.length) {
     findings.push({
       id: "unpublishable-release-link",
@@ -587,12 +895,12 @@ export function summarize({
       ],
     });
   }
-  if (stranded.length) {
+  if (strandedTags.length) {
     findings.push({
       id: "release-tag-without-release",
       severity: "error",
       title: "Tags exist on origin with no release behind them",
-      detail: stranded.flatMap((s) => [
+      detail: strandedTags.flatMap((s) => [
         `${s.tag} is on origin but nothing was published for it` +
           (s.advertised ? ` — the ${s.train} train advertises ${s.advertised}` : ""),
         ...s.links.map((l) => `${l.file}:${l.line} links it  ${l.url}`),
@@ -641,6 +949,21 @@ export function summarize({
     });
   }
   if (canvasVersion && !releases.canvas.published && !strandedTrains.has("canvas")) {
+    // Naming the advertised version is not enough: release-canvas.yml *increments* from it, so
+    // running the workflow publishes the next one and the advertised number is skipped forever.
+    // Derive that from bump-version.mjs rather than restating it — the same "advice that cannot
+    // produce the state it asks for" defect the plugin side had.
+    let willPublish = null;
+    try {
+      willPublish = nextVersion(
+        canvasVersion,
+        "patch",
+        publishedReleases.map((r) => r.tag).filter(Boolean),
+      );
+    } catch {
+      // A VERSION the bump script cannot parse is itself worth reporting, and a monitor that
+      // throws on the malformed input it exists to notice reports nothing at all.
+    }
     findings.push({
       id: "canvas-release-missing",
       severity: "error",
@@ -648,7 +971,13 @@ export function summarize({
       detail: [
         `VERSION: ${canvasVersion}`,
         newestLine(releases.canvas, "canvas"),
-        "release-canvas.yml owns this train and bumps VERSION itself.",
+        willPublish
+          ? `release-canvas.yml owns this train and bumps VERSION itself — running it publishes ` +
+            `v${willPublish}, not v${canvasVersion}.`
+          : `release-canvas.yml owns this train, but bump-version.mjs cannot read ${canvasVersion} ` +
+            `as X.Y.Z, so no release can start from it.`,
+        `To publish ${canvasVersion}, reset VERSION and the extension package.json to the ` +
+          `newest published canvas release and let the workflow do the bump.`,
       ],
     });
   }
@@ -691,11 +1020,23 @@ export function renderAnnotations(summary) {
 // CLI (the only part that touches the network)
 // ---------------------------------------------------------------------------
 
-export async function fetchRegistryListing({ url = REGISTRY_URL, fetchImpl } = {}) {
+async function fetchHtml({ url, fetchImpl }) {
   const doFetch = fetchImpl ?? globalThis.fetch;
   const res = await doFetch(url, { headers: { accept: "text/html" }, redirect: "follow" });
   if (!res.ok) throw new Error(`${url} responded ${res.status}`);
   return await res.text();
+}
+
+export async function fetchRegistryListing({ url = REGISTRY_URL, fetchImpl } = {}) {
+  return await fetchHtml({ url, fetchImpl });
+}
+
+/**
+ * A per-skill listing page. Shares the listing fetch's guard on purpose: a 404 is not an
+ * empty page, and swallowing it would report the entire skill body as missing.
+ */
+export async function fetchSkillPage({ url, fetchImpl } = {}) {
+  return await fetchHtml({ url, fetchImpl });
 }
 
 /**
@@ -758,6 +1099,7 @@ export function readLocalState(root = REPO_ROOT) {
       ? fs.readFileSync(versionFile, "utf8").trim()
       : null,
     repoSkills: repoSkillNames(root),
+    skillProfiles: repoSkillProfiles(root),
     tagLinks: advertisedTagLinks(sources),
     registryUrl: advertisedRegistryUrl(sources),
   };
@@ -769,11 +1111,31 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
   const { registryUrl, ...local } = readLocalState(root);
   const errors = [];
 
-  let listing = { skills: [], description: null, declaredCount: null, url: registryUrl };
+  let listing = { skills: [], parts: [], description: null, declaredCount: null, url: registryUrl };
   try {
     listing = parseRegistryListing(await fetchRegistryListing({ url: registryUrl, fetchImpl }));
   } catch (err) {
     errors.push({ surface: "registry", message: `${registryUrl}: ${err.message}` });
+  }
+
+  // Only the pages of skills this repository actually ships. The listing advertises names
+  // the repository deleted; fetching their pages would be requests spent learning what the
+  // names comparison has already reported.
+  const shipped = new Set(local.skillProfiles.map((p) => p.name));
+  const skillPages = [];
+  for (const part of listing.parts ?? []) {
+    if (!part.url || !shipped.has(part.name)) continue;
+    try {
+      const html = await fetchSkillPage({ url: part.url, fetchImpl });
+      skillPages.push({
+        name: part.name,
+        url: part.url,
+        page: parseSkillPage(html),
+        text: pageText(html),
+      });
+    } catch (err) {
+      errors.push({ surface: `registry page for ${part.name}`, message: `${part.url}: ${err.message}` });
+    }
   }
 
   let publishedReleases = [];
@@ -806,6 +1168,7 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
   const summary = summarize({
     listing,
     ...local,
+    skillPages,
     publishedTags: publishedReleases.map((r) => r.tag),
     publishedReleases,
     repoTags,

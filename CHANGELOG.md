@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`.claude-plugin/marketplace.json` — this repository can now be catalogued.**
+  `/plugin marketplace add` reads a marketplace manifest from the repository root, and we
+  shipped only `plugin.json`: a plugin that no marketplace could list, including its own.
+  The catalog declares one entry whose `source` is `"./"`, so
+  `/plugin marketplace add RafaelGorski/Problem-Based-SRS` resolves with no clone, and the
+  release archive (which already carries `.claude-plugin/`) can be registered from disk.
+  `build-plugin.py validate` now checks the catalog when present: every relative source
+  must resolve to a directory holding a real `plugin.json`, entry names must match the
+  plugin they point at, and a pinned `version`/`description` must agree with the manifest —
+  a stale pin silently freezes updates for everyone who installed from the catalog.
+
 ### Fixed
 
 - **A tag with no release behind it was told to push the tag again.** The drift monitor read
@@ -26,6 +39,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `dangling-release-links` with it, whose advice — *"will resolve when the tag exists"* — is
   false once it does. An unreadable refs API is a warning and changes nothing, and a caller
   that supplies no tag list gets exactly the previous behaviour.
+- **A canvas release could advertise a version it had failed to publish.**
+  `release-canvas.yml` pushed the version bump to `main` and pushed the tag *before* it
+  packaged anything, so a failure in `package-extension.mjs` or `gh release create` left the
+  repository advertising a version, a tag on origin, and no release — the drift monitor's
+  `canvas-release-missing`, which is the state `VERSION` 1.1.1 is in today. It was also
+  unrecoverable: `bump-version.mjs` starts from the already-bumped `package.json` and skips
+  versions whose tag exists, so the stranded version was skipped forever. The pipeline now
+  packages **and reads** the archive before anything leaves the runner, and lets
+  `gh release create --target <sha>` create the tag as part of the release. That works here
+  because this workflow is dispatch-only, so the tag never exists beforehand — GitHub
+  ignores `--target` for a tag that already exists, which is why `create-release.yml`, whose
+  trigger *is* a tag push, is not the reference for the mechanism and stays tagged by hand.
+  A publish failure or cancellation now reverts the bump, on top of the branch as it stands
+  and never force-pushed, so a re-run republishes the same version; it stands down when the
+  release did publish, checked against GitHub rather than against step state alone.
+  `release-canvas-ordering.test.mjs` pins all of it, including that the workflow stays
+  dispatch-only, runs only on the default branch, and holds a single global concurrency
+  group.
+- **The canvas release pipeline never opened the archive it published.** It runs the
+  extension's `npm test`, and the only guard that stages and reads the artifact —
+  `evals/tests/from-archive-install.test.mjs` — lives in the eval suite, which that workflow
+  never ran. `srs-navigator-1.1.0.zip` went out at 4.32 MB with a Playwright tree inside
+  through exactly that gap; the packager was fixed afterwards, the pipeline that publishes it
+  was not. It now runs that guard after the skill sync, so it reads the tree that ships, and
+  additionally opens the `.tar.gz` the run actually built — the guard stages its own copy, so
+  without that second read a packaging or tar regression would pass on a tree nobody ships.
+- **A version bump had left a release unreachable, and cutting `v2.6` would have buried its
+  notes.** The manifest moved `2.4.1 → 2.5.0 → 2.6.0` with no `v2.5` tag in between. Because
+  `create-release.yml` validates the tag against `plugin.json`, `v2.5` is no longer
+  publishable from `main` — `build-plugin.py --expected-version 2.5` fails on a version
+  mismatch — so `[2.5.0]: …/releases/tag/v2.5` had no release behind it while the monitor
+  kept filing it under "cut the missing release", advice that produces a failed run. Tagging
+  the older commit that still read `2.5.0` *would* build, but would publish a tree and notes
+  that predate most of what the section documented. Worse, `extract_notes()` publishes exactly
+  one section: cutting `v2.6` would have shipped an artifact containing 2.5's work (the
+  clean-machine install fixes, the health-dashboard links, the eval-README and whole-spec
+  notation guards) with release notes that never mentioned it. The `[2.5.0]`
+  section is folded into `[2.6.0]`, the release that actually delivers it.
+- **The drift monitor tells the two cases apart.** `stranded-release-link` reports a changelog
+  link for a version the manifest has already passed and gives the fix that works — fold the
+  section in, delete the link — instead of an instruction that fails the workflow. It takes
+  precedence over `unpublishable-release-link`, since correcting a stranded link's tag shape
+  still leaves it pointing at a release `main` cannot cut.
+- **The reason it gives is one the repository's own history supports.** The first version of
+  this finding called the tag impossible to create and its link permanently broken. Neither
+  holds: `checkout@v4` restores the tagged commit, and commit `69dfe88` still carries
+  `plugin.json` at 2.5.0, so `build-plugin.py validate --expected-version 2.5` passes there.
+  The claim is now the narrower one that survives the check, and the same one everywhere it is
+  made. `stranded-release-claim.test.mjs` derives the falsifier from git rather than restating
+  it (it exports the tree at that commit and runs the real validator), forbids a reversion to
+  the strong form across all five surfaces that carry the claim, and requires the finding and
+  its runbook row to name both halves: unreachable from `main`, misleading from anywhere else.
+- **A recurrence now turns CI red at the moment of the bump.** `release-hygiene.test.mjs`
+  requires every changelog section below the manifest version to name a tag present in
+  `git tag --list`, and the eval job checks out with `fetch-tags` so the guard has evidence
+  rather than skipping. That job now also sets up Python, so the two legs that cross-check
+  `build-plugin.py` by executing it stop skipping in CI. Negative-tested by mutating the real
+  tracked files: 14/14 caught.
+- **The documented Claude Code install path was not a command.** README's plugin section
+  offered `/plugin install https://github.com/RafaelGorski/Problem-Based-SRS`, but Claude
+  Code installs `<plugin>@<marketplace>` and never accepts a URL; the alternative,
+  `claude --plugin-dir ./Problem-Based-SRS`, pointed at a checkout the section never told
+  the reader to make. Both are replaced by the two commands that work —
+  `/plugin marketplace add RafaelGorski/Problem-Based-SRS` then
+  `/plugin install problem-based-srs@problem-based-srs` — with the namespaced skill name
+  the install actually produces, and a `git clone` in front of the `--plugin-dir` variant.
+  `docs/index.html` carries the same path. The new
+  `evals/tests/claude-plugin-install.test.mjs` derives both command strings from
+  `plugin.json` and `marketplace.json`, so renaming either breaks the documentation test
+  instead of silently invalidating it, and rejects any `plugin install` argument that is a
+  URL or lacks an `@marketplace`.
+- **The canvas can now be driven from a published release archive**
+  (`evals/tools/open-archive-canvas.mjs`). Every proof of `/live` ran against this
+  repository: `serve-canvas.mjs` renders out of `lib/`, `visual.test.mjs` points at the
+  server it starts, and `from-archive-install.test.mjs` — the one place that stages a real
+  archive — kept the boot sequence sealed inside a `node --test` file. Nothing could hand a
+  browser a URL backed by the artefact a user downloads, so the screenshot #90 asks for could
+  not be taken at all. The tool installs a host-SDK stub and nothing else (no `npm install`,
+  matching the archive's no-`node_modules`/no-lockfile contract), loads `extension.mjs` from
+  the extracted tree, opens the canvas and prints the loopback URL — stdout carries the URL
+  and nothing else, so it feeds `CANVAS_URL` directly and `playwright.config.mjs` then starts
+  no canvas server of its own.
+  - It **refuses any path under `.github/`**, which is the assertion that gives the evidence
+    its value: aimed at `.github/extensions/srs-navigator/` it would boot happily,
+    `extension.mjs` would switch to in-repo mode and resolve the methodology from `skills/`,
+    Playwright would go green — and the capture filed as published-archive evidence would be
+    the checkout. Presence standing in for function is the substitution #69 kept making; a
+    tool that can prove the wrong thing silently makes it cheaper.
+  - By default it passes the archive's **own** `lib/demo-spec.mjs` explicitly rather than
+    letting the extension fall through to its "no spec found" path, which lays a landing
+    overlay over the same graph and swallows the health-bar clicks `visual.test.mjs` makes —
+    an archive-driven run would have failed on the overlay and read as a `/live` regression.
+    `--landing` captures that first-run state deliberately.
+  - `evals/tests/from-archive-install.test.mjs` now imports the stub from the tool instead of
+    keeping its own copy, so the two cannot drift; `archive-canvas-tool.test.mjs` (21 tests)
+    fails if the duplicate comes back, if the `.github` refusal is weakened, if the CLI
+    prints anything but the URL, or if the Playwright config stops honouring `CANVAS_URL`.
+
+- **Publishing the canvas app failed the plugin's release pipeline.** `create-release.yml`
+  triggers on `push: tags: ["v*"]`, and that glob matches both release trains — the two
+  cannot be told apart by tag shape either, since `v2.4.1` is a plugin release and `v1.1.0`
+  a canvas one. So every canvas release fired the plugin pipeline against a tag that does
+  not match `plugin.json`, and it failed: run `28527065984`, tag `v1.1.0`, four seconds
+  after `release-canvas.yml` published `srs-navigator 1.1.0` — the only failure in that
+  workflow's history, and structural rather than incidental. `scripts/release-train.mjs`
+  now attributes the pushed tag before anything is built, and the publishing job is gated on
+  the answer. The plugin side of the rule is the pipeline's own — `build-plugin.py` compares
+  *normalized* versions, so `v2.6` and `v2.6.0` both build for manifest 2.6.0 and both
+  classify as plugin — and a tag claimed by both trains, or by neither, fails the run rather
+  than publishing something arbitrary.
+- **`VERSION` advertised a canvas version that no release could ever publish.**
+  `VERSION` and the extension `package.json` were hand-bumped to 1.1.1, but
+  `bump-version.mjs` *increments* from the version it finds, so running the workflow would
+  have published 1.1.2 and skipped 1.1.1 forever. Both files are reset to the published
+  1.1.0, restoring the intent — the next canvas release publishes 1.1.1 — and the two files
+  are now asserted to agree, since the bump script reads one and every other surface reads
+  the other. The `canvas-release-missing` finding says which version running the workflow
+  would *actually* publish, derived from `bump-version.mjs` rather than restated; importing
+  that script is now side-effect free, so reading a drift report can no longer rewrite the
+  version files.
 - **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
   pointed at `releases/tag/v2.6.0` and `/v2.5.0`, but `create-release.yml` builds its tag
   from `build-plugin.py`'s *normalized* version — `TAG="v${VERSION}"` after
@@ -34,7 +167,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the drift monitor asks for would have left both links 404 and the monitor red, still
   advising a release that by then existed. Both links now name the tag the pipeline
   produces, and `release-hygiene.test.mjs` derives that tag by executing
-  `build-plugin.py`'s own `normalize_version` rather than restating its rule.
+  `build-plugin.py`'s own `normalize_version` rather than restating its rule. (`[2.5.0]` has
+  since been folded into `[2.6.0]` — see above — because naming the right tag was necessary
+  but not sufficient: `main` cannot cut `v2.5` while the manifest reads 2.6.0, and a tag on
+  the older commit would publish notes that predate the section.)
 - **The drift report told the canvas app it was behind a release of the other product.**
   `releaseDrift()` matched each train separately and then printed a single global newest
   tag in both findings, so `VERSION` 1.1.1 was reported against `v2.4.1` — a *plugin*
@@ -50,6 +186,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rule is applied only to `CHANGELOG.md`, the file `build-plugin.py` reads for release notes;
   the canvas train tags `v${VERSION}` verbatim, so a canvas link awaiting its release stays a
   release to cut rather than becoming a link to break.
+- **The registry monitor only compared skill *names*, so a stale page read as healthy.**
+  `check-distribution.mjs` matched the listing's advertised names against the repository and
+  stopped there, which is the cheap half of what the acceptance criteria ask for — the
+  listing is supposed to render the current description, version, and body. Captured
+  2026-07-31, the page for `problem-based-srs` published a description that matched but a
+  body that did not: 14 of the shipped skill's 15 `##` sections, missing **Identifier
+  Notation (CANONICAL)**, and still teaching the `FR-001` hyphen IDs the methodology
+  replaced with dotted notation. Once the maintainer re-submits and the names align, that
+  run would have gone green over a page still teaching superseded methodology. The checker
+  now fetches each per-skill page and reports `registry-skill-stale` when the description,
+  the published version, or the rendered sections disagree with what is shipped. Scraped
+  text is not a contract, so zero matched sections is `registry-skill-unreadable` (a
+  warning) rather than drift — a redesigned page and a broken extractor look identical from
+  here. Guarded by `evals/tests/registry-listing-content.test.mjs` against a verbatim
+  capture of the real page.
 
 - **The canvas's "Learn & Create Spec" button no longer lets the agent write the spec
   itself.** The splash-screen prompt named the `problem_based_srs` tool and then described
@@ -98,8 +249,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Notation table declares `NFR.{n}` → `NFR.01`, and the shipped demo spec uses `NFR.01`. The
   notation guard added in #63/#66 only rejects *hyphen* IDs, so a wrong-arity dotted ID
   walked straight through.
+- **The agent shipped two links that resolved outside the release archive.**
+  `agents/problem-based-srs/AGENT.md` linked its worked examples through
+  `../skills/problem-based-srs/reference/…`, which from `agents/problem-based-srs/` lands in
+  `agents/skills/` — a directory that exists in neither the repository nor the archive. It
+  was wrong in every published `problem-based-srs-vX.Y.zip`. `skills-static.test.mjs` does
+  resolve every relative link, but only under `skills/`, and `evals/` contained no reference
+  to `agents/` at all, so nothing looked at one of the five paths `PACKAGE_INCLUDES` ships.
+- **The agent could not dispatch `/live`.** `SKILL.md` routes nine actions, `AGENT.md`
+  advertised eight: the canvas entry point — the one #69 keeps asking about — was missing
+  from the table the plugin archive ships. It now names `/live`, which is the command that
+  actually reaches the canvas: `live` is not an argument the orchestrator accepts, and a
+  guard now rejects any `/problem-based-srs <action>` the agent claims that `SKILL.md`'s
+  Available Actions table does not list.
+- **The README and the landing page told two different origin stories.** The site opens on
+  `CP.01 · Scattered Customer Information`, quoted from the shipped `.spec/crm-system.json`;
+  the README opened on an invented reporting-dashboard problem and reused **`CP.01` for
+  different content** — so a reader who met both surfaces in sequence, then installed and ran
+  `/live`, saw a third thing. The README now walks the same `CP.01 → CN.01.1 → FR.01.1.1`
+  chain, and `landing-proof.test.mjs` holds it to the spec the way it already held the
+  landing page: renaming a problem in `.spec/crm-system.json` now fails both surfaces instead
+  of neither.
+- **A moderate XSS advisory sat in the canvas dev tree** (`jsondiffpatch < 0.7.2`,
+  [GHSA-33vc-wfww-vjfv](https://github.com/advisories/GHSA-33vc-wfww-vjfv)), reachable only
+  as a transitive dependency of `ai@4`. `npm audit fix --force` would have taken `ai` from
+  v4 to v7 — a breaking SDK migration whose only consumers are the provider-gated LLM suites,
+  which cannot be run without API keys, so the fix could not have been verified. Pinned with
+  an `overrides` entry instead: `npm audit` drops from 5 findings (2 moderate) to 4 low, and
+  `generateText`/`tool` still resolve on the v4 API the harness documents. The four remaining
+  low advisories all require that migration and are left for a deliberate change.
 
 ### Added
+
+- **The plugin release archive has an install path, and a guard that opens it**
+  (`evals/tests/plugin-archive-install.test.mjs`, 14 assertions). `problem-based-srs-vX.Y.zip`
+  is the only asset attached to every methodology release, and no surface said what to do
+  with it: the README documented four install paths and none of them was the file on the
+  release page. It is now documented — where to extract it, that the archive brings its own
+  `problem-based-srs/` root so the target is the directory *above* it, and which folder to
+  copy for the skill alone. The guard stages what the packager ships into a temp directory
+  outside the checkout and reads it as an installer would: every relative link must resolve
+  *inside* the archive, the agent must advertise every action `SKILL.md` dispatches, and every
+  path the README quotes must be in the tree. Both the include list and the archive root are
+  read out of `build-plugin.py` and `plugin.json`, and one cross-check runs the real
+  `build-plugin.py package` and requires the staged tree to equal the zip — so a change to the
+  archive's layout fails the documentation assertion with it.
 
 - **Drift guard for the canvas app's agent-facing instructions**
   (`.github/extensions/srs-navigator/tests/app-prompts.test.mjs`, 21 assertions, wired into
@@ -152,6 +346,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.0] - 2026-07-31
 
+Carries everything that was documented as **2.5.0 and never released**. The manifest moved
+`2.4.1 → 2.5.0 → 2.6.0` without the `v2.5` tag in between, and `build-plugin.py` publishes
+exactly one changelog section — so the two were folded together rather than leaving a
+section whose notes no release cut from `main` would carry and whose link had no release
+behind it.
+
 ### Added
 
 - **The landing page shows the `/live` canvas moving instead of describing it.** The
@@ -180,39 +380,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   proved by poisoning the staged copy, since the bundled and canonical files are
   byte-identical and equality cannot say which was read. That standalone fallback is the
   whole archive install and no test had ever taken that branch.
-
-### Changed
-
-- **Motion on the landing page is opt-out-able.** The video carries no `autoplay`
-  attribute; playback is started from `site.js` only after
-  `prefers-reduced-motion` is read, and only while the figure is on screen. A reader
-  who asked their system for no motion gets the poster frame and a visible control.
-
-### Fixed
-
-- **A canvas filter test that never actually ran.** `tests/visual.test.mjs` asserted on
-  a health metric the clean CRM spec does not produce, and read dimming from
-  `getComputedStyle().opacity` — which the renderer never sets, because it dims child
-  `rect`/`text` `opacity` *attributes*. The test now exercises the real
-  `need clusters` filter and counts genuinely dimmed nodes.
-- **The install archive no longer ships what it cannot run.** `scripts/` went out with it —
-  four files of maintainer tooling, one of which (`record-demo.mjs`) imports `playwright`, a
-  devDependency the archive deliberately excludes, and one of which (`sync-skills.mjs`) reads
-  a monorepo path a standalone install does not have.
-- **The archive no longer ships the manifest that rebuilds the tree it removes.** It carried
-  `package.json` with seven devDependencies (Playwright, three `@ai-sdk/*`, `ai`, `zod`) plus
-  `package-lock.json`, so one `npm install` in the extracted directory recreated exactly the
-  4.3 MB Playwright tree that `srs-navigator-1.1.0.zip` shipped by accident. `stage()` now
-  writes an allowlisted install manifest, and the dangling `"main": "index.js"` — naming a
-  file that exists in neither the archive nor the repository — goes with it. The archive is
-  22 files / 92 KB compressed, and both surfaces now tell the reader no `npm install` follows.
-
-[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6
-
-## [2.5.0] - 2026-07-31
-
-### Added
-
 - **Skills Health Dashboard is now reachable in one click.** The published dashboard
   (`docs/skills-health.html`) is linked from the landing page nav *and* footer, from
   `docs/docs.html`, and from a README badge + intro line. It was generated, committed
@@ -248,6 +415,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Motion on the landing page is opt-out-able.** The video carries no `autoplay`
+  attribute; playback is started from `site.js` only after
+  `prefers-reduced-motion` is read, and only while the figure is on screen. A reader
+  who asked their system for no motion gets the poster frame and a visible control.
 - **`run-tests.ps1` splits its two model-calling suites.** `-IncludeSkillBehavior` (provider
   API key) and `-IncludeLiveEvals` (authenticated `copilot` CLI) are now separate switches.
   Previously one flag enabled both, so requesting the provider suite also launched a runner
@@ -264,6 +435,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A canvas filter test that never actually ran.** `tests/visual.test.mjs` asserted on
+  a health metric the clean CRM spec does not produce, and read dimming from
+  `getComputedStyle().opacity` — which the renderer never sets, because it dims child
+  `rect`/`text` `opacity` *attributes*. The test now exercises the real
+  `need clusters` filter and counts genuinely dimmed nodes.
+- **The install archive no longer ships what it cannot run.** `scripts/` went out with it —
+  four files of maintainer tooling, one of which (`record-demo.mjs`) imports `playwright`, a
+  devDependency the archive deliberately excludes, and one of which (`sync-skills.mjs`) reads
+  a monorepo path a standalone install does not have.
+- **The archive no longer ships the manifest that rebuilds the tree it removes.** It carried
+  `package.json` with seven devDependencies (Playwright, three `@ai-sdk/*`, `ai`, `zod`) plus
+  `package-lock.json`, so one `npm install` in the extracted directory recreated exactly the
+  4.3 MB Playwright tree that `srs-navigator-1.1.0.zip` shipped by accident. `stage()` now
+  writes an allowlisted install manifest, and the dangling `"main": "index.js"` — naming a
+  file that exists in neither the archive nor the repository — goes with it. The archive is
+  22 files / 92 KB compressed, and both surfaces now tell the reader no `npm install` follows.
 - **`evals/README.md` live-eval commands are repo-root relative** (`node evals/run-evals.mjs`).
   They previously required an undocumented `cd evals` while every neighbouring command ran
   from the repository root.
@@ -285,7 +472,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `stage()` are exported so the install guard derives archive facts from the packager
   rather than restating them.
 
-[2.5.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.5
+[2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6
 
 ## [2.4.1] - 2026-07-22
 

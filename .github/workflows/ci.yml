@@ -17,11 +17,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # release-hygiene.test.mjs asks whether every changelog section below the
+          # manifest version has a tag behind it. actions/checkout fetches none by
+          # default, and a tagless checkout is no evidence — the guard would skip on
+          # every CI run and guard nothing.
+          fetch-tags: true
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      # release-hygiene.test.mjs and stranded-release-claim.test.mjs cross-check
+      # build-plugin.py by *executing* it rather than restating its rules. Without an
+      # interpreter both legs skip, and a leg that always skips proves nothing.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
       # No `npm ci` needed: the deterministic suites import only node:test /
       # node:assert. Playwright-driven specs are excluded from `npm test`.

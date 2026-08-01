@@ -263,10 +263,10 @@ describe("the instructions are derived from the pipelines, not asserted about th
     const bump = read("scripts/bump-version.mjs");
     assert.match(
       bump,
-      /while \(tagExists\(/,
+      /while \(taken\.has\(`v\$\{fmt\(next\)\}`\)\)/,
       "the canvas recovery's reason is this loop; if it goes, the reason goes with it",
     );
-    assert.match(bump, /function tagExists/);
+    assert.match(bump, /export function nextVersion/);
   });
 
   it("release-canvas.yml is the workflow the canvas recovery names", () => {
