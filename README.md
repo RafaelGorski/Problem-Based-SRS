@@ -216,10 +216,27 @@ Ask your AI assistant to install. Specify the target directory:
 
 ### Claude Code plugin
 
+Claude Code installs plugins **from a marketplace**, in two steps — register the catalog,
+then install the plugin it lists. This repository is its own marketplace
+([`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json)), so nothing has to
+be cloned first:
+
+```shell
+/plugin marketplace add RafaelGorski/Problem-Based-SRS
+/plugin install problem-based-srs@problem-based-srs
+/reload-plugins
+```
+
+Plugin skills are namespaced, so the methodology then answers to
+`/problem-based-srs:problem-based-srs`. Run `/plugin marketplace update problem-based-srs`
+to pick up a new release.
+
+To hack on the plugin instead of installing it, clone it and load the working copy for a
+single session:
+
 ```bash
+git clone https://github.com/RafaelGorski/Problem-Based-SRS.git
 claude --plugin-dir ./Problem-Based-SRS
-# or
-/plugin install https://github.com/RafaelGorski/Problem-Based-SRS
 ```
 
 ### AgentSkills CLI
@@ -310,7 +327,7 @@ Problem-Based-SRS/
 ├── .spec/crm-system.json        # Demo specification for the navigator
 ├── scripts/                     # build-plugin.py, bump-version, package-extension
 ├── docs/                        # Research paper and methodology
-└── .claude-plugin/              # Plugin manifest
+└── .claude-plugin/              # Plugin manifest + marketplace catalog
 ```
 
 Case studies: [`crm-example.md`](skills/problem-based-srs/reference/crm-example.md) and [`microer-example.md`](skills/problem-based-srs/reference/microer-example.md) walk through complete sessions.

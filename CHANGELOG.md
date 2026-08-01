@@ -7,7 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`.claude-plugin/marketplace.json` — this repository can now be catalogued.**
+  `/plugin marketplace add` reads a marketplace manifest from the repository root, and we
+  shipped only `plugin.json`: a plugin that no marketplace could list, including its own.
+  The catalog declares one entry whose `source` is `"./"`, so
+  `/plugin marketplace add RafaelGorski/Problem-Based-SRS` resolves with no clone, and the
+  release archive (which already carries `.claude-plugin/`) can be registered from disk.
+  `build-plugin.py validate` now checks the catalog when present: every relative source
+  must resolve to a directory holding a real `plugin.json`, entry names must match the
+  plugin they point at, and a pinned `version`/`description` must agree with the manifest —
+  a stale pin silently freezes updates for everyone who installed from the catalog.
+
 ### Fixed
+
+- **The documented Claude Code install path was not a command.** README's plugin section
+  offered `/plugin install https://github.com/RafaelGorski/Problem-Based-SRS`, but Claude
+  Code installs `<plugin>@<marketplace>` and never accepts a URL; the alternative,
+  `claude --plugin-dir ./Problem-Based-SRS`, pointed at a checkout the section never told
+  the reader to make. Both are replaced by the two commands that work —
+  `/plugin marketplace add RafaelGorski/Problem-Based-SRS` then
+  `/plugin install problem-based-srs@problem-based-srs` — with the namespaced skill name
+  the install actually produces, and a `git clone` in front of the `--plugin-dir` variant.
+  `docs/index.html` carries the same path. The new
+  `evals/tests/claude-plugin-install.test.mjs` derives both command strings from
+  `plugin.json` and `marketplace.json`, so renaming either breaks the documentation test
+  instead of silently invalidating it, and rejects any `plugin install` argument that is a
+  URL or lacks an `@marketplace`.
 
 - **The changelog linked release tags the pipeline never creates.** `[2.6.0]` and `[2.5.0]`
   pointed at `releases/tag/v2.6.0` and `/v2.5.0`, but `create-release.yml` builds its tag
