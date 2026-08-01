@@ -16,7 +16,7 @@ When modifying this repository structure, ensure compliance with these plugin st
 ### Compatibility Priority (GHCP → Claude)
 
 1. **GitHub Copilot first**: Keep skills and instructions directly usable in Copilot workflows.
-2. **Claude second**: Keep `.claude-plugin/plugin.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
+2. **Claude second**: Keep `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/`, `agents/`, `hooks/`, and `settings.json` aligned with Claude plugin docs.
 3. **Consistency over time**: Keep compatibility guidance consistent when it changes.
 
 ## Core Principles
@@ -162,7 +162,8 @@ This repository is structured as a Claude Code plugin:
 ```
 Problem-Based-SRS/
 ├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest (name, version, metadata)
+│   ├── plugin.json              # Plugin manifest (name, version, metadata)
+│   └── marketplace.json         # Catalog `/plugin marketplace add` reads (source: "./")
 ├── agents/
 │   └── problem-based-srs/       # Agent orchestrator
 │       └── AGENT.md
@@ -300,7 +301,10 @@ changes.
 ### File Organization
 - **`AGENTS.md`**: **Customer-facing file** — part of the project methodology for end users. Must NOT contain internal development procedures (e.g., release process, CI/CD instructions, internal workflows). Keep aligned with `agents/problem-based-srs/AGENT.md`.
 - **`.github/copilot-instructions.md`**: Internal development instructions for AI agents working on this repository. All internal procedures (release process, development workflows, etc.) belong here.
-- **`.claude-plugin/`**: Plugin manifest (plugin.json) defining plugin metadata
+- **`.claude-plugin/`**: Plugin manifest (`plugin.json`) plus the marketplace catalog
+  (`marketplace.json`) that makes the repository installable with
+  `/plugin marketplace add`. The catalog's entry must keep agreeing with `plugin.json` —
+  `build-plugin.py validate` and `evals/tests/claude-plugin-install.test.mjs` enforce it.
 - **`skills/`**: AgentSkills (Claude Code, Claude.ai, GitHub Copilot)
   - A single self-contained skill directory: `skills/problem-based-srs/`
   - `SKILL.md` orchestrator + `reference/<action>.md` action files (filename == action)
@@ -457,6 +461,21 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 > (driven by `plugin.json` + `build-plugin.py`). The **canvas app** release uses `vX.Y.Z`
 > tags (driven by `VERSION` + `bump-version.mjs`). Keep them distinct so tags never
 > collide. "Make a release" of the methodology means the plugin pipeline below.
+>
+> They still share one tag namespace, and `create-release.yml` triggers on `v*`, so it sees
+> the canvas train's tags too — and the trains cannot be told apart by shape (`v2.4.1` is a
+> plugin release, `v1.1.0` a canvas one). Publishing the canvas app therefore used to fail
+> `Create Release` on a version mismatch it could do nothing about (run `28527065984`, tag
+> `v1.1.0`). `scripts/release-train.mjs` now attributes the pushed tag first — plugin if its
+> normalized version matches `plugin.json` (the same comparison `build-plugin.py` makes),
+> canvas if it matches `VERSION` / the extension `package.json` verbatim (the tag
+> `bump-version.mjs` pushes) — and the publishing job runs only for the plugin train. A tag
+> matching neither, or both, **fails the run** rather than releasing something arbitrary.
+> Guarded by `evals/tests/release-trains.test.mjs`.
+>
+> **`VERSION` is owned by `release-canvas.yml`.** Do not bump it in a feature branch:
+> `bump-version.mjs` *increments* from the version it finds, so a hand-bumped number is never
+> published — it is skipped. `VERSION` and the extension `package.json` must always agree.
 
 > **The canvas train never pushes a tag by hand; the plugin train always does.** This is a
 > real difference, not an inconsistency. `release-canvas.yml` is dispatch-only, so it
@@ -572,11 +591,14 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 | Finding | Severity | What it means | What to do |
 |---------|----------|---------------|-----------|
 | `registry-listing-drift` | error | The [skills.sh listing](https://www.skills.sh/rafaelgorski/problem-based-srs) advertises skills the repository no longer ships. It is a cached index, so consolidations (like #50, which took nine skills to one) do not propagate. | Re-submit the repository at [skills.sh](https://www.skills.sh) so the listing is re-crawled, then re-run the checker. |
+| `registry-skill-stale` | error | The listing's page for a skill the repository *does* ship publishes an older copy of it — a description that has moved on, or `##` sections the page never renders. Captured 2026-07-31, the `problem-based-srs` page was missing **Identifier Notation (CANONICAL)** and still taught `FR-001`, the notation the methodology replaced. Names agreeing is the cheap half; this is the half a re-submission is actually for. | Re-submit at [skills.sh](https://www.skills.sh) and re-run. This is the finding that tells you whether the re-crawl worked — `registry-listing-drift` clearing only means the *names* line up. |
 | `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it — normally a manifest bump whose tag never got pushed. | Cut the missing release (above). The link is already correct and will resolve when the tag exists. |
 | `unpublishable-release-link` | error | A reference definition **in `CHANGELOG.md`** (the file `build-plugin.py` reads for release notes, so its labels are plugin-train claims) names a tag **no pipeline creates for that version**. `create-release.yml` tags `v${VERSION}` where `VERSION` is `build-plugin.py`'s *normalized* version, so `2.6.0` publishes at `v2.6` — and GitHub serves `/releases/tag/<tag>` by exact name. Links outside that file stay under `dangling-release-links`, because the canvas train tags `v${VERSION}` verbatim and does not strip the `.0`. | Correct the link to the tag named in the finding. Cutting a release will **not** clear this one. |
-| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
+| `stranded-release-link` | error | A reference definition **in `CHANGELOG.md`** names a version the manifest has **already moved past**. `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag against `plugin.json` — so `v2.5` fails on `version mismatch: plugin.json has 2.6.0` and is no longer publishable from `main`. Not impossible, and the finding says so: `checkout@v4` restores the *tagged commit*, so tagging the older commit that still read `2.5.0` would build — but it would publish a tree and notes that predate what the section documents now, and `extract_notes()` publishes exactly one section, so those notes reach no release from `main` either. Deeper than `unpublishable-release-link`, so it wins when a link is both. | **Do not cut it from `main`** — that fails the workflow, and a historical tag ships the wrong notes. Fold the section into `## [<manifest version>]`, the release that will actually deliver those changes, and delete the link definition. Guarded offline by `evals/tests/release-hygiene.test.mjs`, which requires every changelog section below the manifest version to name a tag present in `git tag --list`, and by `evals/tests/stranded-release-claim.test.mjs`, which holds the wording to what the repository's history supports. |
+| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. The canvas finding also names the version running `release-canvas.yml` would *actually* publish, derived from `bump-version.mjs`'s own rule — it always increments, so the advertised number is skipped rather than released. | Plugin: cut `vX.Y`. Canvas: run `release-canvas.yml` **or**, if `VERSION` was hand-bumped, reset `VERSION` and the extension `package.json` to the newest published canvas release and let the workflow own the bump. |
 | `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
+| `registry-skill-unreadable` | warning | A per-skill page carried no `SoftwareApplication` block, or **none** of the shipped skill's sections appeared in it. A page serving something else and a page this checker can no longer parse look identical from here, so no drift is claimed. | Read the page by hand. If the site was redesigned, update `parseSkillPage`/`pageText`; a clean `registry-skill-stale` proves nothing while this warning stands. |
 | `registry-listing-partial` | warning | The page's own count disagrees with the entries it returned, so the comparison was skipped rather than run on a truncated payload. | Re-run; if it persists, read the page and confirm what it actually advertises. |
 
 **Exit codes.** Only `error` findings fail the run (`--strict` → 1). Warnings print, are
@@ -597,6 +619,23 @@ parts. Getting this wrong is not cosmetic: the link stays a 404 after the releas
 and the monitor keeps reporting it under advice that no longer applies. Guarded by
 `evals/tests/release-hygiene.test.mjs`, which derives the expected tag by executing
 `build-plugin.py`'s own `normalize_version` rather than restating the rule.
+
+**Never bump the manifest over a release that was never cut.** The tag push in
+[step 2](#2-publish-the-release) is the *only* thing that publishes a version, and the
+manifest version is the only version `main` can publish — `create-release.yml` validates
+the tag against `plugin.json`, so once the manifest reads `2.6.0`, `v2.5` is no longer
+reachable from `main`. `2.4.1 → 2.5.0 → 2.6.0` shipped that way: a 76-line `## [2.5.0]`
+section whose link had no release behind it and whose notes no release cut from `main` would
+carry, because `extract_notes()` extracts exactly one section. State that precisely: tagging
+the older commit that still read `2.5.0` *would* build — `checkout@v4` restores the tagged
+commit — but it would publish a tree and notes that predate most of what the section had
+grown to document. If a bump has already happened, fold the stranded section into the
+manifest version's — do not try to cut it from either end. Guarded by
+`evals/tests/release-hygiene.test.mjs` (offline, every section below the manifest version
+must name a tag in `git tag --list`; the eval job checks out with `fetch-tags: true` so it
+has evidence), by `evals/tests/stranded-release-claim.test.mjs` (which derives the falsifier
+from git history and forbids the strong form of the claim), and reported by
+`stranded-release-link` in the monitor.
 
 **Decision — no second registry, for now (2026-07-31).** The one listing we publish
 drifted by eight of nine entries and stayed that way for three passes, because nothing was
