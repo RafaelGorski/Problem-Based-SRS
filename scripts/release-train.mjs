@@ -33,13 +33,13 @@
  * release the canvas job is about to create.
  *
  * `--expect` is what makes the gate bilateral. Gating the plugin pipeline alone leaves the
- * collision unguarded at the end that *causes* it: release-canvas.yml computes the version,
- * pushes the tag and creates the release, so by the time create-release.yml classifies
- * anything the tag is already on origin. The canvas job therefore asserts the verdict is its
- * own train before anything leaves the runner. The two pipelines act on the verdict
- * differently on purpose: create-release.yml fires on every `v*` tag, most of which are not
- * its business, so it *skips*; release-canvas.yml was dispatched deliberately and is about to
- * publish, so it *fails*.
+ * collision unguarded at the end that causes it: release-canvas.yml bumps the version and then
+ * creates the tag as part of `gh release create`, so by the time create-release.yml classifies
+ * anything the tag already exists. The canvas job therefore asserts the verdict is its own
+ * train before anything leaves the runner. The two pipelines act on the verdict differently on
+ * purpose: create-release.yml fires on every `v*` tag, most of which are not its business, so
+ * it *skips*; release-canvas.yml was dispatched deliberately and is about to publish, so it
+ * *fails*.
  */
 
 import fs from "node:fs";
@@ -188,13 +188,8 @@ function parseArgs(argv) {
     else if (arg === "--root") out.root = needsValue(arg, argv[++i]);
     else if (arg === "--expect") out.expect = needsValue(arg, argv[++i]);
     else if (arg.startsWith("-")) {
-      // Silently ignoring an option is how `release-train.mjs v2.6` came to classify
-      // $GITHUB_REF_NAME instead of the tag it was handed, and a dropped `--expect` would
-      // turn a gate into a log line without anyone noticing.
       throw new Error(`Unknown option "${arg}".`);
     } else if (positional++ === 0) {
-      // The tag as a bare argument: the form the runbook, the issues and reviewers all reach
-      // for. It has to mean the same thing as --tag rather than be discarded.
       out.tag = arg;
     } else {
       throw new Error(`Unexpected argument "${arg}" — only one tag can be classified.`);
@@ -209,7 +204,9 @@ function main(argv) {
     args = parseArgs(argv);
   } catch (err) {
     console.error(`::error::${err.message}`);
-    console.error("Usage: node scripts/release-train.mjs [<tag>|--tag <tag>] [--expect plugin|canvas] [--root <dir>]");
+    console.error(
+      "Usage: node scripts/release-train.mjs [<tag>|--tag <tag>] [--expect plugin|canvas] [--root <dir>]",
+    );
     return 2;
   }
   const { tag, root, expect } = args;

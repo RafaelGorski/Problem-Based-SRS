@@ -4,14 +4,36 @@ name: Release Canvas Extension
 # skills) and publishes a versioned GitHub Release.
 #
 # Pipeline:
-#   1. Run the extension unit test suite.
-#   2. Download the latest methodology skills from the upstream Problem-Based-SRS
+#   1. Refuse to run anywhere but the default branch.
+#   2. Run the extension unit test suite.
+#   3. Download the latest methodology skills from the upstream Problem-Based-SRS
 #      repo (the extension's "dependencies").
-#   3. Bump an incremental project version (patch by default).
-#   4. Confirm the bumped version's tag belongs to this release train and no other.
-#   5. Commit the version bump + refreshed skills and push a matching tag.
+#   4. Bump an incremental project version (patch by default) — locally only.
+#   5. Confirm the bumped tag belongs to this train and no other.
 #   6. Package the extension into .tar.gz / .zip archives.
-#   7. Create the GitHub Release with those archives attached.
+#   7. Verify the archive contract, and read the archive that was actually built.
+#   8. Commit the version bump + refreshed skills and push them.
+#   9. Create the GitHub Release, which creates the tag, with those archives attached.
+#
+# Order matters, and steps 5–7 sit where they do on purpose. This workflow used to push
+# the bump and the tag before it packaged anything, so a failure in the packager or the
+# publish step left `main` advertising a version, a tag on origin, and no release — the
+# drift monitor's `canvas-release-missing`. It was also unrecoverable: bump-version.mjs
+# starts from the already-bumped package.json and skips versions whose tag exists, so the
+# stranded version was skipped forever.
+#
+# Nothing now leaves this runner until the artifact has been built and read, and the tag
+# is created *by* `gh release create --target`, so no tag can outlive a failed publish.
+# That is possible here because this workflow is dispatch-only: the tag never exists
+# beforehand. It is **not** true of create-release.yml, whose `push: tags` trigger means
+# the tag already exists when it runs and `--target` is ignored — that train is tagged by
+# hand on purpose, and adding a tag trigger here would silently turn `--target` into a
+# no-op. Guarded by evals/tests/release-canvas-ordering.test.mjs.
+#
+# Residual window, stated rather than hidden: if the runner dies between pushing the bump
+# and recording that it pushed, no rollback step runs. Closing that needs a re-run to
+# republish the current VERSION instead of bumping past it, which is a change to
+# bump-version.mjs and is deliberately not made here.
 
 on:
   workflow_dispatch:
@@ -30,7 +52,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  # Fixed, not per-ref: the tags and the release page this workflow writes are global, so
+  # two dispatches from different refs must not run at once.
+  group: release-canvas
   cancel-in-progress: false
 
 jobs:
@@ -41,6 +65,15 @@ jobs:
         shell: bash
 
     steps:
+      - name: Refuse to release from anywhere but the default branch
+        # workflow_dispatch runs on whatever ref the caller picks, and every later step
+        # pushes to that ref and writes global tags. A release cut from a feature branch
+        # would advertise a version that main does not carry.
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          echo "::error::release-canvas.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          exit 1
+
       - name: Checkout (full history for tags)
         uses: actions/checkout@v4
         with:
@@ -67,19 +100,39 @@ jobs:
       - name: Confirm this tag is the canvas train's, and only the canvas train's
         # Both products publish from one repository into one tag namespace, and they cannot be
         # told apart by tag shape (v2.4.1 is a plugin release, v1.1.0 a canvas one), so
-        # create-release.yml classifies every pushed tag before it publishes. That gate alone
-        # is one-sided: this workflow is where a collision starts. It computes the version,
-        # pushes the tag and creates the release, so by the time the plugin pipeline classifies
-        # anything the tag is already on origin and a failing check there unpushes nothing.
+        # create-release.yml classifies every pushed tag before it publishes. That gate alone is
+        # one-sided: this workflow is where a collision starts. The tag is created here, as part
+        # of gh release create, so the canvas job has to refuse the wrong train before anything
+        # leaves the runner.
         #
         # Placed after the bump on purpose: the classifier reads VERSION and the extension
-        # package.json off the disk, and bump-version.mjs has only just written the version
-        # this release will publish. Run above the bump it would report `unknown` for every
-        # release this workflow ever cuts. Placed before the commit for the same reason the
-        # plugin gate runs before the build — after the push there is nothing left to prevent.
+        # package.json off the disk, and bump-version.mjs has only just written the version this
+        # release will publish. Run above the bump it would report `unknown` for every release
+        # this workflow ever cuts.
         run: node scripts/release-train.mjs --tag "${{ steps.bump.outputs.tag }}" --expect canvas
 
+      - name: Package the extension
+        run: node scripts/package-extension.mjs --version "${{ steps.bump.outputs.version }}"
+
+      - name: Verify the archive contract
+        # Two checks, because they answer different questions. The eval guard stages the
+        # shippable tree and reads it — the extension's own `npm test` never opens the
+        # artifact, and this pipeline never ran that guard; srs-navigator-1.1.0.zip went
+        # out at 4.32 MB with a Playwright tree inside through exactly that gap. The
+        # second check opens the archive this run actually built, so a packaging or
+        # tar/zip regression cannot pass on the strength of a freshly staged copy.
+        run: |
+          node --test evals/tests/from-archive-install.test.mjs
+          ARCHIVE="build/srs-navigator-${{ steps.bump.outputs.version }}.tar.gz"
+          ROOT=$(node -e "import('./scripts/package-extension.mjs').then(m => console.log(m.ARCHIVE_ROOT))")
+          ENTRIES="${RUNNER_TEMP}/archive-entries.txt"
+          tar -tzf "$ARCHIVE" > "$ENTRIES"
+          grep -qx "$ROOT/extension.mjs" "$ENTRIES"
+          ! grep -q "/node_modules/" "$ENTRIES"
+          echo "Archive OK: $ARCHIVE ($(wc -l < "$ENTRIES") entries)"
+
       - name: Commit version bump and refreshed skills
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -89,34 +142,41 @@ jobs:
             .github/extensions/srs-navigator/skills
           if git diff --cached --quiet; then
             echo "No changes to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git commit \
               -m "Release ${{ steps.bump.outputs.tag }}" \
               -m "Bump project version and refresh bundled Problem-Based SRS skills." \
               -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
             git push origin HEAD:${GITHUB_REF_NAME}
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Create and push tag
-        run: |
-          git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
-          git push origin "${{ steps.bump.outputs.tag }}"
-
-      - name: Package the extension
-        run: node scripts/package-extension.mjs --version "${{ steps.bump.outputs.version }}"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        id: release
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # --target creates the tag as part of the release. This workflow is dispatch-only,
+          # so the tag never exists beforehand and this is always the creating path — a tag
+          # can therefore never outlive a failed publish.
           gh release create "${{ steps.bump.outputs.tag }}" \
+            --target "${{ steps.commit.outputs.sha }}" \
             build/srs-navigator-*.tar.gz \
             build/srs-navigator-*.zip \
             --title "srs-navigator ${{ steps.bump.outputs.version }}" \
             --generate-notes
+          # Recorded immediately, and in its own step: anything after this point is
+          # bookkeeping, and a failure there must never be read as "the release did not
+          # publish" by the rollback below.
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      - name: Summarize the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           url=$(gh release view "${{ steps.bump.outputs.tag }}" --json url --jq .url)
-          echo "url=$url" >> "$GITHUB_OUTPUT"
           {
             echo "## Release published :rocket:"
             echo ""
@@ -124,3 +184,29 @@ jobs:
             echo "- **Tag:** ${{ steps.bump.outputs.tag }}"
             echo "- **Release page:** $url"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Roll back the version bump when the release did not publish
+        # The last window in which the repository can end up advertising a version that no
+        # release delivers. Reverting it means a re-run publishes that same version instead
+        # of bumping past it, which is what made the previous strand permanent.
+        #
+        # Three ways this refuses to make things worse: it only runs when the commit step
+        # reported a push, it stands down if `published=true` was recorded, and it asks
+        # GitHub directly before touching anything — reverting the bump while the release
+        # exists would leave main advertising an older version than the release page.
+        if: (failure() || cancelled()) && steps.commit.outputs.pushed == 'true' && steps.publish.outputs.published != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.bump.outputs.tag }}" >/dev/null 2>&1; then
+            echo "::warning::${{ steps.bump.outputs.tag }} is published; leaving the version bump in place."
+            exit 0
+          fi
+          echo "::warning::Release ${{ steps.bump.outputs.tag }} did not publish; reverting the version bump so a re-run republishes ${{ steps.bump.outputs.version }} instead of skipping it."
+          # Revert on top of the branch as it stands now, never on top of a stale local
+          # head: main may have moved since the bump was pushed, and a force-push here
+          # would destroy whatever moved it.
+          git fetch origin "${GITHUB_REF_NAME}"
+          git checkout -B rollback-${{ steps.bump.outputs.version }} "origin/${GITHUB_REF_NAME}"
+          git revert --no-edit "${{ steps.commit.outputs.sha }}"
+          git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
