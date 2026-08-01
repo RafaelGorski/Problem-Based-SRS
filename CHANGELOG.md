@@ -121,8 +121,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Notation table declares `NFR.{n}` → `NFR.01`, and the shipped demo spec uses `NFR.01`. The
   notation guard added in #63/#66 only rejects *hyphen* IDs, so a wrong-arity dotted ID
   walked straight through.
+- **The agent shipped two links that resolved outside the release archive.**
+  `agents/problem-based-srs/AGENT.md` linked its worked examples through
+  `../skills/problem-based-srs/reference/…`, which from `agents/problem-based-srs/` lands in
+  `agents/skills/` — a directory that exists in neither the repository nor the archive. It
+  was wrong in every published `problem-based-srs-vX.Y.zip`. `skills-static.test.mjs` does
+  resolve every relative link, but only under `skills/`, and `evals/` contained no reference
+  to `agents/` at all, so nothing looked at one of the five paths `PACKAGE_INCLUDES` ships.
+- **The agent could not dispatch `/live`.** `SKILL.md` routes nine actions, `AGENT.md`
+  advertised eight: the canvas entry point — the one #69 keeps asking about — was missing
+  from the table the plugin archive ships. It now names `/live`, which is the command that
+  actually reaches the canvas: `live` is not an argument the orchestrator accepts, and a
+  guard now rejects any `/problem-based-srs <action>` the agent claims that `SKILL.md`'s
+  Available Actions table does not list.
+- **The README and the landing page told two different origin stories.** The site opens on
+  `CP.01 · Scattered Customer Information`, quoted from the shipped `.spec/crm-system.json`;
+  the README opened on an invented reporting-dashboard problem and reused **`CP.01` for
+  different content** — so a reader who met both surfaces in sequence, then installed and ran
+  `/live`, saw a third thing. The README now walks the same `CP.01 → CN.01.1 → FR.01.1.1`
+  chain, and `landing-proof.test.mjs` holds it to the spec the way it already held the
+  landing page: renaming a problem in `.spec/crm-system.json` now fails both surfaces instead
+  of neither.
+- **A moderate XSS advisory sat in the canvas dev tree** (`jsondiffpatch < 0.7.2`,
+  [GHSA-33vc-wfww-vjfv](https://github.com/advisories/GHSA-33vc-wfww-vjfv)), reachable only
+  as a transitive dependency of `ai@4`. `npm audit fix --force` would have taken `ai` from
+  v4 to v7 — a breaking SDK migration whose only consumers are the provider-gated LLM suites,
+  which cannot be run without API keys, so the fix could not have been verified. Pinned with
+  an `overrides` entry instead: `npm audit` drops from 5 findings (2 moderate) to 4 low, and
+  `generateText`/`tool` still resolve on the v4 API the harness documents. The four remaining
+  low advisories all require that migration and are left for a deliberate change.
 
 ### Added
+
+- **The plugin release archive has an install path, and a guard that opens it**
+  (`evals/tests/plugin-archive-install.test.mjs`, 14 assertions). `problem-based-srs-vX.Y.zip`
+  is the only asset attached to every methodology release, and no surface said what to do
+  with it: the README documented four install paths and none of them was the file on the
+  release page. It is now documented — where to extract it, that the archive brings its own
+  `problem-based-srs/` root so the target is the directory *above* it, and which folder to
+  copy for the skill alone. The guard stages what the packager ships into a temp directory
+  outside the checkout and reads it as an installer would: every relative link must resolve
+  *inside* the archive, the agent must advertise every action `SKILL.md` dispatches, and every
+  path the README quotes must be in the tree. Both the include list and the archive root are
+  read out of `build-plugin.py` and `plugin.json`, and one cross-check runs the real
+  `build-plugin.py package` and requires the staged tree to equal the zip — so a change to the
+  archive's layout fails the documentation assertion with it.
 
 - **Drift guard for the canvas app's agent-facing instructions**
   (`.github/extensions/srs-navigator/tests/app-prompts.test.mjs`, 21 assertions, wired into
