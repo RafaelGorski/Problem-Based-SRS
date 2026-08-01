@@ -9,12 +9,13 @@ name: Release Canvas Extension
 #   3. Download the latest methodology skills from the upstream Problem-Based-SRS
 #      repo (the extension's "dependencies").
 #   4. Bump an incremental project version (patch by default) — locally only.
-#   5. Package the extension into .tar.gz / .zip archives.
-#   6. Verify the archive contract, and read the archive that was actually built.
-#   7. Commit the version bump + refreshed skills and push them.
-#   8. Create the GitHub Release, which creates the tag, with those archives attached.
+#   5. Confirm the bumped tag belongs to this train and no other.
+#   6. Package the extension into .tar.gz / .zip archives.
+#   7. Verify the archive contract, and read the archive that was actually built.
+#   8. Commit the version bump + refreshed skills and push them.
+#   9. Create the GitHub Release, which creates the tag, with those archives attached.
 #
-# Order matters, and steps 5–6 sit where they do on purpose. This workflow used to push
+# Order matters, and steps 5–7 sit where they do on purpose. This workflow used to push
 # the bump and the tag before it packaged anything, so a failure in the packager or the
 # publish step left `main` advertising a version, a tag on origin, and no release — the
 # drift monitor's `canvas-release-missing`. It was also unrecoverable: bump-version.mjs
@@ -95,6 +96,20 @@ jobs:
       - name: Bump project version
         id: bump
         run: node scripts/bump-version.mjs --part "${{ inputs.part }}"
+
+      - name: Confirm this tag is the canvas train's, and only the canvas train's
+        # Both products publish from one repository into one tag namespace, and they cannot be
+        # told apart by tag shape (v2.4.1 is a plugin release, v1.1.0 a canvas one), so
+        # create-release.yml classifies every pushed tag before it publishes. That gate alone is
+        # one-sided: this workflow is where a collision starts. The tag is created here, as part
+        # of gh release create, so the canvas job has to refuse the wrong train before anything
+        # leaves the runner.
+        #
+        # Placed after the bump on purpose: the classifier reads VERSION and the extension
+        # package.json off the disk, and bump-version.mjs has only just written the version this
+        # release will publish. Run above the bump it would report `unknown` for every release
+        # this workflow ever cuts.
+        run: node scripts/release-train.mjs --tag "${{ steps.bump.outputs.tag }}" --expect canvas
 
       - name: Package the extension
         run: node scripts/package-extension.mjs --version "${{ steps.bump.outputs.version }}"

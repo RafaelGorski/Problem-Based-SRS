@@ -20,7 +20,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -28,6 +30,7 @@ import {
   canvasReleaseTag,
   readPluginVersion,
   readCanvasVersions,
+  expectationFailure,
 } from "../../scripts/release-train.mjs";
 import { pluginReleaseTag, summarize, repoSkillNames } from "../../scripts/check-distribution.mjs";
 import { nextVersion } from "../../scripts/bump-version.mjs";
@@ -42,12 +45,84 @@ const EXT_PKG = JSON.parse(read(".github/extensions/srs-navigator/package.json")
 const CREATE_RELEASE = read(".github/workflows/create-release.yml");
 const RELEASE_CANVAS = read(".github/workflows/release-canvas.yml");
 const BUMP = read("scripts/bump-version.mjs");
+const CLI = path.join(repoRoot, "scripts", "release-train.mjs");
 
 /** The classification inputs as they stand in this repository today. */
 const live = () => ({
   pluginVersion: readPluginVersion(repoRoot),
   canvasVersions: readCanvasVersions(repoRoot),
 });
+
+/**
+ * Run the real CLI, and report what a workflow step would see: exit code and output.
+ *
+ * The three environment variables are dropped rather than inherited. `GITHUB_OUTPUT` and
+ * `GITHUB_STEP_SUMMARY` are files the script *appends to*, so leaving them set would have
+ * this suite write `train=` lines into the outputs of whichever CI step is running it;
+ * `GITHUB_REF_NAME` is the CLI's default tag, and inheriting CI's ref would make the
+ * positional/`--tag` assertions pass for the wrong reason.
+ */
+function runCli(args) {
+  const env = { ...process.env };
+  delete env.GITHUB_OUTPUT;
+  delete env.GITHUB_STEP_SUMMARY;
+  delete env.GITHUB_REF_NAME;
+  const res = spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", cwd: repoRoot, env });
+  return { status: res.status, out: `${res.stdout ?? ""}${res.stderr ?? ""}` };
+}
+
+/**
+ * A repository root carrying nothing but the two files the classifier reads, so a release
+ * state can be posed without touching the tracked ones — including states this repository
+ * must never be in, like both trains advertising the same version.
+ */
+function fixtureRoot(t, { plugin, canvas }) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "release-train-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(dir, ".claude-plugin"), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, ".claude-plugin", "plugin.json"),
+    `${JSON.stringify({ name: "problem-based-srs", version: plugin }, null, 2)}\n`,
+  );
+  const ext = path.join(dir, ".github", "extensions", "srs-navigator");
+  fs.mkdirSync(ext, { recursive: true });
+  fs.writeFileSync(
+    path.join(ext, "package.json"),
+    `${JSON.stringify({ name: "srs-navigator", version: canvas }, null, 2)}\n`,
+  );
+  fs.writeFileSync(path.join(dir, "VERSION"), `${canvas}\n`);
+  return dir;
+}
+
+/** Whole-line YAML comments, blanked so prose about `gh release create` cannot be mistaken
+ *  for the step that runs it — while leaving every other offset intact. */
+const withoutComments = (yaml) =>
+  yaml
+    .split("\n")
+    .map((line) => (/^\s*#/.test(line) ? "" : line))
+    .join("\n");
+
+/**
+ * Where the canvas train's preflight sits, relative to the two things that bound it.
+ *
+ * Offsets rather than step names: the gate has to run after `bump-version.mjs` has written
+ * the new version (before that, the tag belongs to no train) and before the first action
+ * that is visible outside the runner. Which step that is depends on the order of the
+ * pipeline, and that order is under active change — so it is derived, not named.
+ */
+function canvasGateOrder(yaml) {
+  const body = withoutComments(yaml);
+  const at = (re) => {
+    const m = re.exec(body);
+    return m ? m.index : Infinity;
+  };
+  const leaves = [/git push/, /git tag\b/, /gh release create/].map(at);
+  return {
+    bump: at(/scripts\/bump-version\.mjs/),
+    gate: at(/scripts\/release-train\.mjs/),
+    leavesRunner: Math.min(...leaves),
+  };
+}
 
 describe("release trains — a pushed tag belongs to exactly one pipeline", () => {
   it("claims the tag the plugin pipeline creates for the current manifest", () => {
@@ -128,12 +203,12 @@ describe("release trains — the rules are read from the pipelines, not restated
     assert.equal(canvasReleaseTag("not-a-version"), null);
   });
 
-  it("release-canvas.yml still pushes that tag itself", () => {
+  it("release-canvas.yml still creates the release at bump-version's tag", () => {
     assert.match(
       RELEASE_CANVAS,
-      /git tag -a "\$\{\{ steps\.bump\.outputs\.tag \}\}"/,
-      "if the canvas train stops tagging from bump-version's output, the classifier's canvas " +
-        "side has to move with it",
+      /gh release create "\$\{\{ steps\.bump\.outputs\.tag \}\}"/,
+      "if the canvas train stops publishing the tag bump-version.mjs produced, the classifier's " +
+        "canvas side has to move with it",
     );
   });
 
@@ -189,6 +264,201 @@ describe("release trains — the rules are read from the pipelines, not restated
       /VERSION.{0,80}owned by .{0,40}release-canvas\.yml/s,
       "and that hand-bumping VERSION in a feature branch skips the number instead of shipping it",
     );
+    assert.match(
+      runbook,
+      /--expect canvas/,
+      "and that the canvas train checks its own tag before it publishes",
+    );
+  });
+});
+
+describe("release trains — both pipelines enforce exclusive ownership", () => {
+  // #83 gated create-release.yml only, and that is the workflow the collision *arrives* at.
+  // The canvas train is where it starts: release-canvas.yml computes the version and creates
+  // the release, so a tag both trains claim is already on origin by the time the plugin one
+  // sees it. Failing classification downstream does not unpublish a tag, and does not stop the
+  // canvas job from publishing over a release the plugin train owns.
+  it("release-canvas.yml asks which train the tag it is about to publish belongs to", () => {
+    assert.match(
+      RELEASE_CANVAS,
+      /scripts\/release-train\.mjs/,
+      "the canvas release must classify its own tag; gating only the plugin workflow leaves " +
+        "the pipeline that creates the tag ungated",
+    );
+  });
+
+  it("and refuses to continue unless the answer is its own train", () => {
+    assert.match(
+      RELEASE_CANVAS,
+      /--expect\s+canvas/,
+      "classifying without acting on the verdict is a log line, not a gate: release-train.mjs " +
+        "exits 0 for `plugin` too, so the canvas job would sail past a tag it must not publish",
+    );
+  });
+
+  it("classifies the tag bump-version.mjs just produced, not one written by hand", () => {
+    assert.match(
+      RELEASE_CANVAS,
+      /release-train\.mjs[^\n]*steps\.bump\.outputs\.tag/,
+      "the gate must read the same tag the release will publish",
+    );
+  });
+
+  it("runs after the bump, because before it the tag belongs to nobody", () => {
+    const order = canvasGateOrder(RELEASE_CANVAS);
+    assert.notEqual(order.bump, Infinity, "the workflow still bumps the version");
+    assert.notEqual(order.gate, Infinity, "the workflow still classifies the tag");
+    assert.ok(
+      order.gate > order.bump,
+      "the classifier reads VERSION and the extension package.json off the disk; run before " +
+        "the bump it would report `unknown` for every release this workflow ever cuts",
+    );
+  });
+
+  it("runs before anything leaves the runner", () => {
+    const order = canvasGateOrder(RELEASE_CANVAS);
+    assert.notEqual(order.leavesRunner, Infinity, "the workflow still pushes or publishes");
+    assert.ok(
+      order.gate < order.leavesRunner,
+      "a gate that runs after the release command cannot prevent the release; the tag already " +
+        "exists and create-release.yml has already fired against it",
+    );
+  });
+
+  it("gates the two workflows differently, on purpose", () => {
+    assert.match(CREATE_RELEASE, /needs\.train\.outputs\.train\s*==\s*'plugin'/, "plugin: skip");
+    assert.doesNotMatch(
+      CREATE_RELEASE,
+      /--expect/,
+      "the plugin workflow must not hard-fail on the canvas train's tags",
+    );
+    assert.doesNotMatch(
+      RELEASE_CANVAS,
+      /needs\.train\.outputs/,
+      "the canvas workflow has one job and must stop, not skip a downstream one",
+    );
+  });
+
+  it("the runbook explains the asymmetry, so it survives the next maintainer", () => {
+    const runbook = read(".github/copilot-instructions.md");
+    assert.match(
+      runbook,
+      /--expect canvas/,
+      "the release process section must say the canvas train checks its own tag too",
+    );
+    assert.match(
+      runbook,
+      /both trains|either train|exclusive/i,
+      "and why one workflow skips where the other fails",
+    );
+  });
+});
+
+describe("release trains — the classifier can be told which train it must be", () => {
+  it("passes silently when the verdict is the expected train", () => {
+    assert.equal(expectationFailure({ train: "canvas", tag: "v1.1.1" }, "canvas"), null);
+    assert.equal(expectationFailure({ train: "plugin", tag: "v2.6" }, "plugin"), null);
+    assert.equal(expectationFailure({ train: "canvas", tag: "v1.1.1" }, null), null, "opt-in");
+  });
+
+  it("names both trains when the verdict is the other one", () => {
+    const why = expectationFailure({ train: "plugin", tag: "v2.6" }, "canvas");
+    assert.ok(why, "a plugin tag must not pass a canvas-train gate");
+    assert.match(why, /v2\.6/, "the tag");
+    assert.match(why, /plugin/, "what it actually is");
+    assert.match(why, /canvas/, "what the caller required");
+  });
+
+  it("rejects an expectation that is not a train", () => {
+    assert.ok(expectationFailure({ train: "canvas", tag: "v1.1.1" }, "cavnas"), "typo, not a train");
+  });
+
+  it("refuses the plugin's tag when the canvas train asks — the gap #83 left", (t) => {
+    const root = fixtureRoot(t, { plugin: "1.1.0", canvas: "1.1.0" });
+    const verdict = runCli(["--tag", "v1.1.0", "--root", root]);
+    assert.match(verdict.out, /train=ambiguous/, "the classifier already saw this");
+    assert.equal(
+      runCli(["--tag", "v1.1.0", "--expect", "canvas", "--root", root]).status,
+      1,
+      "and now the canvas train acts on it",
+    );
+  });
+
+  it("refuses a tag that belongs to the other train", (t) => {
+    const root = fixtureRoot(t, { plugin: "2.6.0", canvas: "1.1.0" });
+    assert.equal(runCli(["--tag", "v1.1.0", "--expect", "canvas", "--root", root]).status, 0);
+    const wrong = runCli(["--tag", "v2.6", "--expect", "canvas", "--root", root]);
+    assert.equal(wrong.status, 1, wrong.out);
+    assert.match(wrong.out, /::error::/, "and says so in a form Actions surfaces");
+  });
+
+  it("still refuses a tag no train claims", (t) => {
+    const root = fixtureRoot(t, { plugin: "2.6.0", canvas: "1.1.0" });
+    assert.equal(runCli(["--tag", "v9.9.9", "--expect", "canvas", "--root", root]).status, 1);
+  });
+
+  it("is the canvas train's tag only after the bump is written", (t) => {
+    const next = nextVersion(EXT_PKG.version, "patch", []);
+    const tag = `v${next}`;
+
+    const before = runCli([
+      "--tag",
+      tag,
+      "--root",
+      fixtureRoot(t, { plugin: MANIFEST.version, canvas: EXT_PKG.version }),
+    ]);
+    assert.match(before.out, /train=unknown/, `${tag} is claimed by nobody before the bump`);
+    assert.equal(before.status, 1);
+
+    const after = runCli([
+      "--tag",
+      tag,
+      "--expect",
+      "canvas",
+      "--root",
+      fixtureRoot(t, { plugin: MANIFEST.version, canvas: next }),
+    ]);
+    assert.equal(after.status, 0, after.out);
+    assert.match(after.out, /train=canvas/);
+  });
+
+  it("that bumped version is the one bump-version.mjs really produces", () => {
+    const tags = spawnSync("git", ["tag", "--list"], { encoding: "utf8", cwd: repoRoot });
+    const taken = (tags.stdout ?? "").split(/\r?\n/).map((t) => t.trim()).filter(Boolean);
+    const dry = spawnSync(process.execPath, [path.join(repoRoot, "scripts/bump-version.mjs"), "--dry-run"], {
+      encoding: "utf8",
+      cwd: repoRoot,
+      env: { ...process.env, GITHUB_OUTPUT: "", GITHUB_STEP_SUMMARY: "" },
+    });
+    assert.equal(dry.status, 0, dry.stderr);
+    const predicted = /Next version:\s+(\d+\.\d+\.\d+)/.exec(dry.stdout);
+    assert.ok(predicted, `could not read the next version from:\n${dry.stdout}`);
+    assert.equal(predicted[1], nextVersion(EXT_PKG.version, "patch", taken));
+    assert.equal(read("VERSION").trim(), VERSION_FILE, "--dry-run wrote nothing");
+  });
+});
+
+describe("release trains — the CLI does not silently ignore what it was given", () => {
+  it("accepts the tag as a bare argument, the form the runbook and issues use", () => {
+    const positional = runCli(["v2.6"]);
+    assert.equal(positional.status, 0, positional.out);
+    assert.match(positional.out, /train=plugin/);
+    const explicit = runCli(["--tag", "v2.6"]);
+    assert.deepEqual(
+      [positional.status, /train=(\w+)/.exec(positional.out)[1]],
+      [explicit.status, /train=(\w+)/.exec(explicit.out)[1]],
+      "both forms must answer the same",
+    );
+  });
+
+  it("fails on an option it does not know instead of dropping it", () => {
+    const typo = runCli(["--tagg", "v2.6"]);
+    assert.notEqual(typo.status, 0, "a misspelt gate flag must not pass as an ungated run");
+    assert.match(typo.out, /--tagg/, "and must name the option it refused");
+  });
+
+  it("fails on a second bare argument rather than picking one", () => {
+    assert.notEqual(runCli(["v2.6", "v1.1.0"]).status, 0);
   });
 });
 
@@ -303,6 +573,55 @@ describe("negative canaries", () => {
       ungated,
       /needs\.train\.outputs\.train\s*==\s*'plugin'/,
       "removing the gate must be detectable — that was the live defect",
+    );
+  });
+
+  it("a canvas workflow with the preflight deleted fails the wiring assertion", () => {
+    const ungated = RELEASE_CANVAS.replace(/^.*scripts\/release-train\.mjs.*$/m, "");
+    assert.notEqual(ungated, RELEASE_CANVAS, "the mutation must actually remove the preflight");
+    assert.doesNotMatch(ungated, /scripts\/release-train\.mjs/, "this is the state #83 shipped");
+    assert.equal(canvasGateOrder(ungated).gate, Infinity, "and the ordering check sees it too");
+  });
+
+  it("a preflight without --expect would let the plugin's tag through", (t) => {
+    const root = fixtureRoot(t, { plugin: "2.6.0", canvas: "1.1.0" });
+    assert.equal(runCli(["--tag", "v2.6", "--root", root]).status, 0, "classified, not gated");
+    assert.equal(runCli(["--tag", "v2.6", "--expect", "canvas", "--root", root]).status, 1);
+  });
+
+  it("a preflight moved below the release command fails the ordering assertion", () => {
+    const gateLine = /^.*scripts\/release-train\.mjs.*$/m.exec(RELEASE_CANVAS)[0];
+    const moved = `${RELEASE_CANVAS.replace(gateLine, "")}\n${gateLine}\n`;
+    const order = canvasGateOrder(moved);
+    assert.ok(
+      order.gate > order.leavesRunner,
+      "the mutation must actually move the gate past the release command",
+    );
+    assert.ok(
+      canvasGateOrder(RELEASE_CANVAS).gate < canvasGateOrder(RELEASE_CANVAS).leavesRunner,
+      "while the tracked workflow keeps it before — a canary that cannot separate the two " +
+        "proves nothing",
+    );
+  });
+
+  it("a preflight moved above the bump fails the ordering assertion", () => {
+    const gateLine = /^.*scripts\/release-train\.mjs.*$/m.exec(RELEASE_CANVAS)[0];
+    const bumpLine = /^.*scripts\/bump-version\.mjs.*$/m.exec(RELEASE_CANVAS)[0];
+    const moved = RELEASE_CANVAS.replace(gateLine, "").replace(bumpLine, `${gateLine}\n${bumpLine}`);
+    const order = canvasGateOrder(moved);
+    assert.ok(order.gate < order.bump, "the mutation must actually move the gate above the bump");
+  });
+
+  it("prose about publishing cannot be mistaken for the step that does it", () => {
+    const commented = RELEASE_CANVAS.replace(
+      /^jobs:/m,
+      "# gh release create and git push, discussed before any step runs\njobs:",
+    );
+    assert.notEqual(commented, RELEASE_CANVAS, "the mutation must actually add the comment");
+    assert.deepEqual(
+      canvasGateOrder(commented).gate < canvasGateOrder(commented).leavesRunner,
+      canvasGateOrder(RELEASE_CANVAS).gate < canvasGateOrder(RELEASE_CANVAS).leavesRunner,
+      "a comment must not change the verdict",
     );
   });
 

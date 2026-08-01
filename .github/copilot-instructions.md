@@ -454,7 +454,7 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 | **Build script** | `scripts/build-plugin.py` | Validates the manifest + skills, extracts CHANGELOG notes, and packages the `dist/<name>-vX.Y.zip` artifact. Runs locally and in CI. |
 | **CI workflow** | `.github/workflows/ci.yml` | On every push/PR to `main`: validates the plugin and uploads the packaged zip as a build artifact. |
 | **Release workflow** | `.github/workflows/create-release.yml` | Builds, validates, packages, and publishes a GitHub Release with the zip attached. |
-| **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), packages archives (`scripts/package-extension.mjs`), verifies the archive contract (`evals/tests/from-archive-install.test.mjs`), and publishes a `vX.Y.Z` GitHub Release that creates its own tag. |
+| **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), confirms the bumped tag is this train's (`scripts/release-train.mjs --expect canvas`), packages archives (`scripts/package-extension.mjs`), verifies the archive contract (`evals/tests/from-archive-install.test.mjs`), and publishes a `vX.Y.Z` GitHub Release that creates its own tag. |
 | **Distribution monitor** | `.github/workflows/distribution-drift.yml` → `scripts/check-distribution.mjs` | Weekly (and on demand): compares the surfaces this repository does **not** own — the skills.sh listing and GitHub Releases — against what the repository actually ships. Deliberately outside the PR gate. |
 
 > **Two release pipelines, two tag schemes.** The **plugin** release uses `vX.Y` tags
@@ -473,9 +473,15 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 > matching neither, or both, **fails the run** rather than releasing something arbitrary.
 > Guarded by `evals/tests/release-trains.test.mjs`.
 >
+> **Both trains check the shared tag namespace, and they act on the answer differently — on purpose.** `create-release.yml` fires on every `v*` tag, most of which are not its business, so it *skips* when `release-train.mjs` says the tag belongs to the canvas train. `release-canvas.yml` is dispatched deliberately and is about to publish, so it runs `release-train.mjs --tag <bumped tag> --expect canvas` after `bump-version.mjs` and before anything leaves the runner; if the verdict is not `canvas`, it *fails*. The one state neither may publish is a tag **both trains claim**; either one would put its artifacts on the other's release.
+
 > **`VERSION` is owned by `release-canvas.yml`.** Do not bump it in a feature branch:
 > `bump-version.mjs` *increments* from the version it finds, so a hand-bumped number is never
-> published — it is skipped. `VERSION` and the extension `package.json` must always agree.
+> published — it is skipped. `VERSION` and the extension `package.json` must always agree. To
+> ask which train a tag belongs to, run `node scripts/release-train.mjs --tag v2.6` (the bare
+> form `… v2.6` works too). It answers from the versions **currently on disk**: on a tree
+> advertising canvas `1.1.0`, `v1.1.0` is `canvas` and `v1.1.1` is `unknown` until the release
+> workflow bumps it.
 
 > **The canvas train never pushes a tag by hand; the plugin train always does.** This is a
 > real difference, not an inconsistency. `release-canvas.yml` is dispatch-only, so it

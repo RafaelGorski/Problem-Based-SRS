@@ -24,10 +24,22 @@
  * Usage (create-release.yml):
  *   node scripts/release-train.mjs --tag v2.6
  *
+ * Usage (release-canvas.yml), where the answer must be one particular train:
+ *   node scripts/release-train.mjs --tag v1.1.1 --expect canvas
+ *
  * Prints the verdict, appends `train=` and `reason=` to $GITHUB_OUTPUT when set, and exits
  * non-zero when the tag belongs to no train or to both — a tag nobody owns is a mistake worth
  * stopping for, and one both trains claim would have the plugin pipeline publish onto a
  * release the canvas job is about to create.
+ *
+ * `--expect` is what makes the gate bilateral. Gating the plugin pipeline alone leaves the
+ * collision unguarded at the end that causes it: release-canvas.yml bumps the version and then
+ * creates the tag as part of `gh release create`, so by the time create-release.yml classifies
+ * anything the tag already exists. The canvas job therefore asserts the verdict is its own
+ * train before anything leaves the runner. The two pipelines act on the verdict differently on
+ * purpose: create-release.yml fires on every `v*` tag, most of which are not its business, so
+ * it *skips*; release-canvas.yml was dispatched deliberately and is about to publish, so it
+ * *fails*.
  */
 
 import fs from "node:fs";
@@ -38,6 +50,9 @@ import { pluginReleaseTag } from "./check-distribution.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..");
+
+/** The trains that publish from this repository, and the only values `--expect` accepts. */
+export const TRAINS = ["plugin", "canvas"];
 
 /**
  * The tag release-canvas.yml publishes a canvas version at.
@@ -135,17 +150,66 @@ export function tagTrain({ tag, pluginVersion, canvasVersions = [] } = {}) {
   };
 }
 
+/**
+ * Why a verdict does not satisfy the train the caller required, or null when it does.
+ *
+ * Expressed here rather than as a shell comparison in YAML for the same reason `tagTrain`
+ * lives here: a workflow that greps stdout is a second copy of the rule, and the copy is the
+ * one that rots.
+ *
+ * @param {{train:string, tag?:string, reason?:string}} verdict
+ * @param {string|null|undefined} expected  omitted when the caller only wants the verdict
+ * @returns {string|null}
+ */
+export function expectationFailure(verdict, expected) {
+  if (expected === null || expected === undefined || expected === "") return null;
+  if (!TRAINS.includes(expected)) {
+    return `--expect must name a release train (${TRAINS.join(", ")}); got "${expected}".`;
+  }
+  if (verdict.train === expected) return null;
+  const tag = verdict.tag || "(no tag)";
+  return (
+    `${tag} is not the ${expected} train's to publish: it classifies as ${verdict.train}. ` +
+    `${verdict.reason ?? ""} Publishing it here would put this train's artifacts on the other ` +
+    `train's release.`
+  ).trim();
+}
+
 function parseArgs(argv) {
-  const out = { tag: process.env.GITHUB_REF_NAME ?? "", root: REPO_ROOT };
+  const out = { tag: process.env.GITHUB_REF_NAME ?? "", root: REPO_ROOT, expect: null };
+  const needsValue = (flag, value) => {
+    if (value === undefined) throw new Error(`${flag} needs a value.`);
+    return value;
+  };
+  let positional = 0;
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--tag") out.tag = argv[++i];
-    else if (argv[i] === "--root") out.root = argv[++i];
+    const arg = argv[i];
+    if (arg === "--tag") out.tag = needsValue(arg, argv[++i]);
+    else if (arg === "--root") out.root = needsValue(arg, argv[++i]);
+    else if (arg === "--expect") out.expect = needsValue(arg, argv[++i]);
+    else if (arg.startsWith("-")) {
+      throw new Error(`Unknown option "${arg}".`);
+    } else if (positional++ === 0) {
+      out.tag = arg;
+    } else {
+      throw new Error(`Unexpected argument "${arg}" — only one tag can be classified.`);
+    }
   }
   return out;
 }
 
 function main(argv) {
-  const { tag, root } = parseArgs(argv);
+  let args;
+  try {
+    args = parseArgs(argv);
+  } catch (err) {
+    console.error(`::error::${err.message}`);
+    console.error(
+      "Usage: node scripts/release-train.mjs [<tag>|--tag <tag>] [--expect plugin|canvas] [--root <dir>]",
+    );
+    return 2;
+  }
+  const { tag, root, expect } = args;
   const verdict = tagTrain({
     tag,
     pluginVersion: readPluginVersion(root),
@@ -168,6 +232,11 @@ function main(argv) {
   }
   if (verdict.train === "unknown" || verdict.train === "ambiguous") {
     console.error(`::error::${verdict.reason}`);
+    return 1;
+  }
+  const unmet = expectationFailure(verdict, expect);
+  if (unmet) {
+    console.error(`::error::${unmet}`);
     return 1;
   }
   return 0;
