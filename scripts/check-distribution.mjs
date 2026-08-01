@@ -461,14 +461,22 @@ export function danglingTagLinks(links = [], publishedTags = [], { repo = REPO }
 }
 
 /**
- * Dangling links for versions the release pipeline can no longer publish at all.
+ * Dangling links for versions `main` can no longer publish.
  *
  * `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag
  * against `.claude-plugin/plugin.json` and fails with `version mismatch` for anything else.
  * The manifest version is therefore the *only* version the current tree can release — so a
- * changelog link for a version the manifest has already passed names a tag that will never
- * exist. It is not a release waiting to be cut, and telling a maintainer to cut it produces
- * a failed workflow run rather than a release.
+ * changelog link for a version the manifest has already passed is not a release waiting to
+ * be cut, and telling a maintainer to cut it produces a failed workflow run rather than a
+ * release.
+ *
+ * It is not impossible to publish, and this finding must not say that it is: `checkout@v4`
+ * restores the *tagged commit*, so tagging the older commit whose manifest still read that
+ * version would build. What it would publish is the objection — a tree and release notes
+ * that predate most of what the section documents now, because the section kept growing
+ * after that commit. Unreachable from `main`, misleading from anywhere else. A monitor that
+ * overstates its case is one a maintainer learns to discount, which is the failure this
+ * whole checker exists to prevent.
  *
  * That is not hypothetical: 2.4.1 → 2.5.0 → 2.6.0 shipped with no `v2.5` in between, which
  * also means `extract_notes()` — one section, from the matching heading to the next — would
@@ -725,7 +733,7 @@ export function summarize({
   // and cutting v2.5 fails validation against a manifest that reads 2.6.0.
   //
   // Stranded is checked first because it is the deeper answer: correcting a stranded link's
-  // tag shape still leaves it pointing at a release nobody can publish.
+  // tag shape still leaves it pointing at a release `main` cannot cut.
   const stranded = strandedReleaseLinks(dangling, manifestVersion);
   const unpublishable = dangling.filter((l) => {
     if (stranded.includes(l)) return false;
@@ -739,17 +747,20 @@ export function summarize({
     findings.push({
       id: "stranded-release-link",
       severity: "error",
-      title: "Published links name versions the pipeline can no longer release",
+      title: "Published links name versions `main` can no longer release",
       detail: [
         ...stranded.map(
           (l) =>
             `${l.file}:${l.line}  [${l.label}] links ${l.tag}, but the manifest is already ` +
             `at ${manifestVersion} — \`build-plugin.py --expected-version ${l.label}\` ` +
-            `fails on a version mismatch, so that tag can never be created`,
+            `fails on a version mismatch, so that tag is no longer publishable from \`main\``,
         ),
-        `${manifestVersion} is the only version this tree can publish. Fold each section ` +
+        `Tagging the older commit whose manifest still read that version would build — ` +
+          `create-release.yml checks out the tagged commit, not \`main\` — but it would ` +
+          `publish a tree and notes that predate what the section documents now.`,
+        `${manifestVersion} is the only version \`main\` can publish. Fold each section ` +
           `into ## [${manifestVersion}] and drop the link: build-plugin.py extracts one ` +
-          `section, so those notes reach no release otherwise.`,
+          `section, so those notes reach no release from \`main\` otherwise.`,
       ],
     });
   }

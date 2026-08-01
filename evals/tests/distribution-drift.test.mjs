@@ -300,8 +300,9 @@ describe("release links the repository publishes", () => {
       !tags.includes("v2.5"),
       "v2.5 must *not* be here. It was dangling too, but not as a release to cut: the " +
         "manifest had already moved to 2.6.0, so `build-plugin.py --expected-version 2.5` " +
-        "fails and no such tag can ever exist. Its section was folded into 2.6.0 rather " +
-        "than left advertising a permanent 404 — see the stranded-link suite below.",
+        "fails and `main` can no longer publish that tag. Its section was folded into " +
+        "2.6.0 rather than left advertising a release nobody had cut — see the " +
+        "stranded-link suite below.",
     );
     assert.ok(
       !tags.includes("v2.4.1"),
@@ -648,8 +649,10 @@ describe("a dangling link that cutting the release would not fix", () => {
 // The third kind of dangling link, and the one that kept #69's last box open. `v2.5` was
 // never tagged, and the manifest then moved to 2.6.0 — so create-release.yml, which runs
 // `build-plugin.py build --version <tag>`, now fails that tag on `version mismatch`. The
-// link cannot resolve, ever, and "cut the missing release" is an instruction that produces
-// a red workflow run instead of a release.
+// link has no release behind it and "cut the missing release" is an instruction that
+// produces a red workflow run instead of a release. (Not that the tag is impossible: the
+// commit that still read 2.5.0 would build it, and would publish notes that predate the
+// section. stranded-release-claim.test.mjs holds the finding's wording to that distinction.)
 describe("a dangling link the manifest has already moved past", () => {
   const changelog = (text) => advertisedTagLinks([{ file: "CHANGELOG.md", text }]);
   const link = (version, tag) =>
@@ -685,7 +688,7 @@ describe("a dangling link the manifest has already moved past", () => {
     const finding = summary.findings.find((f) => f.id === "stranded-release-link");
     assert.ok(
       finding,
-      "a link the pipeline can never publish is not the same job as one waiting for a " +
+      "a link `main` can no longer publish is not the same job as one waiting for a " +
         "tag push, and must not be filed under an instruction that cannot work",
     );
     assert.equal(finding.severity, "error");
@@ -708,8 +711,8 @@ describe("a dangling link the manifest has already moved past", () => {
 
   it("wins over the wrong-tag-shape finding, which would give the wrong fix", () => {
     // `[2.5.0]: …/tag/v2.5.0` is both malformed *and* stranded. Reporting it as a shape
-    // problem tells the maintainer to rewrite it as v2.5 — still a 404, because no
-    // pipeline will ever create that tag either.
+    // problem tells the maintainer to rewrite it as v2.5 — still a 404, because `main`
+    // cannot cut that tag either.
     const summary = summaryFor(changelog(link("2.5.0", "v2.5.0")));
     assert.ok(
       summary.findings.some((f) => f.id === "stranded-release-link"),
@@ -783,8 +786,8 @@ describe("a dangling link the manifest has already moved past", () => {
     assert.equal(
       summary.findings.filter((f) => f.id === "stranded-release-link").length,
       0,
-      "a section left behind by a version bump can never be published and its notes " +
-        "never reach a release. Fold it into the version that will carry it.",
+      "a section left behind by a version bump is no longer publishable from `main`, and " +
+        "its notes reach no release cut there. Fold it into the version that will carry it.",
     );
   });
 });

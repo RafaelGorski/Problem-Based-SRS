@@ -176,13 +176,16 @@ describe("release hygiene — the manifest is the source of truth", () => {
   });
 });
 
-// The manifest version is the *only* version this tree can publish: create-release.yml runs
+// The manifest version is the *only* version `main` can publish: create-release.yml runs
 // `build-plugin.py build --version <tag>`, which fails on `version mismatch` for anything
-// else. So a version section left behind by a bump is stranded — its tag can never be
-// created, its link is a permanent 404, and its notes are never published, because
-// extract_notes() captures exactly one section. That is not hypothetical: 2.4.1 → 2.5.0 →
-// 2.6.0 shipped with no v2.5 in between, leaving 76 lines of release notes that the release
-// carrying those changes would not have mentioned.
+// else. So a version section left behind by a bump is stranded — no tag, a link with no
+// release behind it, and notes that reach no release cut from `main`, because
+// extract_notes() captures exactly one section. (Tagging the older commit that still carried
+// that manifest would build — checkout@v4 restores the tagged commit — but would publish a
+// tree and notes that predate the section. Unreachable from `main`, misleading from anywhere
+// else; stranded-release-claim.test.mjs holds that wording to what history supports.) That
+// is not hypothetical: 2.4.1 → 2.5.0 → 2.6.0 shipped with no v2.5 in between, leaving 76
+// lines of release notes that the release carrying those changes would not have mentioned.
 describe("release hygiene — a bump must not strand the release before it", () => {
   const sectionsBelowManifest = () =>
     changelogSections(CHANGELOG).filter(
@@ -207,12 +210,12 @@ describe("release hygiene — a bump must not strand the release before it", () 
       assert.ok(
         tags.includes(link.tag),
         `## [${section.version}] links ${link.tag}, which is not a tag in this repository. ` +
-          `The manifest is already at ${manifest.version}, so the pipeline can no longer ` +
+          `The manifest is already at ${manifest.version}, so \`main\` can no longer ` +
           `publish ${section.version} — \`build-plugin.py --expected-version ` +
           `${section.version}\` fails on a version mismatch. Fold the section into ` +
           `## [${manifest.version}], the release that will actually deliver it, and drop ` +
-          `the link — otherwise its notes are never published and ${link.tag} is a ` +
-          `permanent 404.`,
+          `the link — otherwise its notes reach no release cut from \`main\` and ` +
+          `${link.tag} has no release behind it.`,
       );
     }
   });
@@ -458,7 +461,8 @@ describe("the tag rule is derived from the pipeline, not restated", () => {
       wf,
       /VERSION:\s*\$\{\{\s*steps\.build\.outputs\.version\s*\}\}/,
       "VERSION comes from build-plugin.py's output, i.e. the *normalized* version — not " +
-        "the raw tag or input. That indirection is why a v2.6.0 link can never resolve.",
+        "the raw tag or input. That indirection is why a v2.6.0 link does not resolve: the " +
+        "release is published at v2.6.",
     );
   });
 

@@ -30,6 +30,14 @@ jobs:
         with:
           node-version: "20"
 
+      # release-hygiene.test.mjs and stranded-release-claim.test.mjs cross-check
+      # build-plugin.py by *executing* it rather than restating its rules. Without an
+      # interpreter both legs skip, and a leg that always skips proves nothing.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       # No `npm ci` needed: the deterministic suites import only node:test /
       # node:assert. Playwright-driven specs are excluded from `npm test`.
       - name: Canvas extension tests
