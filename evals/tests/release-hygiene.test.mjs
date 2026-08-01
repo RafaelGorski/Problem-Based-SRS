@@ -63,6 +63,21 @@ export function changelogTagLinks(md) {
   }));
 }
 
+/**
+ * The tags this checkout can see, or null when it can see none.
+ *
+ * A checkout with no tags at all is not evidence that a tag is missing — `actions/checkout`
+ * fetches none by default — so the caller skips rather than reporting a repository-wide
+ * failure. `ci.yml` is asserted below to ask for them, so the skip cannot quietly become
+ * permanent.
+ */
+export function gitTags(root = repoRoot) {
+  const res = spawnSync("git", ["tag", "--list"], { cwd: root, encoding: "utf8" });
+  if (res.status !== 0) return null;
+  const tags = res.stdout.split(/\r?\n/).map((t) => t.trim()).filter(Boolean);
+  return tags.length ? tags : null;
+}
+
 describe("release hygiene — the manifest is the source of truth", () => {
   it("declares a three-part semantic version", () => {
     assert.match(
@@ -158,6 +173,73 @@ describe("release hygiene — the manifest is the source of truth", () => {
           `from the same section heading`,
       );
     }
+  });
+});
+
+// The manifest version is the *only* version this tree can publish: create-release.yml runs
+// `build-plugin.py build --version <tag>`, which fails on `version mismatch` for anything
+// else. So a version section left behind by a bump is stranded — its tag can never be
+// created, its link is a permanent 404, and its notes are never published, because
+// extract_notes() captures exactly one section. That is not hypothetical: 2.4.1 → 2.5.0 →
+// 2.6.0 shipped with no v2.5 in between, leaving 76 lines of release notes that the release
+// carrying those changes would not have mentioned.
+describe("release hygiene — a bump must not strand the release before it", () => {
+  const sectionsBelowManifest = () =>
+    changelogSections(CHANGELOG).filter(
+      (s) => compareVersions(s.version, manifest.version) < 0,
+    );
+
+  it("every changelog section below the manifest version was actually released", (t) => {
+    const tags = gitTags();
+    if (!tags) {
+      t.skip("this checkout carries no tags, so it has no evidence either way");
+      return;
+    }
+    const links = changelogTagLinks(CHANGELOG);
+    const older = sectionsBelowManifest();
+    assert.ok(
+      older.length > 0,
+      "the scan must actually find historical sections, or it asserts nothing",
+    );
+    for (const section of older) {
+      const link = links.find((l) => l.version === section.version);
+      assert.ok(link, `## [${section.version}] has no link definition to check`);
+      assert.ok(
+        tags.includes(link.tag),
+        `## [${section.version}] links ${link.tag}, which is not a tag in this repository. ` +
+          `The manifest is already at ${manifest.version}, so the pipeline can no longer ` +
+          `publish ${section.version} — \`build-plugin.py --expected-version ` +
+          `${section.version}\` fails on a version mismatch. Fold the section into ` +
+          `## [${manifest.version}], the release that will actually deliver it, and drop ` +
+          `the link — otherwise its notes are never published and ${link.tag} is a ` +
+          `permanent 404.`,
+      );
+    }
+  });
+
+  it("exempts the manifest version, which is the release not yet cut", () => {
+    const sections = changelogSections(CHANGELOG);
+    assert.ok(
+      !sectionsBelowManifest().some((s) => compareVersions(s.version, manifest.version) === 0),
+      "the top section must be excluded, or the guard would demand a tag for the release " +
+        "it is asking the maintainer to create",
+    );
+    assert.equal(
+      sections.length - sectionsBelowManifest().length,
+      1,
+      "exactly one section — the manifest's — is exempt",
+    );
+  });
+
+  it("the eval job fetches tags, so the guard has evidence in CI", () => {
+    const ci = read(".github/workflows/ci.yml");
+    const job = ci.slice(ci.indexOf("Test (canvas + skill evals)"), ci.indexOf("Canvas e2e"));
+    assert.match(
+      job,
+      /fetch-tags:\s*true|fetch-depth:\s*0/,
+      "actions/checkout fetches no tags by default, so the orphan-section guard would " +
+        "skip on every CI run and guard nothing",
+    );
   });
 });
 
@@ -294,6 +376,33 @@ describe("negative canaries", () => {
       changelogTagLinks("[Unreleased]: https://github.com/o/r/releases"),
       [],
       "the /releases index is not a per-tag link and resolves regardless",
+    );
+  });
+
+  it("a stranded section — bumped over, never tagged — fails the orphan guard", (t) => {
+    const tags = gitTags();
+    if (!tags) {
+      t.skip("this checkout carries no tags, so the canary has nothing to compare against");
+      return;
+    }
+    // Reintroduce exactly the shape the repository shipped: a section for a version below
+    // the manifest, linking the tag the pipeline would have created for it, with no such
+    // tag anywhere. If the predicate tolerates this, it would have tolerated the live defect.
+    const stranded = "2.4.999";
+    assert.ok(
+      compareVersions(stranded, manifest.version) < 0,
+      "the fabricated version must sit below the manifest, where the guard looks",
+    );
+    const link = `[${stranded}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${pluginReleaseTag(stranded)}`;
+    const injected = `## [${stranded}] - 2026-01-01\n\n### Added\n\n- x\n\n${link}\n\n`;
+    const mutated = CHANGELOG.replace("## [2.4.1]", `${injected}## [2.4.1]`);
+    const offender = changelogSections(mutated).find((s) => s.version === stranded);
+    assert.ok(offender, "the mutation must actually introduce a section below the manifest");
+    const offenderLink = changelogTagLinks(mutated).find((l) => l.version === stranded);
+    assert.ok(offenderLink, "and the section must carry a link for the guard to resolve");
+    assert.ok(
+      !tags.includes(offenderLink.tag),
+      `${offenderLink.tag} must be absent from this repository, or the canary proves nothing`,
     );
   });
 

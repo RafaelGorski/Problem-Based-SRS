@@ -17,6 +17,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # release-hygiene.test.mjs asks whether every changelog section below the
+          # manifest version has a tag behind it. actions/checkout fetches none by
+          # default, and a tagless checkout is no evidence — the guard would skip on
+          # every CI run and guard nothing.
+          fetch-tags: true
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
