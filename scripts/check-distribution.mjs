@@ -547,6 +547,13 @@ export function tagsWithoutRelease({
  * because `bump-version.mjs` keeps bumping past any version whose tag exists, so leaving the
  * tag makes the stranded version unreachable forever — its tag has to go first.
  *
+ * The plugin dispatch carries `--ref <tag>` and that is not decoration. `create-release.yml`
+ * checks out with `actions/checkout@v4` and no `ref:`, so it packages whatever the dispatched
+ * ref holds — and `gh workflow run` defaults to the repository's default branch. Recovering
+ * without `--ref` therefore attaches bytes built from `main` as it is *now* to a tag that
+ * names a different commit, which is a worse outcome than the failed run being recovered
+ * from: the release exists, looks correct, and does not match its own tag.
+ *
  * @param {{tag:string, train:string, advertised:string|null}} entry
  * @returns {string[]}
  */
@@ -557,7 +564,10 @@ export function republishInstruction({ tag, train, advertised } = {}) {
   if (train === "plugin") {
     const version = (pluginReleaseTag(advertised) ?? tag).replace(/^v/i, "");
     return [
-      `Re-publish by dispatch: \`gh workflow run create-release.yml -f version=${version}\`.`,
+      "Re-publish by dispatch: " +
+        `\`gh workflow run create-release.yml --ref ${tag} -f version=${version}\`.`,
+      `--ref pins the provenance: the workflow checks out the dispatched ref, and without it ` +
+        `the run packages main as it stands now and attaches that to ${tag}.`,
       noEvent,
     ];
   }

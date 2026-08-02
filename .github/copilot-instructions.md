@@ -602,7 +602,7 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 | `unpublishable-release-link` | error | A reference definition **in `CHANGELOG.md`** (the file `build-plugin.py` reads for release notes, so its labels are plugin-train claims) names a tag **no pipeline creates for that version**. `create-release.yml` tags `v${VERSION}` where `VERSION` is `build-plugin.py`'s *normalized* version, so `2.6.0` publishes at `v2.6` — and GitHub serves `/releases/tag/<tag>` by exact name. Links outside that file stay under `dangling-release-links`, because the canvas train tags `v${VERSION}` verbatim and does not strip the `.0`. | Correct the link to the tag named in the finding. Cutting a release will **not** clear this one. |
 | `stranded-release-link` | error | A reference definition **in `CHANGELOG.md`** names a version the manifest has **already moved past**. `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag against `plugin.json` — so `v2.5` fails on `version mismatch: plugin.json has 2.6.0` and is no longer publishable from `main`. Not impossible, and the finding says so: `checkout@v4` restores the *tagged commit*, so tagging the older commit that still read `2.5.0` would build — but it would publish a tree and notes that predate what the section documents now, and `extract_notes()` publishes exactly one section, so those notes reach no release from `main` either. Deeper than `unpublishable-release-link`, so it wins when a link is both. | **Do not cut it from `main`** — that fails the workflow, and a historical tag ships the wrong notes. Fold the section into `## [<manifest version>]`, the release that will actually deliver those changes, and delete the link definition. Guarded offline by `evals/tests/release-hygiene.test.mjs`, which requires every changelog section below the manifest version to name a tag present in `git tag --list`, and by `evals/tests/stranded-release-claim.test.mjs`, which holds the wording to what the repository's history supports. |
 | `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it, **and no tag for it exists** — the tag was never pushed. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
-| `release-tag-without-release` | error | A tag **is** on origin but no release was published for it — a publish run that failed after the tag existed (`Create Release` run `28527065984` is the precedent). This supersedes the `*-release-missing` finding for that train and takes the link out of `dangling-release-links`, because in this state both of those advise a re-push, and **re-pushing an existing tag emits no `push` event**, so nothing re-runs. | Plugin train: `gh workflow run create-release.yml -f version=X.Y` — `gh release create` attaches to the tag that already exists. Canvas train: `git push --delete origin vX.Y.Z` **first**, then re-run `release-canvas.yml`; `bump-version.mjs` skips any version whose tag exists, so leaving the tag skips that version forever. |
+| `release-tag-without-release` | error | A tag **is** on origin but no release was published for it — a publish run that failed after the tag existed (`Create Release` run `28527065984` is the precedent). This supersedes the `*-release-missing` finding for that train and takes the link out of `dangling-release-links`, because in this state both of those advise a re-push, and **re-pushing an existing tag emits no `push` event**, so nothing re-runs. | Plugin train: `gh workflow run create-release.yml --ref vX.Y -f version=X.Y` — `gh release create` attaches to the tag that already exists, and `--ref` makes the run package the tagged commit rather than whatever `main` holds now. Canvas train: `git push --delete origin vX.Y.Z` **first**, then re-run `release-canvas.yml`; `bump-version.mjs` skips any version whose tag exists, so leaving the tag skips that version forever. |
 | `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
 | `registry-skill-unreadable` | warning | A per-skill page carried no `SoftwareApplication` block, or **none** of the shipped skill's sections appeared in it. A page serving something else and a page this checker can no longer parse look identical from here, so no drift is claimed. | Read the page by hand. If the site was redesigned, update `parseSkillPage`/`pageText`; a clean `registry-skill-stale` proves nothing while this warning stands. |
@@ -693,12 +693,26 @@ again. Git sends nothing for a ref that is already up to date, so no `push` even
 Fix the cause, then re-publish onto the tag that is already there:
 
 ```bash
-gh workflow run create-release.yml -f version=X.Y   # gh release create attaches to the tag
-gh run watch --exit-status
+gh workflow run create-release.yml --ref vX.Y -f version=X.Y   # attaches to the existing tag
+gh run watch "$(gh run list --workflow 'Create Release' --event workflow_dispatch \
+                  --limit 1 --json databaseId --jq '.[0].databaseId')" --exit-status
 ```
+
+`--ref` pins the provenance and is not optional. The workflow checks out with
+`actions/checkout@v4` and no `ref:`, so it packages whatever the **dispatched** ref holds,
+and `gh workflow run` defaults to the repository's default branch. Recovering without it
+builds from `main` as it stands now and attaches those bytes to a tag naming a different
+commit — a release that exists, looks correct, and does not match its own tag. Watching by
+run **ID** rather than bare `gh run watch` matters for the same reason the release runbook
+gives: a concurrent run can otherwise be the one that gets watched, and the evidence then
+records a green run that is not this one.
 
 On the **canvas** train the equivalent recovery is different: delete the tag first
 (`git push --delete origin vX.Y.Z`) before re-running `release-canvas.yml`, because
 `bump-version.mjs` skips any version whose tag exists and would otherwise walk past the
 stranded version permanently. `check-distribution.mjs` reports this state as
 `release-tag-without-release` and prints the matching command.
+
+The full pre-flight rehearsal, the post-publication verification of the **downloaded**
+artefact, and the manual clean-profile `/live` procedure live in
+[`docs/release-verification.md`](../docs/release-verification.md).

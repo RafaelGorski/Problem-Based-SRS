@@ -194,6 +194,26 @@ describe("the recovery each train actually needs", () => {
     assert.match(text, /-f version=2\.6/, "the dispatch input must carry the version");
   });
 
+  it("pins the dispatch to the tag, so the recovery packages the tagged commit", () => {
+    // #104's review: "Recovery must pin provenance: `gh workflow run create-release.yml
+    // --ref v2.6 -f version=2.6`; otherwise a later `main` can package bytes different
+    // from the tag." The failure this prevents is worse than the one it recovers from —
+    // the release exists, looks right, and does not match its own tag.
+    const text = pluginText();
+    assert.match(
+      text,
+      /gh workflow run create-release\.yml --ref v2\.6 -f version=2\.6/,
+      "without --ref, `gh workflow run` dispatches on the default branch and the workflow " +
+        "checks that out, so the asset is built from main rather than from v2.6",
+    );
+    assert.match(
+      text,
+      /--ref pins the provenance/i,
+      "the flag without its reason is the first thing dropped when someone retypes the " +
+        "command from memory",
+    );
+  });
+
   it("says why re-pushing the tag does nothing, instead of leaving it to be re-tried", () => {
     assert.match(
       pluginText(),
@@ -256,6 +276,20 @@ describe("the instructions are derived from the pipelines, not asserted about th
     assert.ok(
       !/^\s*(git tag|- run: git tag)/m.test(steps),
       "the plugin workflow must never create the tag itself — the tag is its trigger",
+    );
+  });
+
+  it("create-release.yml checks out the dispatched ref, which is why --ref is load-bearing", () => {
+    // The advice's reason, derived from the workflow rather than asserted about it. A
+    // `ref:` added to that checkout would make --ref decorative, and this test says so
+    // rather than letting the instruction quietly become superstition.
+    const wf = read(".github/workflows/create-release.yml");
+    const release = wf.slice(wf.indexOf("  release:"));
+    const checkout = release.slice(release.indexOf("actions/checkout@v4"));
+    assert.ok(
+      !/^\s+with:\s*\n\s+ref:/m.test(checkout.slice(0, 200)),
+      "the release job checks out with no explicit ref, so it packages whatever ref the run " +
+        "was dispatched on — that is the entire reason the recovery must pass --ref",
     );
   });
 
