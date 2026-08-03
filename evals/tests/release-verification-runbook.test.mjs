@@ -21,6 +21,7 @@ import {
   coveredReadmeHeadings,
   readmeInstallHeadings,
 } from "../lib/distribution-artifacts.mjs";
+import { NEED_CLUSTER_DEFINITION } from "../tools/evidence-pack.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
@@ -240,6 +241,117 @@ describe("the /live section separates the two installs it actually depends on", 
   });
 });
 
+/* -------------------------------------------------- the steps that are also executable */
+
+describe("every step with an executable form names it", () => {
+  // A procedure that only prose describes gets performed differently each time — which is how
+  // #104's defect class ("no rehearsal exists") survived a runbook that documented the
+  // pre-flight. Derive the requirement from the tools: a tool that exists but which the
+  // runbook does not name is a tool a maintainer will not run.
+  const EXECUTABLE_STEPS = [
+    { tool: "evals/tools/release-preflight.mjs", flag: "--tag vX.Y" },
+    { tool: "evals/tools/live-profile.mjs", flag: "--archive" },
+    { tool: "evals/tools/evidence-pack.mjs", flag: "--markdown" },
+  ];
+
+  /** Split a command line the way a shell would, so a quoted value stays one token. */
+  const tokenize = (line) =>
+    [...line.matchAll(/"([^"]*)"|(\S+)/g)].map((m) => (m[1] === undefined ? m[2] : m[1]));
+
+  for (const { tool, flag } of EXECUTABLE_STEPS) {
+    it(`names ${tool}, which exists`, () => {
+      assert.ok(fs.existsSync(path.join(repoRoot, tool)), `${tool} is cited but absent`);
+      assert.match(
+        runbook,
+        new RegExp(tool.replace(/[/.]/g, "\\$&")),
+        `${tool} exists but the runbook never tells anyone to run it`,
+      );
+      assert.ok(runbook.includes(flag), `the runbook invokes ${tool} without ${flag}`);
+    });
+
+    it(`mentions no option ${tool} does not have`, async () => {
+      // Prose is where the last wrong option hid: the runbook offered `--skip-dirty`, which
+      // never existed, and the fenced-block check below could not see it because it is not in
+      // a fenced block. Read the options named in the prose that follows this tool's
+      // invocation, up to the next heading, and require the tool's USAGE to document them.
+      // Spans that name a different command (`check-distribution.mjs --strict`) belong to that
+      // command, not this one, so they are skipped rather than mis-attributed.
+      const { USAGE } = await import(`../tools/${path.basename(tool)}`);
+      const name = path.basename(tool);
+      const fenced = [...runbook.matchAll(/```bash\r?\n[\s\S]*?```/g)].find((m) =>
+        m[0].includes(name),
+      );
+      assert.ok(fenced, `no fenced invocation of ${name} to read the prose after`);
+      const start = fenced.index + fenced[0].length;
+      const heading = runbook.slice(start).search(/\r?\n#{2,3} /);
+      const region = runbook.slice(start, heading === -1 ? undefined : start + heading);
+
+      const spans = [...region.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]);
+      const mentioned = new Set();
+      for (const span of spans) {
+        if (/[\w-]+\.(mjs|py|yml|json|md)/.test(span) && !span.includes(name)) continue;
+        for (const [option] of span.matchAll(/(?<![-\w])--[a-z][a-z-]*/g)) mentioned.add(option);
+      }
+      assert.ok(mentioned.size > 0, `the prose after the ${name} invocation offers no options`);
+      for (const option of mentioned) {
+        assert.ok(
+          USAGE.includes(option),
+          `the runbook offers ${option} for ${name}, whose usage does not document it`,
+        );
+      }
+    });
+
+    it(`invokes ${tool} with options its own parser accepts`, async () => {
+      // The runbook's commands are copy-pasted, so an option that has been renamed would fail
+      // at the worst possible moment. Grepping the source for the option string is not enough
+      // — `--tags` appears in `release-preflight.mjs` as an argument to `git ls-remote`, so a
+      // runbook that said `--tags` would have passed that check while failing at runtime.
+      // Run the tool's own `parseArgs` over the runbook's tokens instead.
+      const { parseArgs } = await import(`../tools/${path.basename(tool)}`);
+      const name = path.basename(tool);
+      const blocks = [...runbook.matchAll(/```bash\r?\n([\s\S]*?)```/g)]
+        .map((m) => m[1])
+        .filter((b) => b.includes(name));
+      assert.ok(blocks.length > 0, `no fenced invocation of ${name} in the runbook`);
+
+      let invocations = 0;
+      for (const block of blocks) {
+        // Join shell line-continuations first, so a wrapped command stays one command.
+        for (const line of block.replace(/\\\r?\n\s*/g, " ").split(/\r?\n/)) {
+          if (!line.includes(name)) continue;
+          const argv = tokenize(line.slice(line.indexOf(name) + name.length));
+          assert.ok(argv.some((a) => a.startsWith("--")), `${name} is invoked with no options`);
+          assert.doesNotThrow(
+            () => parseArgs(argv),
+            `the runbook invokes ${name} with arguments it rejects: ${argv.join(" ")}`,
+          );
+          invocations += 1;
+        }
+      }
+      assert.ok(invocations > 0, `no runnable ${name} command line in the runbook`);
+    });
+  }
+
+  it("puts the rehearsal before the tag push, which is the only place it can help", () => {
+    const rehearsal = runbook.indexOf("release-preflight.mjs");
+    const tagPush = runbook.indexOf("git tag vX.Y && git push origin vX.Y");
+    assert.ok(rehearsal !== -1 && tagPush !== -1);
+    assert.ok(rehearsal < tagPush, "the rehearsal is documented after the point of no return");
+  });
+
+  it("says the rehearsal opens the archive, which is what the pre-flight lacked", () => {
+    // Derived: the gate id lives in the tool. If it were renamed or dropped, this fails.
+    const source = fs.readFileSync(path.join(repoRoot, "evals/tools/release-preflight.mjs"), "utf8");
+    assert.match(source, /"packaged-archive-loads"/, "the archive gate was renamed or removed");
+    assert.match(runbook, /packaged-archive-loads/);
+    assert.match(runbook, /on this\s*\n?side of the push/);
+  });
+
+  it("says a missing artefact family fails the pack rather than being skipped", () => {
+    assert.match(runbook, /never skipped/);
+  });
+});
+
 /* ------------------------------------------------------------------- the evidence pack */
 
 describe("the evidence-pack section keeps derived and recorded apart", () => {
@@ -251,8 +363,29 @@ describe("the evidence-pack section keeps derived and recorded apart", () => {
   });
 
   it("labels the graph figures as derived and names the function that derives them", () => {
+    // The definition is derived from the tool, not restated: `NEED_CLUSTER_DEFINITION` is the
+    // string `evidence-pack.mjs` prints, and the earlier wording here ("degree ≥ 4, not an
+    // array length") was true of neither end — `computeHotspots` classifies with an if/else
+    // chain, so an orphaned problem or unmet need of degree ≥ 4 is not a hub.
     assert.match(runbook, /graph-metrics\.mjs/);
     assert.match(runbook, /degree ≥ 4 graph property, not an array length/);
+    assert.ok(
+      NEED_CLUSTER_DEFINITION.includes("orphaned problem"),
+      "the tool's definition no longer mentions the exclusion; re-read this claim",
+    );
+    assert.match(
+      runbook,
+      /excluding\*\* any already classified as an orphaned problem or an unmet need/,
+      "the runbook must carry the exclusion the tool's definition states",
+    );
+    const hotspots = read(".github/extensions/srs-navigator/lib/graph-metrics.mjs");
+    assert.match(hotspots, /orphanedProblems/, "the hotspot buckets were renamed");
+    assert.match(hotspots, /unmetNeeds/, "the hotspot buckets were renamed");
+    assert.match(
+      hotspots,
+      /needClusters: hotspots\.hubs\.length/,
+      "need clusters no longer come from the hub bucket; the definition needs re-deriving",
+    );
     assert.ok(
       fs.existsSync(path.join(repoRoot, ".github/extensions/srs-navigator/lib/graph-metrics.mjs")),
       "the runbook cites a module that must exist",

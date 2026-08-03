@@ -15,6 +15,15 @@ which tag, what the distribution monitor reports) and links back to this file fo
 - [Proving `/live` in the app itself](#proving-live-in-the-app-itself)
 - [Deriving an evidence pack](#deriving-an-evidence-pack)
 
+Three steps below are also **executable**, because a procedure only prose describes is a
+procedure that gets performed differently each time:
+
+| Step | Command |
+|---|---|
+| Pre-flight, before any tag is pushed | `evals/tools/release-preflight.mjs` |
+| The `/live` preconditions | `evals/tools/live-profile.mjs` |
+| The evidence pack | `evals/tools/evidence-pack.mjs` |
+
 ---
 
 ## Distribution artefact families
@@ -45,6 +54,13 @@ a failed run leaves a tag behind, and re-pushing an existing ref emits no `push`
 Everything that can be checked from a clean `main` is checked first.
 
 ```bash
+node evals/tools/release-preflight.mjs --tag vX.Y --json preflight.json
+```
+
+That single command runs the whole rehearsal and exits non-zero if any gate fails. It is the
+executable form of the steps below, which it runs itself:
+
+```bash
 git checkout main && git pull --tags
 git rev-parse HEAD                                   # record this SHA in the release issue
 
@@ -54,6 +70,22 @@ node --test evals/tests/*.test.mjs
 python scripts/build-plugin.py validate
 ( cd .github/extensions/srs-navigator && npm test )
 ```
+
+It adds the one step that list never had: it **opens** what the packager just wrote.
+`build-plugin.py build` packages an archive and stops; `verify-plugin-archive.mjs` has only
+ever run *after* publication, against the download. So the defect class #104 exists for —
+`agents/skills/` links that were broken in every published zip because nothing opened one —
+could sail past the tag and be found on the release page. `packaged-archive-loads` extracts
+the fresh archive to a temporary directory and puts `verifyPluginArchive` through it, on this
+side of the push. Pass `--no-suites` to skip the two test-suite gates when they have just run,
+`--against HEAD` to waive the "HEAD is what will be tagged" comparison visibly rather than
+silently, and `--keep` to leave the packaged archive and the extracted tree on disk for
+inspection.
+
+Its gates are closure properties and its counts are recorded, never gated — the same contract
+`verify-plugin-archive.mjs` follows, so a tenth action does not turn a correct rehearsal red.
+It refuses a `vX.Y.Z` canvas tag rather than guessing: the canvas train creates its tag *as
+part of* publishing, so it has no "before the tag" moment to rehearse.
 
 `build-plugin.py` normalizes the version, so a manifest reading `2.6.0` publishes at
 **`v2.6`** — and GitHub serves `/releases/tag/<tag>` by exact name. Push the tag the
@@ -190,18 +222,63 @@ Procedure:
 ls ~/.copilot/extensions/                      # must not already contain srs-navigator
 unzip -q srs-navigator-X.Y.Z.zip -d ~/.copilot/extensions/
 cd /some/neutral/workspace                     # NOT this repository
+
+node <repo>/evals/tools/live-profile.mjs \
+  --workspace "$PWD" \
+  --archive ~/.copilot/extensions/srs-navigator \
+  --skills ~/.copilot/skills/problem-based-srs \
+  --json live-preconditions.json
 ```
+
+`live-profile.mjs` checks both conditions above before the app is opened, so a capture cannot
+be filed from a double-registered profile. It reads the archive's own `ACTIONS` table rather
+than restating that `live` is absent from it, so adding `live` to the extension changes the
+verdict instead of leaving this document wrong.
 
 Then, in the Copilot app: reload extensions → confirm `srs-navigator` is listed as **loaded**
 (not `failed`) → run `/live` → capture the panel, and record the extension log path from the
-extension inspector.
+extension inspector. Fold that observation back in:
 
-If the host refuses to load it, record the refusal verbatim. A failed load is a result; the
-loopback capture answers a different question and cannot be substituted for it.
+```bash
+node <repo>/evals/tools/live-profile.mjs --workspace "$PWD" \
+  --archive ~/.copilot/extensions/srs-navigator \
+  --loaded loaded --log <extension-log-path> --note "panel rendered"
+```
+
+`--loaded`, `--log` and `--note` are **recorded and never gate the exit code**, because the
+tool cannot observe the app and must not appear to.
+
+If the host refuses to load it, record the refusal verbatim (`--loaded failed`).
+A failed load is a result; the loopback capture answers a different question and
+cannot be substituted for it.
 
 ---
 
 ## Deriving an evidence pack
+
+```bash
+node scripts/check-distribution.mjs --json > distribution.json
+
+node evals/tools/evidence-pack.mjs \
+  --plugin-archive /tmp/pbsrs-asset/extracted \
+  --canvas-archive /tmp/ext/srs-navigator \
+  --provenance /tmp/canvas-archive/provenance.json \
+  --distribution distribution.json \
+  --markdown pack.md --json pack.json
+```
+
+The parts have existed for a while — `graph-metrics.mjs`, `distribution-artifacts.mjs`,
+`verify-plugin-archive.mjs` — but nothing composed them, so the pack was assembled by hand
+from snapshots and its numbers aged silently. `evidence-pack.mjs` composes them and labels
+every figure derived or recorded. A family whose artefact was not supplied **fails** and is
+**never skipped**, because a pack that quietly omits the family it could not prove reads
+exactly like one that proved it.
+
+`--markdown` writes the pack a human reads and `--json` writes the record a later run can
+diff; either takes `-` for stdout. `--distribution` folds in a `check-distribution.mjs --json`
+payload rather than re-fetching the third-party surfaces, so the pack quotes the run that was
+actually observed. `--provenance` ties the canvas capture to the `extension.mjs` that served
+it, and `--spec` points the derived figures at a specification other than the shipped demo.
 
 Every number in a pack is either **derived** or **recorded**, and the two are labelled:
 
@@ -210,7 +287,7 @@ Every number in a pack is either **derived** or **recorded**, and the two are la
 | every action resolves | `verify-plugin-archive.mjs` — dispatch closure over the extracted tree, both directions |
 | no link escapes the tree | `verify-plugin-archive.mjs` — full relative-link closure |
 | skill file count | *recorded* from the installed tree; never a gate. The dispatch table cannot supply it — the tree also carries `SKILL.md` and the `*-example.md` walkthroughs, which no action dispatches |
-| node / need-cluster / traceability figures | *derived* from the loaded specification with `healthMetrics()` in `.github/extensions/srs-navigator/lib/graph-metrics.mjs` — the same function the page runs. "Need clusters" is a degree ≥ 4 graph property, not an array length |
+| node / need-cluster / traceability figures | *derived* from the loaded specification with `healthMetrics()` in `.github/extensions/srs-navigator/lib/graph-metrics.mjs` — the same function the page runs. "Need clusters" is a degree ≥ 4 graph property, not an array length: nodes whose total degree reaches 4, **excluding** any already classified as an orphaned problem or an unmet need, because the classification is an if/else chain and those two win over hub. Where some array happens to have the same length, that is a coincidence and not a derivation |
 | `check-distribution.mjs --strict` exits 0 | **zero *error* findings**. Warnings and notices exit 0 by design, so the pack says "zero errors; every warning and notice explained" rather than treating exit 0 as a fully readable third-party surface |
 
 Thresholds are re-checked with **fixture canaries** — small purpose-built trees in the test
