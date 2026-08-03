@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The release artefact a user downloads is now *loaded*, not just staged.** Three install
+  families ship from this repository, and only two had a reader. `plugin-archive-install`
+  checked what the packager *stages*; nothing opened the published
+  `problem-based-srs-vX.Y.zip`, so the release asset was the one artefact whose contents were
+  taken on trust. `evals/tools/verify-plugin-archive.mjs` extracts and loads it — resolves the
+  manifest, resolves every skill, requires every dispatched action to land on a file present in
+  the extracted tree, and resolves every relative markdown link *against that tree* — and emits
+  a JSON evidence record naming the SHA-256 of the bytes it read. The link check replaces
+  `grep -rn 'agents/skills/'`, which tested one known defect rather than link closure and would
+  not have found the next one. Its gates are closure properties and its counts are recorded but
+  never asserted, so a tenth action does not turn a correct archive red — the failure mode the
+  reviews on #107 called out in the original "9 actions / 12 files" thresholds.
+- **`evals/lib/distribution-artifacts.mjs`** — one definition of what this repository ships:
+  the three artefact families, the README install methods each covers, and the tree/link/
+  dispatch readers the suites and the verifier share. The README's method list is read, not
+  restated, so a seventh install method must be mapped to a family or the suite fails.
+- **`docs/release-verification.md`** — the release procedure, in a tracked file. The reviews on
+  #104 and #108 both flagged that it lived in `.spec/release-readiness/`, which is gitignored:
+  the instructions a future maintainer needs were unavailable to them, and nothing could tell
+  whether they still matched the pipeline. `evals/tests/release-verification-runbook.test.mjs`
+  derives its assertions from the workflows, the README and `extension.mjs`, so the runbook
+  goes red when the pipeline moves rather than quietly becoming wrong.
+- **`.github/extensions/srs-navigator/lib/graph-metrics.mjs`** — the health-bar metrics,
+  extracted from the renderer's template literal and injected back into the page verbatim, so
+  the browser and Node run one implementation instead of two that agree today. "29 nodes,
+  5 need clusters, 100% traceability" can now be *derived* from a specification rather than
+  read off a screenshot; "need clusters" is a graph degree ≥ 4 property, not an array length,
+  which is why nothing outside the browser could compute it before.
+- **`--provenance` on `evals/tools/open-archive-canvas.mjs`** — records the extracted path, the
+  archive version and the SHA-256 of the `extension.mjs` that ran, so a capture can be tied to
+  the bytes that produced it, and states which install each half of `/live` comes from (the
+  command ships with the skill; the panel ships with the canvas archive).
+- **Screenshot evidence is now attributed to the suite that writes it**
+  (`.github/extensions/srs-navigator/tests/evidence-attribution.test.mjs`, 12 assertions, wired
+  into `npm test`; the table it guards is in `docs/release-verification.md`). The evidence plan
+  on #92 cited `skills-health-dashboard.png` for the *graph* health bar's figures — that image
+  is a full-page shot of the landing page written by `tests/site.test.mjs`, while the figures
+  are asserted in `tests/visual.test.mjs`. The claim and the picture came from different suites
+  rendering different surfaces, and the pack was reviewed by reading it, so nothing caught it.
+  The mapping is now derived from the suites' own `shot(...)` calls, so renaming a capture or
+  moving an assertion fails the document instead of silently invalidating it. Two consequences
+  are pinned with it: only `tests/visual.test.mjs` reads `CANVAS_URL`, so it is the only suite
+  whose output can speak for a *published* archive rather than the checkout; and `ci.yml`
+  uploads `playwright-report` under `if: failure()` and never uploads `test-results/`, so a
+  green CI run attaches no evidence at all and the pack must come from a local run.
 - **`.claude-plugin/marketplace.json` — this repository can now be catalogued.**
   `/plugin marketplace add` reads a marketplace manifest from the repository root, and we
   shipped only `plugin.json`: a plugin that no marketplace could list, including its own.
@@ -32,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the very next action on the release backlog is a tag push. `check-distribution.mjs` now reads
   git refs as well, and reports that state as its own finding —
   `release-tag-without-release` — carrying the recovery each train actually needs: dispatch for
-  the plugin train (`gh workflow run create-release.yml -f version=X.Y`, since
+  the plugin train (`gh workflow run create-release.yml --ref vX.Y -f version=X.Y`, since
   `gh release create` attaches to the tag that already exists), and **deleting the tag first**
   for the canvas train, because `bump-version.mjs` skips any version whose tag exists and would
   otherwise walk past the stranded version permanently. A link naming such a tag moves out of

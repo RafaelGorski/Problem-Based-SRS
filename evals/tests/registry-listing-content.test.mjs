@@ -840,3 +840,127 @@ describe("negative canaries", () => {
     assert.ok(!pageText("<h2>Quality Gate</h2>").includes("Quality Gates"));
   });
 });
+
+/* ------------------------------------- the axis #91's criteria may and may not claim */
+
+// Issue #106 asked for no behaviour change — only for #91's acceptance criteria to stop
+// claiming more than the checker verifies. That correction is only worth writing down if
+// something holds the line it draws, because the criteria are prose and the checker is code.
+//
+// The line runs between two kinds of claim:
+//
+//   checker-gated  — the listing's names and count; the body's readability and heading
+//                    presence; the description *when the page publishes one*; the version
+//                    axis, compared or explicitly reported unverified.
+//   observed       — that the page publishes a description at all, and what its identifiers
+//                    mean. Nothing in the checker answers either.
+//
+// The asymmetry between the description axis and the version axis is the crux: an absent
+// version became a *reported* `registry-skill-version-unverifiable` notice (#88/#101), while
+// an absent description is still dropped silently. The captured page happens to publish a
+// description, so the axis is answered on real runs today — but by a property of the page,
+// not of the checker. These tests pin that as it stands, so #91's criteria describe the
+// checker that exists rather than the one the wording implies.
+describe("the description axis is compared only when the page publishes one", () => {
+  it("compares it when the page publishes one", () => {
+    const profile = shipped();
+    const drift = skillPageDrift({
+      ...pageFor({ description: profile.description, sections: profile.sections }),
+      profile,
+    });
+    assert.equal(drift.description.matches, true);
+    assert.equal(drift.description.actual, profile.description);
+  });
+
+  it("does not compare it when the page publishes none — absence is not agreement", () => {
+    // The trap #91's original criteria walked into. `description: null` reads like "nothing
+    // to report", and a criterion saying "the description matches" would be satisfied by a
+    // page that publishes no description at all.
+    const profile = shipped();
+    const drift = skillPageDrift({
+      ...pageFor({ description: undefined, sections: profile.sections }),
+      profile,
+    });
+    assert.equal(drift.description, null, "no description means no comparison, not a pass");
+    assert.notEqual(drift.description?.matches, true);
+  });
+
+  it("raises nothing about a description the page never published", () => {
+    const profile = shipped();
+    const summary = summarize({
+      listing: { skills: [MAIN_SKILL], count: 1, parts: [] },
+      skillPages: [
+        skillPageDrift({
+          ...pageFor({ description: undefined, sections: profile.sections }),
+          profile,
+        }),
+      ],
+      repoSkills: [MAIN_SKILL],
+      releases: [],
+      links: [],
+      tags: [],
+    });
+    const about = [...summary.findings, ...(summary.unverified ?? [])].filter((f) =>
+      JSON.stringify(f).toLowerCase().includes("description"),
+    );
+    assert.deepEqual(
+      about,
+      [],
+      "an absent description currently produces neither a finding nor a notice — #91 may " +
+        "not claim it was verified",
+    );
+  });
+
+  it("the captured page answers the axis today — which is why 'when present' is the wording", () => {
+    // Not hypothetical in either direction. The page skills.sh served on 2026-07-31 *does*
+    // publish a description, and it agrees with the shipped skill. So #91 may claim the
+    // description was compared — but only because of a property of the page, not of the
+    // checker. If skills.sh stops publishing one, the claim silently becomes unfounded and
+    // nothing goes red. That contingency is the whole content of "when present".
+    const page = parseSkillPage(SKILL_PAGE_FIXTURE);
+    assert.ok(page, "fixture must still parse");
+    assert.ok(page.description, "the captured page publishes a description");
+    const drift = skillPageDrift({ page, text: pageText(SKILL_PAGE_FIXTURE), profile: shipped() });
+    assert.equal(drift.description.matches, true);
+    assert.deepEqual(
+      drift.body.missing.length > 0,
+      true,
+      "and the same page is stale in its body — the axes are independent",
+    );
+  });
+
+  it("the version axis does say so, which is why the two are not interchangeable", () => {
+    // Same shape of absence, different treatment — and #91's criteria have to reflect that
+    // rather than average over it. If the description axis ever grows its own notice, this
+    // fails and the criteria get revisited deliberately.
+    const profile = shipped();
+    const drift = skillPageDrift({
+      ...pageFor({ description: undefined, sections: profile.sections }),
+      profile,
+    });
+    assert.equal(drift.version.status, "page-publishes-none");
+    assert.equal(drift.description, null, "the description axis has no equivalent status");
+    assert.match(
+      CHECKER,
+      /registry-skill-version-unverifiable/,
+      "the reported-unverifiable precedent must still exist for the contrast to hold",
+    );
+  });
+
+  it("body readability is a separate claim from either", () => {
+    // #106 also removed Playwright from its close gate: heading presence is what the checker
+    // reads, and it reads it out of the served HTML — no browser is involved, so a criterion
+    // gated on a rendering harness was gating on the wrong thing.
+    const profile = shipped();
+    const drift = skillPageDrift({
+      ...pageFor({ description: undefined, sections: profile.sections.slice(0, 1) }),
+      profile,
+    });
+    assert.ok(drift.body.readable, "sections are found in served text, not in a rendered DOM");
+    assert.ok(drift.body.missing.length > 0, "and missing ones are still reported");
+    assert.ok(
+      !/playwright|puppeteer|headless/i.test(CHECKER),
+      "the checker must not need a browser for the axis #91 gates on",
+    );
+  });
+});

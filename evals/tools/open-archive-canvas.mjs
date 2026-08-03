@@ -21,15 +21,25 @@
 // Usage:
 //   node evals/tools/open-archive-canvas.mjs <extracted-archive-dir> [options]
 //
-//   --spec <file>      render this specification JSON instead of the archive's demo
-//   --instance <id>    canvas instance id (default: open-archive-canvas)
-//   --landing          keep the extension's "no spec found" landing overlay
+//   --spec <file>        render this specification JSON instead of the archive's demo
+//   --instance <id>      canvas instance id (default: open-archive-canvas)
+//   --landing            keep the extension's "no spec found" landing overlay
+//   --provenance <file>  write the capture-source record (see below) as JSON
 //
 // The URL is the only thing written to stdout, so this composes:
 //   CANVAS_URL=$(node evals/tools/open-archive-canvas.mjs /tmp/ext/srs-navigator)
+//
+// `--provenance` exists because of #105's first acceptance criterion: *"the evidence
+// records the source of the capture — extracted archive path and loopback URL — so it
+// cannot be confused with a checkout capture."* A PNG carries no provenance of its own, and
+// `live-dotted-notation.png` looks identical whether the pixels came from the published
+// archive or from `lib/`. `assertExtractedArchive()` stops the wrong tree being *booted*;
+// this records which tree was booted, by path, version and content hash, so the record
+// survives being copied into an issue.
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 /** The single bare specifier the Copilot app injects; everything else must be in the archive. */
@@ -232,15 +242,85 @@ export async function openArchiveCanvas(dir, options = {}) {
   };
 }
 
+/* ------------------------------------------------------------------------ provenance */
+
+/**
+ * What the Copilot app supplies and what the archive supplies are different sources, and
+ * `/live` needs both. The canvas archive registers the `srs-navigator` canvas and the
+ * `problem_based_srs` tool; that tool's action enum does **not** contain `live`, because
+ * `/live` is a *skill* action backed by `reference/live.md`, which travels in the plugin /
+ * skills install. Recorded here so an evidence pack naming "`/live` opened the graph"
+ * states which install supplied the command and which supplied the panel — #105's review:
+ * *"record the separately installed skill that supplies `/live`."*
+ */
+export const LIVE_COMMAND_SOURCES = Object.freeze({
+  command: Object.freeze({
+    source: "skills install (plugin archive or `npx skills add`)",
+    evidence: "skills/problem-based-srs/reference/live.md",
+    note: "the canvas archive's tool action enum excludes `live` — it is not the command's source",
+  }),
+  panel: Object.freeze({
+    source: "canvas archive install",
+    evidence: "srs-navigator/extension.mjs registers the `srs-navigator` canvas",
+    note: "extract into the directory above the extension, e.g. ~/.copilot/extensions/",
+  }),
+});
+
+/**
+ * A record naming the bytes a capture came from.
+ *
+ * `extension.mjs`'s hash is the load-bearing field: a path can be re-pointed and a version
+ * string can be stale, but two runs quoting the same digest read the same code.
+ *
+ * @param {{extensionDir:string, url:string, instanceId?:string, specName?:string|null}} opened
+ * @returns {object}
+ */
+export function captureProvenance(opened) {
+  const { extensionDir, url, instanceId = null, specName = null } = opened;
+  const entry = path.join(extensionDir, "extension.mjs");
+  let version = null;
+  try {
+    version = JSON.parse(fs.readFileSync(path.join(extensionDir, "package.json"), "utf8")).version;
+  } catch {
+    version = null;
+  }
+  return {
+    tool: "open-archive-canvas",
+    capturedAt: new Date().toISOString(),
+    source: "extracted release archive",
+    extensionDir,
+    realPath: fs.existsSync(extensionDir) ? fs.realpathSync(extensionDir) : extensionDir,
+    archiveVersion: version,
+    extensionSha256: fs.existsSync(entry)
+      ? crypto.createHash("sha256").update(fs.readFileSync(entry)).digest("hex")
+      : null,
+    url,
+    instanceId,
+    specName,
+    liveCommandSources: LIVE_COMMAND_SOURCES,
+    note:
+      "This proves the published archive's runtime rendered the capture. It does not prove " +
+      "the Copilot app's own extension loader accepted it — that is a separate witness, " +
+      "taken in a clean profile with every project copy of the extension disabled.",
+  };
+}
+
 /* --------------------------------------------------------------------------------- CLI */
 
 function parseArgs(argv) {
-  const out = { dir: null, specPath: null, instanceId: undefined, landing: false };
+  const out = {
+    dir: null,
+    specPath: null,
+    instanceId: undefined,
+    landing: false,
+    provenance: null,
+  };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--spec") out.specPath = argv[++i];
     else if (arg === "--instance") out.instanceId = argv[++i];
     else if (arg === "--landing") out.landing = true;
+    else if (arg === "--provenance") out.provenance = argv[++i];
     else if (arg === "--help" || arg === "-h") out.help = true;
     else if (arg.startsWith("-")) throw new Error(`open-archive-canvas: unknown option ${arg}`);
     else if (!out.dir) out.dir = arg;
@@ -251,9 +331,10 @@ function parseArgs(argv) {
 
 const USAGE = `Usage: node evals/tools/open-archive-canvas.mjs <extracted-archive-dir> [options]
 
-  --spec <file>     render this specification JSON instead of the archive's demo
-  --instance <id>   canvas instance id (default: open-archive-canvas)
-  --landing         keep the extension's "no spec found" landing overlay
+  --spec <file>        render this specification JSON instead of the archive's demo
+  --instance <id>      canvas instance id (default: open-archive-canvas)
+  --landing            keep the extension's "no spec found" landing overlay
+  --provenance <file>  write the capture-source record as JSON ("-" for stderr)
 
 Prints the loopback URL on stdout and keeps serving until interrupted, so:
   CANVAS_URL=$(node evals/tools/open-archive-canvas.mjs /tmp/ext/srs-navigator)`;
@@ -277,6 +358,12 @@ async function main() {
     `SRS Navigator canvas serving ${opened.specName ?? "the archive's first-run view"} ` +
       `from ${opened.extensionDir}\nPress Ctrl+C to stop.\n`,
   );
+
+  if (opts.provenance) {
+    const record = `${JSON.stringify(captureProvenance(opened), null, 2)}\n`;
+    if (opts.provenance === "-") process.stderr.write(record);
+    else fs.writeFileSync(opts.provenance, record);
+  }
 
   let closing = false;
   const shutdown = async () => {

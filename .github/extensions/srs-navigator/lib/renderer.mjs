@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { graphMetricsSource } from './graph-metrics.mjs';
 
 const REPO_URL = 'https://github.com/RafaelGorski/Problem-Based-SRS';
 
@@ -2074,68 +2075,22 @@ export function renderGraphHtml(graphData, options = {}) {
     const nodes = graphData.nodes.map(d => ({...d}));
 
     // === HOT-SPOT DETECTION ===
-    // Compute connectivity and identify nodes that need attention
-    const hotspots = (function() {
-      const inDegree = {};
-      const outDegree = {};
-      nodes.forEach(n => { inDegree[n.id] = 0; outDegree[n.id] = 0; });
-      links.forEach(l => {
-        const src = typeof l.source === 'object' ? l.source.id : l.source;
-        const tgt = typeof l.target === 'object' ? l.target.id : l.target;
-        outDegree[src] = (outDegree[src] || 0) + 1;
-        inDegree[tgt] = (inDegree[tgt] || 0) + 1;
-      });
+    // Compute connectivity and identify nodes that need attention.
+    //
+    // computeHotspots and healthMetrics are injected verbatim from lib/graph-metrics.mjs
+    // (see graphMetricsSource) so this page and Node run the same function. #107 asked for
+    // the need-cluster figure to be *derivable* outside the browser: it is a degree >= 4
+    // graph property, so an evidence pack that quoted it had to read it off a screenshot.
+${graphMetricsSource()}
 
-      const orphanedProblems = []; // CP with no downstream
-      const unmetNeeds = [];       // CN with no downstream FR/NFR
-      const hubs = [];             // High connectivity (degree >= 4)
-      const leafNodes = [];        // Nodes with no connections at all
-
-      nodes.forEach(n => {
-        const totalDegree = (inDegree[n.id] || 0) + (outDegree[n.id] || 0);
-        n._degree = totalDegree;
-        n._hotspot = null;
-        n._hotspotSeverity = 0; // 0=none, 1=info, 2=warning, 3=critical
-
-        if (n.type === 'problem' && (outDegree[n.id] || 0) === 0) {
-          orphanedProblems.push(n.id);
-          n._hotspot = 'orphaned';
-          n._hotspotSeverity = 3;
-        } else if (n.type === 'need' && (outDegree[n.id] || 0) === 0) {
-          unmetNeeds.push(n.id);
-          n._hotspot = 'unmet';
-          n._hotspotSeverity = 2;
-        } else if (totalDegree >= 4) {
-          hubs.push(n.id);
-          n._hotspot = 'hub';
-          n._hotspotSeverity = 1;
-        } else if (totalDegree === 0) {
-          leafNodes.push(n.id);
-          n._hotspot = 'isolated';
-          n._hotspotSeverity = 3;
-        }
-      });
-
-      // Node size scale: base 22, only scale up for "Need Cluster" hubs
-      const maxDegree = Math.max(...nodes.map(n => n._degree), 1);
-      nodes.forEach(n => {
-        // Only hubs (Need Clusters) get larger; all other nodes stay at base size
-        if (n._hotspot === 'hub') {
-          n._radius = 22 + (n._degree / maxDegree) * 10;
-        } else {
-          n._radius = 22;
-        }
-      });
-
-      return { orphanedProblems, unmetNeeds, hubs, leafNodes, maxDegree };
-    })();
+    const hotspots = computeHotspots(nodes, links);
 
     // Render health bar
     (function renderHealthBar() {
       const bar = document.getElementById('health-bar');
-      const total = nodes.length;
-      const gaps = hotspots.orphanedProblems.length + hotspots.unmetNeeds.length + hotspots.leafNodes.length;
-      const coverage = total > 0 ? Math.round(((total - gaps) / total) * 100) : 100;
+      const metrics = healthMetrics({ nodes, links });
+      const total = metrics.nodes;
+      const coverage = metrics.traceability;
 
       if (total === 0) {
         bar.innerHTML = '<div class="health-metric"><span class="label">No nodes to analyze</span></div>';
