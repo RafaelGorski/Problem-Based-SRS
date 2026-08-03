@@ -9,6 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The release procedure is now executable, not only documented.** `docs/release-verification.md`
+  described a pre-flight, a `/live` proof and an evidence pack in prose; nothing ran any of
+  them, so each was performed slightly differently every time and the numbers in a pack were
+  hand-copied snapshots. Three tools close that gap, each addressing a stated problem in the
+  issue it comes from:
+  - **`evals/tools/release-preflight.mjs`** (#104 — "no rehearsal exists"). Nine gates run
+    before the tag exists, which is the last moment anything can be fixed cheaply: the tag push
+    triggers `create-release.yml`, so a failed run strands a tag and re-pushing emits no `push`
+    event. The gate the old pre-flight lacked is `packaged-archive-loads` — it extracts the
+    archive `build-plugin.py build` just wrote and puts `verifyPluginArchive` through it. The
+    packager only ever *packaged*, and the verifier only ever ran *after* publication, so the
+    defect class #104 exists for — `agents/skills/` links that were broken in **every**
+    published zip — could reach the release page unopposed. The train is decided by importing
+    `tagTrain()` from `scripts/release-train.mjs` rather than re-deriving it, and a `vX.Y.Z`
+    canvas tag is refused rather than guessed at: that train creates its tag *as part of*
+    publishing, so it has no "before the tag" moment. Release notes are read from the
+    `$GITHUB_OUTPUT` payload the build writes, which is the only place it emits them.
+  - **`evals/tools/live-profile.mjs`** (#105, problems 3 and 4). Workspace isolation and
+    command source were prose conditions nothing checked, so a capture could be — and was —
+    produced from a profile where this repository's own `.github/extensions/srs-navigator`
+    registers the same canvas id and tool name a second time. It reads the archive's `ACTIONS`
+    table rather than restating that `live` is absent from it, so adding `live` to the
+    extension changes the verdict instead of leaving the runbook wrong. `--loaded`, `--log`
+    and `--note` record the manual half and gate nothing: the tool cannot observe the app and
+    must not appear to.
+  - **`evals/tools/evidence-pack.mjs`** (#107 / #92). The pack's parts existed —
+    `graph-metrics.mjs`, `distribution-artifacts.mjs`, `verify-plugin-archive.mjs` — but
+    nothing composed them. It derives every figure it can and labels the rest recorded, and a
+    family whose artefact was not supplied **fails** rather than being skipped, because a pack
+    that silently omits the family it could not prove reads exactly like one that proved it.
+    It also sharpens the need-cluster definition the runbook carried: `computeHotspots`
+    classifies with an if/else chain, so a hub is "degree ≥ 4 **excluding** nodes already
+    classified as an orphaned problem or an unmet need", and an array that happens to have the
+    same length is a coincidence, not a derivation.
+
+  All three are covered by `evals/tests/{release-preflight,live-profile,evidence-pack}.test.mjs`
+  — 166 tests at 100 % line and function coverage, with a canary per gate — and
+  `evals/tests/release-verification-runbook.test.mjs` now requires the runbook to name each
+  executable and runs every documented command line through the tool's **own** `parseArgs`, so
+  a renamed option fails here instead of during a release.
 - **The release artefact a user downloads is now *loaded*, not just staged.** Three install
   families ship from this repository, and only two had a reader. `plugin-archive-install`
   checked what the packager *stages*; nothing opened the published
