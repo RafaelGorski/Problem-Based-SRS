@@ -268,6 +268,10 @@ same discipline to all future changes.
 5. **Keep the default suite green.** `npm test` must stay fast and deterministic (no network
    / no API keys). Put anything requiring an LLM or credentials behind
    `npm run test:skill-behavior`.
+6. **Guard sequenced issue ledgers with a command.** If a change updates closure criteria in
+   long-form issue ledgers (for example #69/#92/#108), add or update
+   `evals/tools/issue-ledger.mjs` + `evals/tests/issue-ledger.test.mjs` so drift is detected:
+   open boxes without blocker, ticked boxes without citation, and stale version claims.
 
 #### Required verification before committing a behavior change
 

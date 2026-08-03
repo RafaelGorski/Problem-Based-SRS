@@ -13,6 +13,7 @@ which tag, what the distribution monitor reports) and links back to this file fo
 - [Thursday release cadence](#thursday-release-cadence)
 - [Plugin train — cutting `vX.Y`](#plugin-train--cutting-vxy)
 - [Canvas train — cutting `vX.Y.Z`](#canvas-train--cutting-vxyz)
+- [Issue-ledger drift guard for sequenced closure](#issue-ledger-drift-guard-for-sequenced-closure)
 - [Proving `/live` in the app itself](#proving-live-in-the-app-itself)
 - [Deriving an evidence pack](#deriving-an-evidence-pack)
 
@@ -211,6 +212,25 @@ condition `extension.mjs` uses to treat itself as an in-repo install — a captu
 would show the checkout while being filed as archive evidence. `--provenance` records the
 extracted path, the archive version and the SHA-256 of `extension.mjs`, so a screenshot can
 be tied to the bytes that produced it.
+
+---
+
+## Issue-ledger drift guard for sequenced closure
+
+The closure sequence issues (`#69`, `#89`, `#90`, `#91`, `#92`, `#104`, `#105`, `#107`, `#108`)
+carry long checkbox ledgers. This command reads the **live issue bodies** and reports:
+
+- checked vs. open boxes,
+- open boxes missing an explicit blocker (`Blocked on #...` / URL),
+- ticked boxes with no citation, and
+- box text still naming a version older than the manifest.
+
+```bash
+node evals/tools/issue-ledger.mjs 69 89 90 91 92 104 105 107 108 --json issue-ledger.json
+```
+
+It reports; it does not edit. Reconciliation remains a human judgement. The guard exists so a
+body drifting away from its evidence is detected by command rather than discovered in review.
 
 ---
 
