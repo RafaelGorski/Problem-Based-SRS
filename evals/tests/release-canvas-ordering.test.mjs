@@ -13,9 +13,7 @@
 //   2. The tag is created by the release, not before it — which is only true while this
 //      workflow stays dispatch-only. `gh release create --target` creates the tag when the
 //      tag does not yet exist and is *ignored* when it does, so adding a `push: tags`
-//      trigger would silently turn the whole mechanism into a no-op. That is why
-//      create-release.yml is not the reference for it: its trigger *is* a tag push, so on
-//      that path the tag already exists and that train is tagged by hand on purpose.
+//      trigger would silently turn the whole mechanism into a no-op.
 //   3. A publish failure rolls the bump back, and a publish *success* never does.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -240,13 +238,17 @@ describe("release-canvas.yml — the tag is created by the release, not before i
         "guards would silently stop happening.",
     );
     assert.match(triggers, /workflow_dispatch:/, "the canvas release is dispatched by hand");
-    // Stated as the contrast it is: the plugin train *is* tag-triggered, which is why it
-    // is not the reference for this mechanism.
+    // Keep the plugin workflow aligned with the cadence too: a tag trigger there would
+    // reintroduce an out-of-band release path.
     assert.match(
       PLUGIN_WF.slice(0, PLUGIN_WF.indexOf("\npermissions:")),
+      /workflow_dispatch:/,
+      `${PLUGIN_WF_PATH} must stay dispatch-only alongside the Thursday cadence`,
+    );
+    assert.doesNotMatch(
+      PLUGIN_WF.slice(0, PLUGIN_WF.indexOf("\npermissions:")),
       /tags:/,
-      `${PLUGIN_WF_PATH} is expected to be tag-triggered; if that changed, the comment in ` +
-        `${CANVAS_WF_PATH} explaining why the trains differ is now wrong`,
+      `${PLUGIN_WF_PATH} must not regain a tag trigger outside the Thursday cadence`,
     );
   });
 

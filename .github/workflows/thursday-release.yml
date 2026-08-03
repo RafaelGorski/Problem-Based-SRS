@@ -1,0 +1,71 @@
+name: Thursday release dispatch
+
+on:
+  schedule:
+    # Thursday 16:00 BRT (19:00 UTC) — scheduled release, even when the report is not approved.
+    - cron: "0 19 * * 4"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Refuse to release from anywhere but the default branch
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          echo "::error::thursday-release.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          exit 1
+
+      - name: Checkout (full history for release comparisons)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Plan the Thursday release dispatch
+        id: report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/weekly-release-report.mjs --markdown-out release-report.md --json-out release-report.json
+
+      - name: Dispatch the scheduled plugin release
+        if: steps.report.outputs.plugin_ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLUGIN_VERSION: ${{ steps.report.outputs.plugin_version }}
+        run: gh workflow run create-release.yml --ref "${GITHUB_REF_NAME}" -f version="${PLUGIN_VERSION}"
+
+      - name: Dispatch the scheduled canvas release
+        if: steps.report.outputs.canvas_ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release-canvas.yml --ref "${GITHUB_REF_NAME}" -f part=patch
+
+      - name: Summarize the scheduled dispatch
+        run: |
+          cat release-report.md >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo ""
+            echo "## Dispatch result"
+            echo ""
+            echo "- Plugin dispatched: ${{ steps.report.outputs.plugin_ready }}"
+            echo "- Canvas dispatched: ${{ steps.report.outputs.canvas_ready }}"
+            echo "- This schedule does not wait for approval; it fires at 16:00 BRT even if the report is still pending."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -408,6 +408,23 @@ directly, so the bundled copies only exist for standalone installs and packaging
 Maintainers edit a skill **once** in `skills/problem-based-srs/`, and both the agent plugin
 and the canvas app stay in sync.
 
+### Thursday release cadence
+
+The standard release cadence now runs on **Thursday**. Two GitHub Actions workflows handle it:
+
+1. [`.github/workflows/thursday-release-report.yml`](.github/workflows/thursday-release-report.yml)
+   opens or refreshes a weekly report issue at **12:00 BRT** with the commits and files waiting
+   for each release train.
+2. [`.github/workflows/thursday-release.yml`](.github/workflows/thursday-release.yml)
+   dispatches releases at **16:00 BRT**.
+
+The canvas train auto-releases when commits are waiting. The plugin train only auto-releases
+when `plugin.json` and `CHANGELOG.md` already advertise an unpublished version; otherwise the
+Thursday run reports the accumulated plugin changes and skips that train until the version is
+prepared. The report is for review, not gating — the 16:00 BRT dispatch still runs even if no
+approval arrives in time, and the plugin release workflow itself no longer auto-runs from a tag
+push outside that cadence.
+
 ## Research and standards
 
 Based on the methodology by Gorski & Stadzisz, published as peer-reviewed research.

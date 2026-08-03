@@ -455,6 +455,8 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 | **CI workflow** | `.github/workflows/ci.yml` | On every push/PR to `main`: validates the plugin and uploads the packaged zip as a build artifact. |
 | **Release workflow** | `.github/workflows/create-release.yml` | Builds, validates, packages, and publishes a GitHub Release with the zip attached. |
 | **Canvas release workflow** | `.github/workflows/release-canvas.yml` | Independent pipeline for the SRS Navigator canvas app: runs `npm test`, refreshes bundled skills, bumps the extension version (`scripts/bump-version.mjs`), confirms the bumped tag is this train's (`scripts/release-train.mjs --expect canvas`), packages archives (`scripts/package-extension.mjs`), verifies the archive contract (`evals/tests/from-archive-install.test.mjs`), and publishes a `vX.Y.Z` GitHub Release that creates its own tag. |
+| **Thursday report** | `.github/workflows/thursday-release-report.yml` | At 12:00 BRT on Thursdays, opens or refreshes the weekly release report issue with the unreleased commits and files for both trains. |
+| **Thursday dispatch** | `.github/workflows/thursday-release.yml` | At 16:00 BRT on Thursdays, dispatches the trains that are ready; the report is advisory, not a gate. |
 | **Distribution monitor** | `.github/workflows/distribution-drift.yml` → `scripts/check-distribution.mjs` | Weekly (and on demand): compares the surfaces this repository does **not** own — the skills.sh listing and GitHub Releases — against what the repository actually ships. Deliberately outside the PR gate. |
 
 > **Two release pipelines, two tag schemes.** The **plugin** release uses `vX.Y` tags
@@ -462,18 +464,17 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 > tags (driven by `VERSION` + `bump-version.mjs`). Keep them distinct so tags never
 > collide. "Make a release" of the methodology means the plugin pipeline below.
 >
-> They still share one tag namespace, and `create-release.yml` triggers on `v*`, so it sees
-> the canvas train's tags too — and the trains cannot be told apart by shape (`v2.4.1` is a
-> plugin release, `v1.1.0` a canvas one). Publishing the canvas app therefore used to fail
-> `Create Release` on a version mismatch it could do nothing about (run `28527065984`, tag
-> `v1.1.0`). `scripts/release-train.mjs` now attributes the pushed tag first — plugin if its
-> normalized version matches `plugin.json` (the same comparison `build-plugin.py` makes),
-> canvas if it matches `VERSION` / the extension `package.json` verbatim (the tag
-> `bump-version.mjs` pushes) — and the publishing job runs only for the plugin train. A tag
-> matching neither, or both, **fails the run** rather than releasing something arbitrary.
+> They still share one tag namespace, and the trains still cannot be told apart by tag shape
+> (`v2.4.1` is a plugin release, `v1.1.0` a canvas one). Publishing the canvas app used to
+> fire `Create Release` on a version mismatch it could do nothing about (run `28527065984`,
+> tag `v1.1.0`). The plugin workflow is now dispatch-only, and the canvas workflow calls
+> `scripts/release-train.mjs` before it creates its tag — plugin if its normalized version
+> matches `plugin.json` (the same comparison `build-plugin.py` makes), canvas if it matches
+> `VERSION` / the extension `package.json` verbatim (the tag `bump-version.mjs` pushes). A
+> tag matching neither, or both, **fails the run** rather than releasing something arbitrary.
 > Guarded by `evals/tests/release-trains.test.mjs`.
 >
-> **Both trains check the shared tag namespace, and they act on the answer differently — on purpose.** `create-release.yml` fires on every `v*` tag, most of which are not its business, so it *skips* when `release-train.mjs` says the tag belongs to the canvas train. `release-canvas.yml` is dispatched deliberately and is about to publish, so it runs `release-train.mjs --tag <bumped tag> --expect canvas` after `bump-version.mjs` and before anything leaves the runner; if the verdict is not `canvas`, it *fails*. The one state neither may publish is a tag **both trains claim**; either one would put its artifacts on the other's release.
+> **The plugin train is dispatched on purpose; the canvas train proves ownership before tagging.** `create-release.yml` no longer auto-runs on tag pushes, so the Thursday dispatcher (or an explicit manual recovery) decides when the plugin release happens. `release-canvas.yml` is still about to create a shared-namespace tag, so it runs `release-train.mjs --tag <bumped tag> --expect canvas` after `bump-version.mjs` and before anything leaves the runner; if the verdict is not `canvas`, it *fails*. The one state neither may publish is a tag **both trains claim**; either one would put its artifacts on the other's release.
 
 > **`VERSION` is owned by `release-canvas.yml`.** Do not bump it in a feature branch:
 > `bump-version.mjs` *increments* from the version it finds, so a hand-bumped number is never
@@ -483,14 +484,12 @@ single build script. Releases publish a validated, packaged plugin artifact to t
 > advertising canvas `1.1.0`, `v1.1.0` is `canvas` and `v1.1.1` is `unknown` until the release
 > workflow bumps it.
 
-> **The canvas train never pushes a tag by hand; the plugin train always does.** This is a
-> real difference, not an inconsistency. `release-canvas.yml` is dispatch-only, so it
-> publishes with `gh release create <tag> --target <sha>` and GitHub creates the tag *as part
-> of* the release — no tag can outlive a failed publish. `create-release.yml` is triggered
-> **by** a tag push, so its tag already exists when it runs and `--target` is ignored there;
-> that train is tagged by hand on purpose (`git tag v2.6 && git push origin v2.6`), which is
-> why a failed plugin release can leave a tag behind and the canvas one cannot. Adding a
-> `push: tags` trigger to `release-canvas.yml` would silently turn `--target` into a no-op.
+> **Neither train should be hand-tagged during the normal Thursday flow.** Both release
+> workflows are dispatch-only now. `release-canvas.yml` publishes with `gh release create
+> <tag> --target <sha>` and GitHub creates the tag *as part of* the release; `create-release.yml`
+> does the same for the plugin train when Thursday dispatches it (or when a maintainer runs a
+> recovery by hand). Adding a `push: tags` trigger back to either train would reintroduce an
+> out-of-cadence path and, on the canvas side, would silently turn `--target` into a no-op.
 >
 > The canvas rule is therefore: **nothing leaves the runner until the artifact has been built
 > and read**, and a failed or cancelled publish reverts the version bump so a re-run
@@ -550,18 +549,12 @@ git push origin main
 
 #### 2. Publish the Release
 
-Pick **one** of the two methods:
+The standard path is the Thursday cadence: `thursday-release-report.yml` opens the review
+issue at **12:00 BRT**, and `thursday-release.yml` dispatches the release at **16:00 BRT**
+when `plugin.json` and `CHANGELOG.md` already advertise an unpublished version.
 
-**Method A — Tag push (recommended).** Pushing a `vX.Y` tag triggers the release
-workflow, which derives the version from the tag and the notes from `CHANGELOG.md`:
-
-```bash
-git tag vX.Y
-git push origin vX.Y
-```
-
-**Method B — Manual dispatch.** GitHub → **Actions** → **Create Release** →
-**Run workflow**. All inputs are optional:
+For an exception or recovery, use **manual dispatch**: GitHub → **Actions** →
+**Create Release** → **Run workflow**. All inputs are optional:
 
 | Field | Description | Default |
 |-------|-------------|---------|
@@ -571,7 +564,8 @@ git push origin vX.Y
 
 The workflow validates the plugin, packages `problem-based-srs-vX.Y.zip`, and creates
 (or updates) the `vX.Y` release with that zip attached. The `v` prefix and trailing
-`.0` normalization are handled automatically.
+`.0` normalization are handled automatically, and the tag is created by the workflow's
+`gh release create --target` step rather than by a separate git push.
 
 #### 3. Verify the Release
 
@@ -598,10 +592,10 @@ is a notification, not a broken build: it is out of the PR gate on purpose.
 |---------|----------|---------------|-----------|
 | `registry-listing-drift` | error | The [skills.sh listing](https://www.skills.sh/rafaelgorski/problem-based-srs) advertises skills the repository no longer ships. It is a cached index, so consolidations (like #50, which took nine skills to one) do not propagate. | Re-submit the repository at [skills.sh](https://www.skills.sh) so the listing is re-crawled, then re-run the checker. |
 | `registry-skill-stale` | error | The listing's page for a skill the repository *does* ship publishes an older copy of it — a description that has moved on, or `##` sections the page never renders. Captured 2026-07-31, the `problem-based-srs` page was missing **Identifier Notation (CANONICAL)** and still taught `FR-001`, the notation the methodology replaced. Names agreeing is the cheap half; this is the half a re-submission is actually for. | Re-submit at [skills.sh](https://www.skills.sh) and re-run. This is the finding that tells you whether the re-crawl worked — `registry-listing-drift` clearing only means the *names* line up. |
-| `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it **and no tag on origin** — normally a manifest bump whose tag never got pushed. When the tag does exist, the link moves to `release-tag-without-release` instead. | Cut the missing release (above). The link is already correct and will resolve when the tag exists. |
+| `dangling-release-links` | error | A `releases/tag/…` link in `README.md`/`CHANGELOG.md` names a **well-formed** tag with no release behind it **and no tag on origin** — normally a manifest bump that has not been dispatched yet. When the tag does exist, the link moves to `release-tag-without-release` instead. | Cut the missing release (above). The link is already correct and will resolve when the workflow creates the tag. |
 | `unpublishable-release-link` | error | A reference definition **in `CHANGELOG.md`** (the file `build-plugin.py` reads for release notes, so its labels are plugin-train claims) names a tag **no pipeline creates for that version**. `create-release.yml` tags `v${VERSION}` where `VERSION` is `build-plugin.py`'s *normalized* version, so `2.6.0` publishes at `v2.6` — and GitHub serves `/releases/tag/<tag>` by exact name. Links outside that file stay under `dangling-release-links`, because the canvas train tags `v${VERSION}` verbatim and does not strip the `.0`. | Correct the link to the tag named in the finding. Cutting a release will **not** clear this one. |
 | `stranded-release-link` | error | A reference definition **in `CHANGELOG.md`** names a version the manifest has **already moved past**. `create-release.yml` runs `build-plugin.py build --version <tag>`, which validates the tag against `plugin.json` — so `v2.5` fails on `version mismatch: plugin.json has 2.6.0` and is no longer publishable from `main`. Not impossible, and the finding says so: `checkout@v4` restores the *tagged commit*, so tagging the older commit that still read `2.5.0` would build — but it would publish a tree and notes that predate what the section documents now, and `extract_notes()` publishes exactly one section, so those notes reach no release from `main` either. Deeper than `unpublishable-release-link`, so it wins when a link is both. | **Do not cut it from `main`** — that fails the workflow, and a historical tag ships the wrong notes. Fold the section into `## [<manifest version>]`, the release that will actually deliver those changes, and delete the link definition. Guarded offline by `evals/tests/release-hygiene.test.mjs`, which requires every changelog section below the manifest version to name a tag present in `git tag --list`, and by `evals/tests/stranded-release-claim.test.mjs`, which holds the wording to what the repository's history supports. |
-| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it, **and no tag for it exists** — the tag was never pushed. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — `vX.Y` for the plugin, `vX.Y.Z` for the canvas. |
+| `plugin-release-missing` / `canvas-release-missing` | error | The version a surface advertises has no release behind it, **and no tag for it exists** — the release has not been run yet. Each finding names the newest release **on its own train**; the trains are told apart by the title their workflow writes (`🎉 Version …` / `srs-navigator …`). When a train has no releases at all it says so, rather than quoting the other train's newest. | Cut it on the matching train — dispatch `create-release.yml` for the plugin, or run `release-canvas.yml` for the canvas. |
 | `release-tag-without-release` | error | A tag **is** on origin but no release was published for it — a publish run that failed after the tag existed (`Create Release` run `28527065984` is the precedent). This supersedes the `*-release-missing` finding for that train and takes the link out of `dangling-release-links`, because in this state both of those advise a re-push, and **re-pushing an existing tag emits no `push` event**, so nothing re-runs. | Plugin train: `gh workflow run create-release.yml --ref vX.Y -f version=X.Y` — `gh release create` attaches to the tag that already exists, and `--ref` makes the run package the tagged commit rather than whatever `main` holds now. Canvas train: `git push --delete origin vX.Y.Z` **first**, then re-run `release-canvas.yml`; `bump-version.mjs` skips any version whose tag exists, so leaving the tag skips that version forever. |
 | `surface-unreachable` | warning | A registry or the releases API could not be reached at all. | A fetch failure, **not** proof of drift. Re-run; if it persists, check the surface by hand. |
 | `registry-listing-unreadable` | warning | The listing responded but carried no JSON-LD `CollectionPage`. | Its markup probably changed. Check the page by hand and update `parseRegistryListing` — until then a clean run proves nothing. |
@@ -637,10 +631,10 @@ and the monitor keeps reporting it under advice that no longer applies. Guarded 
 `evals/tests/release-hygiene.test.mjs`, which derives the expected tag by executing
 `build-plugin.py`'s own `normalize_version` rather than restating the rule.
 
-**Never bump the manifest over a release that was never cut.** The tag push in
+**Never bump the manifest over a release that was never cut.** The release dispatch in
 [step 2](#2-publish-the-release) is the *only* thing that publishes a version, and the
 manifest version is the only version `main` can publish — `create-release.yml` validates
-the tag against `plugin.json`, so once the manifest reads `2.6.0`, `v2.5` is no longer
+the dispatched version against `plugin.json`, so once the manifest reads `2.6.0`, `v2.5` is no longer
 reachable from `main`. `2.4.1 → 2.5.0 → 2.6.0` shipped that way: a 76-line `## [2.5.0]`
 section whose link had no release behind it and whose notes no release cut from `main` would
 carry, because `extract_notes()` extracts exactly one section. State that precisely: tagging
@@ -685,12 +679,12 @@ check repo Settings → Actions → General → Workflow permissions.
 
 **Tag already exists / re-release:** the workflow updates an existing `vX.Y` release in
 place (notes + asset). To start clean: `git push --delete origin vX.Y` and delete the
-release from the GitHub UI, then re-tag.
+release from the GitHub UI, then re-dispatch `create-release.yml`.
 
-**The tag pushed but the run failed (no release exists):** do **not** try to push the tag
-again. Git sends nothing for a ref that is already up to date, so no `push` event fires and
-`create-release.yml` never re-runs — the same reason `git tag vX.Y` aborts on the collision.
-Fix the cause, then re-publish onto the tag that is already there:
+**The workflow created the tag but the run failed (no release exists):** do **not** try to
+push the tag again. Git sends nothing for a ref that is already up to date, and
+`create-release.yml` is dispatch-only anyway. Fix the cause, then re-publish onto the tag
+that is already there:
 
 ```bash
 gh workflow run create-release.yml --ref vX.Y -f version=X.Y   # attaches to the existing tag

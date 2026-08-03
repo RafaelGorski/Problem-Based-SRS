@@ -3,24 +3,12 @@ name: Create Release
 # Build & release pipeline: validates the plugin, packages a distributable
 # artifact, and publishes a GitHub Release with the artifact attached.
 #
-# Two ways to release:
-#   1. Push a tag matching v*  (e.g. `git tag v1.3 && git push origin v1.3`)
-#      -> version is derived from the tag, notes from CHANGELOG.md.
-#   2. Run manually (workflow_dispatch). All inputs are optional:
-#        - version: defaults to the version in .claude-plugin/plugin.json
-#        - release_name: optional display suffix
-#        - release_body: optional override; defaults to the CHANGELOG.md section
-#
-# The `v*` trigger below is deliberately broad, and it therefore also matches the *other*
-# release train: release-canvas.yml publishes the srs-navigator canvas app at vX.Y.Z. The two
-# trains cannot be told apart by tag shape (v2.4.1 is a plugin release; v1.1.0 is a canvas
-# one), so this workflow used to run against canvas tags and fail on a version mismatch it
-# could do nothing about — run 28527065984, tag v1.1.0, four seconds after the canvas release.
-# The `train` job below attributes the tag first, and publishing runs only for this train.
+# The normal path is the Thursday dispatcher (`thursday-release.yml`), which calls this
+# workflow on the default branch after the report window. Manual dispatch remains available
+# for rehearsals, recoveries, and exceptional releases. The release tag is created by
+# `gh release create --target`, not by a pushed git tag, so this workflow no longer has any
+# release path that fires automatically outside the Thursday cadence.
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
       version:
@@ -40,34 +28,19 @@ permissions:
   contents: write
 
 jobs:
-  train:
-    name: Which release train is this tag?
-    runs-on: ubuntu-latest
-    outputs:
-      train: ${{ steps.classify.outputs.train || 'plugin' }}
-      reason: ${{ steps.classify.outputs.reason }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      # A tag push may belong to either train. A manual dispatch carries no tag, and was asked
-      # for on this workflow by hand, so it is the plugin train by definition.
-      - name: Classify the pushed tag
-        id: classify
-        if: github.event_name == 'push'
-        run: node scripts/release-train.mjs --tag "$GITHUB_REF_NAME"
-
   release:
     name: Build, package & publish release
-    needs: train
-    if: needs.train.outputs.train == 'plugin'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
+      - name: Refuse to release from anywhere but the default branch
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          echo "::error::create-release.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -79,9 +52,7 @@ jobs:
       - name: Resolve raw version
         id: raw
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            VERSION="${GITHUB_REF_NAME#v}"
-          elif [ -n "${{ inputs.version }}" ]; then
+          if [ -n "${{ inputs.version }}" ]; then
             VERSION="${{ inputs.version }}"
           else
             VERSION="$(python -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")"
