@@ -337,12 +337,15 @@ describe("every step with an executable form names it", () => {
     });
   }
 
-  it("puts the rehearsal before the tag push, which is the only place it can help", () => {
+  it("puts the rehearsal before the release dispatch, which is the only place it can help", () => {
     const rehearsal = runbook.indexOf("release-preflight.mjs");
-    const tagPush = runbook.indexOf("git tag vX.Y && git push origin vX.Y");
+    const dispatch = runbook.indexOf("gh workflow run create-release.yml --ref main -f version=X.Y");
     assert.ok(rehearsal !== -1, "release-preflight.mjs is not mentioned in the runbook");
-    assert.ok(tagPush !== -1, '"git tag vX.Y && git push origin vX.Y" is not in the runbook');
-    assert.ok(rehearsal < tagPush, "the rehearsal is documented after the point of no return");
+    assert.ok(
+      dispatch !== -1,
+      '"gh workflow run create-release.yml --ref main -f version=X.Y" is not in the runbook',
+    );
+    assert.ok(rehearsal < dispatch, "the rehearsal is documented after the point of no return");
   });
 
   it("says the rehearsal opens the archive, which is what the pre-flight lacked", () => {

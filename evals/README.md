@@ -231,7 +231,8 @@ evals/
 │   └── graders.mjs          # rubric grading + LLM judge
 ├── tests/                   # deterministic node --test files (offline)
 ├── tools/
-│   └── open-archive-canvas.mjs  # boot the canvas from an extracted release archive
+│   ├── open-archive-canvas.mjs  # boot the canvas from an extracted release archive
+│   └── issue-ledger.mjs         # report checkbox-ledger drift in sequenced GitHub issues
 ├── cases/                   # live eval cases (opt-in)
 │   ├── _shared.mjs
 │   └── *.case.mjs
