@@ -312,7 +312,7 @@ describe("release links the repository publishes", () => {
   });
 
   it("every link to an already-shipped release resolves", () => {
-    // The pending-release link (v2.6) is a maintainer action — a tag push, not an edit. A link to a version *older* than the newest published release has no such
+    // The pending-release link (v2.6) is a maintainer action — a release dispatch, not an edit. A link to a version *older* than the newest published release has no such
     // excuse: it is a typo, and it is permanently broken. `[1.0]` pointed at v1.0 for the
     // project's entire life; the tag has always been v1.0.0, and
     //   /releases/tag/v1.0   → 404
@@ -512,7 +512,7 @@ describe("a dangling link that cutting the release would not fix", () => {
       canvasVersion: "1.1.0",
     });
 
-  it("is reported apart from a link that is merely waiting for a tag push", () => {
+  it("is reported apart from a link that is merely waiting for a release dispatch", () => {
     const summary = summaryFor(
       advertisedTagLinks([
         {
@@ -528,7 +528,7 @@ describe("a dangling link that cutting the release would not fix", () => {
     assert.ok(
       unpublishable,
       "v2.6.0 names a tag no pipeline in this repository creates. Reporting it beside a " +
-        "link that a tag push *would* fix hands the maintainer one instruction that works " +
+        "link that a release dispatch *would* fix hands the maintainer one instruction that works " +
         "and one that cannot, under a heading that says 'cut the release'.",
     );
     assert.ok(
@@ -561,7 +561,7 @@ describe("a dangling link that cutting the release would not fix", () => {
     assert.deepEqual(
       summary.findings.map((f) => f.id),
       [],
-      "after `git tag v2.6 && git push origin v2.6` the report must go quiet — that is " +
+      "after dispatching `create-release.yml` for 2.6 the report must go quiet — that is " +
         "the whole point of the last open box on #69",
     );
   });
@@ -689,7 +689,7 @@ describe("a dangling link the manifest has already moved past", () => {
     assert.ok(
       finding,
       "a link `main` can no longer publish is not the same job as one waiting for a " +
-        "tag push, and must not be filed under an instruction that cannot work",
+        "release dispatch, and must not be filed under an instruction that cannot work",
     );
     assert.equal(finding.severity, "error");
     assert.ok(

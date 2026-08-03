@@ -1,0 +1,63 @@
+name: Thursday release report
+
+on:
+  schedule:
+    # Thursday 12:00 BRT (15:00 UTC) — four hours before the scheduled release dispatch.
+    - cron: "0 15 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Refuse to report from anywhere but the default branch
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          echo "::error::thursday-release-report.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          exit 1
+
+      - name: Checkout (full history for release comparisons)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the weekly release report
+        id: report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/weekly-release-report.mjs --markdown-out release-report.md --json-out release-report.json
+
+      - name: Create or update the weekly release issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT_TITLE: ${{ steps.report.outputs.report_title }}
+        run: |
+          gh issue list --state open --limit 100 --json number,title > issues.json
+          NUMBER=$(node -e "const fs=require('fs'); const issues=JSON.parse(fs.readFileSync('issues.json','utf8')); const hit=issues.find((issue) => issue.title === process.env.REPORT_TITLE); process.stdout.write(hit ? String(hit.number) : '');")
+          rm issues.json
+          if [ -n "$NUMBER" ]; then
+            gh issue edit "$NUMBER" --title "$REPORT_TITLE" --body-file release-report.md
+          else
+            gh issue create --title "$REPORT_TITLE" --body-file release-report.md
+          fi
+
+      - name: Publish the report summary
+        run: cat release-report.md >> "$GITHUB_STEP_SUMMARY"

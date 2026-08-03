@@ -139,10 +139,10 @@ describe("the plugin-train commands match what create-release.yml does", () => {
     assert.match(runbook, /`--ref` is not optional/);
   });
 
-  it("looks the run up by event, ref and commit rather than by --limit 1", () => {
+  it("looks the run up by event, branch and commit rather than by --limit 1", () => {
     // `--limit 1` races with any concurrent run, and the evidence then records a green run
     // that is not the release run — which is unfalsifiable after the fact.
-    for (const filter of ["--event push", "--branch vX.Y", "--commit"]) {
+    for (const filter of ["--event workflow_dispatch", "--branch main", "--commit"]) {
       assert.ok(runbook.includes(filter), `run lookup is missing ${filter}`);
     }
     assert.match(runbook, /gh run watch "\$RUN" --exit-status/);
@@ -166,6 +166,11 @@ describe("the plugin-train commands match what create-release.yml does", () => {
     assert.match(runbook, /replaces `grep -rn 'agents\/skills\/'`/);
     assert.match(runbook, /link closure/);
     assert.match(runbook, /Counts in its output are \*\*recorded, not gated\*\*/);
+  });
+
+  it("documents dispatching the release instead of pushing a tag", () => {
+    assert.match(runbook, /gh workflow run create-release\.yml --ref main -f version=X\.Y/);
+    assert.doesNotMatch(runbook, /git tag vX\.Y && git push origin vX\.Y/);
   });
 });
 

@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 /**
- * Which release train a pushed tag belongs to.
+ * Which release train a tag belongs to.
  *
  * The project publishes two products from one repository and one tag namespace:
  *
  *   plugin  — .claude-plugin/plugin.json, released by create-release.yml
  *   canvas  — the srs-navigator extension, released by release-canvas.yml
  *
- * `create-release.yml` triggers on `push: tags: ["v*"]`, which matches both, and the trains
- * cannot be told apart by tag shape: `v2.4.1` is a plugin release and `v1.1.0` is a canvas
- * one. So every canvas release fired the plugin pipeline against a tag that does not match
- * plugin.json — run 28527065984 on tag v1.1.0, the only failure in that workflow's history,
- * four seconds after the canvas release it belonged to succeeded.
+ * The two products still share one tag namespace, and the trains cannot be told apart by tag
+ * shape: `v2.4.1` is a plugin release and `v1.1.0` is a canvas one. The canvas workflow asks
+ * this module whether the tag it is about to create belongs to it before anything leaves the
+ * runner, so a canvas release can never publish over a plugin tag.
  *
  * The tag can only be attributed by asking each train whether it claims it, which is what
  * this module does. Both rules are the pipelines' own, not local restatements:
@@ -21,9 +20,6 @@
  *            same comparison is used here via pluginReleaseTag().
  *   canvas — bump-version.mjs tags `v${version}` verbatim, so the match is exact.
  *
- * Usage (create-release.yml):
- *   node scripts/release-train.mjs --tag v2.6
- *
  * Usage (release-canvas.yml), where the answer must be one particular train:
  *   node scripts/release-train.mjs --tag v1.1.1 --expect canvas
  *
@@ -32,14 +28,9 @@
  * stopping for, and one both trains claim would have the plugin pipeline publish onto a
  * release the canvas job is about to create.
  *
- * `--expect` is what makes the gate bilateral. Gating the plugin pipeline alone leaves the
- * collision unguarded at the end that causes it: release-canvas.yml bumps the version and then
- * creates the tag as part of `gh release create`, so by the time create-release.yml classifies
- * anything the tag already exists. The canvas job therefore asserts the verdict is its own
- * train before anything leaves the runner. The two pipelines act on the verdict differently on
- * purpose: create-release.yml fires on every `v*` tag, most of which are not its business, so
- * it *skips*; release-canvas.yml was dispatched deliberately and is about to publish, so it
- * *fails*.
+ * `--expect` is what makes the gate load-bearing. release-canvas.yml bumps the version and then
+ * creates the tag as part of `gh release create`, so the canvas job has to assert the verdict
+ * is its own train before anything leaves the runner.
  */
 
 import fs from "node:fs";

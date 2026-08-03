@@ -483,13 +483,12 @@ export function danglingTagLinks(links = [], publishedTags = [], { repo = REPO }
  * nothing behind it is invisible — and two states that need opposite instructions get the
  * same one:
  *
- *   A. the tag was never pushed              -> `git tag vX.Y && git push origin vX.Y`
- *   B. the tag was pushed and the run failed -> that command does nothing at all
+ *   A. the release was never dispatched      -> no tag exists yet
+ *   B. the tag exists but the run failed     -> re-dispatching on the tag is the only fix
  *
- * In state B `git tag` aborts on the collision, and pushing a ref that is already up to
- * date sends nothing, so no `push` event fires and create-release.yml cannot re-run. The
- * maintainer follows the advice, sees "Everything up-to-date", and the run stays red.
- * `Create Release` has already failed on a tag push here (run 28527065984, tag v1.1.0).
+ * In state B the tag is already there, so the Thursday scheduler will not recreate it and a
+ * recovery run has to dispatch create-release.yml on that tag explicitly. `Create Release` has
+ * already failed with a tag stranded on origin here (run 28527065984, tag v1.1.0).
  *
  * The plugin train is matched through `pluginTag` so a hand-pushed `v2.6.0` counts as the
  * tag standing in 2.6.0's way; the canvas train tags `v${VERSION}` verbatim and is matched
@@ -560,7 +559,9 @@ export function tagsWithoutRelease({
 export function republishInstruction({ tag, train, advertised } = {}) {
   const noEvent =
     `Re-pushing ${tag} cannot re-trigger anything: git sends nothing for a ref that is ` +
-    "already up to date, so no push event fires.";
+    "already up to date.";
+  const pluginNoEvent = `${noEvent} create-release.yml is dispatch-only, so recovery has to use ` +
+    "workflow_dispatch.";
   if (train === "plugin") {
     const version = (pluginReleaseTag(advertised) ?? tag).replace(/^v/i, "");
     return [
@@ -568,7 +569,7 @@ export function republishInstruction({ tag, train, advertised } = {}) {
         `\`gh workflow run create-release.yml --ref ${tag} -f version=${version}\`.`,
       `--ref pins the provenance: the workflow checks out the dispatched ref, and without it ` +
         `the run packages main as it stands now and attaches that to ${tag}.`,
-      noEvent,
+      pluginNoEvent,
     ];
   }
   if (train === "canvas") {
@@ -892,7 +893,7 @@ export function summarize({
   }
 
   const dangling = danglingTagLinks(tagLinks, tags);
-  // Three jobs, not one. A link waiting for a tag push is cut; a link naming a tag no
+  // Three jobs, not one. A link waiting for a release dispatch is cut; a link naming a tag no
   // pipeline creates is edited; a link for a version the manifest has already passed is
   // *folded into the release that will carry it*. Reporting them together hands the
   // maintainer instructions that cannot all work: cutting v2.6 leaves a v2.6.0 link 404,
@@ -909,7 +910,7 @@ export function summarize({
   });
   const cuttable = dangling.filter((l) => !unpublishable.includes(l) && !stranded.includes(l));
 
-  // Of what is left, a link whose tag is already on origin is not waiting for a tag push:
+  // Of what is left, a link whose tag is already on origin is not waiting for a fresh dispatch:
   // its release run failed. Same evidence, opposite instruction.
   const strandedTags = tagsWithoutRelease({
     manifestVersion,
@@ -1007,8 +1008,8 @@ export function summarize({
       detail: [
         `.claude-plugin/plugin.json: ${manifestVersion}`,
         newestLine(releases.plugin, "plugin"),
-        `Cut it with \`git tag ${pluginReleaseTag(manifestVersion) ?? "vX.Y"} && git push ` +
-          `origin ${pluginReleaseTag(manifestVersion) ?? "vX.Y"}\` (create-release.yml).`,
+        `Dispatch \`create-release.yml\` for ${pluginReleaseTag(manifestVersion)?.replace(/^v/i, "") ?? "X.Y"} ` +
+          `or let the Thursday release cadence pick it up from \`main\`.`,
       ],
     });
   }

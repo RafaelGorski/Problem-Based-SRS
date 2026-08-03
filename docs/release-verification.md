@@ -10,6 +10,7 @@ process lives here; `.github/copilot-instructions.md` keeps the *policy* (which 
 which tag, what the distribution monitor reports) and links back to this file for the steps.
 
 - [Distribution artefact families](#distribution-artefact-families)
+- [Thursday release cadence](#thursday-release-cadence)
 - [Plugin train — cutting `vX.Y`](#plugin-train--cutting-vxy)
 - [Canvas train — cutting `vX.Y.Z`](#canvas-train--cutting-vxyz)
 - [Proving `/live` in the app itself](#proving-live-in-the-app-itself)
@@ -36,42 +37,66 @@ install method cannot be added without either mapping it to a family or failing 
 
 ---
 
+## Thursday release cadence
+
+The normal release rhythm is now:
+
+- **12:00 BRT / 15:00 UTC** — `thursday-release-report.yml` creates or refreshes a weekly
+  report issue with the commits and files waiting for both release trains.
+- **16:00 BRT / 19:00 UTC** — `thursday-release.yml` dispatches the releases for the trains
+  that are ready.
+
+The report is informational, not a gate. If no approval arrives before 16:00 BRT, the
+scheduled dispatch still runs.
+
+The two trains differ on what "ready" means:
+
+- **Plugin train:** ready only when `plugin.json` and `CHANGELOG.md` already advertise an
+  unpublished plugin version. The Thursday report calls this out explicitly when the version
+  is not yet prepared.
+- **Canvas train:** ready whenever unreleased commits exist. The dispatch workflow triggers
+  `release-canvas.yml`, which bumps the patch version itself.
+
+This keeps the manual release paths available for exceptions and recovery, while making
+Thursday the default accumulation point for normal releases. The plugin workflow itself is
+dispatch-only now, so it no longer auto-runs from a tag push outside this cadence.
+
+---
+
 ## Plugin train — cutting `vX.Y`
 
-### Pre-flight, before any tag is pushed
+### Pre-flight, before the release is dispatched
 
-The tag is the point of no return: `create-release.yml` is triggered **by** the tag push, so
-a failed run leaves a tag behind, and re-pushing an existing ref emits no `push` event.
-Everything that can be checked from a clean `main` is checked first.
+The standard cut is a workflow dispatch on `main`, not a tag push. Everything that can be
+checked from a clean `main` is checked first.
 
 ```bash
 git checkout main && git pull --tags
 git rev-parse HEAD                                   # record this SHA in the release issue
 
 python scripts/build-plugin.py build --version X.Y   # validates + packages + prints notes
-node scripts/release-train.mjs --tag vX.Y            # must print exactly: plugin
 node --test evals/tests/*.test.mjs
 python scripts/build-plugin.py validate
 ( cd .github/extensions/srs-navigator && npm test )
 ```
 
 `build-plugin.py` normalizes the version, so a manifest reading `2.6.0` publishes at
-**`v2.6`** — and GitHub serves `/releases/tag/<tag>` by exact name. Push the tag the
-rehearsal named, not the manifest string.
+**`v2.6`** — and GitHub serves `/releases/tag/<tag>` by exact name. Dispatch the workflow
+with the normalized version, not the manifest string with its trailing `.0`.
 
 ### The cut, and watching the right run
 
 ```bash
-git tag vX.Y && git push origin vX.Y
+gh workflow run create-release.yml --ref main -f version=X.Y
 ```
 
 `gh run list --workflow 'Create Release' --limit 1` races: any concurrent run can be the one
 it returns, and the evidence then records a green run that is not the release run. Pin it to
-the event, the ref and the commit that was recorded above:
+the event, the branch and the commit that was recorded above:
 
 ```bash
 RUN=$(gh run list --workflow 'Create Release' \
-        --event push --branch vX.Y --commit "$SHA" \
+        --event workflow_dispatch --branch main --commit "$SHA" \
         --limit 1 --json databaseId --jq '.[0].databaseId')
 gh run watch "$RUN" --exit-status
 gh run view "$RUN" --json headSha,event,headBranch    # assert it is the run you meant
@@ -103,10 +128,10 @@ a grep for the symptom would not have found the next one.
 Counts in its output are **recorded, not gated**. The gates are closure properties, so a
 tenth action does not turn a correct archive red.
 
-### If the run fails with the tag already pushed
+### If the run fails after the workflow created the tag
 
-Do not re-push — git sends nothing for a ref that is up to date, so no `push` event fires.
-Re-publish by dispatch, **pinned to the tag**:
+Do not re-push — git sends nothing for a ref that is up to date, and `create-release.yml` is
+dispatch-only anyway. Re-publish by dispatch, **pinned to the tag**:
 
 ```bash
 gh workflow run create-release.yml --ref vX.Y -f version=X.Y

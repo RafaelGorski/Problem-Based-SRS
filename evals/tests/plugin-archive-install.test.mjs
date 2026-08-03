@@ -1,5 +1,5 @@
 // The plugin release archive is the artifact every `vX.Y` release publishes — and the
-// artifact the release issue #69 keeps asking for (`git tag v2.6 && git push origin v2.6`)
+// artifact the release issue #69 keeps asking for (now produced by `create-release.yml`)
 // will publish. Nothing had ever opened it.
 //
 // Eight passes on #69 proved the two *other* install paths: #73 loaded the canvas archive

@@ -3,10 +3,9 @@
 //   plugin  — .claude-plugin/plugin.json, tagged vX.Y   by create-release.yml
 //   canvas  — VERSION / the extension package.json, tagged vX.Y.Z by release-canvas.yml
 //
-// `create-release.yml` triggers on `push: tags: ["v*"]`, and that glob matches both. The
-// trains cannot be told apart by tag shape either — v2.4.1 is a plugin release and v1.1.0 is
-// a canvas one. So publishing a canvas release fired the plugin pipeline against a tag that
-// does not match plugin.json, and it failed:
+// The trains cannot be told apart by tag shape either — v2.4.1 is a plugin release and
+// v1.1.0 is a canvas one. So publishing a canvas release used to fire the plugin pipeline
+// against a tag that did not match plugin.json, and it failed:
 //
 //   run 28527065984 · tag v1.1.0 · 2026-07-01T15:01:11Z · "Build, validate & package" failed
 //     ::error::validation failed: version mismatch: plugin.json has … but expected 1.1.1
@@ -15,8 +14,9 @@
 // that workflow's entire history, and it is structural: it recurs on every canvas release.
 //
 // This suite pins the classification that keeps the trains apart, and the wiring that makes
-// the release pipeline use it. Both rules are read from the pipelines themselves rather than
-// restated here — a test that hard-codes what a workflow hard-codes is a second copy of it.
+// the canvas release pipeline use it while the plugin train stays dispatch-only. Both rules
+// are read from the pipelines themselves rather than restated here — a test that hard-codes
+// what a workflow hard-codes is a second copy of it.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -212,42 +212,28 @@ describe("release trains — the rules are read from the pipelines, not restated
     );
   });
 
-  it("create-release.yml still triggers on every v* tag", () => {
-    // Kept deliberately: the glob cannot express "tags whose version matches plugin.json", so
-    // the trigger is not where the trains get separated. Asserting it stays broad is what makes
-    // the gate below load-bearing rather than belt-and-braces.
-    assert.match(CREATE_RELEASE, /tags:\s*\n\s*-\s*"v\*"/, "the plugin workflow still sees both trains");
+  it("create-release.yml stays dispatch-only", () => {
+    assert.match(CREATE_RELEASE, /workflow_dispatch:/, "the plugin workflow must still be callable");
+    assert.doesNotMatch(
+      CREATE_RELEASE,
+      /push:\s*\n\s*tags:/,
+      "the plugin workflow must not auto-run from a tag push outside the Thursday cadence",
+    );
   });
 
-  it("create-release.yml classifies the tag before building anything", () => {
+  it("release-canvas.yml still classifies the tag before publishing anything", () => {
     assert.match(
-      CREATE_RELEASE,
+      RELEASE_CANVAS,
       /scripts\/release-train\.mjs/,
-      "the plugin release must ask which train the tag belongs to",
-    );
-  });
-
-  it("create-release.yml releases only when the answer is the plugin train", () => {
-    assert.match(
-      CREATE_RELEASE,
-      /needs\.train\.outputs\.train\s*==\s*'plugin'/,
-      "the publishing job must be gated on the classification, not merely informed by it",
-    );
-    assert.match(CREATE_RELEASE, /needs:\s*train/, "and it must depend on the job that produces it");
-    assert.match(
-      CREATE_RELEASE,
-      /outputs:\s*\n\s*train:/,
-      "the classify job has to publish its verdict for the gate to read",
+      "the canvas release must ask which train the tag belongs to",
     );
   });
 
   it("a manual dispatch still releases the plugin", () => {
-    // workflow_dispatch carries no tag, so classification has nothing to read. The run was
-    // asked for by hand on this workflow, which is the plugin train by definition.
     assert.match(
       CREATE_RELEASE,
-      /github\.event_name.*=.*.push./,
-      "the classifier must only be consulted for tag pushes",
+      /workflow_dispatch:/,
+      "the plugin workflow must still support Thursday dispatch and recovery dispatches",
     );
   });
 
@@ -257,7 +243,7 @@ describe("release trains — the rules are read from the pipelines, not restated
     assert.match(
       runbook,
       /release-train\.mjs/,
-      "the release process section must say the pushed tag is attributed to a train",
+      "the release process section must still say the canvas train checks the tag it is about to create",
     );
     assert.match(
       runbook,
@@ -325,12 +311,11 @@ describe("release trains — both pipelines enforce exclusive ownership", () => 
     );
   });
 
-  it("gates the two workflows differently, on purpose", () => {
-    assert.match(CREATE_RELEASE, /needs\.train\.outputs\.train\s*==\s*'plugin'/, "plugin: skip");
+  it("keeps the two workflows separate, on purpose", () => {
     assert.doesNotMatch(
       CREATE_RELEASE,
-      /--expect/,
-      "the plugin workflow must not hard-fail on the canvas train's tags",
+      /release-train\.mjs/,
+      "the plugin workflow no longer auto-sees foreign tags; the canvas workflow owns the classifier",
     );
     assert.doesNotMatch(
       RELEASE_CANVAS,
@@ -567,12 +552,17 @@ describe("bump-version — the rule is importable without running a release", ()
 
 describe("negative canaries", () => {
   it("an ungated workflow fails the gate assertion", () => {
-    const ungated = CREATE_RELEASE.replace(/^\s*if:\s*needs\.train\.outputs\.train.*$/m, "");
-    assert.notEqual(ungated, CREATE_RELEASE, "the mutation must actually remove the gate");
+    const ungated = CREATE_RELEASE.replace(/workflow_dispatch:\s*\n/, 'push:\n    tags:\n      - "v*"\n  workflow_dispatch:\n');
+    assert.notEqual(ungated, CREATE_RELEASE, "the mutation must actually add the out-of-band trigger");
     assert.doesNotMatch(
+      CREATE_RELEASE,
+      /push:\s*\n\s*tags:/,
+      "the tracked workflow must stay off tag-push automation",
+    );
+    assert.match(
       ungated,
-      /needs\.train\.outputs\.train\s*==\s*'plugin'/,
-      "removing the gate must be detectable — that was the live defect",
+      /push:\s*\n\s*tags:/,
+      "reintroducing the tag trigger must be detectable",
     );
   });
 

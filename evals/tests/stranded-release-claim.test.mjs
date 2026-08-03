@@ -6,8 +6,8 @@
 //
 //   * `git show 69dfe88:.claude-plugin/plugin.json` reads 2.5.0, and that tree ships the
 //     skill, so `validate --expected-version 2.5` passes on it;
-//   * `create-release.yml` checks out with no `ref:`, so a tag push builds *the tagged
-//     commit*, not `main`.
+//   * `create-release.yml` checks out with no `ref:`, so a dispatch pinned to a tag builds
+//     *the tagged commit*, not `main`.
 //
 // `git tag v2.5 <that commit> && git push` therefore publishes v2.5. "The tag can never be
 // created" and "a permanent 404" were overstatements, and a monitor that overstates its case

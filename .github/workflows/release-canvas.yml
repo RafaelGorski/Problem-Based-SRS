@@ -25,10 +25,8 @@ name: Release Canvas Extension
 # Nothing now leaves this runner until the artifact has been built and read, and the tag
 # is created *by* `gh release create --target`, so no tag can outlive a failed publish.
 # That is possible here because this workflow is dispatch-only: the tag never exists
-# beforehand. It is **not** true of create-release.yml, whose `push: tags` trigger means
-# the tag already exists when it runs and `--target` is ignored — that train is tagged by
-# hand on purpose, and adding a tag trigger here would silently turn `--target` into a
-# no-op. Guarded by evals/tests/release-canvas-ordering.test.mjs.
+# beforehand. Keep it that way — adding a `push: tags` trigger here would silently turn
+# `--target` into a no-op. Guarded by evals/tests/release-canvas-ordering.test.mjs.
 #
 # Residual window, stated rather than hidden: if the runner dies between pushing the bump
 # and recording that it pushed, no rollback step runs. Closing that needs a re-run to

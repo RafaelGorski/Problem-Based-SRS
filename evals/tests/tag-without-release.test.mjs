@@ -4,13 +4,13 @@
 // releases** only: `publishedTags` is `fetchPublishedReleases().map(r => r.tag)`. It never
 // reads git refs, so it cannot tell these two states apart:
 //
-//   A. the tag was never pushed      -> `git tag v2.6 && git push origin v2.6` works
-//   B. the tag was pushed and the publish run failed -> the same command does nothing
+//   A. the release was never dispatched -> no tag exists yet
+//   B. the tag exists and the publish run failed -> recovery has to target that tag
 //
 // In state B `git tag` aborts with "tag already exists", and `git push origin v2.6` sends
 // nothing for a ref that is already up to date — so no `push` event fires and
 // create-release.yml cannot re-run. The maintainer follows the advice, observes no change,
-// and the run stays red. `Create Release` has already failed on a tag push in this
+// and the run stays red. `Create Release` has already failed with a stranded tag in this
 // repository (run 28527065984, tag v1.1.0), so this is not a hypothetical.
 //
 // The two trains do not even recover the same way: the plugin train re-publishes by
@@ -188,8 +188,8 @@ describe("the recovery each train actually needs", () => {
     assert.match(
       text,
       /gh workflow run create-release\.yml/,
-      "create-release.yml is triggered by a tag push and by workflow_dispatch; the tag is " +
-        "already there, so dispatch is what is left",
+      "create-release.yml is dispatch-only, and the stranded-tag recovery still has to target " +
+        "that existing tag",
     );
     assert.match(text, /-f version=2\.6/, "the dispatch input must carry the version");
   });
@@ -217,15 +217,14 @@ describe("the recovery each train actually needs", () => {
   it("says why re-pushing the tag does nothing, instead of leaving it to be re-tried", () => {
     assert.match(
       pluginText(),
-      /push event/i,
-      "without the reason, the next maintainer re-runs `git push origin v2.6`, sees " +
-        "'Everything up-to-date', and has no way to know that is the whole story",
+      /dispatch-only/i,
+      "without the reason, the next maintainer retries the wrong git push and has no way to know why nothing changes",
     );
   });
 
   it("never tells the plugin maintainer to push a tag that already exists", () => {
     assert.doesNotMatch(
-      pluginText().replace(/[^\n]*push event[^\n]*/gi, ""),
+      pluginText().replace(/[^\n]*dispatch-only[^\n]*/gi, ""),
       /git push origin v2\.6\b(?!.*cannot)/,
       "that is the instruction this finding exists to replace",
     );
@@ -248,7 +247,7 @@ describe("the recovery each train actually needs", () => {
       "\n",
     );
     assert.doesNotMatch(text, /create-release\.yml|release-canvas\.yml/);
-    assert.match(text, /push event/i);
+    assert.match(text, /re-publish/i);
   });
 });
 
@@ -275,7 +274,7 @@ describe("the instructions are derived from the pipelines, not asserted about th
     const steps = wf.slice(wf.indexOf("jobs:"));
     assert.ok(
       !/^\s*(git tag|- run: git tag)/m.test(steps),
-      "the plugin workflow must never create the tag itself — the tag is its trigger",
+      "the plugin workflow must never hand-create the tag itself; the release command owns it",
     );
   });
 
@@ -338,8 +337,8 @@ describe("summarize routes the stranded state to the instruction that works", ()
     assert.ok(!ids(summary).includes("release-tag-without-release"));
     assert.match(
       detailOf(summary, "plugin-release-missing"),
-      /git tag v2\.6 && git push origin v2\.6/,
-      "state A is the common case and its advice must not be collateral damage",
+      /Dispatch `create-release\.yml`|Dispatch \`create-release\.yml\`/,
+      "state A is the common case and its advice must still name the release path that exists",
     );
   });
 
@@ -586,7 +585,7 @@ describe("the maintainer's runbook says both halves out loud", () => {
 });
 
 describe("negative canaries", () => {
-  it("the plugin instruction fails this suite if it goes back to a tag push", () => {
+  it("the plugin instruction fails this suite if it goes back to a git-tag release path", () => {
     const regressed = "Cut it with `git tag v2.6 && git push origin v2.6`.";
     const real = republishInstruction({
       tag: "v2.6",
