@@ -335,7 +335,8 @@ describe("every step with an executable form names it", () => {
   it("puts the rehearsal before the tag push, which is the only place it can help", () => {
     const rehearsal = runbook.indexOf("release-preflight.mjs");
     const tagPush = runbook.indexOf("git tag vX.Y && git push origin vX.Y");
-    assert.ok(rehearsal !== -1 && tagPush !== -1);
+    assert.ok(rehearsal !== -1, "release-preflight.mjs is not mentioned in the runbook");
+    assert.ok(tagPush !== -1, '"git tag vX.Y && git push origin vX.Y" is not in the runbook');
     assert.ok(rehearsal < tagPush, "the rehearsal is documented after the point of no return");
   });
 
