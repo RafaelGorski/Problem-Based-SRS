@@ -90,7 +90,23 @@ describe("eval case wiring", () => {
       assert.ok(prompt.length > action.text.length, `${file}: prompt did not embed the skill`);
       assert.match(prompt, /SKILL START/, `${file}: prompt is missing the skill delimiters`);
       assert.match(prompt, /INPUT START/, `${file}: prompt is missing the input delimiters`);
+      assert.match(prompt, /USER-CONFIRMED INTERVIEW ANSWERS/, `${file}: prompt must declare interview basis`);
     }
+  });
+
+  it("artifact cases provide explicit confirmed answers, while an empty basis stays interview-first", async () => {
+    const skillsRoot = defaultSkillsRoot();
+    for (const { file, def } of cases) {
+      assert.ok(
+        def.interviewAnswers || file === "_shared.mjs",
+        `${file}: artifact eval must provide user-confirmed interview answers`,
+      );
+    }
+    const action = await loadAction("problems", { skillsRoot });
+    const { buildExecutionPrompt } = await import("../cases/_shared.mjs");
+    const ambiguous = buildExecutionPrompt({ skillText: action.text, input: "ambiguous brief", task: "produce CPs" });
+    assert.match(ambiguous, /None were supplied/);
+    assert.match(ambiguous, /mandatory Discovery Interview/);
   });
 });
 
@@ -132,5 +148,17 @@ describe("eval rubrics are runnable", () => {
     for (const id of ["no-rewrite", "no-stack-complaint"]) {
       assert.ok(failed.includes(id), `expected "${id}" to fail on a technical-debt answer`);
     }
+  });
+
+  it("required brownfield absence checks cannot be overridden by the threshold", () => {
+    const brownfield = cases.find((c) => c.def.name === "brownfield");
+    const answer = "CP.01 CP.02 CP.03 Obligation Expectation Hope duplicate history lead forecast audit " +
+      "22% rewrite PHP monolith jQuery React Salesforce";
+    const graded = gradeRubric(answer, brownfield.def.rubric, { threshold: 0.1 });
+    assert.equal(graded.passed, false);
+    assert.deepEqual(
+      graded.requiredFailures.map((r) => r.id).sort(),
+      ["no-rewrite", "no-stack-complaint"],
+    );
   });
 });

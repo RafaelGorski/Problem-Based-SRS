@@ -16,6 +16,12 @@ export default {
   skill: "problems",
   fixture: "northwind-crm-brownfield.md",
   threshold: 0.75,
+  interviewAnswers: [
+    "The completed Step 0 Business Context for the inherited Northwind CRM was reviewed and confirmed by the user.",
+    "The user confirms the scope is the existing CRM's customer-record, lead, forecast, and audit outcomes.",
+    "Sales representatives, sales managers, marketing, customers, and compliance are the affected stakeholders; the business consequences in the fixture are confirmed.",
+    "The user confirms that the artifact must state only customer/business consequences and must not repeat technical-debt terms or propose a rewrite.",
+  ],
 
   async buildPrompt(skillText) {
     const input = await readFixture(this.fixture);
@@ -25,6 +31,7 @@ export default {
       task:
         "This system already exists and has no specification. Produce the Customer Problems (CP) " +
         "artifact that explains why it must change, derived from the evidence in the digest.",
+      interviewAnswers: this.interviewAnswers,
     });
   },
 
@@ -44,8 +51,8 @@ export default {
     patternCheck("quantified-penalty", "quantifies at least one consequence from the evidence", /\b(22\s?%|1 in 5|6 hours|four hours|two enterprise|60\s?%|renewal)/i, { min: 1 }),
 
     // The brownfield trap: technical debt restated as the customer problem.
-    absenceCheck("no-rewrite", "does not propose a rewrite/replatform as a problem", /\b(rewrite|re-?platform|migrate to microservices|move to microservices)\b/i),
-    absenceCheck("no-stack-complaint", "does not treat the tech stack itself as the problem", /\b(PHP monolith|jQuery|React|Salesforce)\b/i),
+    absenceCheck("no-rewrite", "does not propose a rewrite/replatform as a problem", /\b(rewrite|re-?platform|migrate to microservices|move to microservices)\b/i, { required: true }),
+    absenceCheck("no-stack-complaint", "does not treat the tech stack itself as the problem", /\b(PHP monolith|jQuery|React|Salesforce)\b/i, { required: true }),
     absenceCheck("no-solution-verbs", "does not state problems as build/implement instructions", /\b(build|implement|introduce)\s+(an?\s+)?(new\s+)?(CRM|system|database|microservice)/i),
 
     check("subject-present", "each problem names who suffers it", (t) => {

@@ -50,7 +50,7 @@
 //
 // Exit code is 0 only when every gate passed, so it composes into the release procedure:
 //   node evals/tools/release-preflight.mjs --tag v2.6 --json preflight.json \
-//     && git tag v2.6 && git push origin v2.6
+//     && gh workflow run create-release.yml --ref main -f version=2.6
 
 import fs from "node:fs";
 import os from "node:os";
@@ -589,7 +589,7 @@ export function parseArgs(argv) {
 
 export const USAGE = `Usage: node evals/tools/release-preflight.mjs --tag <tag> [options]
 
-  --tag <tag>      the tag about to be pushed (required)
+  --tag <tag>      the tag about to be published (required)
   --against <ref>  the ref HEAD must equal (default: origin/main; HEAD waives it visibly)
   --root <dir>     repository root
   --no-suites      skip the two test-suite gates
@@ -598,7 +598,8 @@ export const USAGE = `Usage: node evals/tools/release-preflight.mjs --tag <tag> 
   --quiet          suppress the human transcript on stderr
 
 Exits 0 only when every gate passed, so it composes:
-  node evals/tools/release-preflight.mjs --tag v2.6 && git tag v2.6 && git push origin v2.6`;
+  node evals/tools/release-preflight.mjs --tag v2.6 --json preflight.json &&
+  gh workflow run create-release.yml --ref main -f version=2.6`;
 
 /** Render the record as the transcript a release issue can carry. */
 export function formatReport(record) {

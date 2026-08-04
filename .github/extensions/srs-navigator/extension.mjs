@@ -107,6 +107,8 @@ const ACTIONS = [
     { action: "complexity", file: "complexity.md" },
     { action: "full", file: "problem-based-srs.md" },
 ];
+Object.freeze(ACTIONS);
+export { ACTIONS };
 
 // Resolve the backing skill file for an action, defaulting to the full
 // orchestrator when the action is unknown or omitted.

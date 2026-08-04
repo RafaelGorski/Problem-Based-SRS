@@ -19,12 +19,18 @@ export default {
   name: "functional-requirements",
   skill: "functional-requirements",
   threshold: 0.75,
+  interviewAnswers: [
+    "The confirmed Software Vision defines scope boundaries and feature priorities for the RelayDesk support system.",
+    "The user explicitly asks for FRs for CN.01.1, CN.02.1, and CN.03.1 at testable detail.",
+    "The Business Context confirms technical constraints and the requested shall/must level of detail.",
+  ],
 
   async buildPrompt(skillText) {
     return buildExecutionPrompt({
       skillText,
       input: UPSTREAM_CNS,
       task: "Produce Functional Requirements (FR) with a traceability chain FR -> CN -> CP.",
+      interviewAnswers: this.interviewAnswers,
     });
   },
 

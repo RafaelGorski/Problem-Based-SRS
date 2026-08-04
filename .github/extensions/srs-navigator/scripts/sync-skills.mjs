@@ -38,6 +38,9 @@ const FILES = [
   "complexity.md",
   "problem-based-srs.md",
   "validate.md",
+  "live.md",
+  "crm-example.md",
+  "microer-example.md",
 ];
 
 async function main() {

@@ -13,6 +13,7 @@ which tag, what the distribution monitor reports) and links back to this file fo
 - [Thursday release cadence](#thursday-release-cadence)
 - [Plugin train — cutting `vX.Y`](#plugin-train--cutting-vxy)
 - [Canvas train — cutting `vX.Y.Z`](#canvas-train--cutting-vxyz)
+- [Refreshing the skills.sh listing](#refreshing-the-skillssh-listing)
 - [Issue-ledger drift guard for sequenced closure](#issue-ledger-drift-guard-for-sequenced-closure)
 - [Proving `/live` in the app itself](#proving-live-in-the-app-itself)
 - [Deriving an evidence pack](#deriving-an-evidence-pack)
@@ -88,7 +89,9 @@ That single command runs the whole rehearsal and exits non-zero if any gate fail
 executable form of the steps below, which it runs itself:
 
 ```bash
-git checkout main && git pull --tags
+git fetch origin main --tags
+git checkout --detach origin/main
+test -z "$(git status --porcelain)"                  # assert the rehearsal tree is clean
 git rev-parse HEAD                                   # record this SHA in the release issue
 
 python scripts/build-plugin.py build --version X.Y   # validates + packages + prints notes
@@ -124,13 +127,21 @@ gh workflow run create-release.yml --ref main -f version=X.Y
 ```
 
 `gh run list --workflow 'Create Release' --limit 1` races: any concurrent run can be the one
-it returns, and the evidence then records a green run that is not the release run. Pin it to
-the event, the branch and the commit that was recorded above:
+it returns, and the evidence then records a green run that is not the release run. Poll until
+the matching run is indexed, then pin it to the event, the branch and the commit that was
+recorded above:
 
 ```bash
-RUN=$(gh run list --workflow 'Create Release' \
-        --event workflow_dispatch --branch main --commit "$SHA" \
-        --limit 1 --json databaseId --jq '.[0].databaseId')
+for attempt in 1 2 3 4 5; do
+  RUN=$(gh run list --workflow 'Create Release' \
+          --event workflow_dispatch --branch main --commit "$SHA" \
+          --limit 1 --json databaseId,headSha,event,headBranch \
+          --jq ".[] | select(.headSha == \"$SHA\" and .event == \"workflow_dispatch\" and .headBranch == \"main\") | .databaseId" \
+          | head -n 1)
+  test -n "$RUN" && break
+  sleep 5
+done
+test -n "$RUN"
 gh run watch "$RUN" --exit-status
 gh run view "$RUN" --json headSha,event,headBranch    # assert it is the run you meant
 ```
@@ -141,9 +152,13 @@ gh run view "$RUN" --json headSha,event,headBranch    # assert it is the run you
 release serves and load it:
 
 ```bash
-gh release download vX.Y -p 'problem-based-srs-*.zip' -D /tmp/pbsrs-asset
-cd /tmp/pbsrs-asset && unzip -q problem-based-srs-vX.Y.zip -d extracted
-shasum -a 256 problem-based-srs-vX.Y.zip              # record; compare with the asset digest
+gh release download vX.Y -p 'problem-based-srs-*.zip' -D release-asset
+cd release-asset
+LOCAL_SHA=$(sha256sum problem-based-srs-vX.Y.zip | awk '{print $1}')
+gh release view vX.Y --json assets --jq '.assets[] | select(.name == "problem-based-srs-vX.Y.zip") | .digest' \
+  | sed 's/^sha256://' > published-sha.txt
+test "$LOCAL_SHA" = "$(cat published-sha.txt)"       # normalize GitHub's sha256:<hex> digest
+unzip -q problem-based-srs-vX.Y.zip -d extracted
 
 node <repo>/evals/tools/verify-plugin-archive.mjs extracted --json evidence.json
 curl -s -o /dev/null -w '%{http_code}\n' \
@@ -214,6 +229,55 @@ extracted path, the archive version and the SHA-256 of `extension.mjs`, so a scr
 be tied to the bytes that produced it.
 
 ---
+
+## Refreshing the skills.sh listing
+
+The skills.sh listing is a third-party cache. The repository can detect drift, but it
+cannot submit or re-crawl the listing itself. When the collection page reports
+`registry-listing-drift`, a maintainer must re-submit the repository at
+[skills.sh](https://www.skills.sh/rafaelgorski/problem-based-srs), then capture the
+before-and-after checker output. Do this after the plugin and canvas releases that the
+listing should represent are settled; do not close the issue on a green result from a
+stale or unreadable response.
+
+Save the two JSON responses in the evidence workspace (for example,
+`distribution-before.json` and `distribution-after.json`) and retain the submission
+timestamp and the resulting crawl URL or confirmation. When the checker provides its
+`observations.registry` values, use them as the machine-readable evidence. Otherwise,
+attach the parsed values manually: the advertised skill count and declared count must
+both be `1`, the sole name must be `problem-based-srs`, and there must be no
+registry-scoped warning (`surface-unreachable`,
+`registry-listing-unreadable`, or `registry-listing-partial`). A clean run must also keep
+`registry-skill-stale` clear.
+
+```bash
+node scripts/check-distribution.mjs --json > distribution-before.json
+
+# Manual action: submit/refresh the repository on skills.sh and wait for its crawl.
+
+node scripts/check-distribution.mjs --json > distribution-after.json
+node scripts/check-distribution.mjs --strict
+```
+
+Read the after-run output separately from its exit code. `--strict` exits zero when there
+are no **error** findings, but warnings and notices intentionally do not fail it. Record
+these observations alongside the JSON:
+
+- whether the page publishes a description, and if so whether it matches
+  `skills/problem-based-srs/SKILL.md`;
+- whether the page publishes a version. If it does, it must be the skill’s
+  `metadata.version` (`1.3` currently), not the plugin release version. If it does not,
+  record `registry-skill-version-unverifiable` as an accepted unverified axis;
+- whether the rendered body contains all 15 `##` sections, including
+  `Identifier Notation (CANONICAL)`, and does not teach obsolete `FR-001`/`CN-001`
+  outside the explicit accepted-legacy compatibility section; and
+- the manual submission timestamp and the observed crawl change.
+
+The clean-directory `npx skills add` path is a repository clone, not a skills.sh listing
+check, so it cannot serve as after evidence for this procedure. Likewise, local Playwright
+tests do not fetch skills.sh. If the re-crawl cannot be performed, leave the external
+acceptance boxes open and report the manual step as blocked rather than treating a
+repository-only change as completion.
 
 ## Issue-ledger drift guard for sequenced closure
 

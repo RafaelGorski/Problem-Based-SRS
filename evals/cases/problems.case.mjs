@@ -10,6 +10,11 @@ export default {
   skill: "problems",
   fixture: "relaydesk-brief.md",
   threshold: 0.75,
+  interviewAnswers: [
+    "The completed Step 0 Business Context below was reviewed and confirmed by the user.",
+    "The user confirms the scope is RelayDesk customer support and explicitly prioritizes SLA breaches, tribal knowledge, and seven-year audit history.",
+    "Support leadership, frontline agents, and compliance are the affected stakeholders; the consequences in the fixture are confirmed.",
+  ],
 
   async buildPrompt(skillText) {
     const input = await readFixture(this.fixture);
@@ -17,6 +22,7 @@ export default {
       skillText,
       input,
       task: "Produce the Customer Problems (CP) artifact for this business brief.",
+      interviewAnswers: this.interviewAnswers,
     });
   },
 
