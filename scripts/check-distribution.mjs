@@ -24,17 +24,93 @@
  */
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseFrontmatter } from "../evals/lib/skills.mjs";
 import { nextVersion } from "./bump-version.mjs";
+import { verifyCanvasArchive } from "../evals/tools/verify-canvas-archive.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..");
 
 export const REPO = "RafaelGorski/Problem-Based-SRS";
 export const REGISTRY_URL = "https://www.skills.sh/rafaelgorski/problem-based-srs";
+
+/** Read the current canvas release payload without scanning release history. */
+export async function fetchCanvasReleaseAssets({ repo = REPO, tag, fetchImpl, token } = {}) {
+  const doFetch = fetchImpl ?? globalThis.fetch;
+  const headers = { accept: "application/vnd.github+json" };
+  if (token) headers.authorization = `Bearer ${token}`;
+  const url = `https://api.github.com/repos/${repo}/releases/tags/${encodeURIComponent(tag)}`;
+  const res = await doFetch(url, { headers });
+  if (!res.ok) throw new Error(`${url} responded ${res.status}`);
+  const release = await res.json();
+  return (release.assets ?? [])
+    .filter((a) => /\.(?:zip|tar\.gz)$/i.test(a.name ?? "") && a.browser_download_url)
+    .map((a) => ({
+      id: a.id ?? null,
+      name: a.name,
+      size: a.size ?? null,
+      digest: a.digest ?? null,
+      downloadUrl: a.browser_download_url,
+    }));
+}
+
+/** Download and read both current canvas assets; network failures remain unknown. */
+export async function inspectCanvasAssets(assets, { fetchImpl, tempDir } = {}) {
+  const doFetch = fetchImpl ?? globalThis.fetch;
+  const base = tempDir ?? fs.mkdtempSync(path.join(process.env.RUNNER_TEMP || process.env.TEMP || os.tmpdir(), "pbsrs-canvas-monitor-"));
+  const observations = [];
+  for (const asset of assets ?? []) {
+    try {
+      const response = await doFetch(asset.downloadUrl, { headers: { accept: "application/octet-stream" } });
+      if (!response.ok) throw new Error(`${asset.downloadUrl} responded ${response.status}`);
+      const bytes = Buffer.from(await response.arrayBuffer());
+      const file = path.join(base, asset.name);
+      fs.writeFileSync(file, bytes);
+      const record = await verifyCanvasArchive(file);
+      observations.push({ ...asset, localSha256: record.archive.sha256, gates: record.checks, ok: record.ok, files: record.files });
+    } catch (error) {
+      observations.push({ ...asset, error: error.message, ok: null });
+    }
+  }
+  return observations;
+}
+
+export function canvasAssetFindings(observations) {
+  const findings = [];
+  for (const asset of observations ?? []) {
+    if (asset.error) {
+      findings.push({
+        id: "surface-unreachable",
+        severity: "warning",
+        title: `The canvas asset ${asset.name} could not be read`,
+        detail: [asset.error, "This run has no evidence about that asset either way."],
+      });
+      continue;
+    }
+    if (!asset.ok) {
+      findings.push({
+        id: "canvas-asset-drift",
+        severity: "error",
+        title: `${asset.name} does not satisfy the canvas archive contract`,
+        detail: [`asset id ${asset.id ?? "(unknown)"}, ${asset.size ?? "(unknown)"} B, digest ${asset.digest ?? "(not supplied)"}`, ...asset.gates.filter((g) => !g.ok).map((g) => `${g.id}: ${g.detail}`)],
+      });
+    }
+  }
+  const good = observations.filter((a) => a.ok && Array.isArray(a.files));
+  if (good.length > 1) {
+    const first = JSON.stringify([...good[0].files].sort());
+    for (const asset of good.slice(1)) {
+      if (JSON.stringify([...asset.files].sort()) !== first) {
+        findings.push({ id: "canvas-asset-mismatch", severity: "error", title: "Canvas release assets contain different files", detail: [`${good[0].name} and ${asset.name} disagree after stripping their archive roots.`] });
+      }
+    }
+  }
+  return findings;
+}
 
 /** Files that publish release links to readers. */
 export const LINK_SOURCES = ["README.md", "CHANGELOG.md", "docs/index.html", "docs/docs.html"];
@@ -724,11 +800,13 @@ export function summarize({
   repoTags = null,
   manifestVersion = null,
   canvasVersion = null,
+  canvasAssets = [],
   errors = [],
 } = {}) {
   const findings = [];
   const unverified = [];
   const failed = new Set(errors.map((e) => e.surface));
+  const canvasAssetObservations = canvasAssets;
   // One list, one truth. When the caller has the release titles, they also carry the tags;
   // accepting a second, possibly disagreeing tag list would let a summary report a link as
   // resolved while the same release is reported as missing.
@@ -761,6 +839,9 @@ export function summarize({
         ],
       });
     }
+
+    const canvasAssetIssues = canvasAssetFindings(canvasAssetObservations);
+    findings.push(...canvasAssetIssues);
   } else if (listing.declaredCount !== null && listing.declaredCount !== listing.skills.length) {
     findings.push({
       id: "registry-listing-partial",
@@ -1055,6 +1136,7 @@ export function summarize({
     findings,
     unverified,
     releases,
+    observations: { canvasAssets: canvasAssetObservations },
   };
 }
 
@@ -1254,6 +1336,23 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
     errors.push({ surface: "tags", message: `GitHub tags API: ${err.message}` });
   }
 
+  let canvasAssets = [];
+  const currentCanvasTag = publishedReleases.find(
+    (release) => releaseTrain(release) === "canvas" && release.tag === exactTag(local.canvasVersion, publishedReleases.map((r) => r.tag)),
+  );
+  if (currentCanvasTag) {
+    try {
+      const assets = await fetchCanvasReleaseAssets({
+        tag: currentCanvasTag.tag,
+        fetchImpl,
+        token: env.GITHUB_TOKEN || env.GH_TOKEN,
+      });
+      canvasAssets = await inspectCanvasAssets(assets, { fetchImpl });
+    } catch (err) {
+      errors.push({ surface: "canvas release assets", message: `Canvas release assets: ${err.message}` });
+    }
+  }
+
   const summary = summarize({
     listing,
     ...local,
@@ -1262,6 +1361,7 @@ export async function main(argv = [], { fetchImpl, env = process.env, root = REP
     publishedReleases,
     repoTags,
     errors,
+    canvasAssets,
   });
   const output = asJson ? JSON.stringify(summary, null, 2) : renderReport(summary);
   console.log(output);

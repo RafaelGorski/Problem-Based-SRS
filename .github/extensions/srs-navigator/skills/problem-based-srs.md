@@ -88,15 +88,15 @@ artifact, and follow it exactly:
 
 | Action | Reference file |
 |--------|----------------|
-| `business-context` | [`reference/business-context.md`](reference/business-context.md) |
-| `problems` | [`reference/problems.md`](reference/problems.md) |
-| `software-glance` | [`reference/software-glance.md`](reference/software-glance.md) |
-| `needs` | [`reference/needs.md`](reference/needs.md) |
-| `software-vision` | [`reference/software-vision.md`](reference/software-vision.md) |
-| `functional-requirements` | [`reference/functional-requirements.md`](reference/functional-requirements.md) |
-| `validate` | [`reference/validate.md`](reference/validate.md) |
-| `complexity` | [`reference/complexity.md`](reference/complexity.md) |
-| `live` | [`reference/live.md`](reference/live.md) — opens the SRS Navigator canvas (`/live`) |
+| `business-context` | [`reference/business-context.md`](business-context.md) |
+| `problems` | [`reference/problems.md`](problems.md) |
+| `software-glance` | [`reference/software-glance.md`](software-glance.md) |
+| `needs` | [`reference/needs.md`](needs.md) |
+| `software-vision` | [`reference/software-vision.md`](software-vision.md) |
+| `functional-requirements` | [`reference/functional-requirements.md`](functional-requirements.md) |
+| `validate` | [`reference/validate.md`](validate.md) |
+| `complexity` | [`reference/complexity.md`](complexity.md) |
+| `live` | [`reference/live.md`](live.md) — opens the SRS Navigator canvas (`/live`) |
 
 For a **full** run (bare `/problem-based-srs`), work through the steps in order,
 reading each `reference/<action>.md` as you reach that step.
@@ -232,7 +232,7 @@ The business context captures: project identity, business principles (Mandatory/
 - Questions must reference the specific context at hand — never ask generic questions
 - **Starting from an existing system?** Scanning the repository is legitimate *preparation* — it
   gives you evidence to assert and confirm — but it is not a shortcut past the interview. See
-  **Mode 3: Brownfield Discovery** in [`reference/problems.md`](reference/problems.md).
+  **Mode 3: Brownfield Discovery** in [`reference/problems.md`](problems.md).
 
 ### Starting Fresh
 When user provides business context or problem description:
@@ -487,7 +487,7 @@ For deeper quality analysis, users can explicitly invoke the `/problem-based-srs
 ## Examples
 
 For complete walkthroughs, see:
-- [CRM Example](reference/crm-example.md) — Business domain (Customer Relationship Management)
-- [MicroER Example](reference/microer-example.md) — Technical domain (Renewable Energy System)
+- [CRM Example](crm-example.md) — Business domain (Customer Relationship Management)
+- [MicroER Example](microer-example.md) — Technical domain (Renewable Energy System)
 
 **Run actions individually** based on current step to minimize context usage.

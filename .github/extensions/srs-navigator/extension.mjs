@@ -96,7 +96,7 @@ const derivedWorkspacePath = isProjectExtension ? resolve(__dirname, "..", "..",
 // through a SINGLE tool/command (`problem_based_srs` / `/problem-based-srs`) that
 // dispatches to a step via an `action` argument, instead of one command per step.
 // Each action maps to the canonical skill markdown that backs it.
-const ACTIONS = [
+export const ACTIONS = Object.freeze([
     { action: "business-context", file: "business-context.md" },
     { action: "problems", file: "problems.md" },
     { action: "software-glance", file: "software-glance.md" },
@@ -106,7 +106,7 @@ const ACTIONS = [
     { action: "validate", file: "validate.md" },
     { action: "complexity", file: "complexity.md" },
     { action: "full", file: "problem-based-srs.md" },
-];
+]);
 
 // Resolve the backing skill file for an action, defaulting to the full
 // orchestrator when the action is unknown or omitted.
