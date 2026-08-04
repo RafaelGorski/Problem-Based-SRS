@@ -43,6 +43,10 @@ import {
 import { buildManualEditEvidence } from './live-manual-edit-evidence.mjs';
 import { commitManualEdits } from './live-commit-manual-edits.mjs';
 import {
+  isAllowedLiveScriptRequest,
+  isAllowedLocalOrigin,
+} from './live-server-security.mjs';
+import {
   applyDeferredSvelteComponentAccepts,
   removeAllSvelteComponentSessions,
 } from './live-svelte-component.mjs';
@@ -1246,7 +1250,16 @@ function statOrNull(filePath) {
 function createRequestHandler({ detectScript, sessionPath, livePath }) {
   return (req, res) => {
     const url = new URL(req.url, `http://localhost:${state.port}`);
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    if (!isAllowedLocalOrigin(origin)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden origin');
+      return;
+    }
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
@@ -1255,6 +1268,11 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
 
     // --- Scripts ---
     if (p === '/live.js') {
+      if (!isAllowedLiveScriptRequest(req.headers)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden cross-site script request');
+        return;
+      }
       // Re-read from disk each request so edits to live-browser.js land on
       // the next tab reload. No-store headers prevent browser caching across
       // sessions — during iteration, a cached old script silently breaks
