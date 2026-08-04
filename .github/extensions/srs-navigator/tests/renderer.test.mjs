@@ -9,7 +9,7 @@ import { renderGraphHtml } from "../lib/renderer.mjs";
 
 const EXTENSION_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const D3_ASSET_PATH = path.join(EXTENSION_ROOT, "assets", "d3.v7.9.0.min.js");
-const D3_SHA384 = "0A396803CCB4D3ED520C05248ECD3DF4F55F9D8D8A9830B60599F0B3D921F03FE55F5B38EB0E843E1A5776A31F8CAEA2";
+const D3_SHA384 = "D68D0867C3B9785AFDE2050018A7874152D00ED38DD92B9647201CBC47C224A393A6A1F30C0A01C3D28E2FB6CCEF3AAF";
 
 describe("renderGraphHtml", () => {
   const sampleGraph = {
