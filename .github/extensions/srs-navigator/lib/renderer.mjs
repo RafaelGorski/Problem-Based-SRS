@@ -8,12 +8,14 @@ import { dirname, resolve } from 'node:path';
 import { graphMetricsSource } from './graph-metrics.mjs';
 
 const REPO_URL = 'https://github.com/RafaelGorski/Problem-Based-SRS';
+const EXTENSION_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const D3_SOURCE = readFileSync(resolve(EXTENSION_ROOT, 'assets', 'd3.v7.9.0.min.js'), 'utf8');
 
 // Read the canvas app version from package.json once at module load so the
 // on-screen badge stays in sync with the published extension version.
 const APP_VERSION = (() => {
   try {
-    const pkgPath = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'package.json');
+    const pkgPath = resolve(EXTENSION_ROOT, 'package.json');
     return JSON.parse(readFileSync(pkgPath, 'utf8')).version || '';
   } catch {
     return '';
@@ -57,7 +59,7 @@ export function renderGraphHtml(graphData, options = {}) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <script src="https://d3js.org/d3.v7.min.js"><\/script>
+  <script>${D3_SOURCE.replace(/<\/script/gi, '<\\/script')}</script>
   <style>
     :root {
       --background: oklch(0.975 0.003 240);
