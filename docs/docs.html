@@ -245,7 +245,7 @@
                             <h3>Build &amp; release</h3>
                             <p>The methodology plugin ships through a single build script that validates the manifest and every skill, then packages a versioned artifact.</p>
                             <pre><code>python scripts/build-plugin.py build --version X.Y
-git tag vX.Y &amp;&amp; git push origin vX.Y</code></pre>
+gh workflow run create-release.yml --ref main -f version=X.Y</code></pre>
                             <p>The SRS Navigator app releases on its own <code>vX.Y.Z</code> track, gated by <code>npm test</code>. The two pipelines never share a tag.</p>
                         </div>
                     </div>

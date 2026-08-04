@@ -38,6 +38,7 @@ import {
   notesHeadings,
   parseArgs,
   parseGithubOutput,
+  resolveCommand,
   runPreflight,
   sha256,
 } from "../tools/release-preflight.mjs";
@@ -298,6 +299,40 @@ describe("the small readers", () => {
       { cwd: repoRoot, env: { PBSRS_PROBE: "yes" } },
     );
     assert.equal(withEnv.stdout, "yes");
+  });
+
+  it("runs a PATH-resolved package-manager shim, which is what the canvas gate does", () => {
+    // The canary for the defect this guards. `canvas-suite-is-green` runs `npm test`, and on
+    // Windows npm is a `.cmd` shim: `spawnSync("npm", …)` raises ENOENT and naming the
+    // resolved `npm.cmd` raises EINVAL, because Node will not CreateProcess a batch file.
+    // `normalizeResult` maps both to 127, so the gate reported red for a green suite — on the
+    // platform this repository is maintained from. Asserting on `npm --version` rather than on
+    // any platform detail keeps the test meaningful everywhere: it fails wherever the runner
+    // cannot execute the one kind of command the gate actually needs.
+    const npm = defaultRunner("npm", ["--version"]);
+    assert.equal(npm.status, 0, `expected npm to run, got ${npm.status}: ${npm.stderr}`);
+    assert.match(npm.stdout.trim(), /^\d+\.\d+\.\d+/);
+  });
+
+  it("never hands back a batch shim as a path, and leaves an unresolvable command bare", () => {
+    // Two halves of the same rule. A `.cmd`/`.bat` must come back as shell:true, because the
+    // path form is unspawnable; and a command that resolves to nothing must come back bare
+    // with shell:false, so spawnSync still raises ENOENT. Routing the missing case through a
+    // shell would turn it into the shell's "not recognized" exit code, and `findPython`'s
+    // ability to tell "no interpreter" from "the packager is broken" depends on that
+    // difference surviving.
+    const resolved = resolveCommand("npm");
+    assert.ok(!/\.(cmd|bat)$/i.test(resolved.command));
+    if (resolved.shell) assert.equal(resolved.command, "npm");
+
+    const missing = resolveCommand("pbsrs-no-such-executable-xyz");
+    assert.deepEqual(missing, { command: "pbsrs-no-such-executable-xyz", shell: false });
+
+    // An absolute path is never re-resolved, whatever it points at.
+    assert.deepEqual(resolveCommand(process.execPath), {
+      command: process.execPath,
+      shell: false,
+    });
   });
 });
 

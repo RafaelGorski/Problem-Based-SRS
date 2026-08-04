@@ -121,6 +121,12 @@ describe("the artefact-families table is derived from the README, not asserted a
 /* -------------------------------------------------- commands derived from the workflows */
 
 describe("the plugin-train commands match what create-release.yml does", () => {
+  it("asserts a clean origin/main input before recording the tag SHA", () => {
+    assert.match(runbook, /git fetch origin main --tags/);
+    assert.match(runbook, /git checkout --detach origin\/main/);
+    assert.match(runbook, /git status --porcelain/);
+  });
+
   it("pins the recovery dispatch to the tag, because the workflow checks out the ref", () => {
     // Derived, not restated: the workflow's checkout has no `ref:`, so it takes the
     // dispatched ref, and `gh workflow run` defaults to the default branch. If someone adds
@@ -151,6 +157,7 @@ describe("the plugin-train commands match what create-release.yml does", () => {
       !/gh run list[^\n]*--limit 1 --json databaseId[^\n]*\n[^\n]*gh run watch\s*$/m.test(runbook),
       "the runbook must record which run it watched",
     );
+    assert.match(runbook, /for attempt in 1 2 3 4 5; do/);
   });
 
   it("names the tag the pipeline creates, not the manifest string", () => {
@@ -161,6 +168,10 @@ describe("the plugin-train commands match what create-release.yml does", () => {
   it("verifies the downloaded asset, not the repository at that ref", () => {
     assert.match(runbook, /gh release download vX\.Y -p 'problem-based-srs-\*\.zip'/);
     assert.match(runbook, /npx skills add.*clones the repository; it never opens the release/s);
+    const hash = runbook.indexOf("LOCAL_SHA=$(sha256sum");
+    const extract = runbook.indexOf("unzip -q problem-based-srs-vX.Y.zip", hash);
+    assert.ok(hash >= 0 && extract > hash, "hash the downloaded archive before extracting it");
+    assert.match(runbook, /sed 's\/\^sha256:\/\/' > published-sha\.txt/);
   });
 
   it("explains the link closure instead of the grep it replaced", () => {

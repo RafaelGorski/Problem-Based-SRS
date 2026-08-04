@@ -59,14 +59,6 @@ async function main() {
 
   console.log(`Done: ${result.updated.length} updated, ${result.failed.length} failed.`);
 
-  // The standalone extension intentionally ships a flat skills/ directory. Rewrite links
-  // from the canonical reference/ layout to that shipped layout while preserving all files.
-  for (const file of FILES) {
-    const target = resolve(skillsDir, file);
-    const text = await readFile(target, "utf-8");
-    await writeFile(target, text.replaceAll("(reference/", "("), "utf-8");
-  }
-
   process.exit(result.failed.length === 0 ? 0 : 1);
 }
 
