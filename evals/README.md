@@ -105,6 +105,12 @@ Each `cases/*.case.mjs` builds a **hermetic prompt** that injects the skill's ow
 `SKILL.md` plus a fixture brief, runs it through the Copilot CLI, and grades the
 result with a deterministic rubric and (optionally) an LLM judge.
 
+Artifact cases include explicit user-confirmed interview answers that satisfy the
+action's documented Skip Conditions. This does not weaken the mandatory Discovery
+Interview: an ambiguous prompt with no confirmed answers must still produce the
+interview. The runner reports `pass`, `fail`, `error`, or `skipped`; provider/process
+errors are never scored as skill behavior.
+
 Cases cover both directions of travel:
 
 | Case | Direction | Fixture | Guards against |
@@ -127,11 +133,14 @@ Run them (all paths are **repo-root relative**, like the offline commands above)
 ```bash
 RUN_SKILL_EVALS=1 node evals/run-evals.mjs
 node evals/run-evals.mjs --force                 # ignore the env gate
-node evals/run-evals.mjs needs                   # a single case
+node evals/run-evals.mjs needs                   # a single case (positional filter)
+node evals/run-evals.mjs --force brownfield      # targeted run; --case is invalid
 node evals/run-evals.mjs --no-judge              # rubric only
 node evals/run-evals.mjs --verbose               # show prompt, run metadata, artifact, every check
 node evals/run-evals.mjs -vv                     # even more verbose (no truncation)
 ```
+
+Unknown options fail non-zero rather than silently broadening a targeted run.
 
 PowerShell helper:
 

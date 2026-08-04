@@ -22,12 +22,19 @@ export default {
   name: "needs",
   skill: "needs",
   threshold: 0.75,
+  interviewAnswers: [
+    "The upstream CP artifact is clearly classified as Obligation/Expectation and was reviewed and confirmed by the user.",
+    "The confirmed Software Glance defines RelayDesk's support-ticket, knowledge, and audit boundaries.",
+    "The user explicitly asks to address CP.01, CP.02, and CP.03 as outcome-level needs.",
+    "The user confirms the needs must explicitly cover shared trustworthy knowledge reuse and a complete auditable history.",
+  ],
 
   async buildPrompt(skillText) {
     return buildExecutionPrompt({
       skillText,
       input: UPSTREAM_CPS,
       task: "Produce the Customer Needs (CN) artifact, tracing each CN to a CP.",
+      interviewAnswers: this.interviewAnswers,
     });
   },
 

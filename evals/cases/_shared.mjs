@@ -26,9 +26,22 @@ export async function readFixture(name) {
  * @param {string} args.skillText  full SKILL.md content
  * @param {string} args.input      the fixture / upstream artifact
  * @param {string} args.task       one-line instruction of what to produce
+ * @param {string[]} [args.interviewAnswers] user-confirmed answers satisfying skip conditions
  * @returns {string}
  */
-export function buildExecutionPrompt({ skillText, input, task }) {
+export function buildExecutionPrompt({ skillText, input, task, interviewAnswers = [] }) {
+  const confirmation = interviewAnswers.length
+    ? [
+      "===== USER-CONFIRMED INTERVIEW ANSWERS START =====",
+      "The user explicitly confirmed these answers for this evaluation. Treat them as the user's own prompt and use them only to satisfy the action's documented Skip Conditions:",
+      ...interviewAnswers.map((answer) => `- ${answer}`),
+      "===== USER-CONFIRMED INTERVIEW ANSWERS END =====",
+    ]
+    : [
+      "===== USER-CONFIRMED INTERVIEW ANSWERS =====",
+      "None were supplied. The input is intentionally ambiguous; conduct the mandatory Discovery Interview and do not fabricate an artifact.",
+      "===== USER-CONFIRMED INTERVIEW ANSWERS END =====",
+    ];
   return [
     "You are executing a single step of the Problem-Based SRS methodology.",
     "Follow the SKILL instructions below EXACTLY, including its notation and ID formats.",
@@ -41,6 +54,8 @@ export function buildExecutionPrompt({ skillText, input, task }) {
     "===== SKILL START =====",
     skillText,
     "===== SKILL END =====",
+    "",
+    ...confirmation,
     "",
     "===== INPUT START =====",
     input,

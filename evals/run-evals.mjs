@@ -27,17 +27,25 @@ import { gradeRubric, llmJudge } from "./lib/graders.mjs";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CASES_DIR = path.join(HERE, "cases");
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const opts = { force: false, judge: true, model: undefined, timeoutMs: 240000, verbose: 0, filters: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--force") opts.force = true;
     else if (a === "--no-judge") opts.judge = false;
-    else if (a === "--model") opts.model = argv[++i];
-    else if (a === "--timeout") opts.timeoutMs = Number(argv[++i]) * 1000;
+    else if (a === "--model") {
+      if (!argv[i + 1] || argv[i + 1].startsWith("-")) throw new Error("--model requires a value");
+      opts.model = argv[++i];
+    }
+    else if (a === "--timeout") {
+      const value = Number(argv[++i]);
+      if (!Number.isFinite(value) || value <= 0) throw new Error("--timeout requires a positive number");
+      opts.timeoutMs = value * 1000;
+    }
     else if (a === "--verbose" || a === "-v") opts.verbose += 1;
     else if (a === "-vv") opts.verbose += 2;
     else if (!a.startsWith("--")) opts.filters.push(a);
+    else throw new Error(`unknown option: ${a}`);
   }
   return opts;
 }
@@ -115,6 +123,14 @@ async function runCase(c, opts, skillsRoot) {
   const artifact = run.text || "";
   logVerboseRun(c, run, opts);
 
+  if (run.code !== 0 || !run.result) {
+    return {
+      name: c.name, artifact, rubric: gradeRubric(artifact, c.rubric, { threshold: c.threshold ?? 0.7 }),
+      judge: null, status: "error", passed: false, durationMs: run.durationMs, usage: run.result?.usage,
+      error: run.code !== 0 ? `copilot exited with code ${run.code}` : "copilot returned no result event",
+    };
+  }
+
   const rubric = gradeRubric(artifact, c.rubric, { threshold: c.threshold ?? 0.7 });
 
   let judge = null;
@@ -127,18 +143,21 @@ async function runCase(c, opts, skillsRoot) {
         invoke: (p, o) => runCopilot(p, { ...o, timeoutMs: opts.timeoutMs, cwd: HERE }),
       });
     } catch (err) {
-      judge = { score: 0, reasoning: `judge error: ${err.message}`, passed: false };
+      return {
+        name: c.name, artifact, rubric, judge: null, status: "error", passed: false,
+        durationMs: run.durationMs, usage: run.result?.usage, error: `judge error: ${err.message}`,
+      };
     }
   }
 
   const passed = rubric.passed && (judge ? judge.passed : true);
-  return { name: c.name, artifact, rubric, judge, passed, durationMs: run.durationMs, usage: run.result?.usage };
+  return { name: c.name, artifact, rubric, judge, status: passed ? "pass" : "fail", passed, durationMs: run.durationMs, usage: run.result?.usage };
 }
 
 function printReport(results, opts = { verbose: 0 }) {
   console.log("\n================ Skill Eval Report ================\n");
   for (const r of results) {
-    const status = r.passed ? "PASS" : "FAIL";
+    const status = (r.status ?? (r.passed ? "pass" : "fail")).toUpperCase();
     console.log(`[${status}] ${r.name}  rubric=${fmtPct(r.rubric.ratio)} (${r.rubric.score}/${r.rubric.maxScore})` +
       (r.judge ? `  judge=${fmtPct(r.judge.score)}` : "") +
       `  ${(r.durationMs / 1000).toFixed(1)}s`);
@@ -153,6 +172,7 @@ function printReport(results, opts = { verbose: 0 }) {
     if (r.judge && (opts.verbose >= 1 || !r.judge.passed)) {
       console.log(`       judge (${fmtPct(r.judge.score)}): ${r.judge.reasoning}`);
     }
+    if (r.error) console.log(`       error: ${r.error}`);
   }
   const passCount = results.filter((r) => r.passed).length;
   console.log(`\n${passCount}/${results.length} cases passed.\n`);
@@ -163,11 +183,11 @@ async function main() {
   const gate = opts.force || process.env.RUN_SKILL_EVALS === "1";
 
   if (!isCopilotAvailable()) {
-    console.error("copilot CLI not found on PATH. Install @github/copilot to run live evals.");
+    console.error("[ERROR] copilot CLI not found on PATH. Install @github/copilot to run live evals.");
     process.exit(2);
   }
   if (!gate) {
-    console.log("Live skill evals are opt-in (they call the model).");
+    console.log("[SKIPPED] Live skill evals are opt-in (they call the model).");
     console.log("Run with RUN_SKILL_EVALS=1 or pass --force. Use scripts\\run-evals.ps1 for convenience.");
     process.exit(0);
   }
@@ -189,7 +209,7 @@ async function main() {
       results.push(r);
     } catch (err) {
       console.log(`error: ${err.message}`);
-      results.push({ name: c.name, passed: false, rubric: { ratio: 0, score: 0, maxScore: 0, results: [] }, judge: null, durationMs: 0 });
+      results.push({ name: c.name, passed: false, status: "error", error: err.message, rubric: { ratio: 0, score: 0, maxScore: 0, results: [] }, judge: null, durationMs: 0 });
     }
   }
 
@@ -197,7 +217,9 @@ async function main() {
   process.exit(results.every((r) => r.passed) ? 0 : 1);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === HERE + path.sep + "run-evals.mjs") {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
