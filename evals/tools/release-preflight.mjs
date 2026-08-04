@@ -113,6 +113,66 @@ export function normalizeResult(result) {
 }
 
 /**
+ * Resolve how a command must be spawned on this platform.
+ *
+ * Windows cannot execute a PATH-resolved shim the way POSIX can, and both of the obvious
+ * spellings fail in ways that look like a broken repository rather than a broken call:
+ * `spawnSync("npm", …)` raises ENOENT, and naming the resolved `npm.cmd` directly raises
+ * EINVAL, because Node refuses to `CreateProcess` a batch file. `normalizeResult` maps both
+ * to 127, so `canvas-suite-is-green` failed on Windows **whatever the canvas suite did** —
+ * a rehearsal reporting a red gate for a green suite, on the platform this repository is
+ * maintained from.
+ *
+ * A blanket `shell: true` would fix npm and break something more important: a genuinely
+ * missing executable would come back as the shell's "not recognized" exit code instead of
+ * ENOENT, so "the tool is absent" and "the tool ran and failed" would stop being
+ * distinguishable. That distinction is the reason `findPython` can tell those apart. So the
+ * shell is used only where it is the only option: a command that resolves to a `.cmd`/`.bat`
+ * shim. An unresolvable command is deliberately left bare, to keep its ENOENT.
+ *
+ * @param {string} command
+ * @param {NodeJS.ProcessEnv} [env]
+ * @returns {{command:string, shell:boolean}}
+ */
+export function resolveCommand(command, env = process.env) {
+  if (process.platform !== "win32") return { command, shell: false };
+  if (path.isAbsolute(command) || /[\\/]/.test(command) || path.extname(command)) {
+    return { command, shell: false };
+  }
+
+  const extensions = (env.PATHEXT ?? ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean);
+  const directories = (env.Path ?? env.PATH ?? "").split(path.delimiter).filter(Boolean);
+
+  for (const directory of directories) {
+    for (const extension of extensions) {
+      const candidate = path.join(directory, command + extension);
+      if (!fs.existsSync(candidate)) continue;
+      // Batch shims are the only case Node cannot spawn directly.
+      return /\.(cmd|bat)$/i.test(extension)
+        ? { command, shell: true }
+        : { command: candidate, shell: false };
+    }
+  }
+
+  return { command, shell: false };
+}
+
+/**
+ * Quote one argument for `cmd.exe`.
+ *
+ * Only reached on the shell path. Node's own warning (DEP0190) is that `args` passed
+ * alongside `shell: true` are concatenated without escaping; quoting here and passing a
+ * single command string means nothing is concatenated on our behalf.
+ *
+ * @param {string} argument
+ * @returns {string}
+ */
+function quoteForCmd(argument) {
+  if (argument.length > 0 && !/[\s"^&|<>()%!]/.test(argument)) return argument;
+  return `"${argument.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/, "$1$1")}"`;
+}
+
+/**
  * Run one command and return its result. Injected everywhere so the rehearsal's own logic is
  * testable without a git remote, a Python interpreter or a network.
  *
@@ -122,12 +182,20 @@ export function normalizeResult(result) {
  * @returns {{status:number, stdout:string, stderr:string}}
  */
 export function defaultRunner(command, args, options = {}) {
+  const env = options.env ? { ...process.env, ...options.env } : process.env;
+  const resolved = resolveCommand(command, env);
+  const [file, argv] = resolved.shell
+    ? [[resolved.command, ...args].map(quoteForCmd).join(" "), []]
+    : [resolved.command, args];
+
   return normalizeResult(
-    spawnSync(command, args, {
+    spawnSync(file, argv, {
       cwd: options.cwd,
-      env: options.env ? { ...process.env, ...options.env } : process.env,
+      env,
       encoding: "utf8",
       maxBuffer: 64 * 1024 * 1024,
+      shell: resolved.shell,
+      windowsHide: true,
     }),
   );
 }
