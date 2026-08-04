@@ -51,13 +51,20 @@ jobs:
 
       - name: Resolve raw version
         id: raw
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
+          if [ -n "$VERSION_INPUT" ]; then
+            VERSION="$VERSION_INPUT"
           else
             VERSION="$(python -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")"
           fi
-          echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+          VERSION="${VERSION#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
+            echo "::error::Invalid release version: '$VERSION'. Expected X.Y or X.Y.Z."
+            exit 1
+          fi
+          printf 'version=%s\n' "$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build, validate & package
         id: build
@@ -65,14 +72,18 @@ jobs:
 
       - name: Determine release notes
         id: notes
+        env:
+          RELEASE_BODY: ${{ inputs.release_body }}
         run: |
-          if [ -n "${{ inputs.release_body }}" ]; then
+          if [ -n "$RELEASE_BODY" ]; then
+            delimiter="EOF_NOTES_$(uuidgen)"
+            while [[ "$RELEASE_BODY" == *"$delimiter"* ]]; do
+              delimiter="EOF_NOTES_$(uuidgen)"
+            done
             {
-              echo "body<<EOF_NOTES"
-              cat <<'USER_NOTES'
-          ${{ inputs.release_body }}
-          USER_NOTES
-              echo "EOF_NOTES"
+              printf 'body<<%s\n' "$delimiter"
+              printf '%s\n' "$RELEASE_BODY"
+              printf '%s\n' "$delimiter"
             } >> "$GITHUB_OUTPUT"
           else
             {

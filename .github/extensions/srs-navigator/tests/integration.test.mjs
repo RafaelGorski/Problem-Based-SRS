@@ -131,7 +131,8 @@ describe("Integration: HTTP server serving canvas", () => {
     assert.equal(res.headers.get("content-type"), "text/html; charset=utf-8");
     const body = await res.text();
     assert.ok(body.includes("<!DOCTYPE html>"));
-    assert.ok(body.includes("d3.v7.min.js"));
+    assert.ok(body.includes("// https://d3js.org v7.9.0"));
+    assert.ok(!body.includes("https://d3js.org/d3.v7.min.js"));
   });
 
   it("serves JSON state on /api/state", async () => {

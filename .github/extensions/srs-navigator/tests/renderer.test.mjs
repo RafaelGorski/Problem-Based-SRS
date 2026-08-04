@@ -1,7 +1,15 @@
 // Unit tests for the HTML renderer
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { renderGraphHtml } from "../lib/renderer.mjs";
+
+const EXTENSION_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const D3_ASSET_PATH = path.join(EXTENSION_ROOT, "assets", "d3.v7.9.0.min.js");
+const D3_SHA384 = "D68D0867C3B9785AFDE2050018A7874152D00ED38DD92B9647201CBC47C224A393A6A1F30C0A01C3D28E2FB6CCEF3AAF";
 
 describe("renderGraphHtml", () => {
   const sampleGraph = {
@@ -20,9 +28,20 @@ describe("renderGraphHtml", () => {
     assert.ok(html.includes("</html>"));
   });
 
-  it("includes D3.js script", () => {
+  it("inlines the pinned local D3 asset instead of loading mutable remote code", () => {
     const html = renderGraphHtml(sampleGraph);
-    assert.ok(html.includes("d3.v7.min.js"));
+    const asset = readFileSync(D3_ASSET_PATH, "utf8");
+    assert.ok(html.includes("// https://d3js.org v7.9.0"));
+    assert.ok(html.includes(asset.slice(0, 128)), "generated HTML must contain the bundled D3 source");
+    assert.ok(!html.includes("https://d3js.org/d3.v7.min.js"), "D3 must not load from a mutable remote URL");
+  });
+
+  it("keeps the bundled D3 asset pinned to the reviewed SHA-384", () => {
+    const digest = createHash("sha384")
+      .update(readFileSync(D3_ASSET_PATH))
+      .digest("hex")
+      .toUpperCase();
+    assert.equal(digest, D3_SHA384);
   });
 
   it("includes the graph data as JSON", () => {
