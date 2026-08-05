@@ -1,6 +1,6 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-08-05T08:08:50.9473723Z",
+  "generatedAt": "2026-08-05T08:23:35.8710239Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "2.6.0",
   "canvasVersion": "1.1.0",
@@ -14,7 +14,7 @@
     "pass": 41,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 81.1
+    "durationSeconds": 69.7
   },
   "suites": [
     {
@@ -58,7 +58,7 @@
       "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 80.9,
+      "seconds": 69.6,
       "reason": ""
     },
     {
