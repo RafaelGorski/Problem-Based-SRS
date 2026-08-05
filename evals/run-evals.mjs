@@ -50,6 +50,23 @@ export function parseArgs(argv) {
   return opts;
 }
 
+export function classifyResult({ gated = false, runCode = 0, hasResult = true, rubricPassed = false, judgeError = null, judgePassed = true }) {
+  if (gated) return { status: "skipped", passed: false };
+  if (runCode !== 0 || !hasResult || judgeError) {
+    return {
+      status: "error",
+      passed: false,
+      error: judgeError ?? (runCode !== 0 ? `copilot exited with code ${runCode}` : "copilot returned no result event"),
+    };
+  }
+  const passed = rubricPassed && judgePassed;
+  return { status: passed ? "pass" : "fail", passed };
+}
+
+export function formatResultStatus(result) {
+  return (result.status ?? (result.passed ? "pass" : "fail")).toUpperCase();
+}
+
 async function loadCases(filters) {
   const files = (await readdir(CASES_DIR)).filter((f) => f.endsWith(".case.mjs"));
   const cases = [];
@@ -124,10 +141,10 @@ async function runCase(c, opts, skillsRoot) {
   logVerboseRun(c, run, opts);
 
   if (run.code !== 0 || !run.result) {
+    const classification = classifyResult({ runCode: run.code, hasResult: Boolean(run.result) });
     return {
       name: c.name, artifact, rubric: gradeRubric(artifact, c.rubric, { threshold: c.threshold ?? 0.7 }),
-      judge: null, status: "error", passed: false, durationMs: run.durationMs, usage: run.result?.usage,
-      error: run.code !== 0 ? `copilot exited with code ${run.code}` : "copilot returned no result event",
+      judge: null, ...classification, durationMs: run.durationMs, usage: run.result?.usage,
     };
   }
 
@@ -143,21 +160,22 @@ async function runCase(c, opts, skillsRoot) {
         invoke: (p, o) => runCopilot(p, { ...o, timeoutMs: opts.timeoutMs, cwd: HERE }),
       });
     } catch (err) {
+      const classification = classifyResult({ judgeError: `judge error: ${err.message}` });
       return {
-        name: c.name, artifact, rubric, judge: null, status: "error", passed: false,
-        durationMs: run.durationMs, usage: run.result?.usage, error: `judge error: ${err.message}`,
+        name: c.name, artifact, rubric, judge: null, ...classification,
+        durationMs: run.durationMs, usage: run.result?.usage,
       };
     }
   }
 
-  const passed = rubric.passed && (judge ? judge.passed : true);
-  return { name: c.name, artifact, rubric, judge, status: passed ? "pass" : "fail", passed, durationMs: run.durationMs, usage: run.result?.usage };
+  const classification = classifyResult({ rubricPassed: rubric.passed, judgePassed: judge ? judge.passed : true });
+  return { name: c.name, artifact, rubric, judge, ...classification, durationMs: run.durationMs, usage: run.result?.usage };
 }
 
 function printReport(results, opts = { verbose: 0 }) {
   console.log("\n================ Skill Eval Report ================\n");
   for (const r of results) {
-    const status = (r.status ?? (r.passed ? "pass" : "fail")).toUpperCase();
+    const status = formatResultStatus(r);
     console.log(`[${status}] ${r.name}  rubric=${fmtPct(r.rubric.ratio)} (${r.rubric.score}/${r.rubric.maxScore})` +
       (r.judge ? `  judge=${fmtPct(r.judge.score)}` : "") +
       `  ${(r.durationMs / 1000).toFixed(1)}s`);
@@ -205,7 +223,7 @@ async function main() {
     process.stdout.write(`  • ${c.name} ... `);
     try {
       const r = await runCase(c, opts, skillsRoot);
-      console.log(r.passed ? "pass" : "fail");
+      console.log(formatResultStatus(r).toLowerCase());
       results.push(r);
     } catch (err) {
       console.log(`error: ${err.message}`);
