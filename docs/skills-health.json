@@ -1,54 +1,54 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-07-31T17:40:57.9277572Z",
+  "generatedAt": "2026-08-05T08:08:50.9473723Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "2.6.0",
   "canvasVersion": "1.1.0",
   "overall": {
     "state": "passed",
     "suites": 6,
-    "suitesRun": 4,
+    "suitesRun": 1,
     "suitesFailed": 0,
-    "suitesSkipped": 2,
-    "tests": 566,
-    "pass": 566,
+    "suitesSkipped": 5,
+    "tests": 41,
+    "pass": 41,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 87.8
+    "durationSeconds": 81.1
   },
   "suites": [
     {
       "name": "Plugin validation",
-      "state": "passed",
+      "state": "skipped",
       "command": "python scripts/build-plugin.py validate",
-      "tests": 1,
-      "pass": 1,
+      "tests": 0,
+      "pass": 0,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.3,
-      "reason": ""
+      "seconds": 0,
+      "reason": "-SkipValidate"
     },
     {
       "name": "Canvas extension",
-      "state": "passed",
+      "state": "skipped",
       "command": "npm test",
-      "tests": 244,
-      "pass": 244,
+      "tests": 0,
+      "pass": 0,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.5,
-      "reason": ""
+      "seconds": 0,
+      "reason": "-SkipCanvas"
     },
     {
       "name": "Skill evals",
-      "state": "passed",
+      "state": "skipped",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 280,
-      "pass": 280,
+      "tests": 0,
+      "pass": 0,
       "fail": 0,
       "skipped": 0,
-      "seconds": 2,
-      "reason": ""
+      "seconds": 0,
+      "reason": "-SkipEvals"
     },
     {
       "name": "Canvas e2e",
@@ -58,7 +58,7 @@
       "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 83.9,
+      "seconds": 80.9,
       "reason": ""
     },
     {
@@ -91,9 +91,9 @@
     "files": [
       {
         "file": "skills/problem-based-srs/SKILL.md",
-        "lines": 482,
+        "lines": 483,
         "state": "ok",
-        "pctOfCap": 80.3
+        "pctOfCap": 80.5
       },
       {
         "file": "skills/problem-based-srs/reference/business-context.md",
@@ -103,15 +103,15 @@
       },
       {
         "file": "skills/problem-based-srs/reference/complexity.md",
-        "lines": 267,
+        "lines": 272,
         "state": "ok",
-        "pctOfCap": 44.5
+        "pctOfCap": 45.3
       },
       {
         "file": "skills/problem-based-srs/reference/crm-example.md",
-        "lines": 179,
+        "lines": 189,
         "state": "ok",
-        "pctOfCap": 29.8
+        "pctOfCap": 31.5
       },
       {
         "file": "skills/problem-based-srs/reference/functional-requirements.md",
@@ -121,15 +121,15 @@
       },
       {
         "file": "skills/problem-based-srs/reference/live.md",
-        "lines": 81,
+        "lines": 91,
         "state": "ok",
-        "pctOfCap": 13.5
+        "pctOfCap": 15.2
       },
       {
         "file": "skills/problem-based-srs/reference/microer-example.md",
-        "lines": 215,
+        "lines": 225,
         "state": "ok",
-        "pctOfCap": 35.8
+        "pctOfCap": 37.5
       },
       {
         "file": "skills/problem-based-srs/reference/needs.md",
@@ -157,9 +157,9 @@
       },
       {
         "file": "skills/problem-based-srs/reference/validate.md",
-        "lines": 296,
+        "lines": 319,
         "state": "ok",
-        "pctOfCap": 49.3
+        "pctOfCap": 53.2
       }
     ]
   }
