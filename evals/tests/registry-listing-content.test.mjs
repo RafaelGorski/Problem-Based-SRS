@@ -37,6 +37,7 @@ import {
   renderAnnotations,
   fetchSkillPage,
   readLocalState,
+  registryObservations,
   main,
 } from "../../scripts/check-distribution.mjs";
 
@@ -46,6 +47,11 @@ const read = (rel) => fs.readFileSync(path.join(repoRoot, rel), "utf8");
 
 const LISTING_FIXTURE = read("evals/fixtures/skills-sh-listing-2026-07-31.html");
 const SKILL_PAGE_FIXTURE = read("evals/fixtures/skills-sh-skill-page-2026-07-31.html");
+const REFRESHED_LISTING_FIXTURE = read("evals/fixtures/skills-sh-listing-refreshed.html");
+const PARTIAL_LISTING_FIXTURE = read("evals/fixtures/skills-sh-listing-partial.html");
+const UNREADABLE_LISTING_FIXTURE = read("evals/fixtures/skills-sh-listing-unreadable.html");
+const UNREADABLE_SKILL_PAGE_FIXTURE = read("evals/fixtures/skills-sh-skill-page-unreadable.html");
+const REFRESHED_SKILL_PAGE_FIXTURE = read("evals/fixtures/skills-sh-skill-page-refreshed.html");
 const CHECKER = read("scripts/check-distribution.mjs");
 
 const MAIN_SKILL = "problem-based-srs";
@@ -66,7 +72,27 @@ const pageFor = ({ description, version, sections = [] }) => ({
 
 /* ------------------------------------------------------- what the page publishes */
 
-describe("the per-skill page declares a machine-readable skill", () => {
+describe("the registry pages declare machine-readable content", () => {
+  it("parses the refreshed one-skill listing fixture", () => {
+    const listing = parseRegistryListing(REFRESHED_LISTING_FIXTURE);
+    assert.deepEqual(listing.skills, [MAIN_SKILL]);
+    assert.equal(listing.declaredCount, 1);
+  });
+  it("keeps partial and unreadable listing states distinct", () => {
+    assert.equal(parseRegistryListing(PARTIAL_LISTING_FIXTURE).declaredCount, 2);
+    assert.equal(parseRegistryListing(PARTIAL_LISTING_FIXTURE).skills.length, 1);
+    assert.equal(parseRegistryListing(UNREADABLE_LISTING_FIXTURE).declaredCount, null);
+    assert.deepEqual(parseRegistryListing(UNREADABLE_LISTING_FIXTURE).skills, []);
+  });
+  it("parses the refreshed current-body fixture", () => {
+    const page = parseSkillPage(REFRESHED_SKILL_PAGE_FIXTURE);
+    assert.equal(page.name, MAIN_SKILL);
+    assert.equal(page.version, null);
+    assert.ok(pageText(REFRESHED_SKILL_PAGE_FIXTURE).includes("Identifier Notation (CANONICAL)"));
+  });
+  it("treats an unreadable skill page as absent", () => {
+    assert.equal(parseSkillPage(UNREADABLE_SKILL_PAGE_FIXTURE), null);
+  });
   it("reads the SoftwareApplication block, not the other JSON-LD on the page", () => {
     const page = parseSkillPage(SKILL_PAGE_FIXTURE);
     assert.equal(
@@ -333,6 +359,29 @@ describe("what the maintainer is handed", () => {
       repoSkills: [MAIN_SKILL],
       skillProfiles: repoSkillProfiles(repoRoot),
       skillPages,
+    });
+
+    describe("machine-readable registry observations", () => {
+      it("records counts, names, headings, descriptions, and version status", () => {
+        const profile = shipped();
+        const summary = registryObservations({
+          listing: parseRegistryListing(REFRESHED_LISTING_FIXTURE),
+          repoSkills: [MAIN_SKILL],
+          skillProfiles: [profile],
+          skillPages: [{
+            name: MAIN_SKILL,
+            url: "https://www.skills.sh/x",
+            page: parseSkillPage(REFRESHED_SKILL_PAGE_FIXTURE),
+            text: pageText(REFRESHED_SKILL_PAGE_FIXTURE),
+          }],
+        });
+        assert.equal(summary.listing.declaredCount, 1);
+        assert.deepEqual(summary.listing.advertisedNames, [MAIN_SKILL]);
+        assert.deepEqual(summary.skills[0].headings.missing, []);
+        assert.equal(summary.skills[0].headings.matched, profile.sections.length);
+        assert.equal(summary.skills[0].version.status, "page-publishes-none");
+        assert.equal(summary.skills[0].description.matches, true);
+      });
     });
 
   it("raises registry-skill-stale, naming the sections and the fix that works", () => {

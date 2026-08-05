@@ -355,6 +355,55 @@ export function skillPageDrift({ page = null, text = "", profile = null } = {}) 
 }
 
 /**
+ * Preserve the raw registry comparison as machine-readable evidence. Findings are intentionally
+ * separate: a warning or notice must not be mistaken for a clean comparison.
+ */
+export function registryObservations({ listing, repoSkills = [], skillProfiles = [], skillPages = [], errors = [] } = {}) {
+  const registryError = errors.find((e) => e.surface === "registry");
+  const listingObservation = {
+    status: registryError ? "unreachable" : listing?.skills?.length ? "readable" : "unreadable",
+    url: listing?.url ?? null,
+    declaredCount: listing?.declaredCount ?? null,
+    parsedCount: listing?.skills?.length ?? 0,
+    advertisedNames: [...(listing?.skills ?? [])],
+    description: listing?.description ?? null,
+    partial:
+      listing?.declaredCount !== null &&
+      listing?.declaredCount !== undefined &&
+      listing.declaredCount !== (listing?.skills?.length ?? 0),
+    error: registryError?.message ?? null,
+  };
+  const skills = skillProfiles.map((profile) => {
+    const entry = skillPages.find((page) => page?.name === profile.name);
+    const pageError = errors.find((e) => e.surface === `registry page for ${profile.name}`);
+    const drift = entry ? skillPageDrift({ page: entry.page, text: entry.text, profile }) : null;
+    return {
+      name: profile.name,
+      url: entry?.url ?? null,
+      status: pageError ? "unreachable" : drift?.body.readable ? "readable" : "unreadable",
+      description: drift?.description ?? null,
+      headings: {
+        expected: profile.sections.length,
+        matched: drift?.body.matched ?? 0,
+        missing: drift?.body.missing ?? [],
+      },
+      version: drift?.version ?? {
+        status: "unreadable",
+        expected: profile.version ?? null,
+        actual: null,
+        matches: null,
+      },
+      error: pageError?.message ?? null,
+    };
+  });
+  return {
+    listing: listingObservation,
+    repositoryNames: [...repoSkills],
+    skills,
+  };
+}
+
+/**
  * The skills this repository actually ships, read from each SKILL.md's frontmatter.
  * Derived rather than restated so the comparison moves with the repository.
  * @param {string} [root]
@@ -1136,7 +1185,10 @@ export function summarize({
     findings,
     unverified,
     releases,
-    observations: { canvasAssets: canvasAssetObservations },
+    observations: {
+      registry: registryObservations({ listing, repoSkills, skillProfiles, skillPages, errors }),
+      canvasAssets: canvasAssetObservations,
+    },
   };
 }
 
