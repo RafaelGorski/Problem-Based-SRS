@@ -171,6 +171,42 @@ jobs:
           # publish" by the rollback below.
           echo "published=true" >> "$GITHUB_OUTPUT"
 
+      - name: Verify downloaded canvas release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.bump.outputs.tag }}"
+          mkdir -p release-asset
+          gh release download "$TAG" --pattern 'srs-navigator-*' --dir release-asset
+          ZIP=$(find release-asset -maxdepth 1 -type f -name '*.zip' | head -n 1)
+          TAR=$(find release-asset -maxdepth 1 -type f -name '*.tar.gz' | head -n 1)
+          test -n "$ZIP" && test -n "$TAR"
+          ZIP_SHA=$(sha256sum "$ZIP" | awk '{print $1}')
+          TAR_SHA=$(sha256sum "$TAR" | awk '{print $1}')
+          API_DIGESTS=$(gh release view "$TAG" --json assets --jq \
+           '.assets[] | select(.name | startswith("srs-navigator-")) | {name, digest, size, id}')
+          printf '%s\n' "$API_DIGESTS" > release-asset/asset-metadata.json
+          echo "$API_DIGESTS" | jq -e 'length > 0' >/dev/null || echo "API digest unavailable"
+          node evals/tools/verify-canvas-archive.mjs "$ZIP" --json release-asset/zip.json
+          node evals/tools/verify-canvas-archive.mjs "$TAR" --json release-asset/tar.json
+          unzip -Z1 "$ZIP" | sed '/\/$/d' | sort > release-asset/zip.paths
+          tar -tzf "$TAR" | sed 's#/$##' | sort > release-asset/tar.paths
+          cmp release-asset/zip.paths release-asset/tar.paths
+          gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
+           > release-asset/release-metadata.json
+          jq --arg sha "${{ steps.commit.outputs.sha }}" \
+           'if .targetCommitish == $sha then . else error("release target does not match bump commit") end' \
+           release-asset/release-metadata.json >/dev/null
+          {
+           echo "## Downloaded canvas release verification"
+           echo "- **Tag:** $TAG"
+           echo "- **ZIP SHA-256:** $ZIP_SHA"
+           echo "- **TAR.GZ SHA-256:** $TAR_SHA"
+           echo "- **Assets:** $(jq -c '[.[] | {id, name, size, digest}]' release-asset/asset-metadata.json)"
+           echo "- **Run:** ${{ github.run_id }} (${{ github.event_name }}, ${{ github.ref_name }}, ${{ github.sha }})"
+           echo "- **Evidence:** release-asset/zip.json, release-asset/tar.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Summarize the release
         env:
           GH_TOKEN: ${{ github.token }}

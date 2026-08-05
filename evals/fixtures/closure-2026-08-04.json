@@ -1,0 +1,15 @@
+{
+  "capturedAt": "2026-08-04T23:59:00Z",
+  "issues": [
+    {"number": 89, "state": "CLOSED", "body": "<!-- release-claim train=plugin version=v2.6 -->"},
+    {"number": 90, "state": "CLOSED", "body": "<!-- release-claim train=canvas version=v1.1.1 -->"},
+    {"number": 129, "state": "CLOSED", "body": "<!-- release-claim train=plugin version=v2.6 -->"},
+    {"number": 130, "state": "CLOSED", "body": "<!-- release-claim train=canvas version=v1.1.1 -->"},
+    {"number": 137, "state": "OPEN", "body": "<!-- release-claim train=plugin version=v2.6 -->"},
+    {"number": 138, "state": "OPEN", "body": "<!-- release-claim train=canvas version=v1.1.1 -->"}
+  ],
+  "releases": [
+    {"tagName": "v2.4.1", "name": "Version 2.4.1", "isDraft": false, "isPrerelease": false},
+    {"tagName": "v1.1.0", "name": "srs-navigator 1.1.0", "isDraft": false, "isPrerelease": false}
+  ]
+}

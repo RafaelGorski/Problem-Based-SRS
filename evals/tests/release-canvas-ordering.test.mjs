@@ -196,6 +196,17 @@ describe("release-canvas.yml — nothing is pushed before the artifact exists", 
       "the release targets the bump commit, so that commit must be on the remote first",
     );
   });
+
+  it("verifies both assets downloaded from the published release", () => {
+    const publishAt = firstStepMatching(CANVAS_STEPS, PUBLISHES);
+    const verifyDownloadedAt = firstStepMatching(CANVAS_STEPS, /gh\s+release\s+download/);
+    assert.ok(verifyDownloadedAt > publishAt, "downloaded-asset verification must follow publication");
+    const step = CANVAS_STEPS[verifyDownloadedAt];
+    assert.match(step.command, /sha256sum/);
+    assert.match(step.command, /verify-canvas-archive\.mjs[\s\S]*verify-canvas-archive\.mjs/);
+    assert.match(step.command, /cmp\s+.*zip\.paths.*tar\.paths/);
+    assert.match(step.command, /release-metadata\.json/);
+  });
 });
 
 describe("release-canvas.yml — the tag is created by the release, not before it", () => {

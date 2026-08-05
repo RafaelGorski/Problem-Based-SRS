@@ -14,6 +14,7 @@ which tag, what the distribution monitor reports) and links back to this file fo
 - [Plugin train — cutting `vX.Y`](#plugin-train--cutting-vxy)
 - [Canvas train — cutting `vX.Y.Z`](#canvas-train--cutting-vxyz)
 - [Refreshing the skills.sh listing](#refreshing-the-skillssh-listing)
+- [Release-claim closure evidence](#release-claim-closure-evidence)
 - [Issue-ledger drift guard for sequenced closure](#issue-ledger-drift-guard-for-sequenced-closure)
 - [Proving `/live` in the app itself](#proving-live-in-the-app-itself)
 - [Deriving an evidence pack](#deriving-an-evidence-pack)
@@ -258,6 +259,33 @@ node scripts/check-distribution.mjs --json > distribution-before.json
 node scripts/check-distribution.mjs --json > distribution-after.json
 node scripts/check-distribution.mjs --strict
 ```
+
+---
+
+## Release-claim closure evidence
+
+An issue that claims a published release stays open until the claim is backed by the
+release surface. The marker is deliberately machine-readable and train-specific:
+
+```text
+<!-- release-claim train=plugin version=v2.6 -->
+<!-- release-claim train=canvas version=v1.1.1 -->
+```
+
+The check is report-only. It reads explicitly supplied issue records and non-draft,
+non-prerelease releases; it never edits or closes an issue. Replay a captured state offline,
+or audit live issue numbers through the GitHub CLI:
+
+```bash
+node evals/tools/closure-evidence.mjs --fixture evals/fixtures/closure-2026-08-04.json
+node evals/tools/closure-evidence.mjs 137 138
+node evals/tools/closure-evidence.mjs --prospective 137 138
+```
+
+Use `--prospective` for open issues before closure. A missing, duplicate, malformed, or
+ambiguous marker is indeterminate and fails the report; a network/API failure also fails
+instead of looking like a clean verdict. External publication remains a maintainer action,
+so a failing report is a blocker rather than evidence to record as complete.
 
 Read the after-run output separately from its exit code. `--strict` exits zero when there
 are no **error** findings, but warnings and notices intentionally do not fail it. Record

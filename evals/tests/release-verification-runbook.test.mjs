@@ -61,6 +61,18 @@ describe("the runbook is somewhere a maintainer can actually read it", () => {
     assert.ok(fs.existsSync(path.join(repoRoot, "docs/release-verification.md")));
   });
 
+  describe("release-claim closure is guarded by report-only evidence", () => {
+    it("documents the marker, offline fixture, prospective mode, and no-mutation contract", () => {
+      assert.match(runbook, /evals\/tools\/closure-evidence\.mjs/);
+      assert.match(runbook, /closure-2026-08-04\.json/);
+      assert.match(runbook, /--prospective/);
+      assert.match(runbook, /report-only/);
+      assert.match(runbook, /never edits or closes an issue/);
+      assert.match(runbook, /release-claim train=plugin version=v2\.6/);
+      assert.match(runbook, /release-claim train=canvas version=v1\.1\.1/);
+    });
+  });
+
   it("is reachable from the policy document rather than duplicating it", () => {
     const instructions = read(".github/copilot-instructions.md");
     assert.match(
