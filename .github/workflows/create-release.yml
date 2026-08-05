@@ -119,3 +119,38 @@ jobs:
               "$ARTIFACT"
           fi
           echo "Published $TAG with asset: $ARTIFACT"
+
+      - name: Verify downloaded release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.build.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          mkdir -p release-asset
+          ASSET=$(gh release view "$TAG" --json assets --jq '.assets[] | select(.name | startswith("problem-based-srs-")) | .name' | head -n 1)
+          test -n "$ASSET"
+          gh release download "$TAG" --pattern "$ASSET" --dir release-asset
+          FILE="release-asset/$ASSET"
+          LOCAL_SHA=$(sha256sum "$FILE" | awk '{print $1}')
+          API_DIGEST=$(gh release view "$TAG" --json assets --jq ".assets[] | select(.name == \"$ASSET\") | .digest // \"\"")
+          if [ -n "$API_DIGEST" ]; then
+           test "$LOCAL_SHA" = "${API_DIGEST#sha256:}"
+          else
+           echo "API digest unavailable"
+          fi
+          unzip -q "$FILE" -d release-asset/extracted
+          node evals/tools/verify-plugin-archive.mjs release-asset/extracted \
+           --json release-asset/plugin-archive.json
+          gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
+           > release-asset/release-metadata.json
+          jq --arg sha "${{ github.sha }}" \
+           'if .targetCommitish == $sha then . else error("release target does not match workflow head") end' \
+           release-asset/release-metadata.json >/dev/null
+          {
+           echo "## Downloaded plugin release verification"
+           echo "- **Tag:** $TAG"
+           echo "- **Asset:** $ASSET"
+           echo "- **Bytes SHA-256:** $LOCAL_SHA"
+           echo "- **Run:** ${{ github.run_id }} (${{ github.event_name }}, ${{ github.ref_name }}, ${{ github.sha }})"
+           echo "- **Evidence:** release-asset/plugin-archive.json"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,23 @@
+{
+  "targetChannel": "",
+  "intendedAudience": "",
+  "publicPostUrl": "",
+  "beforeState": "",
+  "afterState": "",
+  "releasedEvidence": "",
+  "observationStart": "",
+  "observationEnd": "",
+  "signal": "An external opt-in confirmation containing a redacted artifact or transcript showing /problem-based-srs invoked from the released version",
+  "measurementSource": "",
+  "positiveThreshold": 1,
+  "exclusions": [
+    "maintainer",
+    "bot",
+    "collaborator",
+    "test",
+    "repository automation"
+  ],
+  "readingAtStart": "",
+  "readingAtEnd": "",
+  "result": ""
+}

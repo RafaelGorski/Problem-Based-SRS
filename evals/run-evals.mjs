@@ -131,33 +131,43 @@ function logVerboseRun(c, run, opts) {
   console.log(indent(truncate(run.text || "(empty)", artifactCap)));
 }
 
-async function runCase(c, opts, skillsRoot) {
-  const skill = await loadAction(c.skill, { skillsRoot });
+export function classifyStatus({ run, passed = false, judgeError = false, skipped = false } = {}) {
+  if (skipped) return "skipped";
+  if (judgeError || run?.code !== 0 || !run?.result) return "error";
+  return passed ? "pass" : "fail";
+}
+
+export async function runCase(c, opts, skillsRoot, deps = {}) {
+  const loadActionImpl = deps.loadActionImpl ?? loadAction;
+  const runCopilotImpl = deps.runCopilotImpl ?? runCopilot;
+  const gradeRubricImpl = deps.gradeRubricImpl ?? gradeRubric;
+  const llmJudgeImpl = deps.llmJudgeImpl ?? llmJudge;
+  const skill = await loadActionImpl(c.skill, { skillsRoot });
   const prompt = await c.buildPrompt(skill.text);
   logVerboseInputs(c, prompt, skill, opts);
 
-  const run = await runCopilot(prompt, { model: opts.model, timeoutMs: opts.timeoutMs, cwd: HERE });
+  const run = await runCopilotImpl(prompt, { model: opts.model, timeoutMs: opts.timeoutMs, cwd: HERE });
   const artifact = run.text || "";
   logVerboseRun(c, run, opts);
 
   if (run.code !== 0 || !run.result) {
     const classification = classifyResult({ runCode: run.code, hasResult: Boolean(run.result) });
     return {
-      name: c.name, artifact, rubric: gradeRubric(artifact, c.rubric, { threshold: c.threshold ?? 0.7 }),
+      name: c.name, artifact, rubric: gradeRubricImpl(artifact, c.rubric, { threshold: c.threshold ?? 0.7 }),
       judge: null, ...classification, durationMs: run.durationMs, usage: run.result?.usage,
     };
   }
 
-  const rubric = gradeRubric(artifact, c.rubric, { threshold: c.threshold ?? 0.7 });
+  const rubric = gradeRubricImpl(artifact, c.rubric, { threshold: c.threshold ?? 0.7 });
 
   let judge = null;
   if (opts.judge && Array.isArray(c.judgeCriteria) && c.judgeCriteria.length) {
     try {
-      judge = await llmJudge(artifact, {
+      judge = await llmJudgeImpl(artifact, {
         criteria: c.judgeCriteria,
         threshold: c.threshold ?? 0.7,
         model: opts.model,
-        invoke: (p, o) => runCopilot(p, { ...o, timeoutMs: opts.timeoutMs, cwd: HERE }),
+        invoke: (p, o) => runCopilotImpl(p, { ...o, timeoutMs: opts.timeoutMs, cwd: HERE }),
       });
     } catch (err) {
       const classification = classifyResult({ judgeError: `judge error: ${err.message}` });
@@ -176,10 +186,11 @@ function printReport(results, opts = { verbose: 0 }) {
   console.log("\n================ Skill Eval Report ================\n");
   for (const r of results) {
     const status = formatResultStatus(r);
-    console.log(`[${status}] ${r.name}  rubric=${fmtPct(r.rubric.ratio)} (${r.rubric.score}/${r.rubric.maxScore})` +
+    const rubric = r.rubric ?? { ratio: 0, score: 0, maxScore: 0, results: [] };
+    console.log(`[${status}] ${r.name}  rubric=${fmtPct(rubric.ratio)} (${rubric.score}/${rubric.maxScore})` +
       (r.judge ? `  judge=${fmtPct(r.judge.score)}` : "") +
       `  ${(r.durationMs / 1000).toFixed(1)}s`);
-    for (const item of r.rubric.results) {
+    for (const item of rubric.results) {
       // In verbose mode show every check; otherwise only failures.
       if (!item.pass || opts.verbose >= 1) {
         const mark = item.pass ? "ok " : (item.required ? "REQ" : "x  ");
@@ -200,14 +211,14 @@ async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const gate = opts.force || process.env.RUN_SKILL_EVALS === "1";
 
-  if (!isCopilotAvailable()) {
-    console.error("[ERROR] copilot CLI not found on PATH. Install @github/copilot to run live evals.");
-    process.exit(2);
-  }
   if (!gate) {
     console.log("[SKIPPED] Live skill evals are opt-in (they call the model).");
     console.log("Run with RUN_SKILL_EVALS=1 or pass --force. Use scripts\\run-evals.ps1 for convenience.");
     process.exit(0);
+  }
+  if (!isCopilotAvailable()) {
+    console.error("[ERROR] copilot CLI not found on PATH. Install @github/copilot to run live evals.");
+    process.exit(2);
   }
 
   const skillsRoot = defaultSkillsRoot();
@@ -223,7 +234,7 @@ async function main() {
     process.stdout.write(`  • ${c.name} ... `);
     try {
       const r = await runCase(c, opts, skillsRoot);
-      console.log(formatResultStatus(r).toLowerCase());
+      console.log(r.status);
       results.push(r);
     } catch (err) {
       console.log(`error: ${err.message}`);
