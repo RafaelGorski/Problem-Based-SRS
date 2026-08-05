@@ -382,6 +382,26 @@ describe("what the maintainer is handed", () => {
         assert.equal(summary.skills[0].version.status, "page-publishes-none");
         assert.equal(summary.skills[0].description.matches, true);
       });
+      it("keeps the refreshed external state open only on the unverifiable version axis", () => {
+        const profile = shipped();
+        const summary = summarize({
+          listing: parseRegistryListing(REFRESHED_LISTING_FIXTURE),
+          repoSkills: [MAIN_SKILL],
+          skillProfiles: [profile],
+          skillPages: [{
+            name: MAIN_SKILL,
+            url: "https://www.skills.sh/x",
+            page: parseSkillPage(REFRESHED_SKILL_PAGE_FIXTURE),
+            text: pageText(REFRESHED_SKILL_PAGE_FIXTURE),
+          }],
+          tagLinks: [],
+          publishedReleases: [],
+          manifestVersion: null,
+          canvasVersion: null,
+        });
+        assert.deepEqual(summary.findings, []);
+        assert.equal(summary.unverified[0].id, "registry-skill-version-unverifiable");
+      });
     });
 
   it("raises registry-skill-stale, naming the sections and the fix that works", () => {
