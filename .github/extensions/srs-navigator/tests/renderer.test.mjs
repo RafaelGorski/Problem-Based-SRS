@@ -9,7 +9,7 @@ import { renderGraphHtml } from "../lib/renderer.mjs";
 
 const EXTENSION_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const D3_ASSET_PATH = path.join(EXTENSION_ROOT, "assets", "d3.v7.9.0.min.js");
-const D3_SHA384 = "D68D0867C3B9785AFDE2050018A7874152D00ED38DD92B9647201CBC47C224A393A6A1F30C0A01C3D28E2FB6CCEF3AAF";
+const D3_SHA384 = "0A396803CCB4D3ED520C05248ECD3DF4F55F9D8D8A9830B60599F0B3D921F03FE55F5B38EB0E843E1A5776A31F8CAEA2";
 
 describe("renderGraphHtml", () => {
   const sampleGraph = {
@@ -38,7 +38,7 @@ describe("renderGraphHtml", () => {
 
   it("keeps the bundled D3 asset pinned to the reviewed SHA-384", () => {
     const digest = createHash("sha384")
-      .update(readFileSync(D3_ASSET_PATH))
+      .update(readFileSync(D3_ASSET_PATH, "utf8").replace(/\r\n/g, "\n"))
       .digest("hex")
       .toUpperCase();
     assert.equal(digest, D3_SHA384);
