@@ -25,6 +25,7 @@
     "@ai-sdk/openai": "^4.0.32",
     "@playwright/test": "^1.62.1",
     "ai": "^7.0.55",
+    "jsondiffpatch": "^0.7.2",
     "playwright": "^1.62.1",
     "zod": "^3.25.76"
   },
