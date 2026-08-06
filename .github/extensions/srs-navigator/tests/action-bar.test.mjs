@@ -525,4 +525,11 @@ describe("Unified command: single problem_based_srs tool", () => {
     assert.ok(extSource.includes("action.srsAction"),
       "server prompts must read the srsAction field from queued actions");
   });
+
+  it("validates and canonicalizes action payloads before sending them to the agent", () => {
+    assert.ok(extSource.includes("validateActionPayload(rawAction, inst?.graphData)"),
+      "the invoke-skill route must validate browser-controlled action data server-side");
+    assert.ok(extSource.includes("const action = validation.data"),
+      "the prompt and queue must use the validated action, not the raw payload");
+  });
 });
