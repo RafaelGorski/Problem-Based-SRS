@@ -18,6 +18,7 @@ import { DEMO_SPEC } from "./lib/demo-spec.mjs";
 import { compileAndSave } from "./lib/spec-compiler.mjs";
 import { decomposeNode } from "./lib/decompose.mjs";
 import { isTrustedLoopbackRequest } from "./lib/http-guard.mjs";
+import { validateActionPayload } from "./lib/action-validation.mjs";
 import { LEARN_PROMPT, LOAD_PROMPT, buildActionPrompt, srsActionCommand } from "./lib/prompts.mjs";
 
 // Content fingerprint of a graph, used to detect *any* change to the loaded
@@ -395,6 +396,8 @@ function createCanvasServer(instanceId, fallbackHtml, workspacePath) {
             (async () => {
                 try {
                     const action = JSON.parse(await readBody(req));
+                    const validation = validateActionPayload(action, inst?.graphData);
+                    if (!validation.ok) return sendJson(res, { ok: false, error: validation.error }, 400);
                     const actionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
                     await session.send({ prompt: buildActionPrompt(action) });
                     if (!pendingActions.has(instanceId)) pendingActions.set(instanceId, []);

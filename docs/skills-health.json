@@ -1,6 +1,6 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-08-06T08:09:22.5725552Z",
+  "generatedAt": "2026-08-06T08:18:13.1762067Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "2.6.0",
   "canvasVersion": "1.1.0",
@@ -10,11 +10,11 @@
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 1262,
-    "pass": 1262,
+    "tests": 1265,
+    "pass": 1265,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 118.4
+    "durationSeconds": 115.2
   },
   "suites": [
     {
@@ -32,11 +32,11 @@
       "name": "Canvas extension",
       "state": "passed",
       "command": "npm test",
-      "tests": 300,
-      "pass": 300,
+      "tests": 303,
+      "pass": 303,
       "fail": 0,
       "skipped": 0,
-      "seconds": 3.1,
+      "seconds": 3,
       "reason": ""
     },
     {
@@ -47,7 +47,7 @@
       "pass": 920,
       "fail": 0,
       "skipped": 0,
-      "seconds": 27.6,
+      "seconds": 34.7,
       "reason": ""
     },
     {
@@ -58,7 +58,7 @@
       "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 87,
+      "seconds": 76.6,
       "reason": ""
     },
     {
