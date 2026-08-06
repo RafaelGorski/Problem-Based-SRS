@@ -478,6 +478,15 @@ describe("List View: implement action prompt", () => {
     assert.ok(built.includes("Preserve traceability"));
     assert.ok(built.includes("FR.01.1.1"));
   });
+
+  // "Implement" is the one action that writes code rather than specification
+  // text, so it must never fire from a stray click: the renderer asks for an
+  // explicit confirmation and abandons the request when it is declined.
+  it("keeps an explicit confirmation before implementation requests", () => {
+    const renderer = readFileSync(join(__dirname, "..", "lib", "renderer.mjs"), "utf8");
+    assert.match(renderer, /actionKey === "implement" && !window\.confirm/,
+      "the implement action must be gated behind an explicit user confirmation");
+  });
 });
 
 // --- Unified single-command model (problem_based_srs with action arg) ---

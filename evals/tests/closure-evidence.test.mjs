@@ -47,6 +47,25 @@ describe("closure evidence is report-only and deterministic", () => {
     });
     assert.equal(released.ok, true);
   });
+  it("fails when a published release is removed, then passes after restoration", () => {
+    const passing = {
+      issues: [
+        { number: 137, state: "open", body: "<!-- release-claim train=plugin version=v2.6 -->" },
+        { number: 138, state: "open", body: "<!-- release-claim train=canvas version=v1.1.1 -->" },
+      ],
+      releases: [
+        { tagName: "v2.6", name: "Version 2.6", isDraft: false, isPrerelease: false },
+        { tagName: "v1.1.1", name: "srs-navigator 1.1.1", isDraft: false, isPrerelease: false },
+      ],
+      prospective: [137, 138],
+    };
+    const removed = { ...passing, releases: passing.releases.slice(0, 1) };
+    const failed = assessClaims(removed);
+    assert.equal(failed.ok, false);
+    assert.deepEqual(failed.findings.map((f) => f.issue), [138]);
+    const restored = assessClaims(passing);
+    assert.equal(restored.ok, true);
+  });
   it("parses prospective issue numbers without allowing an implicit repository-wide scan", () => {
     assert.deepEqual(parseArgs(["--prospective", "137", "138"]), {
       json: false, fixture: null, prospective: [137, 138], issueNumbers: [],

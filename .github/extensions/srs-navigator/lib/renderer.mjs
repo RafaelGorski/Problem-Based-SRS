@@ -2522,6 +2522,7 @@ ${graphMetricsSource()}
     function performNodeAction(actionKey, srsAction, node, prompt) {
       if (!node) return false;
       prompt = (prompt || "").trim();
+      if (actionKey === "implement" && !window.confirm("Send this implementation request to the coding agent?")) return false;
 
       // The "implement" action is self-contained: a fully-specified requirement
       // needs no extra prose to act on. Every other node action is driven by the

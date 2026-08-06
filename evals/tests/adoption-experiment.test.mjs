@@ -37,7 +37,18 @@ describe("external adoption experiment contract", () => {
     assert.equal(result.ok, false);
     assert.match(result.errors.join("\n"), /targetChannel/);
     assert.match(result.errors.join("\n"), /observationEnd/);
-    assert.match(result.errors.join("\n"), /readingAtStart and readingAtEnd/);
+    assert.match(result.errors.join("\n"), /readingAtEnd/);
+  });
+
+  it("rejects placeholder readings so the observation cannot start unrecorded", () => {
+    const result = validateContract({
+      ...complete,
+      readingAtStart: "",
+      readingAtEnd: "",
+    });
+    assert.equal(result.ok, false);
+    assert.match(result.errors.join("\n"), /readingAtStart/);
+    assert.match(result.errors.join("\n"), /readingAtEnd/);
   });
 
   it("accepts zero as a measured result", () => {
