@@ -4,7 +4,16 @@
 // The goal is not to auto-edit issue bodies. It is to make drift visible in one command:
 // how many boxes are open/closed, which open boxes are missing an explicit blocker, which
 // ticked boxes carry no citation, and whether any box still names a version older than the
-// manifest currently advertises.
+// train that would publish it.
+//
+// The version check is per *train*, not per repository. This repository publishes two products
+// from one tag namespace — the plugin (`.claude-plugin/plugin.json`, 2.x) and the srs-navigator
+// canvas app (`VERSION`, 1.x) — and the trains cannot be told apart by tag shape. Comparing every
+// mention against the plugin manifest made a canvas issue unable to reach a clean ledger: a box
+// naming its own unreleased tag `v1.1.1` was reported as a stale claim purely because 1.1.1 is
+// numerically below the plugin's 2.6.0. A mention is therefore compared only against the baseline
+// sharing its major series, and a mention matching no train's series is reported separately as
+// unattributed rather than being silently passed or falsely failed.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -53,6 +62,48 @@ export function versionMentions(text) {
   return [...String(text ?? "").matchAll(/\bv(\d+\.\d+(?:\.\d+)?)\b/g)].map((m) => m[1]);
 }
 
+/**
+ * The version baselines a mention can be measured against, as a flat list.
+ *
+ * Accepts the historical single-version string, a list, or a train map such as
+ * `{ plugin: "2.6.0", canvas: "1.1.0" }`, so callers that only know the manifest keep working.
+ */
+export function toBaselines(baselines) {
+  const raw =
+    baselines && typeof baselines === "object" && !Array.isArray(baselines)
+      ? Object.values(baselines)
+      : [baselines].flat();
+  return raw.filter((v) => normalizeVersion(v) !== null).map((v) => String(v).trim());
+}
+
+/**
+ * The baseline that would publish this mention: the one sharing its major series.
+ *
+ * Returns null when no train claims the series. That is an honest "cannot attribute", not a
+ * pass — `analyzeIssueBody` reports those mentions on a separate channel.
+ */
+export function attributeVersion(mention, baselines) {
+  const left = normalizeVersion(mention);
+  if (!left) return null;
+  const candidates = toBaselines(baselines).filter(
+    (b) => normalizeVersion(b)?.[0] === left[0],
+  );
+  if (candidates.length === 0) return null;
+  return candidates.reduce((a, b) => (compareVersions(a, b) === 1 ? a : b));
+}
+
+/** Split a line's version mentions into superseded, unattributed, and current. */
+export function classifyVersionMentions(text, baselines) {
+  const superseded = [];
+  const unattributed = [];
+  for (const mention of versionMentions(text)) {
+    const baseline = attributeVersion(mention, baselines);
+    if (baseline === null) unattributed.push(mention);
+    else if (compareVersions(mention, baseline) === -1) superseded.push(mention);
+  }
+  return { superseded, unattributed };
+}
+
 export function hasCitation(text) {
   return (
     /https?:\/\//i.test(text) ||
@@ -69,13 +120,13 @@ export function hasExplicitBlocker(text) {
   );
 }
 
-export function parseChecklistLine(line, currentVersion) {
+export function parseChecklistLine(line, baselines) {
   const m = /^\s*-\s\[( |x|X)\]\s+(.*)\s*$/.exec(line);
   if (!m) return null;
   const checked = m[1].toLowerCase() === "x";
   const text = m[2];
   const mentions = versionMentions(text);
-  const superseded = mentions.filter((v) => compareVersions(v, currentVersion) === -1);
+  const { superseded, unattributed } = classifyVersionMentions(text, baselines);
   return {
     checked,
     text,
@@ -83,14 +134,15 @@ export function parseChecklistLine(line, currentVersion) {
     hasExplicitBlocker: hasExplicitBlocker(text),
     versionMentions: mentions,
     supersededVersions: superseded,
+    unattributedVersions: unattributed,
   };
 }
 
-export function analyzeIssueBody(body, currentVersion) {
+export function analyzeIssueBody(body, baselines) {
   const lines = String(body ?? "").split(/\r?\n/);
   const boxes = [];
   for (const line of lines) {
-    const parsed = parseChecklistLine(line, currentVersion);
+    const parsed = parseChecklistLine(line, baselines);
     if (parsed) boxes.push(parsed);
   }
   const checked = boxes.filter((b) => b.checked);
@@ -98,6 +150,7 @@ export function analyzeIssueBody(body, currentVersion) {
   const openWithoutBlocker = open.filter((b) => !b.hasExplicitBlocker);
   const tickedWithoutCitation = checked.filter((b) => !b.hasCitation);
   const supersededVersionMentions = boxes.flatMap((b) => b.supersededVersions);
+  const unattributedVersionMentions = boxes.flatMap((b) => b.unattributedVersions);
 
   return {
     boxes,
@@ -108,11 +161,13 @@ export function analyzeIssueBody(body, currentVersion) {
       openWithoutBlocker: openWithoutBlocker.length,
       tickedWithoutCitation: tickedWithoutCitation.length,
       supersededVersionMentions: supersededVersionMentions.length,
+      unattributedVersionMentions: unattributedVersionMentions.length,
     },
     findings: {
       openWithoutBlocker: openWithoutBlocker.map((b) => b.text),
       tickedWithoutCitation: tickedWithoutCitation.map((b) => b.text),
       supersededVersionMentions,
+      unattributedVersionMentions,
     },
   };
 }
@@ -121,6 +176,32 @@ export function readPluginVersion(root = REPO_ROOT) {
   const file = path.join(root, ".claude-plugin", "plugin.json");
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   return data.version;
+}
+
+/**
+ * The version the canvas train advertises.
+ *
+ * `VERSION` is the file the release workflow owns and the drift monitor reads; the extension
+ * package.json is asserted to agree with it elsewhere. Either one is enough to know the canvas
+ * major series, which is all the ledger needs to stop measuring canvas tags against the plugin.
+ */
+export function readCanvasVersion(root = REPO_ROOT) {
+  const versionFile = path.join(root, "VERSION");
+  if (fs.existsSync(versionFile)) {
+    const value = fs.readFileSync(versionFile, "utf8").trim();
+    if (value) return value;
+  }
+  const pkg = path.join(root, ".github", "extensions", "srs-navigator", "package.json");
+  if (fs.existsSync(pkg)) {
+    const version = JSON.parse(fs.readFileSync(pkg, "utf8")).version;
+    if (version) return String(version).trim();
+  }
+  return null;
+}
+
+/** Every train's advertised version, keyed by train, as the ledger measures mentions against. */
+export function readTrainVersions(root = REPO_ROOT) {
+  return { plugin: readPluginVersion(root), canvas: readCanvasVersion(root) };
 }
 
 export function parseRepoFromRemoteUrl(url) {
@@ -149,11 +230,12 @@ export function fetchIssue(number, repo, run = defaultRunner, root = REPO_ROOT) 
 }
 
 export function buildLedger(options, run = defaultRunner) {
-  const currentVersion = readPluginVersion(options.root);
+  const trainVersions = readTrainVersions(options.root);
+  const currentVersion = trainVersions.plugin;
   const repo = options.repo || detectRepo(options.root, run);
   const issues = options.issues.map((n) => {
     const issue = fetchIssue(n, repo, run, options.root);
-    const analysis = analyzeIssueBody(issue.body, currentVersion);
+    const analysis = analyzeIssueBody(issue.body, trainVersions);
     return {
       number: issue.number,
       title: issue.title,
@@ -171,6 +253,7 @@ export function buildLedger(options, run = defaultRunner) {
       acc.openWithoutBlocker += issue.counts.openWithoutBlocker;
       acc.tickedWithoutCitation += issue.counts.tickedWithoutCitation;
       acc.supersededVersionMentions += issue.counts.supersededVersionMentions;
+      acc.unattributedVersionMentions += issue.counts.unattributedVersionMentions;
       return acc;
     },
     {
@@ -181,16 +264,20 @@ export function buildLedger(options, run = defaultRunner) {
       openWithoutBlocker: 0,
       tickedWithoutCitation: 0,
       supersededVersionMentions: 0,
+      unattributedVersionMentions: 0,
     },
   );
 
   const record = {
     repo,
     currentVersion,
+    trainVersions,
     generatedAt: new Date().toISOString(),
     issues,
     totals,
   };
+  // Unattributed mentions are reported, never failed: a version no train claims is a
+  // comparison that did not run, not a stale claim.
   record.ok =
     totals.openWithoutBlocker === 0 &&
     totals.tickedWithoutCitation === 0 &&
@@ -236,9 +323,15 @@ export function parseArgs(argv) {
 }
 
 export function formatReport(record) {
+  const trains = record.trainVersions ?? { plugin: record.currentVersion };
+  const baselineLine = Object.entries(trains)
+    .filter(([, v]) => v)
+    .map(([train, v]) => `${train} ${v}`)
+    .join(", ");
   const lines = [
     `issue ledger for ${record.repo ?? "(repo not detected)"}`,
     `manifest version: ${record.currentVersion}`,
+    `version baselines: ${baselineLine || "(none readable)"}`,
     "",
     ...record.issues.map((issue) => {
       const prefix = `#${issue.number} ${issue.title}`;
@@ -248,6 +341,7 @@ export function formatReport(record) {
         `  open without blocker: ${issue.counts.openWithoutBlocker}`,
         `  ticked without citation: ${issue.counts.tickedWithoutCitation}`,
         `  superseded version mentions: ${issue.counts.supersededVersionMentions}`,
+        `  unattributed version mentions: ${issue.counts.unattributedVersionMentions ?? 0}`,
       ].join("\n");
     }),
     "",
@@ -255,6 +349,7 @@ export function formatReport(record) {
     `flags: ${record.totals.openWithoutBlocker} open-without-blocker, ` +
       `${record.totals.tickedWithoutCitation} ticked-without-citation, ` +
       `${record.totals.supersededVersionMentions} superseded-version-mentions`,
+    `not compared: ${record.totals.unattributedVersionMentions ?? 0} version mention(s) claimed by no train`,
     "",
     record.ok ? "RESULT: ledger is consistent" : "RESULT: ledger has drift to reconcile",
   ];
