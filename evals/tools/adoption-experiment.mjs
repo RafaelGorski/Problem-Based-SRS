@@ -42,8 +42,11 @@ export function validateContract(contract = {}) {
       new Date(contract.observationEnd) <= new Date(contract.observationStart)) {
     errors.push("observationEnd must be after observationStart");
   }
-  if (contract.readingAtStart === undefined || contract.readingAtEnd === undefined) {
-    errors.push("readingAtStart and readingAtEnd are required");
+  for (const field of ["readingAtStart", "readingAtEnd"]) {
+    const value = contract[field];
+    if (value === undefined || value === null || value === "") {
+      errors.push(`${field} is required`);
+    }
   }
   if (contract.result !== undefined && !["positive", "zero", "blocked"].includes(contract.result)) {
     errors.push("result must be positive, zero, or blocked");

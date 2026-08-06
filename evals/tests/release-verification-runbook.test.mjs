@@ -68,6 +68,7 @@ describe("the runbook is somewhere a maintainer can actually read it", () => {
       assert.match(runbook, /--prospective/);
       assert.match(runbook, /report-only/);
       assert.match(runbook, /never edits or closes an issue/);
+      assert.match(runbook, /stays open until the\s+claim is backed by the\s+release surface/);
       assert.match(runbook, /release-claim train=plugin version=v2\.6/);
       assert.match(runbook, /release-claim train=canvas version=v1\.1\.1/);
     });
