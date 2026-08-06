@@ -2,8 +2,8 @@
  * Sandboxed scenario runner for Problem-Based SRS skill-behavior tests.
  *
  * Adapted from pbakaus/impeccable's skill-behavior/harness.mjs. Differences:
- *   - Targets `ai` v4 (this repo's version): tools use `parameters` (not
- *     `inputSchema`) and generateText takes `maxSteps` (not `stopWhen`).
+ *   - Targets the current AI SDK: tools use `inputSchema` and generateText
+ *     uses `stopWhen` with a step-count condition.
  *   - Cross-platform: the canonical skill is COPIED into the workspace (Windows
  *     symlinks need privilege), and the optional shell tool runs through the
  *     OS default shell.
@@ -17,7 +17,7 @@
  *
  * The trace is the source of truth, not the model's free-form reply.
  */
-import { generateText, tool } from "ai";
+import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod";
 import fs from "node:fs";
 import os from "node:os";
@@ -143,7 +143,7 @@ export function makeTools(workspace, simulatedUser = {}) {
   const tools = {
     read: tool({
       description: "Read a file from the workspace. Path must be workspace-relative.",
-      parameters: z.object({ path: z.string().describe("Workspace-relative file path.") }),
+      inputSchema: z.object({ path: z.string().describe("Workspace-relative file path.") }),
       execute: async ({ path: p }) => {
         record("read", { path: p });
         const resolved = safeResolve(workspace, p);
@@ -155,7 +155,7 @@ export function makeTools(workspace, simulatedUser = {}) {
     }),
     write: tool({
       description: "Write or overwrite a file in the workspace. Creates parent directories.",
-      parameters: z.object({
+      inputSchema: z.object({
         path: z.string().describe("Workspace-relative file path."),
         contents: z.string().describe("Full file contents."),
       }),
@@ -171,7 +171,7 @@ export function makeTools(workspace, simulatedUser = {}) {
     }),
     list: tool({
       description: "List a workspace directory. Defaults to the workspace root.",
-      parameters: z.object({ path: z.string().default(".").describe("Workspace-relative directory.") }),
+      inputSchema: z.object({ path: z.string().default(".").describe("Workspace-relative directory.") }),
       execute: async ({ path: p }) => {
         record("list", { path: p });
         const resolved = safeResolve(workspace, p);
@@ -186,7 +186,7 @@ export function makeTools(workspace, simulatedUser = {}) {
     }),
     run_command: tool({
       description: "Run a shell command in the workspace root (e.g. to inspect files).",
-      parameters: z.object({ command: z.string().describe("The shell command to execute.") }),
+      inputSchema: z.object({ command: z.string().describe("The shell command to execute.") }),
       execute: async ({ command }) => {
         record("run_command", { command });
         const res = await execShell(workspace, command);
@@ -198,7 +198,7 @@ export function makeTools(workspace, simulatedUser = {}) {
     ask_user: tool({
       description:
         "Ask the user 1-4 structured questions and wait for answers. Use this for the mandatory Discovery Interview and any clarification, instead of asking in prose.",
-      parameters: z.object({
+      inputSchema: z.object({
         questions: z
           .array(
             z.object({
@@ -238,7 +238,13 @@ export async function runTurn({ workspace, model, userPrompt, priorMessages = []
   const messages = [...priorMessages, { role: "user", content: userPrompt }];
   let result;
   try {
-    result = await generateText({ model, system: SKILL_BODY, messages, tools, maxSteps });
+    result = await generateText({
+      model,
+      system: SKILL_BODY,
+      messages,
+      tools,
+      stopWhen: stepCountIs(maxSteps),
+    });
   } catch (err) {
     throw new Error(`LLM behavior turn failed before completing: ${String(err)}`, { cause: err });
   }
