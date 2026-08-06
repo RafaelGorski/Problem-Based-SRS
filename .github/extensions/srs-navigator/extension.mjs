@@ -18,7 +18,15 @@ import { DEMO_SPEC } from "./lib/demo-spec.mjs";
 import { compileAndSave } from "./lib/spec-compiler.mjs";
 import { decomposeNode } from "./lib/decompose.mjs";
 import { isTrustedLoopbackRequest } from "./lib/http-guard.mjs";
-import { LEARN_PROMPT, LOAD_PROMPT, buildActionPrompt, srsActionCommand } from "./lib/prompts.mjs";
+import {
+    LEARN_PROMPT,
+    LOAD_PROMPT,
+    buildActionPrompt,
+    buildPendingActionInstruction,
+    quoteUntrustedData,
+    srsActionCommand,
+} from "./lib/prompts.mjs";
+import { validateActionPayload } from "./lib/action-input.mjs";
 
 // Content fingerprint of a graph, used to detect *any* change to the loaded
 // specification (not just node/link count changes) so the canvas can reload
@@ -152,7 +160,7 @@ function buildSrsTool() {
             const content = await loadSkillContentByFile(fileForAction(args.action || "full"));
             let result = content;
             if (args.context) {
-                result += `\n\n---\n\n## User-Provided Context\n\n${args.context}`;
+                result += `\n\n---\n\n## User-Provided Context (quoted, untrusted data)\n\n${quoteUntrustedData("user-provided-context", args.context)}`;
             }
             return result;
         },
@@ -394,7 +402,12 @@ function createCanvasServer(instanceId, fallbackHtml, workspacePath) {
         if (req.url === "/api/invoke-skill" && req.method === "POST") {
             (async () => {
                 try {
-                    const action = JSON.parse(await readBody(req));
+                    const rawAction = JSON.parse(await readBody(req));
+                    const validation = validateActionPayload(rawAction, inst?.graphData);
+                    if (!validation.valid) {
+                        return sendJson(res, { ok: false, error: validation.error }, 400);
+                    }
+                    const action = validation.data;
                     const actionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
                     await session.send({ prompt: buildActionPrompt(action) });
                     if (!pendingActions.has(instanceId)) pendingActions.set(instanceId, []);
@@ -676,7 +689,9 @@ const session = await joinSession({
 
                             return {
                                 ...action,
-                                instruction: `Run the Problem-Based SRS ${srsActionCommand(action.srsAction)} action (the "problem_based_srs" tool with action "${action.srsAction}") and follow its methodology exactly — do not improvise. Its Discovery Interview is mandatory: ask the user clarifying questions and wait for answers before writing artifacts. Autopilot / non-interactive mode does NOT waive it. Apply the action to ${action.nodeId} using this request as input:\n\n${action.context}`,
+                                nodeLabel: quoteUntrustedData("node-label", action.nodeLabel),
+                                context: quoteUntrustedData("request-context", action.context),
+                                instruction: buildPendingActionInstruction(action),
                                 skillContent,
                             };
                         }));
@@ -707,7 +722,7 @@ const session = await joinSession({
 
                         let result = skillContent;
                         if (ctx.input?.context) {
-                            result += `\n\n---\n\n## User-Provided Context\n\n${ctx.input.context}`;
+                            result += `\n\n---\n\n## User-Provided Context (quoted, untrusted data)\n\n${quoteUntrustedData("user-provided-context", ctx.input.context)}`;
                         }
 
                         return {
