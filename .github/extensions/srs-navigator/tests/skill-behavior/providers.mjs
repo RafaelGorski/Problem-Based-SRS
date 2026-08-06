@@ -6,9 +6,8 @@
  * provider a model id belongs to. Providers without a key are SKIPPED (not
  * failed) so the suite is safe to run in CI without secrets.
  *
- * Note: this repo installs `ai` v4 (`@ai-sdk/*` v4). The tool/loop API differs
- * from impeccable's v5 harness (`parameters` schema + `maxSteps`), which the
- * sibling harness.mjs accounts for.
+ * The provider packages are kept on their current compatible release line and
+ * share the zod 3 peer supported by the AI SDK.
  */
 import { anthropic, createAnthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
