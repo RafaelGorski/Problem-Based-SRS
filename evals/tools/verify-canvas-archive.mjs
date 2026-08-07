@@ -24,7 +24,11 @@ export function extractArchive(file, destination) {
     throw new Error("verify-canvas-archive: archive must be .zip or .tar.gz");
   }
   fs.mkdirSync(destination, { recursive: true });
-  execFileSync("tar", ["-xf", file, "-C", destination], { stdio: "ignore" });
+  if (lower.endsWith(".zip")) {
+    execFileSync("unzip", ["-q", file, "-d", destination], { stdio: "ignore" });
+  } else {
+    execFileSync("tar", ["-xf", file, "-C", destination], { stdio: "ignore" });
+  }
   return destination;
 }
 
