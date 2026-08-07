@@ -199,7 +199,7 @@ jobs:
           node evals/tools/verify-canvas-archive.mjs "$ZIP" --json release-asset/zip.json
           node evals/tools/verify-canvas-archive.mjs "$TAR" --json release-asset/tar.json
           unzip -Z1 "$ZIP" | sed '/\/$/d' | sort > release-asset/zip.paths
-          tar -tzf "$TAR" | sed 's#/$##' | sort > release-asset/tar.paths
+          tar -tzf "$TAR" | sed '/\/$/d' | sort > release-asset/tar.paths
           cmp release-asset/zip.paths release-asset/tar.paths
           gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
            > release-asset/release-metadata.json

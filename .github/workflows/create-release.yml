@@ -94,6 +94,7 @@ jobs:
           fi
 
       - name: Create or update GitHub Release
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.build.outputs.version }}
@@ -111,12 +112,14 @@ jobs:
             echo "Release $TAG exists; updating notes and assets."
             printf '%s' "$NOTES" | gh release edit "$TAG" --title "$TITLE" --notes-file -
             gh release upload "$TAG" "$ARTIFACT" --clobber
+            echo "created=false" >> "$GITHUB_OUTPUT"
           else
             printf '%s' "$NOTES" | gh release create "$TAG" \
               --target "${{ github.sha }}" \
               --title "$TITLE" \
               --notes-file - \
               "$ARTIFACT"
+            echo "created=true" >> "$GITHUB_OUTPUT"
           fi
           echo "Published $TAG with asset: $ARTIFACT"
 
@@ -124,6 +127,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.build.outputs.version }}
+          RELEASE_CREATED: ${{ steps.publish.outputs.created }}
         run: |
           TAG="v${VERSION}"
           mkdir -p release-asset
@@ -143,9 +147,13 @@ jobs:
            --json release-asset/plugin-archive.json
           gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
            > release-asset/release-metadata.json
-          jq --arg sha "${{ github.sha }}" \
-           'if .targetCommitish == $sha then . else error("release target does not match workflow head") end' \
-           release-asset/release-metadata.json >/dev/null
+          if [ "$RELEASE_CREATED" = "true" ]; then
+           jq --arg sha "${{ github.sha }}" \
+             'if .targetCommitish == $sha then . else error("release target does not match workflow head") end' \
+             release-asset/release-metadata.json >/dev/null
+          else
+           echo "Existing release updated; retaining its original target commit."
+          fi
           {
            echo "## Downloaded plugin release verification"
            echo "- **Tag:** $TAG"
