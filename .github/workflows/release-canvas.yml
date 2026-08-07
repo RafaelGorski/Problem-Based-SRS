@@ -124,7 +124,7 @@ jobs:
           ARCHIVE_ROOT=$(node -e "import('./scripts/package-extension.mjs').then(m => console.log(m.ARCHIVE_ROOT))")
           for ARCHIVE in build/srs-navigator-${{ steps.bump.outputs.version }}.tar.gz build/srs-navigator-${{ steps.bump.outputs.version }}.zip; do
             test -f "$ARCHIVE"
-            if [[ "$ARCHIVE" == *.tar.gz ]]; then tar -tzf "$ARCHIVE" >/dev/null; else tar -tf "$ARCHIVE" >/dev/null; fi
+            if [[ "$ARCHIVE" == *.tar.gz ]]; then tar -tzf "$ARCHIVE" >/dev/null; else unzip -t "$ARCHIVE" >/dev/null; fi
             case "$ARCHIVE" in
               *.tar.gz)
                 tar -tzf "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
