@@ -124,10 +124,17 @@ jobs:
           ARCHIVE_ROOT=$(node -e "import('./scripts/package-extension.mjs').then(m => console.log(m.ARCHIVE_ROOT))")
           for ARCHIVE in build/srs-navigator-${{ steps.bump.outputs.version }}.tar.gz build/srs-navigator-${{ steps.bump.outputs.version }}.zip; do
             test -f "$ARCHIVE"
-            if [[ "$ARCHIVE" == *.tar.gz ]]; then tar -tzf "$ARCHIVE" >/dev/null; else tar -tf "$ARCHIVE" >/dev/null; fi
-            # Do not use grep -q here: with pipefail, grep exits early after finding the
-            # member and tar reports SIGPIPE, turning a valid archive into a failed release.
-            case "$ARCHIVE" in *.tar.gz) tar -tzf "$ARCHIVE" | grep -Fx "${ARCHIVE_ROOT}/extension.mjs" >/dev/null ;; *.zip) tar -tf "$ARCHIVE" | grep -Fx "${ARCHIVE_ROOT}/extension.mjs" >/dev/null ;; esac
+            if [[ "$ARCHIVE" == *.tar.gz ]]; then tar -tzf "$ARCHIVE" >/dev/null; else unzip -t "$ARCHIVE" >/dev/null; fi
+            case "$ARCHIVE" in
+              *.tar.gz)
+                tar -tzf "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
+                grep -q "^${ARCHIVE_ROOT}/extension.mjs$" "$RUNNER_TEMP/archive.paths"
+                ;;
+              *.zip)
+                unzip -Z1 "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
+                grep -q "^${ARCHIVE_ROOT}/extension.mjs$" "$RUNNER_TEMP/archive.paths"
+                ;;
+            esac
             node evals/tools/verify-canvas-archive.mjs "$ARCHIVE" \
               --json "${RUNNER_TEMP}/$(basename "$ARCHIVE").json"
           done
@@ -192,7 +199,7 @@ jobs:
           node evals/tools/verify-canvas-archive.mjs "$ZIP" --json release-asset/zip.json
           node evals/tools/verify-canvas-archive.mjs "$TAR" --json release-asset/tar.json
           unzip -Z1 "$ZIP" | sed '/\/$/d' | sort > release-asset/zip.paths
-          tar -tzf "$TAR" | sed 's#/$##' | sort > release-asset/tar.paths
+          tar -tzf "$TAR" | sed '/\/$/d' | sort > release-asset/tar.paths
           cmp release-asset/zip.paths release-asset/tar.paths
           gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
            > release-asset/release-metadata.json
