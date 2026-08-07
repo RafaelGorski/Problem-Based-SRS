@@ -125,7 +125,16 @@ jobs:
           for ARCHIVE in build/srs-navigator-${{ steps.bump.outputs.version }}.tar.gz build/srs-navigator-${{ steps.bump.outputs.version }}.zip; do
             test -f "$ARCHIVE"
             if [[ "$ARCHIVE" == *.tar.gz ]]; then tar -tzf "$ARCHIVE" >/dev/null; else tar -tf "$ARCHIVE" >/dev/null; fi
-            case "$ARCHIVE" in *.tar.gz) tar -tzf "$ARCHIVE" | grep -q "^${ARCHIVE_ROOT}/extension.mjs$" ;; *.zip) tar -tf "$ARCHIVE" | grep -q "^${ARCHIVE_ROOT}/extension.mjs$" ;; esac
+            case "$ARCHIVE" in
+              *.tar.gz)
+                tar -tzf "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
+                grep -q "^${ARCHIVE_ROOT}/extension.mjs$" "$RUNNER_TEMP/archive.paths"
+                ;;
+              *.zip)
+                tar -tf "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
+                grep -q "^${ARCHIVE_ROOT}/extension.mjs$" "$RUNNER_TEMP/archive.paths"
+                ;;
+            esac
             node evals/tools/verify-canvas-archive.mjs "$ARCHIVE" \
               --json "${RUNNER_TEMP}/$(basename "$ARCHIVE").json"
           done
