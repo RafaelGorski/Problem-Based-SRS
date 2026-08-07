@@ -41,6 +41,7 @@ const SKILL_SLUG = "problem-based-srs";
 // the only people who read it.
 const REPO_ONLY_PATHS = [".github/extensions/srs-navigator", ".spec/crm-system.json"];
 const PROJECT_URL = "https://github.com/RafaelGorski/Problem-Based-SRS";
+const hasProjectUrl = (text) => /https:\/\/github\.com\/RafaelGorski\/Problem-Based-SRS(?:[/?#)\s]|$)/.test(text);
 
 // A stand-in Identifier Notation table for the parser canaries at the bottom of this
 // file. It deliberately is not the real one: these tests prove the parser reads whatever
@@ -238,7 +239,7 @@ describe("the installed skill is self-contained", () => {
     for (const rel of staged.filter((f) => f.endsWith(".md"))) {
       const text = read(rel);
       for (const repoPath of REPO_ONLY_PATHS) {
-        if (text.includes(repoPath) && !text.includes(PROJECT_URL)) {
+        if (text.includes(repoPath) && !hasProjectUrl(text)) {
           offenders.push(`${rel} mentions ${repoPath}`);
         }
       }
@@ -256,7 +257,7 @@ describe("the installed skill is self-contained", () => {
     const live = read("reference/live.md");
     const recovery = live.slice(live.indexOf("not installed"));
     assert.ok(
-      recovery.includes(PROJECT_URL),
+      hasProjectUrl(recovery),
       "the /live recovery note must hand over the install URL: the one instruction whose job " +
         "is to fix “the extension is not installed” cannot assume the extension's source tree " +
         "is already on disk",

@@ -414,10 +414,14 @@ describe("negative canaries", () => {
     // the raw version is only wrong while the version ends in `.0`; for a patch release
     // like 2.4.1 it is exactly what the pipeline creates, and a canary written that way
     // goes red on a correct repository the first time a patch ships.
-    const broken = CHANGELOG.replace(
-      new RegExp(`^\\[${manifest.version.replace(/\./g, "\\.")}\\]:.*$`, "m"),
-      `[${manifest.version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${pluginReleaseTag(manifest.version)}.0`,
-    );
+    const definition = `[${manifest.version}]:`;
+    const broken = CHANGELOG.split("\n")
+      .map((line) =>
+        line.startsWith(definition)
+          ? `[${manifest.version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${pluginReleaseTag(manifest.version)}.0`
+          : line,
+      )
+      .join("\n");
     const link = changelogTagLinks(broken).find(
       (l) => compareVersions(l.version, manifest.version) === 0,
     );
@@ -502,4 +506,3 @@ describe("the tag rule is derived from the pipeline, not restated", () => {
     });
   });
 });
-

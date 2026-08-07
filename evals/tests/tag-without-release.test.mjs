@@ -498,8 +498,8 @@ describe("reading the tags is a fetch like any other, and may fail like one", ()
       code = await main(["--strict"], {
         fetchImpl: async (url) => {
           const u = String(url);
-          if (u.includes("matching-refs")) throw new Error("502");
-          if (u.includes("api.github.com")) {
+          if (new URL(u).pathname.includes("/git/matching-refs")) throw new Error("502");
+          if (new URL(u).hostname === "api.github.com") {
             return {
               ok: true,
               status: 200,
@@ -531,12 +531,12 @@ describe("reading the tags is a fetch like any other, and may fail like one", ()
       await main([], {
         fetchImpl: async (url) => {
           const u = String(url);
-          if (u.includes("matching-refs")) {
+          if (new URL(u).pathname.includes("/git/matching-refs")) {
             const manifest = JSON.parse(read(".claude-plugin/plugin.json"));
             const tag = `v${String(manifest.version).replace(/\.0$/, "")}`;
             return { ok: true, status: 200, json: async () => refsPayload([...RELEASED, tag]) };
           }
-          if (u.includes("api.github.com")) {
+          if (new URL(u).hostname === "api.github.com") {
             return {
               ok: true,
               status: 200,

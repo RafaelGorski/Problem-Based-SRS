@@ -307,8 +307,7 @@ describe("problem-based-srs orchestrator", () => {
 
   it("advertises every unified action", () => {
     for (const action of ORCHESTRATOR_ACTIONS) {
-      const re = new RegExp("/problem-based-srs " + action.replace(/[-]/g, "\\-"));
-      assert.ok(re.test(main.text), `orchestrator missing action: /problem-based-srs ${action}`);
+      assert.ok(main.text.includes(`/problem-based-srs ${action}`), `orchestrator missing action: /problem-based-srs ${action}`);
     }
   });
 
