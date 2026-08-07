@@ -131,7 +131,7 @@ jobs:
                 grep -q "^${ARCHIVE_ROOT}/extension.mjs$" "$RUNNER_TEMP/archive.paths"
                 ;;
               *.zip)
-                tar -tf "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
+                unzip -Z1 "$ARCHIVE" > "$RUNNER_TEMP/archive.paths"
                 grep -q "^${ARCHIVE_ROOT}/extension.mjs$" "$RUNNER_TEMP/archive.paths"
                 ;;
             esac
