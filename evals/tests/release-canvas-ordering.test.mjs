@@ -176,6 +176,21 @@ describe("release-canvas.yml — nothing is pushed before the artifact exists", 
     );
   });
 
+  it("reads the complete archive listing so pipefail cannot turn a match into SIGPIPE", () => {
+    const verify = CANVAS_STEPS.find((s) => VERIFIES.test(s.command));
+    assert.doesNotMatch(
+      verify?.command ?? "",
+      /tar\s+-t[a-z]*f\s+"?\$?\{?ARCHIVE"?\s*\|\s*grep/,
+      "grep can close the tar pipe early; with pipefail tar then reports SIGPIPE — write the " +
+        "listing to a file first and grep the file instead of the pipe",
+    );
+    assert.match(
+      verify?.command ?? "",
+      />\s*"?\$?\{?RUNNER_TEMP\}?\/?[^\n]*"?\n[\s\S]*grep\s+-q\b/,
+      "the archive member check must write the full listing to a file, then grep that file",
+    );
+  });
+
   it("verifies the archive against the tree the release ships, i.e. after the skill sync", () => {
     const syncAt = firstStepMatching(CANVAS_STEPS, /sync-skills\.mjs/);
     const verifyAt = firstStepMatching(CANVAS_STEPS, VERIFIES);

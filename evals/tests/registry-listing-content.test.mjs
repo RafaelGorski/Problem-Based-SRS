@@ -731,7 +731,7 @@ describe("the checker actually fetches the pages", () => {
     const seen = [];
     const impl = async (url) => {
       seen.push(String(url));
-      if (String(url).includes("api.github.com")) {
+      if (new URL(String(url)).hostname === "api.github.com") {
         return { ok: true, status: 200, json: async () => releases };
       }
       const isSkillPage = /\/problem-based-srs\/problem-based-srs$/.test(String(url));

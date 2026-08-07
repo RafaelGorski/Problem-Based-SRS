@@ -55,13 +55,22 @@ export function walk(dir, base = dir) {
  */
 export function importedSpecifiers(source) {
   const out = new Set();
-  const patterns = [
-    /^[ \t]*(?:import|export)\b(?:[^;"'`]|\r?\n)*?\bfrom\s*["']([^"']+)["']/gm, // import x from "y"
-    /^[ \t]*import\s*["']([^"']+)["']/gm, //                                       import "y"
-    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g, //                                   await import("y")
-    /\brequire\s*\(\s*["']([^"']+)["']\s*\)/g, //                                  require("y")
-  ];
-  for (const re of patterns) {
+  const lines = source.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    if (!/^[ \t]*(?:import|export)\b/.test(lines[i])) continue;
+    let statement = lines[i];
+    let consumed = 0;
+    while (!statement.includes(";") && i + consumed + 1 < lines.length && consumed < 100) {
+      consumed += 1;
+      statement += `\n${lines[i + consumed]}`;
+    }
+    const from = statement.match(/\bfrom\s*["']([^"']+)["']/);
+    const sideEffect = statement.match(/^[ \t]*import\s*["']([^"']+)["']/);
+    if (from) out.add(from[1]);
+    else if (sideEffect) out.add(sideEffect[1]);
+    i += consumed;
+  }
+  for (const re of [/\bimport\s*\(\s*["']([^"']+)["']\s*\)/g, /\brequire\s*\(\s*["']([^"']+)["']\s*\)/g]) {
     for (const m of source.matchAll(re)) out.add(m[1]);
   }
   return [...out];

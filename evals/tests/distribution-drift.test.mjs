@@ -1021,7 +1021,7 @@ describe("the summary is what a human is handed", () => {
 describe("the exit code the workflow depends on", () => {
   const stubFetch = ({ listingHtml, releases }) =>
     async (url) => {
-      if (String(url).includes("api.github.com")) {
+      if (new URL(String(url)).hostname === "api.github.com") {
         if (releases instanceof Error) throw releases;
         return { ok: true, status: 200, json: async () => releases };
       }

@@ -290,9 +290,8 @@ describe("every step with an executable form names it", () => {
   for (const { tool, flag } of EXECUTABLE_STEPS) {
     it(`names ${tool}, which exists`, () => {
       assert.ok(fs.existsSync(path.join(repoRoot, tool)), `${tool} is cited but absent`);
-      assert.match(
-        runbook,
-        new RegExp(tool.replace(/[/.]/g, "\\$&")),
+      assert.ok(
+        runbook.includes(tool),
         `${tool} exists but the runbook never tells anyone to run it`,
       );
       assert.ok(runbook.includes(flag), `the runbook invokes ${tool} without ${flag}`);

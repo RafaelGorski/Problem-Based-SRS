@@ -34,11 +34,12 @@ def translate_text(text: str, translator: GoogleTranslator) -> str:
         return text
     
     # Skip lines that are only page markers, images, or page numbers
-    if re.match(r'^<!--.*-->$', text.strip()):
+    stripped = text.strip()
+    if stripped.startswith("<!--") and stripped.endswith("-->"):
         return text
-    if re.match(r'^\!\[.*\]\(.*\)$', text.strip()):
+    if stripped.startswith("![") and stripped.endswith(")") and "](" in stripped:
         return text
-    if re.match(r'^\d+$', text.strip()):
+    if stripped.isdecimal():
         return text
     
     try:

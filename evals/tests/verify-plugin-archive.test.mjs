@@ -99,7 +99,10 @@ describe("findPluginRoot accepts either thing a maintainer will point at", () =>
 
   it("refuses a directory with no manifest rather than reporting an empty archive", () => {
     const root = fixture("root-none", { "readme.txt": "not a plugin" });
-    assert.throws(() => findPluginRoot(root), new RegExp(`no ${MANIFEST.replace(/[.]/g, "\\.")}`));
+    assert.throws(
+      () => findPluginRoot(root),
+      (error) => error instanceof Error && error.message.includes(`no ${MANIFEST}`),
+    );
   });
 
   it("refuses to guess between two plugin roots", () => {
