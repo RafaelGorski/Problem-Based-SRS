@@ -180,13 +180,14 @@ describe("release-canvas.yml — nothing is pushed before the artifact exists", 
     const verify = CANVAS_STEPS.find((s) => VERIFIES.test(s.command));
     assert.doesNotMatch(
       verify?.command ?? "",
-      /grep\s+-q/,
-      "grep -q can close the tar pipe early; with pipefail tar then reports SIGPIPE",
+      /tar\s+-t[a-z]*f\s+"?\$?\{?ARCHIVE"?\s*\|\s*grep/,
+      "grep can close the tar pipe early; with pipefail tar then reports SIGPIPE — write the " +
+        "listing to a file first and grep the file instead of the pipe",
     );
     assert.match(
       verify?.command ?? "",
-      /grep\s+-Fx\b[^\n]*>\s*\/dev\/null/,
-      "the archive member check must consume the full listing while matching exactly",
+      />\s*"?\$?\{?RUNNER_TEMP\}?\/?[^\n]*"?\n[\s\S]*grep\s+-q\b/,
+      "the archive member check must write the full listing to a file, then grep that file",
     );
   });
 
