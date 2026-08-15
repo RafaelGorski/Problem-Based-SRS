@@ -69,8 +69,9 @@ anti-checkout guard shall be exercised rather than assumed.
       provenance record is evidence for an unknown artifact.
 - [ ] The provenance SHA-256 matches the hash of the downloaded asset before extraction, linking
       the capture to the published bytes end to end.
-- [ ] The capture shows nodes in canonical dotted notation (`CP.01` / `CN.01.1` / `FR.01.1.1`)
-      with the health bar rendered — not hyphen legacy IDs.
+- [ ] The capture shows nodes in canonical dotted notation — the demo specification's own IDs
+      (`CP.01` / `CN.01.1` / `FR.01.1.1`, from `.spec/crm-system.json`, not this plan's artifacts)
+      — with the health bar rendered, and no hyphen legacy IDs anywhere.
 - [ ] The version shown in the capture equals `VERSION`, the release tag, and the extension
       `package.json` — all four agree.
 
