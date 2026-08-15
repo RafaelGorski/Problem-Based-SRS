@@ -120,11 +120,8 @@ export function hasExplicitBlocker(text) {
   );
 }
 
-export function parseChecklistLine(line, baselines) {
-  const m = /^\s*-\s\[( |x|X)\]\s+(.*)\s*$/.exec(line);
-  if (!m) return null;
-  const checked = m[1].toLowerCase() === "x";
-  const text = m[2];
+/** Build the classified box record shared by both the line-anchored and collapsed-body paths. */
+function classifyBox(checked, text, baselines) {
   const mentions = versionMentions(text);
   const { superseded, unattributed } = classifyVersionMentions(text, baselines);
   return {
@@ -138,19 +135,56 @@ export function parseChecklistLine(line, baselines) {
   };
 }
 
+export function parseChecklistLine(line, baselines) {
+  const m = /^\s*-\s\[( |x|X)\]\s+(.*)\s*$/.exec(line);
+  if (!m) return null;
+  const checked = m[1].toLowerCase() === "x";
+  const text = m[2];
+  return classifyBox(checked, text, baselines);
+}
+
+// Matches a checklist marker anywhere in the body, not anchored to the start of a line. Issue
+// bodies are sometimes rewritten (by an editor, an API round-trip, or a paste) into a single
+// paragraph with no newlines at all; anchoring detection to `^\s*-\s\[...\]` makes every box in
+// such a body invisible; a ledger reporting "0 boxes" for those is then indistinguishable from an
+// issue that genuinely has none, and a batch gate built on that count passes vacuously (#156).
+const CHECKLIST_MARKER = /-\s\[( |x|X)\]\s+/g;
+
+/**
+ * Extract every checklist box from a body regardless of line formatting.
+ *
+ * A box's text is delimited by the next checklist marker (or the end of the body), not by a
+ * newline — so a collapsed, single-paragraph body is parsed exactly like its multi-line
+ * counterpart. Text is trimmed of surrounding whitespace only; internal newlines are preserved
+ * so citation/blocker detection keeps seeing the same text it would see in a well-formed body.
+ */
+export function extractChecklistBoxes(body) {
+  const text = String(body ?? "");
+  const matches = [...text.matchAll(CHECKLIST_MARKER)];
+  return matches.map((m, i) => {
+    const start = m.index + m[0].length;
+    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+    return {
+      checked: m[1].toLowerCase() === "x",
+      text: text.slice(start, end).trim(),
+    };
+  });
+}
+
 export function analyzeIssueBody(body, baselines) {
-  const lines = String(body ?? "").split(/\r?\n/);
-  const boxes = [];
-  for (const line of lines) {
-    const parsed = parseChecklistLine(line, baselines);
-    if (parsed) boxes.push(parsed);
-  }
+  const raw = extractChecklistBoxes(body);
+  const boxes = raw.map((b) => classifyBox(b.checked, b.text, baselines));
   const checked = boxes.filter((b) => b.checked);
   const open = boxes.filter((b) => !b.checked);
   const openWithoutBlocker = open.filter((b) => !b.hasExplicitBlocker);
   const tickedWithoutCitation = checked.filter((b) => !b.hasCitation);
   const supersededVersionMentions = boxes.flatMap((b) => b.supersededVersions);
   const unattributedVersionMentions = boxes.flatMap((b) => b.unattributedVersions);
+  // Every checklist marker found by CHECKLIST_MARKER is attributed to exactly one box above, so
+  // there is currently no code path that drops a marker silently. This channel exists so a future
+  // change that narrows extraction (e.g. to skip markers inside fenced code) has somewhere to
+  // report a box it declines to attribute, instead of that box quietly vanishing from the count.
+  const unparseable = [];
 
   return {
     boxes,
@@ -162,12 +196,14 @@ export function analyzeIssueBody(body, baselines) {
       tickedWithoutCitation: tickedWithoutCitation.length,
       supersededVersionMentions: supersededVersionMentions.length,
       unattributedVersionMentions: unattributedVersionMentions.length,
+      unparseable: unparseable.length,
     },
     findings: {
       openWithoutBlocker: openWithoutBlocker.map((b) => b.text),
       tickedWithoutCitation: tickedWithoutCitation.map((b) => b.text),
       supersededVersionMentions,
       unattributedVersionMentions,
+      unparseable,
     },
   };
 }
@@ -254,6 +290,7 @@ export function buildLedger(options, run = defaultRunner) {
       acc.tickedWithoutCitation += issue.counts.tickedWithoutCitation;
       acc.supersededVersionMentions += issue.counts.supersededVersionMentions;
       acc.unattributedVersionMentions += issue.counts.unattributedVersionMentions;
+      acc.unparseable += issue.counts.unparseable ?? 0;
       return acc;
     },
     {
@@ -265,6 +302,7 @@ export function buildLedger(options, run = defaultRunner) {
       tickedWithoutCitation: 0,
       supersededVersionMentions: 0,
       unattributedVersionMentions: 0,
+      unparseable: 0,
     },
   );
 
@@ -281,7 +319,8 @@ export function buildLedger(options, run = defaultRunner) {
   record.ok =
     totals.openWithoutBlocker === 0 &&
     totals.tickedWithoutCitation === 0 &&
-    totals.supersededVersionMentions === 0;
+    totals.supersededVersionMentions === 0 &&
+    totals.unparseable === 0;
   return record;
 }
 
@@ -342,13 +381,15 @@ export function formatReport(record) {
         `  ticked without citation: ${issue.counts.tickedWithoutCitation}`,
         `  superseded version mentions: ${issue.counts.supersededVersionMentions}`,
         `  unattributed version mentions: ${issue.counts.unattributedVersionMentions ?? 0}`,
+        `  unparseable: ${issue.counts.unparseable ?? 0}`,
       ].join("\n");
     }),
     "",
     `totals: ${record.totals.checked} checked, ${record.totals.open} open, ${record.totals.boxes} boxes`,
     `flags: ${record.totals.openWithoutBlocker} open-without-blocker, ` +
       `${record.totals.tickedWithoutCitation} ticked-without-citation, ` +
-      `${record.totals.supersededVersionMentions} superseded-version-mentions`,
+      `${record.totals.supersededVersionMentions} superseded-version-mentions, ` +
+      `${record.totals.unparseable ?? 0} unparseable`,
     `not compared: ${record.totals.unattributedVersionMentions ?? 0} version mention(s) claimed by no train`,
     "",
     record.ok ? "RESULT: ledger is consistent" : "RESULT: ledger has drift to reconcile",

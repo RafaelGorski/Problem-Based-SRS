@@ -23,6 +23,7 @@ export const REPO = "RafaelGorski/Problem-Based-SRS";
 
 const CLAIM_MARKER = /<!--\s*release-claim\b[\s\S]*?-->/gi;
 const VALID_CLAIM = /^<!--\s*release-claim\s+train=(plugin|canvas)\s+version=(v\d+(?:\.\d+){1,2})\s*-->$/i;
+const VALID_NO_CLAIM = /^<!--\s*release-claim\s+train=none\s*-->$/i;
 const CANVAS_TITLE = /^srs-navigator\b/i;
 
 export function parseClaim(body) {
@@ -32,6 +33,12 @@ export function parseClaim(body) {
       ok: false,
       reason: markers.length === 0 ? "missing release-claim marker" : "duplicate release-claim markers",
     };
+  }
+  if (VALID_NO_CLAIM.test(markers[0])) {
+    // An explicit declaration that this issue asserts no release of its own (remediation-only
+    // work). It is "ok" for closure purposes and carries no train/version/tag to match against
+    // the published release list.
+    return { ok: true, train: "none", version: null, tag: null, noRelease: true };
   }
   const match = markers[0].match(VALID_CLAIM);
   if (!match) return { ok: false, reason: "malformed release-claim marker" };
@@ -77,13 +84,19 @@ export function assessClaims({ issues = [], releases = [], prospective = [] } = 
   for (const issue of issues) {
     const number = Number(issue.number);
     const state = String(issue.state ?? "").toLowerCase();
-    const shouldCheck = prospectiveSet.size ? prospectiveSet.has(number) : state === "closed";
-    if (!shouldCheck) continue;
-    if (prospectiveSet.size && state !== "open") {
+    const isProspectiveTarget = prospectiveSet.size > 0 && prospectiveSet.has(number);
+    // Audit mode now examines every supplied issue's marker, open or closed — not only closed
+    // ones. Skipping open issues in audit mode was the parity bug (#172): audit mode returned
+    // exit 0 for a batch of nine open parent issues, having examined zero of their markers,
+    // while `--prospective` over the identical input returned exit 1 naming seven of them as
+    // indeterminate. A "clean" verdict that never looked at the claim it is asked about is
+    // indistinguishable from one that looked and found nothing wrong; this loop no longer
+    // produces the first kind for any supplied issue.
+    if (prospectiveSet.size > 0 && !isProspectiveTarget) continue;
+    if (isProspectiveTarget && state !== "open") {
       findings.push({ issue: number, id: "issue-state-indeterminate", detail: "prospective claims must be open issues" });
       continue;
     }
-    if (!prospectiveSet.size && state !== "closed") continue;
 
     const claim = parseClaim(issue.body);
     checked.push({ issue: number, state, claim });
@@ -91,6 +104,14 @@ export function assessClaims({ issues = [], releases = [], prospective = [] } = 
       findings.push({ issue: number, id: "release-claim-indeterminate", detail: claim.reason });
       continue;
     }
+    if (claim.noRelease) continue;
+    // A release must actually exist only when the issue is being closed on the claim: a
+    // prospective target (about to close) or an issue already closed under audit. An open issue
+    // examined in audit mode carries a well-formed marker but has not been closed on it yet, so
+    // it is not held to the publication requirement — only to carrying a marker the gate can
+    // read, which is what the loop above already enforced by reaching this point.
+    const requiresPublished = isProspectiveTarget || state === "closed";
+    if (!requiresPublished) continue;
     const matches = published.filter((release) => release.tag === claim.tag && release.train === claim.train);
     if (matches.length === 0) {
       findings.push({
@@ -109,6 +130,7 @@ export function assessClaims({ issues = [], releases = [], prospective = [] } = 
   return {
     ok: findings.length === 0,
     mode: prospectiveSet.size ? "prospective" : "audit",
+    evaluated: checked.length,
     checked,
     findings,
     releases: published,

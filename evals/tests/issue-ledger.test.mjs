@@ -6,6 +6,7 @@ import {
   attributeVersion,
   classifyVersionMentions,
   compareVersions,
+  extractChecklistBoxes,
   hasCitation,
   hasExplicitBlocker,
   normalizeVersion,
@@ -164,6 +165,59 @@ describe("train baselines are read from the files the pipelines own", () => {
       "the two trains occupy different major series; if that changes, the ledger's " +
         "attribution rule needs revisiting rather than silently mis-attributing tags",
     );
+  });
+});
+
+// Regression guard for the defect found on 2026-08-07 (#156): six live issue bodies were
+// rewritten into a single paragraph with no newlines. `parseChecklistLine`'s line anchoring
+// made every box in those bodies invisible, so the ledger reported "0 boxes" for an issue that
+// actually carried 14 — indistinguishable from an issue that genuinely has none. Reverting
+// `analyzeIssueBody`/`extractChecklistBoxes` to line-based splitting fails every test below.
+describe("checklist boxes are found regardless of line formatting", () => {
+  const collapsed =
+    "Some intro text. - [x] done in #108 and cited here - [ ] Blocked on #91 until re-crawl lands " +
+    "- [ ] still pending with no blocker - [x] completed with no citation";
+
+  it("extracts every marker from a body with no newlines", () => {
+    const boxes = extractChecklistBoxes(collapsed);
+    assert.equal(boxes.length, 4);
+    assert.deepEqual(boxes.map((b) => b.checked), [true, false, false, true]);
+  });
+
+  it("delimits box text by the next marker, not by a newline", () => {
+    const boxes = extractChecklistBoxes(collapsed);
+    assert.equal(boxes[0].text, "done in #108 and cited here");
+    assert.equal(boxes[1].text, "Blocked on #91 until re-crawl lands");
+  });
+
+  it("matches the marker count gh reports for a collapsed body", () => {
+    const markerCount = [...collapsed.matchAll(/- \[[ xX]\]/g)].length;
+    assert.equal(extractChecklistBoxes(collapsed).length, markerCount);
+  });
+
+  it("attributes citations and blockers on a collapsed body the same as a line-anchored one", () => {
+    const analyzed = analyzeIssueBody(collapsed, "2.6.0");
+    assert.equal(analyzed.counts.total, 4);
+    assert.equal(analyzed.counts.checked, 2);
+    assert.equal(analyzed.counts.open, 2);
+    assert.equal(analyzed.counts.openWithoutBlocker, 1, "only the unblocked open box should flag");
+    assert.equal(analyzed.counts.tickedWithoutCitation, 1, "only the uncited ticked box should flag");
+  });
+
+  it("reports zero boxes distinctly for a body with genuinely none", () => {
+    const analyzed = analyzeIssueBody("Just prose, no checklist markers at all.", "2.6.0");
+    assert.equal(analyzed.counts.total, 0);
+    assert.equal(analyzed.counts.unparseable, 0);
+  });
+
+  it("keeps well-formed multi-line bodies parsing identically", () => {
+    const multiline = [
+      "- [x] done in #108 and cited here",
+      "- [ ] Blocked on #91 until re-crawl lands",
+      "- [ ] still pending with no blocker",
+      "- [x] completed with no citation",
+    ].join("\n");
+    assert.deepEqual(analyzeIssueBody(multiline, "2.6.0").counts, analyzeIssueBody(collapsed, "2.6.0").counts);
   });
 });
 
