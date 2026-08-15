@@ -8,6 +8,8 @@
 // Files updated:
 //   .github/extensions/srs-navigator/package.json       -> version: "X.Y.Z"
 //   .github/extensions/srs-navigator/copilot-extension.json -> version: X (major int)
+//   .github/extensions/srs-navigator/package-lock.json   -> root "version" and
+//     packages[""].version, both stamped to "X.Y.Z" (dependency graph untouched)
 //   VERSION                                              -> X.Y.Z
 //
 // Usage:
@@ -29,6 +31,7 @@ const repoRoot = resolve(__dirname, "..");
 const extDir = resolve(repoRoot, ".github", "extensions", "srs-navigator");
 const pkgPath = resolve(extDir, "package.json");
 const manifestPath = resolve(extDir, "copilot-extension.json");
+const lockPath = resolve(extDir, "package-lock.json");
 const versionFilePath = resolve(repoRoot, "VERSION");
 
 function parseArgs(argv) {
@@ -120,7 +123,16 @@ function main() {
 
   writeFileSync(versionFilePath, version + "\n");
 
-  console.log("Updated package.json, copilot-extension.json, and VERSION.");
+  // Only root metadata is rewritten — the dependency graph (all other "version" fields,
+  // nested under node_modules/*) is left exactly as npm resolved it.
+  if (existsSync(lockPath)) {
+    const lock = readJson(lockPath);
+    lock.version = version;
+    if (lock.packages?.[""]) lock.packages[""].version = version;
+    writeFileSync(lockPath, JSON.stringify(lock, null, 2) + "\n");
+  }
+
+  console.log("Updated package.json, copilot-extension.json, package-lock.json, and VERSION.");
   emitOutputs(version, tag);
 }
 
