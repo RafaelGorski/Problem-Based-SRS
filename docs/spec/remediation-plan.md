@@ -127,43 +127,44 @@ Phase 4  ── batch ledger accounting     (needs everything; closes last)
 | Order | Issue | Work | Why first |
 |---|---|---|---|
 | 0.1 | #173–#179 (all) | Land `docs/spec/` plan + FR artifacts | Every sub-issue's citation currently dangles (F5) |
-| 0.2 | **#139** | Remove the duplicate `release-claim` marker, leaving exactly one | Nothing that claims a release can reach a clean verdict until this clears (F2) |
+| 0.2 | **#139** → **#182** | Remove the duplicate `release-claim` marker, leaving exactly one | Nothing that claims a release can reach a clean verdict until this clears (F2) |
 
 ### Phase 1 — Correct the claims (parallel, after 0.2)
 
 | Order | Issue | Work | Depends on |
 |---|---|---|---|
-| 1.1 | **#138** | Restate the marker and all acceptance text to the **current** canvas release (`v1.1.3`), clearing 9 stale mentions | 0.2 |
-| 1.2 | **#162** | Align the recovery-rehearsal text to `v1.1.3`, clearing 4 stale mentions | 1.1 |
-| 1.3 | **#140** | Capture `distribution-before.json` by **parsed content** and submit the re-crawl | — (independent) |
-| 1.4 | **#145** | Give #145 an acceptance ledger and an explicit release-claim record | 0.2 |
-| 1.5 | #142, #147, #148, #149 | Record each explicitly as *not* a release claim (F7) | — |
+| 1.1 | **#138** → **#183** | Restate the marker and all acceptance text to the **current** canvas release (`v1.1.3`), clearing 9 stale mentions | 0.2 |
+| 1.2 | **#162** → **#191** | Align the recovery-rehearsal text to `v1.1.3`, clearing 4 stale mentions | 1.1 |
+| 1.3 | **#140** → **#184** | Capture `distribution-before.json` by **parsed content** and submit the re-crawl | — (independent) |
+| 1.4 | **#145** → **#186** | Give #145 an acceptance ledger and an explicit release-claim record | 0.2 |
+| 1.5 | #142 → #185, #147 → #187, #148 → #188, #149 → #189 | Record each explicitly as *not* a release claim (F7) | — |
+| 1.6 | **#173** → **#190** | Execute the registry before-state capture now that the cited spec exists | 0.1 |
 
 ### Phase 2 — Prove the mechanisms (after Phase 1)
 
 | Order | Issue | Work | Depends on |
 |---|---|---|---|
-| 2.1 | **#174** | Falsify the closure gate under mutation; restore byte-identically | 0.2, 1.4 |
-| 2.2 | **#164** | Wire the gate into the release procedure so it cannot be skipped | 0.2 |
-| 2.3 | **#176** | Capture `/live` provenance from the **published v1.1.3 archive** | 1.1 |
-| 2.4 | **#175** | Verify the re-crawl by parsed-content diff, not by exit code | 1.3 + crawl interval |
-| 2.5 | **#147** | Attach the third-party before/after evidence pair | 2.4 |
+| 2.1 | **#174** → **#194** | Falsify the closure gate under mutation; restore byte-identically | 0.2, 1.4 |
+| 2.2 | **#164** → **#192** | Wire the gate into the release procedure so it cannot be skipped | 0.2 |
+| 2.3 | **#176** → **#196** | Capture `/live` provenance from the **published v1.1.3 archive** | 1.1 |
+| 2.4 | **#175** → **#195** | Verify the re-crawl by parsed-content diff, not by exit code | 1.3 + crawl interval |
+| 2.5 | **#147** → **#187** | Attach the third-party before/after evidence pair | 2.4 |
 
 ### Phase 3 — External signal (after Phase 2)
 
 | Order | Issue | Work | Depends on |
 |---|---|---|---|
-| 3.1 | **#165** | Complete + validate the adoption contract; build the archive-derived demo | 2.3, 2.5 |
-| 3.2 | **#148** | Record the observation evidence against the completed contract | 3.1 |
-| 3.3 | **#178** | Run the declared window from published bytes and file the outcome | 3.2 + elapsed window |
-| 3.4 | **#142** | Close out the adoption experiment on the recorded outcome | 3.3 |
+| 3.1 | **#165** → **#193** | Complete + validate the adoption contract; build the archive-derived demo | 2.3, 2.5 |
+| 3.2 | **#148** → **#188** | Record the observation evidence against the completed contract | 3.1 |
+| 3.3 | **#178** → **#197** | Run the declared window from published bytes and file the outcome | 3.2 + elapsed window |
+| 3.4 | **#142** → **#185** | Close out the adoption experiment on the recorded outcome | 3.3 |
 
 ### Phase 4 — Close out (last)
 
 | Order | Issue | Work | Depends on |
 |---|---|---|---|
-| 4.1 | **#179** | Account for every acceptance box; each ticked with a citation or open with a named blocker | all above |
-| 4.2 | **#149** | Reconcile the batch and close in dependency order — **#149 closes last** | 4.1 |
+| 4.1 | **#179** → **#198** | Account for every acceptance box; each ticked with a citation or open with a named blocker | all above |
+| 4.2 | **#149** → **#189** | Reconcile the batch and close in dependency order — **#149 closes last** | 4.1 |
 
 ---
 
@@ -243,6 +244,42 @@ Recording the boundary is part of the deliverable, not an omission:
 5. **Close in dependency order** — sub-issues before parents, and **#149 last**.
 6. **Do not close a parent merely because a successor sub-issue exists.** Closure requires
    the live measurements to pass, not the presence of tracking issues.
+
+---
+
+## 6. Sub-issues created for this batch (2026-08-16)
+
+Seventeen sub-issues, one per open issue, each **natively linked** to its parent via the
+GitHub sub-issues API (not a prose "part of" reference), so the relationship survives a
+retitle and renders in the parent's issue view.
+
+| Sub-issue | Parent | Phase | Focus | Gate |
+|---|---|---|---|---|
+| #182 | #139 | 0 | Resolve the duplicate `release-claim` marker (F2) | CLI |
+| #183 | #138 | 1 | Restate the claim from `v1.1.1` to the current release (F3) | CLI + App |
+| #184 | #140 | 1 | Release-claim decision + parsed registry before-state | CLI |
+| #185 | #142 | 1 | Predeclare the adoption threshold + marker record | CLI |
+| #186 | #145 | 1 | Give #145 an acceptance ledger so it is gateable | CLI |
+| #187 | #147 | 1 | Marker record + third-party before/after evidence pair | CLI |
+| #188 | #148 | 1 | Marker record + adoption-contract gate | CLI |
+| #189 | #149 | 1 | Release-claim census across the live batch (F7) | CLI |
+| #190 | #173 | 1 | Execute the before-state capture (the cited spec now exists) | CLI |
+| #191 | #162 | 2 | Retarget the recovery rehearsal to the current release | CLI |
+| #192 | #164 | 2 | Wire the closure gate into the release procedure | CLI |
+| #193 | #165 | 2 | Archive-derived adoption demo | App |
+| #194 | #174 | 2 | Unblock the mutation-falsification proof | CLI |
+| #195 | #175 | 2 | Parsed-content registry diff, not exit code | CLI |
+| #196 | #176 | 2 | `/live` provenance from the published archive | App |
+| #197 | #178 | 3 | Hold the observation window until predecessors clear | CLI |
+| #198 | #179 | 4 | Re-derive the batch at closure time | CLI |
+
+**Measured after creation** (`issue-ledger.mjs 182…198`): 127 boxes, **0 unparseable,
+0 ticked-without-citation, 0 superseded version mentions**, 26 of 127 boxes carrying a
+named blocker. The new bodies reference only the current releases, so this batch adds no
+stale version claims to the ledger — the defect F6 records against the parents.
+
+> **This registry does not close anything.** It records that the tracking issues exist.
+> Rule 6 above still applies: a parent closes on its own live measurements.
 
 ---
 
