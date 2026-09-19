@@ -14,6 +14,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const DEFAULT_TIMEOUT_MS = 60_000;
+export const MANUAL_EDIT_VALIDATE_SCRIPT_OPT_IN_ENV = 'IMPECCABLE_ALLOW_MANUAL_EDIT_VALIDATE_SCRIPT';
 const require = createRequire(import.meta.url);
 
 export function buildCopyEditBatchPrompt(batch, { cwd = process.cwd() } = {}) {
@@ -134,7 +135,7 @@ export async function runCopyEditBatchAgent(batch, opts = {}) {
   throw new Error('AI copy-edit batch did not return a valid completion payload. ' + tail.trim());
 }
 
-export function runCopyEditPostApplyChecks({ cwd = process.cwd(), files = [] } = {}) {
+export function runCopyEditPostApplyChecks({ cwd = process.cwd(), files = [], env = process.env } = {}) {
   const failures = [];
   const warnings = [];
   const uniqueFiles = [...new Set((files || []).filter((file) => typeof file === 'string' && file.trim()))];
@@ -176,7 +177,7 @@ export function runCopyEditPostApplyChecks({ cwd = process.cwd(), files = [] } =
       }
     }
   }
-  const validation = runManualEditValidationScript(cwd);
+  const validation = runManualEditValidationScript(cwd, { env });
   if (validation?.failure) failures.push(validation.failure);
   if (validation?.warning) warnings.push(validation.warning);
   return { ok: failures.length === 0, failures, warnings };
@@ -247,9 +248,18 @@ function isInsideQuotedLiteral(line, index) {
   return quote !== null;
 }
 
-function runManualEditValidationScript(cwd) {
+export function runManualEditValidationScript(cwd, { env = process.env } = {}) {
   const script = readManualEditValidationScript(cwd);
   if (!script) return null;
+  if (env?.[MANUAL_EDIT_VALIDATE_SCRIPT_OPT_IN_ENV] !== '1') {
+    return {
+      warning: {
+        file: 'package.json',
+        reason: 'manual_edit_validation_skipped',
+        message: `Skipped scripts.impeccable:manual-edit-validate because explicit opt-in via ${MANUAL_EDIT_VALIDATE_SCRIPT_OPT_IN_ENV}=1 is required.`,
+      },
+    };
+  }
   const validation = spawnSync(script, {
     cwd,
     encoding: 'utf-8',
@@ -277,7 +287,7 @@ function runManualEditValidationScript(cwd) {
   return null;
 }
 
-function readManualEditValidationScript(cwd) {
+export function readManualEditValidationScript(cwd) {
   const pkgPath = path.join(cwd, 'package.json');
   if (!fs.existsSync(pkgPath)) return null;
   try {
