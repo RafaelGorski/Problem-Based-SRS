@@ -82,7 +82,7 @@
 
   <line x1="0" y1="94" x2="720" y2="94" stroke="oklch(0.900 0.006 240)"/>
   <!-- stats bar -->
-  <text class="stat" x="24" y="101">28 nodes</text>
+  <text class="stat" x="24" y="101">29 nodes</text>
   <text class="stat" x="120" y="101">5 need clusters</text>
   <text class="stat" x="232" y="101"><tspan>100% traceability</tspan></text>
   <line x1="0" y1="106" x2="720" y2="106" stroke="oklch(0.900 0.006 240)"/>

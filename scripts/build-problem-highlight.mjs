@@ -217,7 +217,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" wid
 
   <line x1="0" y1="94" x2="${W}" y2="94" stroke="${T.surfaceBorder}"/>
   <!-- stats bar -->
-  <text class="stat" x="24" y="101">28 nodes</text>
+  <text class="stat" x="24" y="101">29 nodes</text>
   <text class="stat" x="120" y="101">5 need clusters</text>
   <text class="stat" x="232" y="101"><tspan>100% traceability</tspan></text>
   <line x1="0" y1="106" x2="${W}" y2="106" stroke="${T.surfaceBorder}"/>
