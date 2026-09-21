@@ -37,8 +37,11 @@ jobs:
     steps:
       - name: Refuse to release from anywhere but the default branch
         if: github.ref_name != github.event.repository.default_branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          echo "::error::create-release.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          echo "::error::create-release.yml must run on $DEFAULT_BRANCH; got $REF_NAME"
           exit 1
 
       - name: Checkout
@@ -128,6 +131,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.build.outputs.version }}
           RELEASE_CREATED: ${{ steps.publish.outputs.created }}
+          GH_SHA: ${{ github.sha }}
+          GH_RUN_ID: ${{ github.run_id }}
+          GH_EVENT_NAME: ${{ github.event_name }}
+          GH_REF_NAME: ${{ github.ref_name }}
         run: |
           TAG="v${VERSION}"
           mkdir -p release-asset
@@ -148,7 +155,7 @@ jobs:
           gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
            > release-asset/release-metadata.json
           if [ "$RELEASE_CREATED" = "true" ]; then
-           jq --arg sha "${{ github.sha }}" \
+           jq --arg sha "$GH_SHA" \
              'if .targetCommitish == $sha then . else error("release target does not match workflow head") end' \
              release-asset/release-metadata.json >/dev/null
           else
@@ -159,6 +166,6 @@ jobs:
            echo "- **Tag:** $TAG"
            echo "- **Asset:** $ASSET"
            echo "- **Bytes SHA-256:** $LOCAL_SHA"
-           echo "- **Run:** ${{ github.run_id }} (${{ github.event_name }}, ${{ github.ref_name }}, ${{ github.sha }})"
+           echo "- **Run:** $GH_RUN_ID ($GH_EVENT_NAME, $GH_REF_NAME, $GH_SHA)"
            echo "- **Evidence:** release-asset/plugin-archive.json"
           } >> "$GITHUB_STEP_SUMMARY"
