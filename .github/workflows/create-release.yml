@@ -37,15 +37,18 @@ jobs:
     steps:
       - name: Refuse to release from anywhere but the default branch
         if: github.ref_name != github.event.repository.default_branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          echo "::error::create-release.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          echo "::error::create-release.yml must run on $DEFAULT_BRANCH; got $REF_NAME"
           exit 1
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
 
@@ -68,12 +71,15 @@ jobs:
 
       - name: Build, validate & package
         id: build
-        run: python scripts/build-plugin.py build --version "${{ steps.raw.outputs.version }}"
+        env:
+          RAW_VERSION: ${{ steps.raw.outputs.version }}
+        run: python scripts/build-plugin.py build --version "$RAW_VERSION"
 
       - name: Determine release notes
         id: notes
         env:
           RELEASE_BODY: ${{ inputs.release_body }}
+          BUILD_VERSION: ${{ steps.build.outputs.version }}
         run: |
           if [ -n "$RELEASE_BODY" ]; then
             delimiter="EOF_NOTES_$(uuidgen)"
@@ -88,7 +94,7 @@ jobs:
           else
             {
               echo "body<<EOF_NOTES"
-              GITHUB_OUTPUT="" python scripts/build-plugin.py notes --version "${{ steps.build.outputs.version }}"
+              GITHUB_OUTPUT="" python scripts/build-plugin.py notes --version "$BUILD_VERSION"
               echo "EOF_NOTES"
             } >> "$GITHUB_OUTPUT"
           fi
@@ -101,6 +107,7 @@ jobs:
           RELEASE_NAME: ${{ inputs.release_name }}
           NOTES: ${{ steps.notes.outputs.body }}
           ARTIFACT: ${{ steps.build.outputs.artifact }}
+          GITHUB_SHA_VALUE: ${{ github.sha }}
         run: |
           TAG="v${VERSION}"
           if [ -n "$RELEASE_NAME" ]; then
@@ -115,7 +122,7 @@ jobs:
             echo "created=false" >> "$GITHUB_OUTPUT"
           else
             printf '%s' "$NOTES" | gh release create "$TAG" \
-              --target "${{ github.sha }}" \
+              --target "$GITHUB_SHA_VALUE" \
               --title "$TITLE" \
               --notes-file - \
               "$ARTIFACT"
@@ -128,6 +135,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.build.outputs.version }}
           RELEASE_CREATED: ${{ steps.publish.outputs.created }}
+          GITHUB_SHA_VALUE: ${{ github.sha }}
+          GITHUB_RUN_ID_VALUE: ${{ github.run_id }}
+          GITHUB_EVENT_NAME_VALUE: ${{ github.event_name }}
+          GITHUB_REF_NAME_VALUE: ${{ github.ref_name }}
         run: |
           TAG="v${VERSION}"
           mkdir -p release-asset
@@ -148,7 +159,7 @@ jobs:
           gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
            > release-asset/release-metadata.json
           if [ "$RELEASE_CREATED" = "true" ]; then
-           jq --arg sha "${{ github.sha }}" \
+           jq --arg sha "$GITHUB_SHA_VALUE" \
              'if .targetCommitish == $sha then . else error("release target does not match workflow head") end' \
              release-asset/release-metadata.json >/dev/null
           else
@@ -159,6 +170,6 @@ jobs:
            echo "- **Tag:** $TAG"
            echo "- **Asset:** $ASSET"
            echo "- **Bytes SHA-256:** $LOCAL_SHA"
-           echo "- **Run:** ${{ github.run_id }} (${{ github.event_name }}, ${{ github.ref_name }}, ${{ github.sha }})"
+           echo "- **Run:** $GITHUB_RUN_ID_VALUE ($GITHUB_EVENT_NAME_VALUE, $GITHUB_REF_NAME_VALUE, $GITHUB_SHA_VALUE)"
            echo "- **Evidence:** release-asset/plugin-archive.json"
           } >> "$GITHUB_STEP_SUMMARY"
