@@ -18,7 +18,7 @@ that `git status` remains a statement about the contributor's own work.
 | Traces To | ID | Description |
 |-----------|-----|-------------|
 | Customer Need | CN.02.1 | Verification that leaves the tree untouched |
-| Customer Problem | CP.02 | The suite rewrites three tracked files |
+| Customer Problem | CP.02 | The suite rewrites tracked files — up to three, intermittently |
 
 ## Issues addressed
 
@@ -26,13 +26,28 @@ that `git status` remains a statement about the contributor's own work.
 
 ## Measured defect (2026-09-23)
 
-`git status --porcelain` immediately after `pwsh -File run-tests.ps1 -NoOpen`:
+`git status --porcelain` immediately after `pwsh -File run-tests.ps1 -NoOpen`, **run 1 on a
+clean tree**:
 
 ```
  M .github/extensions/srs-navigator/package-lock.json
  M docs/skills-health.html
  M docs/skills-health.json
 ```
+
+A **third run**, after the intervening runs had already repaired the lockfile, mutated only
+two:
+
+```
+ M docs/skills-health.html
+ M docs/skills-health.json
+```
+
+**The lockfile mutation is intermittent, and that is worse than if it were constant.** It
+fires only when the installed tree disagrees with the committed lockfile — which is exactly
+the state a reviewer is in on a fresh clone, and exactly the state nobody is in once they
+have run the suite once. A defect that disappears the moment you look at it twice is one
+that gets reported as "cannot reproduce" and closed.
 
 Two distinct problems are entangled here, and **the second hides the first**:
 
@@ -43,6 +58,7 @@ Two distinct problems are entangled here, and **the second hides the first**:
    `Problem-Based SRS v2.6.0 · SRS Navigator v1.1.3 · generated 2026-08-15`, and the site
    test that reads it fails. A committed artefact that regenerates on every run is a
    false-green surface: it can publish results from an older run than the one just executed.
+   Unlike the lockfile, this one mutates on **every** run, including run 3.
 
 ## Decision required
 

@@ -61,7 +61,8 @@ the single cheapest blocker in the backlog and it gates nine of the eleven works
 cannot distinguish their own edits from runner output, and "the working tree is clean"
 is not a checkable statement after a verification run.
 
-**Evidence (2026-09-23):** after `run-tests.ps1 -NoOpen`, `git status --porcelain` reports:
+**Evidence (2026-09-23):** after `run-tests.ps1 -NoOpen` on a clean tree, `git status
+--porcelain` reports:
 
 ```
  M .github/extensions/srs-navigator/package-lock.json
@@ -69,8 +70,16 @@ is not a checkable statement after a verification run.
  M docs/skills-health.json
 ```
 
+A later run on the same worktree — after the lockfile had already been repaired by an
+earlier run — mutated only the two dashboard files. **The lockfile mutation is therefore
+intermittent**, firing only when the installed tree disagrees with the committed lockfile:
+the state a reviewer is in on a fresh clone, and the state nobody is in after running the
+suite once.
+
 The lockfile mutation also **masks CP.01's first failure class**: the two lockfile tests
-pass on a second run purely because the first run silently repaired the file.
+pass on a second run purely because the first run silently repaired the file. A defect that
+stops reproducing as soon as it is observed twice is one that gets closed as
+"cannot reproduce".
 
 **Impact:** Verification evidence is not reproducible, and a green second run is not proof
 of a green first run.
