@@ -68,17 +68,20 @@ jobs:
         # pushes to that ref and writes global tags. A release cut from a feature branch
         # would advertise a version that main does not carry.
         if: github.ref_name != github.event.repository.default_branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          echo "::error::release-canvas.yml must run on ${{ github.event.repository.default_branch }}; got ${{ github.ref_name }}"
+          echo "::error::release-canvas.yml must run on $DEFAULT_BRANCH; got $REF_NAME"
           exit 1
 
       - name: Checkout (full history for tags)
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"
 
@@ -107,10 +110,14 @@ jobs:
         # package.json off the disk, and bump-version.mjs has only just written the version this
         # release will publish. Run above the bump it would report `unknown` for every release
         # this workflow ever cuts.
-        run: node scripts/release-train.mjs --tag "${{ steps.bump.outputs.tag }}" --expect canvas
+        env:
+          BUMP_TAG: ${{ steps.bump.outputs.tag }}
+        run: node scripts/release-train.mjs --tag "$BUMP_TAG" --expect canvas
 
       - name: Package the extension
-        run: node scripts/package-extension.mjs --version "${{ steps.bump.outputs.version }}"
+        env:
+          BUMP_VERSION: ${{ steps.bump.outputs.version }}
+        run: node scripts/package-extension.mjs --version "$BUMP_VERSION"
 
       - name: Verify the archive contract
         # Two checks, because they answer different questions. The eval guard stages the
@@ -119,10 +126,12 @@ jobs:
         # out at 4.32 MB with a Playwright tree inside through exactly that gap. The
         # second check opens the archive this run actually built, so a packaging or
         # tar/zip regression cannot pass on the strength of a freshly staged copy.
+        env:
+          BUMP_VERSION: ${{ steps.bump.outputs.version }}
         run: |
           node --test evals/tests/from-archive-install.test.mjs
           ARCHIVE_ROOT=$(node -e "import('./scripts/package-extension.mjs').then(m => console.log(m.ARCHIVE_ROOT))")
-          for ARCHIVE in build/srs-navigator-${{ steps.bump.outputs.version }}.tar.gz build/srs-navigator-${{ steps.bump.outputs.version }}.zip; do
+          for ARCHIVE in "build/srs-navigator-${BUMP_VERSION}.tar.gz" "build/srs-navigator-${BUMP_VERSION}.zip"; do
             test -f "$ARCHIVE"
             if [[ "$ARCHIVE" == *.tar.gz ]]; then tar -tzf "$ARCHIVE" >/dev/null; else unzip -t "$ARCHIVE" >/dev/null; fi
             case "$ARCHIVE" in
@@ -141,6 +150,8 @@ jobs:
 
       - name: Commit version bump and refreshed skills
         id: commit
+        env:
+          BUMP_TAG: ${{ steps.bump.outputs.tag }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -153,7 +164,7 @@ jobs:
             echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git commit \
-              -m "Release ${{ steps.bump.outputs.tag }}" \
+              -m "Release $BUMP_TAG" \
               -m "Bump project version and refresh bundled Problem-Based SRS skills." \
               -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
             git push origin HEAD:${GITHUB_REF_NAME}
@@ -165,15 +176,18 @@ jobs:
         id: publish
         env:
           GH_TOKEN: ${{ github.token }}
+          BUMP_TAG: ${{ steps.bump.outputs.tag }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+          BUMP_VERSION: ${{ steps.bump.outputs.version }}
         run: |
           # --target creates the tag as part of the release. This workflow is dispatch-only,
           # so the tag never exists beforehand and this is always the creating path — a tag
           # can therefore never outlive a failed publish.
-          gh release create "${{ steps.bump.outputs.tag }}" \
-            --target "${{ steps.commit.outputs.sha }}" \
+          gh release create "$BUMP_TAG" \
+            --target "$COMMIT_SHA" \
             build/srs-navigator-*.tar.gz \
             build/srs-navigator-*.zip \
-            --title "srs-navigator ${{ steps.bump.outputs.version }}" \
+            --title "srs-navigator $BUMP_VERSION" \
             --generate-notes
           # Recorded immediately, and in its own step: anything after this point is
           # bookkeeping, and a failure there must never be read as "the release did not
@@ -183,8 +197,14 @@ jobs:
       - name: Verify downloaded canvas release assets
         env:
           GH_TOKEN: ${{ github.token }}
+          BUMP_TAG: ${{ steps.bump.outputs.tag }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+          GITHUB_RUN_ID_VALUE: ${{ github.run_id }}
+          GITHUB_EVENT_NAME_VALUE: ${{ github.event_name }}
+          GITHUB_REF_NAME_VALUE: ${{ github.ref_name }}
+          GITHUB_SHA_VALUE: ${{ github.sha }}
         run: |
-          TAG="${{ steps.bump.outputs.tag }}"
+          TAG="$BUMP_TAG"
           mkdir -p release-asset
           gh release download "$TAG" --pattern 'srs-navigator-*' --dir release-asset
           ZIP=$(find release-asset -maxdepth 1 -type f -name '*.zip' | head -n 1)
@@ -203,7 +223,7 @@ jobs:
           cmp release-asset/zip.paths release-asset/tar.paths
           gh release view "$TAG" --json tagName,targetCommitish,isDraft,isPrerelease,assets \
            > release-asset/release-metadata.json
-          jq --arg sha "${{ steps.commit.outputs.sha }}" \
+          jq --arg sha "$COMMIT_SHA" \
            'if .targetCommitish == $sha then . else error("release target does not match bump commit") end' \
            release-asset/release-metadata.json >/dev/null
           {
@@ -212,20 +232,22 @@ jobs:
            echo "- **ZIP SHA-256:** $ZIP_SHA"
            echo "- **TAR.GZ SHA-256:** $TAR_SHA"
            echo "- **Assets:** $(jq -c '[.[] | {id, name, size, digest}]' release-asset/asset-metadata.json)"
-           echo "- **Run:** ${{ github.run_id }} (${{ github.event_name }}, ${{ github.ref_name }}, ${{ github.sha }})"
+           echo "- **Run:** $GITHUB_RUN_ID_VALUE ($GITHUB_EVENT_NAME_VALUE, $GITHUB_REF_NAME_VALUE, $GITHUB_SHA_VALUE)"
            echo "- **Evidence:** release-asset/zip.json, release-asset/tar.json"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Summarize the release
         env:
           GH_TOKEN: ${{ github.token }}
+          BUMP_TAG: ${{ steps.bump.outputs.tag }}
+          BUMP_VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          url=$(gh release view "${{ steps.bump.outputs.tag }}" --json url --jq .url)
+          url=$(gh release view "$BUMP_TAG" --json url --jq .url)
           {
             echo "## Release published :rocket:"
             echo ""
-            echo "- **Version:** ${{ steps.bump.outputs.version }}"
-            echo "- **Tag:** ${{ steps.bump.outputs.tag }}"
+            echo "- **Version:** $BUMP_VERSION"
+            echo "- **Tag:** $BUMP_TAG"
             echo "- **Release page:** $url"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -241,16 +263,19 @@ jobs:
         if: (failure() || cancelled()) && steps.commit.outputs.pushed == 'true' && steps.publish.outputs.published != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          BUMP_TAG: ${{ steps.bump.outputs.tag }}
+          BUMP_VERSION: ${{ steps.bump.outputs.version }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
         run: |
-          if gh release view "${{ steps.bump.outputs.tag }}" >/dev/null 2>&1; then
-            echo "::warning::${{ steps.bump.outputs.tag }} is published; leaving the version bump in place."
+          if gh release view "$BUMP_TAG" >/dev/null 2>&1; then
+            echo "::warning::$BUMP_TAG is published; leaving the version bump in place."
             exit 0
           fi
-          echo "::warning::Release ${{ steps.bump.outputs.tag }} did not publish; reverting the version bump so a re-run republishes ${{ steps.bump.outputs.version }} instead of skipping it."
+          echo "::warning::Release $BUMP_TAG did not publish; reverting the version bump so a re-run republishes $BUMP_VERSION instead of skipping it."
           # Revert on top of the branch as it stands now, never on top of a stale local
           # head: main may have moved since the bump was pushed, and a force-push here
           # would destroy whatever moved it.
           git fetch origin "${GITHUB_REF_NAME}"
-          git checkout -B rollback-${{ steps.bump.outputs.version }} "origin/${GITHUB_REF_NAME}"
-          git revert --no-edit "${{ steps.commit.outputs.sha }}"
+          git checkout -B "rollback-${BUMP_VERSION}" "origin/${GITHUB_REF_NAME}"
+          git revert --no-edit "$COMMIT_SHA"
           git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
