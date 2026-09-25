@@ -113,7 +113,7 @@
         /* ── Skip link ── */
         .skip-link {
             position: absolute; left: -9999px; top: var(--space-sm);
-            background: var(--primary); color: var(--ink-heading);
+            background: var(--primary); color: var(--on-primary);
             padding: var(--space-sm) var(--space-md); border-radius: 8px;
             font-weight: 600; z-index: 200;
         }
