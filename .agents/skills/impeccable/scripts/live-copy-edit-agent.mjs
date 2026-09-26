@@ -247,9 +247,24 @@ function isInsideQuotedLiteral(line, index) {
   return quote !== null;
 }
 
-function runManualEditValidationScript(cwd) {
+// A workspace's package.json can name an arbitrary shell command here. Running it
+// unconditionally would let any attacker-controlled or untrusted package.json achieve
+// code execution as a side effect of validation, so this hook only runs when the
+// operator has explicitly opted in for this invocation.
+const MANUAL_EDIT_VALIDATION_OPT_IN_ENV = 'IMPECCABLE_ALLOW_MANUAL_EDIT_VALIDATE';
+
+function runManualEditValidationScript(cwd, { env = process.env } = {}) {
   const script = readManualEditValidationScript(cwd);
   if (!script) return null;
+  if (env[MANUAL_EDIT_VALIDATION_OPT_IN_ENV] !== '1') {
+    return {
+      warning: {
+        file: 'package.json',
+        reason: 'manual_edit_validation_skipped_not_opted_in',
+        message: `scripts.impeccable:manual-edit-validate was found but not run because ${MANUAL_EDIT_VALIDATION_OPT_IN_ENV}=1 was not set. Set it explicitly to allow this workspace-controlled command to execute.`,
+      },
+    };
+  }
   const validation = spawnSync(script, {
     cwd,
     encoding: 'utf-8',
