@@ -77,6 +77,15 @@ jobs:
         if: always() && steps.provider.outcome == 'success'
         run: node scripts/skill-behavior-summary.mjs .github/extensions/srs-navigator/skill-behavior.log
 
+      - name: Report blocked scenario count
+        if: always() && steps.provider.outcome != 'success'
+        run: |
+          {
+            echo "## Skill behavior proof"
+            echo ""
+            echo "Executed scenarios: **0** (provider credential unavailable; no proof executed)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # The log is the only record of *why* a behavioral scenario failed: the model's
       # trace is not reproducible from the exit code.
       - name: Upload run log

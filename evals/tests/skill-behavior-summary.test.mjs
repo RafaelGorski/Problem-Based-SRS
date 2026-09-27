@@ -43,6 +43,8 @@ test("CLI writes the executed count into the Actions summary and fails closed on
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
     const workflow = fs.readFileSync(path.join(root, ".github/workflows/skill-behavior.yml"), "utf8");
     assert.match(workflow, /set -o pipefail\s+.*npm run test:skill-behavior 2>&1 \| tee skill-behavior\.log/s);
+    assert.match(workflow, /if: always\(\) && steps\.provider\.outcome == 'success'/);
+    assert.match(workflow, /if: always\(\) && steps\.provider\.outcome != 'success'[\s\S]*Executed scenarios: \*\*0\*\*/);
   });
 
   fs.writeFileSync(log, "ℹ tests 6\nℹ pass 4\nℹ fail 0\nℹ skipped 2\n");
