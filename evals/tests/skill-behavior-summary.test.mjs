@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { scenarioCounts } from "../../scripts/skill-behavior-summary.mjs";
 
-const script = path.resolve("scripts/skill-behavior-summary.mjs");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const script = path.join(root, "scripts/skill-behavior-summary.mjs");
 
 test("counts executed scenarios rather than treating skipped scenarios as proof", () => {
   assert.deepEqual(scenarioCounts("ℹ tests 9\nℹ pass 7\nℹ fail 1\nℹ skipped 1\nℹ cancelled 0\n"), {
@@ -40,7 +41,6 @@ test("CLI writes the executed count into the Actions summary and fails closed on
   });
 
   test("scheduled workflow preserves the scenario runner's failure despite tee", () => {
-    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
     const workflow = fs.readFileSync(path.join(root, ".github/workflows/skill-behavior.yml"), "utf8");
     assert.match(workflow, /set -o pipefail\s+.*npm run test:skill-behavior 2>&1 \| tee skill-behavior\.log/s);
     assert.match(workflow, /if: always\(\) && steps\.provider\.outcome == 'success'/);

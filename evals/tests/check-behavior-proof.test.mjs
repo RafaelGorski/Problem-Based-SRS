@@ -7,6 +7,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { assessBehaviorProof, main } from "../../scripts/check-behavior-proof.mjs";
 
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
 const now = new Date("2026-09-27T12:00:00Z");
 const run = (databaseId, createdAt, conclusion, status = "completed") => ({
   databaseId, createdAt, conclusion, status,
@@ -63,7 +65,7 @@ test("CLI contract writes the success link and emits actionable error annotation
 test("CLI fails closed when live GitHub state is unreadable", (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "behavior-cli-"));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
-  const result = spawnSync(process.execPath, [path.resolve("scripts/check-behavior-proof-cli.mjs")], {
+  const result = spawnSync(process.execPath, [path.join(root, "scripts/check-behavior-proof-cli.mjs")], {
     encoding: "utf8",
     env: { ...process.env, PATH: dir, GITHUB_STEP_SUMMARY: path.join(dir, "summary.md") },
   });
@@ -72,7 +74,6 @@ test("CLI fails closed when live GitHub state is unreadable", (t) => {
 });
 
 test("daily Actions workflow runs the alert and the weekly run rejects zero scenarios", () => {
-  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
   const daily = fs.readFileSync(path.join(root, ".github/workflows/behavior-proof-health.yml"), "utf8");
   const weekly = fs.readFileSync(path.join(root, ".github/workflows/skill-behavior.yml"), "utf8");
   assert.match(daily, /cron: "30 7 \* \* \*"/);

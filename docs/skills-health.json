@@ -1,20 +1,20 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-09-21T08:29:58.1101149Z",
+  "generatedAt": "2026-09-27T08:26:13.5330650Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "2.7.0",
-  "canvasVersion": "1.1.4",
+  "canvasVersion": "1.1.5",
   "overall": {
     "state": "passed",
     "suites": 6,
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 1302,
-    "pass": 1302,
+    "tests": 1323,
+    "pass": 1323,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 86.4
+    "durationSeconds": 90.7
   },
   "suites": [
     {
@@ -25,7 +25,7 @@
       "pass": 1,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.2,
+      "seconds": 0.3,
       "reason": ""
     },
     {
@@ -36,18 +36,18 @@
       "pass": 307,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.4,
+      "seconds": 2.1,
       "reason": ""
     },
     {
       "name": "Skill evals",
       "state": "passed",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 953,
-      "pass": 953,
+      "tests": 974,
+      "pass": 974,
       "fail": 0,
       "skipped": 0,
-      "seconds": 17.3,
+      "seconds": 21.8,
       "reason": ""
     },
     {
@@ -58,7 +58,7 @@
       "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 67.3,
+      "seconds": 66.4,
       "reason": ""
     },
     {
