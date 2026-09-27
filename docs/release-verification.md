@@ -304,6 +304,17 @@ release dispatch; the scripts never alter issues. If the batch changes, update
 `ROOT_ISSUES` and the workflow guard test together. Do not bypass a red gate by
 publishing from another workflow.
 
+To record a dated, machine-readable census of every batch root, its marker,
+pipeline train, and matching published release, run:
+
+```bash
+node scripts/release-claim-census-cli.mjs > release-claim-census.json
+```
+
+The command reads live GitHub state and exits nonzero on any missing, ambiguous,
+unowned or unpublished claim. The JSON still records each root's precise verdict;
+an API failure never yields a success-shaped census.
+
 Use `--prospective` for open issues before closure. A missing, duplicate, malformed, or
 ambiguous marker is indeterminate and fails the report; a network/API failure also fails
 instead of looking like a clean verdict. External publication remains a maintainer action,
