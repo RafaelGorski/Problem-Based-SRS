@@ -43,6 +43,7 @@ jobs:
 
       # Fail before spending any setup time, and say exactly what is missing.
       - name: Require a provider API key
+        id: provider
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
@@ -64,10 +65,15 @@ jobs:
         run: npm ci
 
       - name: Run skill-behavior suite
+        id: scenarios
         working-directory: .github/extensions/srs-navigator
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run test:skill-behavior 2>&1 | tee skill-behavior.log
+
+      - name: Report executed scenarios
+        if: always() && steps.provider.outcome == 'success'
+        run: node scripts/skill-behavior-summary.mjs .github/extensions/srs-navigator/skill-behavior.log
 
       # The log is the only record of *why* a behavioral scenario failed: the model's
       # trace is not reproducible from the exit code.
