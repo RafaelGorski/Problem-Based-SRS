@@ -315,6 +315,7 @@ carry long checkbox ledgers. This command reads the **live issue bodies** and re
 - checked vs. open boxes,
 - open boxes missing an explicit blocker (`Blocked on #...` / URL),
 - ticked boxes with no citation, and
+- included issues with no acceptance checklist (an empty ledger cannot pass), and
 - box text still naming a version older than the manifest.
 
 ```bash

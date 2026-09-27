@@ -291,6 +291,7 @@ export function buildLedger(options, run = defaultRunner) {
       acc.supersededVersionMentions += issue.counts.supersededVersionMentions;
       acc.unattributedVersionMentions += issue.counts.unattributedVersionMentions;
       acc.unparseable += issue.counts.unparseable ?? 0;
+      if (issue.counts.total === 0) acc.emptyLedgers += 1;
       return acc;
     },
     {
@@ -303,6 +304,7 @@ export function buildLedger(options, run = defaultRunner) {
       supersededVersionMentions: 0,
       unattributedVersionMentions: 0,
       unparseable: 0,
+      emptyLedgers: 0,
     },
   );
 
@@ -317,6 +319,7 @@ export function buildLedger(options, run = defaultRunner) {
   // Unattributed mentions are reported, never failed: a version no train claims is a
   // comparison that did not run, not a stale claim.
   record.ok =
+    totals.emptyLedgers === 0 &&
     totals.openWithoutBlocker === 0 &&
     totals.tickedWithoutCitation === 0 &&
     totals.supersededVersionMentions === 0 &&
@@ -382,6 +385,7 @@ export function formatReport(record) {
         `  superseded version mentions: ${issue.counts.supersededVersionMentions}`,
         `  unattributed version mentions: ${issue.counts.unattributedVersionMentions ?? 0}`,
         `  unparseable: ${issue.counts.unparseable ?? 0}`,
+        ...(issue.counts.total === 0 ? ["  empty acceptance ledger: yes"] : []),
       ].join("\n");
     }),
     "",
@@ -389,7 +393,8 @@ export function formatReport(record) {
     `flags: ${record.totals.openWithoutBlocker} open-without-blocker, ` +
       `${record.totals.tickedWithoutCitation} ticked-without-citation, ` +
       `${record.totals.supersededVersionMentions} superseded-version-mentions, ` +
-      `${record.totals.unparseable ?? 0} unparseable`,
+      `${record.totals.unparseable ?? 0} unparseable, ` +
+      `${record.totals.emptyLedgers ?? 0} empty acceptance ledgers`,
     `not compared: ${record.totals.unattributedVersionMentions ?? 0} version mention(s) claimed by no train`,
     "",
     record.ok ? "RESULT: ledger is consistent" : "RESULT: ledger has drift to reconcile",

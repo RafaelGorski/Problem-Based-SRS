@@ -4,14 +4,17 @@ import assert from "node:assert/strict";
 import {
   analyzeIssueBody,
   attributeVersion,
+  buildLedger,
   classifyVersionMentions,
   compareVersions,
   extractChecklistBoxes,
+  formatReport,
   hasCitation,
   hasExplicitBlocker,
   normalizeVersion,
   parseArgs,
   parseChecklistLine,
+  REPO_ROOT,
   readCanvasVersion,
   readTrainVersions,
   toBaselines,
@@ -85,6 +88,39 @@ describe("issue body analysis", () => {
   it("flags boxes that still name a superseded version", () => {
     const analyzed = analyzeIssueBody("- [ ] release link points at v2.5", "2.6.0");
     assert.equal(analyzed.counts.supersededVersionMentions, 1);
+  });
+});
+
+describe("empty acceptance ledgers", () => {
+  it("fails the ledger gate when an included issue has no acceptance boxes", () => {
+    const bodies = new Map([
+      [301, "Issue has no acceptance checklist."],
+      [302, "- [ ] Blocked on #301 until its evidence is reconciled."],
+    ]);
+    const run = (_command, args) => {
+      const number = Number(args[2]);
+      return {
+        status: 0,
+        stdout: JSON.stringify({
+          number,
+          title: `Issue ${number}`,
+          url: `https://github.com/example/project/issues/${number}`,
+          body: bodies.get(number),
+        }),
+        stderr: "",
+      };
+    };
+    const options = { repo: "example/project", root: REPO_ROOT };
+    const empty = buildLedger({ ...options, issues: [301] }, run);
+    assert.equal(empty.issues[0].counts.total, 0);
+    assert.equal(empty.totals.emptyLedgers, 1);
+    assert.equal(empty.ok, false);
+    assert.match(formatReport(empty), /empty acceptance ledger: yes/);
+
+    const accounted = buildLedger({ ...options, issues: [302] }, run);
+    assert.equal(accounted.issues[0].counts.total, 1);
+    assert.equal(accounted.totals.emptyLedgers, 0);
+    assert.equal(accounted.ok, true, formatReport(accounted));
   });
 });
 
