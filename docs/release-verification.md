@@ -264,6 +264,14 @@ node scripts/check-distribution.mjs --strict
 
 ## Release-claim closure evidence
 
+The model-behavior proof runs each Monday in `skill-behavior.yml`. Its summary counts
+executed scenarios; a missing provider credential or zero executed scenarios fails the
+run rather than certifying a skipped suite. `behavior-proof-health.yml` checks completed
+scheduled runs daily: it raises a failing Actions alert when no successful run is at most
+seven days old or the two most recent runs both failed. Local
+`npm run test:skill-behavior` remains provider-gated and may skip without credentials;
+such a skip is not evidence for the scheduled proof.
+
 An issue that claims a published release stays open until the claim is backed by the
 release surface. The marker is deliberately machine-readable and train-specific:
 

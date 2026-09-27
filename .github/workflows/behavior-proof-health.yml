@@ -1,0 +1,24 @@
+name: Scheduled behavior proof health
+
+on:
+  schedule:
+    # Check after the weekly Monday behavior run, and keep checking during the week.
+    - cron: "30 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check scheduled proof age and consecutive failures
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-behavior-proof.mjs
