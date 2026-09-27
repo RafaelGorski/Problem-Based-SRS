@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { scenarioCounts } from "../../scripts/skill-behavior-summary.mjs";
 
@@ -36,6 +37,12 @@ test("CLI writes the executed count into the Actions summary and fails closed on
   const run = () => spawnSync(process.execPath, [script, log], {
     encoding: "utf8",
     env: { ...process.env, GITHUB_STEP_SUMMARY: summary },
+  });
+
+  test("scheduled workflow preserves the scenario runner's failure despite tee", () => {
+    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+    const workflow = fs.readFileSync(path.join(root, ".github/workflows/skill-behavior.yml"), "utf8");
+    assert.match(workflow, /set -o pipefail\s+.*npm run test:skill-behavior 2>&1 \| tee skill-behavior\.log/s);
   });
 
   fs.writeFileSync(log, "ℹ tests 6\nℹ pass 4\nℹ fail 0\nℹ skipped 2\n");

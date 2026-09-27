@@ -69,7 +69,9 @@ jobs:
         working-directory: .github/extensions/srs-navigator
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: npm run test:skill-behavior 2>&1 | tee skill-behavior.log
+        run: |
+          set -o pipefail
+          npm run test:skill-behavior 2>&1 | tee skill-behavior.log
 
       - name: Report executed scenarios
         if: always() && steps.provider.outcome == 'success'
