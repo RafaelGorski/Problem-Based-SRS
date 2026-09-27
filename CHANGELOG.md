@@ -589,6 +589,7 @@ behind it.
   and `stage()` are exported so the install guard derives archive facts from the packager
   rather than restating them.
 
+[2.7.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.7
 [2.6.0]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/v2.6
 
 ## [2.4.1] - 2026-07-22

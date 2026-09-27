@@ -776,13 +776,22 @@ describe("a dangling link the manifest has already moved past", () => {
   });
 
   it("holds for the links this repository ships today", () => {
-    const summary = summaryFor(
-      advertisedTagLinks([
+    // Unlike the scenarios above, this one is checked against the real repository — so it
+    // needs the real release history, not PUBLISHED_RELEASES (frozen at the snapshot this
+    // suite was written against). Every tag this test's own CHANGELOG.md links must be in
+    // this list, or a real, already-published version reads as "stranded" purely because
+    // the fixture is stale — the same defect class this suite exists to catch elsewhere.
+    const summary = summarize({
+      listing: { skills: ["problem-based-srs"], declaredCount: 1, url: REGISTRY_URL },
+      repoSkills: ["problem-based-srs"],
+      tagLinks: advertisedTagLinks([
         { file: "README.md", text: README },
         { file: "CHANGELOG.md", text: CHANGELOG },
       ]),
-      JSON.parse(read(".claude-plugin/plugin.json")).version,
-    );
+      publishedReleases: [...PUBLISHED_RELEASES, { tag: "v2.6", name: "🎉 Version 2.6 - Weekly Stability and Customer Confidence" }, { tag: "v2.7", name: "🎉 Version 2.7 - Weekly Stability and Customer Confidence" }],
+      manifestVersion: JSON.parse(read(".claude-plugin/plugin.json")).version,
+      canvasVersion: "1.1.0",
+    });
     assert.equal(
       summary.findings.filter((f) => f.id === "stranded-release-link").length,
       0,
