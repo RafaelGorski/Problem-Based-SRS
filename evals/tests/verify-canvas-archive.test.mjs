@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { verifyCanvasArchive } from "../tools/verify-canvas-archive.mjs";
+import { extractArchive, verifyCanvasArchive } from "../tools/verify-canvas-archive.mjs";
 
 let tmp;
 before(() => { tmp = fs.mkdtempSync(path.join(os.tmpdir(), "pbsrs-canvas-reader-")); });
@@ -31,6 +31,20 @@ function archive(name, extra = {}) {
 }
 
 describe("verify-canvas-archive", () => {
+  it("extracts zip archives with the available platform tool and rejects unknown formats", () => {
+    const calls = [];
+    const run = (command, args) => calls.push([command, args]);
+    const file = path.join(tmp, "test.zip");
+    const destination = path.join(tmp, "zip-extraction");
+    extractArchive(file, destination, { platform: "win32", run });
+    extractArchive(file, destination, { platform: "linux", run });
+    assert.deepEqual(calls, [
+      ["tar", ["-xf", file, "-C", destination]],
+      ["unzip", ["-q", file, "-d", destination]],
+    ]);
+    assert.throws(() => extractArchive("test.txt", destination, { run }), /archive must be/);
+  });
+
   it("records archive and extension hashes and accepts a clean archive", async () => {
     const record = await verifyCanvasArchive(archive("healthy", {
       "skills/problem-based-srs.md": "# skill\n",
