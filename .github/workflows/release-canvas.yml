@@ -85,6 +85,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Require a clean live release-claim gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-release-issue-gate-cli.mjs
+
       - name: Run unit tests
         working-directory: .github/extensions/srs-navigator
         run: npm test

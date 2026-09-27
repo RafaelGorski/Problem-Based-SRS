@@ -42,6 +42,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Require a clean live release-claim gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-release-issue-gate-cli.mjs
+
       - name: Plan the Thursday release dispatch
         id: report
         env:

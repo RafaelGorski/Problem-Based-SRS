@@ -290,6 +290,20 @@ node evals/tools/closure-evidence.mjs 137 138
 node evals/tools/closure-evidence.mjs --prospective 137 138
 ```
 
+Before dispatching either release train, `thursday-release.yml`,
+`create-release.yml`, and `release-canvas.yml` **require** the live batch-root
+release-claim gate to pass:
+
+```bash
+node scripts/check-release-issue-gate-cli.mjs
+```
+
+The script supplies all 28 root issue numbers to the report-only guard. Missing,
+duplicate, or malformed markers and unpublished claims on closed roots block
+release dispatch; the scripts never alter issues. If the batch changes, update
+`ROOT_ISSUES` and the workflow guard test together. Do not bypass a red gate by
+publishing from another workflow.
+
 Use `--prospective` for open issues before closure. A missing, duplicate, malformed, or
 ambiguous marker is indeterminate and fails the report; a network/API failure also fails
 instead of looking like a clean verdict. External publication remains a maintainer action,
