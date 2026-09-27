@@ -21,4 +21,4 @@ jobs:
       - name: Check scheduled proof age and consecutive failures
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/check-behavior-proof.mjs
+        run: node scripts/check-behavior-proof-cli.mjs

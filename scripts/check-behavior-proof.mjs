@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import { pathToFileURL } from "node:url";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -48,8 +47,4 @@ export function main({
     error(`::error title=Behavior proof unavailable::${failure.message}`);
     return 1;
   }
-}
-
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-  process.exitCode = main();
 }
