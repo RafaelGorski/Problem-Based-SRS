@@ -35,6 +35,8 @@ export default defineConfig({
   // Screenshot evidence for the /live graph and the landing page lands here.
   // `test-results/` is git-ignored, so captures are never committed.
   outputDir: './test-results',
+  // Regenerate the skills-health dashboard before any site test reads it (FR.05.3.1).
+  globalSetup: './tests/e2e-global-setup.mjs',
   use: {
     headless: true,
     viewport: { width: 1280, height: 800 },

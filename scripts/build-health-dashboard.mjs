@@ -114,7 +114,8 @@ export function buildSnapshot(results, root = REPO_ROOT) {
     version,
     canvasVersion,
     overall: {
-      state: failed.length ? "failed" : "passed",
+      // A run in which no suite executed proves nothing, so it must not read as a pass.
+      state: failed.length ? "failed" : ran.length ? "passed" : "not-run",
       suites: suites.length,
       suitesRun: ran.length,
       suitesFailed: failed.length,
@@ -133,7 +134,7 @@ export function buildSnapshot(results, root = REPO_ROOT) {
 const esc = (v) =>
   String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const STATE_LABEL = { passed: "Passed", failed: "Failed", skipped: "Skipped", ok: "OK", watch: "Watch", over: "Over" };
+const STATE_LABEL = { passed: "Passed", failed: "Failed", skipped: "Skipped", "not-run": "Not run", ok: "OK", watch: "Watch", over: "Over" };
 
 /**
  * Render the dashboard HTML. Self-contained: no build step, no JS required.

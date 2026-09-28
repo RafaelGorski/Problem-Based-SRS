@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 
 import {
@@ -308,5 +308,50 @@ describe("dashboard rendering", () => {
     assert.ok(stable.suites.every((s) => s.seconds === undefined));
     assert.equal(stable.overall.tests, snap.overall.tests);
     assert.deepEqual(stableSnapshot({ overall: {} }).suites, []);
+  });
+});
+
+describe("e2e global setup — dashboard exists before the site suite reads it (FR.05.3.1)", () => {
+  const SETUP = path.join(REPO_ROOT, ".github", "extensions", "srs-navigator", "tests", "e2e-global-setup.mjs");
+  const CONFIG = path.join(REPO_ROOT, ".github", "extensions", "srs-navigator", "playwright.config.mjs");
+
+  test("a run in which no suite executed is 'not-run', never a pass", () => {
+    const snap = buildSnapshot({ suites: [{ name: "Skill behavior (LLM)", state: "skipped" }] }, REPO_ROOT);
+    assert.equal(snap.overall.state, "not-run");
+    assert.match(renderDashboard(snap), /Not run/);
+    assert.doesNotMatch(renderDashboard(snap), /class="card verdict-passed"/);
+  });
+
+  test("the Playwright config wires the global setup", () => {
+    assert.match(fs.readFileSync(CONFIG, "utf8"), /globalSetup:\s*'\.\/tests\/e2e-global-setup\.mjs'/);
+  });
+
+  test("generates a 'Not run' dashboard only when none exists, and leaves an existing one alone", async () => {
+    const { ensureDashboard, REPO_ROOT: setupRoot, default: globalSetup } = await import(pathToFileURL(SETUP).href);
+    assert.equal(setupRoot, REPO_ROOT, "setup must resolve the repository root");
+    assert.equal(typeof globalSetup, "function");
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-setup-"));
+    try {
+      fs.mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
+      fs.copyFileSync(path.join(REPO_ROOT, ".claude-plugin", "plugin.json"), path.join(root, ".claude-plugin", "plugin.json"));
+      const first = await ensureDashboard({ root });
+      assert.equal(first.generated, true);
+      const snap = JSON.parse(fs.readFileSync(first.jsonPath, "utf8"));
+      assert.equal(snap.overall.state, "not-run");
+      assert.equal(snap.version, JSON.parse(fs.readFileSync(path.join(REPO_ROOT, ".claude-plugin", "plugin.json"), "utf8")).version);
+      assert.match(fs.readFileSync(first.htmlPath, "utf8"), new RegExp(`v${snap.version.replace(/\./g, "\\.")}`));
+
+      const second = await ensureDashboard({ root });
+      assert.equal(second.generated, false, "an existing dashboard is never overwritten by the setup");
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("the default export is a no-op on this checkout, whose dashboard is tracked", async () => {
+    const { default: globalSetup } = await import(pathToFileURL(SETUP).href);
+    const before = fs.readFileSync(path.join(REPO_ROOT, "docs", "skills-health.json"), "utf8");
+    await globalSetup();
+    assert.equal(fs.readFileSync(path.join(REPO_ROOT, "docs", "skills-health.json"), "utf8"), before);
   });
 });
