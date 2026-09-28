@@ -1,0 +1,83 @@
+{
+  "schema": "distribution-before-state/1",
+  "capturedAtUtc": "2026-09-28T08:10:59.690Z",
+  "command": "node scripts/check-distribution.mjs --json",
+  "commandExit": 0,
+  "note": "Captured before any skills.sh re-crawl request by the unlabeled category agent; no re-crawl request was submitted from this worktree.",
+  "registrySha256": "50cb1163d08acabe55fa84e700aebac51393bd6782daf9580e78fba22ef9eadc",
+  "observations": {
+    "registry": {
+      "listing": {
+        "status": "readable",
+        "url": "https://www.skills.sh/rafaelgorski/problem-based-srs",
+        "declaredCount": 9,
+        "parsedCount": 9,
+        "advertisedNames": [
+          "problem-based-srs",
+          "functional-requirements",
+          "zigzag-validator",
+          "software-vision",
+          "business-context",
+          "customer-problems",
+          "customer-needs",
+          "software-glance",
+          "complexity-analysis"
+        ],
+        "description": "9 agent skills from the rafaelgorski/problem-based-srs repository.",
+        "partial": false,
+        "error": null
+      },
+      "repositoryNames": [
+        "problem-based-srs"
+      ],
+      "skills": [
+        {
+          "name": "problem-based-srs",
+          "url": "https://www.skills.sh/rafaelgorski/problem-based-srs/problem-based-srs",
+          "status": "readable",
+          "description": {
+            "expected": "Complete Problem-Based Software Requirements Specification methodology following Gorski & Stadzisz research. Use when you need to perform requirements engineering from business problems to functional requirements with full traceability.",
+            "actual": "Complete Problem-Based Software Requirements Specification methodology following Gorski & Stadzisz research. Use when you need to perform requirements engineering from business problems to functional requirements with full traceability.",
+            "matches": true
+          },
+          "headings": {
+            "expected": 15,
+            "matched": 15,
+            "missing": []
+          },
+          "version": {
+            "status": "page-publishes-none",
+            "expected": "1.3",
+            "actual": null,
+            "matches": null
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "registry-listing-drift",
+      "severity": "error",
+      "title": "The registry listing disagrees with the repository",
+      "detail": [
+        "Listing: https://www.skills.sh/rafaelgorski/problem-based-srs",
+        "Advertised but not in this repository (8): business-context, complexity-analysis, customer-needs, customer-problems, functional-requirements, software-glance, software-vision, zigzag-validator",
+        "Refreshing the listing is third-party state; re-submit it at https://www.skills.sh."
+      ]
+    }
+  ],
+  "unverified": [
+    {
+      "id": "registry-skill-version-unverifiable",
+      "severity": "notice",
+      "title": "The version of problem-based-srs was not compared",
+      "detail": [
+        "https://www.skills.sh/rafaelgorski/problem-based-srs/problem-based-srs publishes no version — its JSON-LD carries no softwareVersion — so the page's version cannot be read.",
+        "This repository ships metadata.version 1.3 in skills/problem-based-srs/SKILL.md — the skill's own version, not the plugin release version.",
+        "Recorded so a clean run is not read as a version that was checked and agreed. It does not fail the run: the limitation is the surface's, not this repository's."
+      ]
+    }
+  ]
+}

@@ -62,7 +62,8 @@ attributes, no orphans. Run `/live` and the SRS Navigator opens that graph.
 
 ## How it works
 
-Your AI assistant walks you through six steps. Each builds on the previous:
+Your AI assistant walks you through six core steps. The single skill exposes 9 methodology steps
+and support actions; each core step builds on the previous:
 
 ```mermaid
 graph LR
@@ -191,7 +192,7 @@ as agent tools, so every step is available without leaving the panel.
 > Prefer a preview first? The [project website](https://rafaelgorski.github.io/Problem-Based-SRS/)
 > plays app-faithful animations of the methodology: the traceability chain building itself
 > (Customer Problems first, then the Needs that address them, then the Requirements that
-> satisfy them), a real 28-node spec with its five Customer Problems highlighted, and a
+> satisfy them), a real 29-node spec with its five Customer Problems highlighted, and a
 > Copilot CLI walkthrough calling each skill in order.
 
 ### Decompose and iterate with the agent
