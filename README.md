@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version 2.6.0](https://img.shields.io/badge/version-2.6.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases)
+[![Version 2.7.0](https://img.shields.io/badge/version-2.7.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases)
 [![Skills Health](https://img.shields.io/badge/skills%20health-dashboard-brightgreen.svg)](https://rafaelgorski.github.io/Problem-Based-SRS/skills-health.html)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -62,7 +62,8 @@ attributes, no orphans. Run `/live` and the SRS Navigator opens that graph.
 
 ## How it works
 
-Your AI assistant walks you through six steps. Each builds on the previous:
+Your AI assistant walks you through six core steps. The single skill exposes 9 methodology steps
+and support actions; each core step builds on the previous:
 
 ```mermaid
 graph LR
@@ -109,7 +110,7 @@ This prevents "everything is P1" by grounding priority in the problem's actual i
 
 ## Quick start
 
-**Install** (ask your AI assistant):
+1. **Install the methodology skills** (ask your AI assistant):
 
 ```
 Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/
@@ -117,7 +118,9 @@ Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .g
 
 For Claude Code, use `.claude/skills/` instead. Skills must go in the agent-specific directory, not a `skills/` folder at the repo root.
 
-**Run** your first session:
+**Success check:** your assistant can find the `problem-based-srs` skill and offers the `/problem-based-srs` command.
+
+2. **Run your first session:**
 
 ```
 /problem-based-srs
@@ -131,6 +134,17 @@ Our warehouse tracks everything in spreadsheets and loses $50k/month due to erro
 ```
 
 The methodology will produce traced artifacts from business context through functional requirements, stored in your project's `.spec/` directory.
+
+**Success check:** your project has a `.spec/` folder with traced CP/CN/FR artifacts, or the assistant names the missing input it still needs before writing them.
+
+3. **Install the SRS Navigator canvas app and open the graph:**
+
+```
+Install the canvas extension from https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator
+/live
+```
+
+**Success check:** Copilot opens the SRS Navigator side panel and renders an interactive graph with CP, CN, FR and NFR nodes connected by traceability links (or the built-in CRM demo graph if your project has no `.spec/` yet).
 
 ## Full example
 
@@ -191,7 +205,7 @@ as agent tools, so every step is available without leaving the panel.
 > Prefer a preview first? The [project website](https://rafaelgorski.github.io/Problem-Based-SRS/)
 > plays app-faithful animations of the methodology: the traceability chain building itself
 > (Customer Problems first, then the Needs that address them, then the Requirements that
-> satisfy them), a real 28-node spec with its five Customer Problems highlighted, and a
+> satisfy them), a real 29-node spec with its five Customer Problems highlighted, and a
 > Copilot CLI walkthrough calling each skill in order.
 
 ### Decompose and iterate with the agent
@@ -323,7 +337,9 @@ The archive already contains a `srs-navigator/` folder, so extract it into the d
 The extracted folder runs as-is — there is **no `npm install` step**. The archive carries no
 `node_modules/` and declares no dependencies; the Copilot app supplies the host SDK.
 
-Then run `/live` in the Copilot app to open the canvas.
+Then run `/live` in the Copilot app to open the canvas. **Success check:** the SRS
+Navigator side panel renders an interactive CP/CN/FR/NFR traceability graph, using your
+project's `.spec/` when present and the built-in CRM demo otherwise.
 
 ### Manual
 

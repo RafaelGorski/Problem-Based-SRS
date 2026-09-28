@@ -927,7 +927,7 @@ describe("as a real command", () => {
 describe("against this repository", () => {
   it("classifies the manifest's own tag as the plugin train", () => {
     const record = runPreflight({
-      tag: "v2.6",
+      tag: "v2.7",
       root: repoRoot,
       suites: false,
       against: "HEAD",

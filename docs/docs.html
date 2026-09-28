@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <!-- Bump the ?v= query on any assets/site.css or assets/site.js change to bust the 10-min Pages cache. -->
-    <link rel="stylesheet" href="assets/site.css?v=2.6.0">
+    <link rel="stylesheet" href="assets/site.css?v=2.7.0">
 </head>
 <body>
     <a href="#main" class="skip-link">Skip to content</a>
@@ -19,7 +19,7 @@
         <div class="wrap">
             <div class="site-nav-id">
                 <a href="index.html" class="site-nav-brand" aria-label="Problem-Based SRS home">Problem-Based <span>SRS</span></a>
-                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.6.0, view releases">v2.6.0</a>
+                <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="version-badge" target="_blank" rel="noopener" aria-label="Version 2.7.0, view releases">v2.7.0</a>
             </div>
             <ul class="site-nav-links">
                 <li><a href="index.html">Home</a></li>
@@ -104,25 +104,25 @@
             <!-- Quick start -->
             <section class="docs-section" id="start" style="border-top: 0; padding-top: var(--space-md);">
                 <h2>Start in three steps</h2>
-                <p class="section-lead">Install the skills into your assistant, run the methodology, then open the result as a graph.</p>
+                <p class="section-lead">Install the skills into your assistant, run the methodology, then install the canvas app to open the result as a graph. Each step has an observable success check so a first run cannot silently stop before the graph appears.</p>
                 <div class="qs-rail">
                     <div class="qs-step">
                         <span class="qs-num">01</span>
                         <span class="qs-label">Install</span>
                         <code class="qs-cmd">RafaelGorski/Problem-Based-SRS</code>
-                        <span class="qs-line">Ask your assistant to add the skills into <code>.github/skills/</code> (or <code>.claude/skills/</code>).</span>
+                        <span class="qs-line">Ask your assistant to add the skills into <code>.github/skills/</code> (or <code>.claude/skills/</code>). <strong>Success check:</strong> the assistant can find the <code>problem-based-srs</code> skill and offers the <code>/problem-based-srs</code> command.</span>
                     </div>
                     <div class="qs-step">
                         <span class="qs-num">02</span>
                         <span class="qs-label">Run</span>
                         <code class="qs-cmd">/problem-based-srs</code>
-                        <span class="qs-line">Describe your situation. The agent walks you from context to requirements.</span>
+                        <span class="qs-line">Describe your situation. The agent walks you from context to requirements. <strong>Success check:</strong> your project has a <code>.spec/</code> folder with traced CP/CN/FR artifacts, or the assistant names the missing input it still needs before writing them.</span>
                     </div>
                     <div class="qs-step">
                         <span class="qs-num">03</span>
                         <span class="qs-label">Visualize</span>
                         <code class="qs-cmd">/live</code>
-                        <span class="qs-line">Open the SRS Navigator and explore the spec as a living graph.</span>
+                        <span class="qs-line">The SRS Navigator canvas is a separate install — a GitHub Copilot canvas extension, not part of the skills bundle. Ask the Copilot app to install it from this repository, then run <code>/live</code>. <strong>Success check:</strong> Copilot opens the SRS Navigator side panel and renders an interactive graph with CP, CN, FR and NFR nodes connected by traceability links (or the built-in CRM demo graph if your project has no <code>.spec/</code> yet).</span>
                     </div>
                 </div>
 
@@ -416,7 +416,7 @@ gh workflow run create-release.yml --ref main -f version=X.Y</code></pre>
                 <!-- Launch -->
                 <div class="docs-feature" id="nav-launch">
                     <h3>Launch it with <code>/live</code></h3>
-                    <p class="section-lead">The Navigator ships inside the Problem-Based SRS plugin. Once installed, open it from any session:</p>
+                    <p class="section-lead">The Navigator is a separate Copilot canvas extension. Once the extension is installed, open it from any session:</p>
                     <pre><code>/live</code></pre>
                     <p class="section-lead">Copilot opens the canvas in the side panel and loads the specification from your project's <code>.spec/</code> folder. No spec yet? Run the methodology first (<code>/problem-based-srs</code>), then open the Navigator to see it take shape.</p>
                     <div class="app-actions">
@@ -527,7 +527,7 @@ gh workflow run create-release.yml --ref main -f version=X.Y</code></pre>
 
     <footer class="site-footer">
         <div class="wrap">
-            <p>Problem-Based SRS &middot; <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.6.0</a> &middot; Methodology by Gorski &amp; Stadzisz</p>
+            <p>Problem-Based SRS &middot; <a href="https://github.com/RafaelGorski/Problem-Based-SRS/releases" class="footer-version">v2.7.0</a> &middot; Methodology by Gorski &amp; Stadzisz</p>
             <p class="footer-links">
                 <a href="index.html">Home</a>
                 <a href="https://github.com/RafaelGorski/Problem-Based-SRS">GitHub</a>
@@ -537,7 +537,7 @@ gh workflow run create-release.yml --ref main -f version=X.Y</code></pre>
         </div>
     </footer>
 
-    <script src="assets/site.js?v=2.6.0" defer></script>
+    <script src="assets/site.js?v=2.7.0" defer></script>
     <script>
         (function () {
             // Sidebar toggle (mobile)

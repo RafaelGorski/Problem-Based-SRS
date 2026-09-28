@@ -425,10 +425,10 @@ describe("release trains — the classifier can be told which train it must be",
 
 describe("release trains — the CLI does not silently ignore what it was given", () => {
   it("accepts the tag as a bare argument, the form the runbook and issues use", () => {
-    const positional = runCli(["v2.6"]);
+    const positional = runCli(["v2.7"]);
     assert.equal(positional.status, 0, positional.out);
     assert.match(positional.out, /train=plugin/);
-    const explicit = runCli(["--tag", "v2.6"]);
+    const explicit = runCli(["--tag", "v2.7"]);
     assert.deepEqual(
       [positional.status, /train=(\w+)/.exec(positional.out)[1]],
       [explicit.status, /train=(\w+)/.exec(explicit.out)[1]],

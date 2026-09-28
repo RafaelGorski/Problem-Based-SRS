@@ -18,16 +18,20 @@ export function sha256(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
-export function extractArchive(file, destination) {
+export function extractArchive(file, destination, { platform = process.platform, run = execFileSync } = {}) {
   const lower = file.toLowerCase();
   if (!lower.endsWith(".zip") && !lower.endsWith(".tar.gz") && !lower.endsWith(".tgz")) {
     throw new Error("verify-canvas-archive: archive must be .zip or .tar.gz");
   }
   fs.mkdirSync(destination, { recursive: true });
   if (lower.endsWith(".zip")) {
-    execFileSync("unzip", ["-q", file, "-d", destination], { stdio: "ignore" });
+    if (platform === "win32") {
+      run("tar", ["-xf", file, "-C", destination], { stdio: "ignore" });
+    } else {
+      run("unzip", ["-q", file, "-d", destination], { stdio: "ignore" });
+    }
   } else {
-    execFileSync("tar", ["-xf", file, "-C", destination], { stdio: "ignore" });
+    run("tar", ["-xf", file, "-C", destination], { stdio: "ignore" });
   }
   return destination;
 }
