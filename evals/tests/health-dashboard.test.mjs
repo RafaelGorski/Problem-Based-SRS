@@ -339,7 +339,7 @@ describe("e2e global setup — dashboard exists before the site suite reads it (
       const snap = JSON.parse(fs.readFileSync(first.jsonPath, "utf8"));
       assert.equal(snap.overall.state, "not-run");
       assert.equal(snap.version, JSON.parse(fs.readFileSync(path.join(REPO_ROOT, ".claude-plugin", "plugin.json"), "utf8")).version);
-      assert.match(fs.readFileSync(first.htmlPath, "utf8"), new RegExp(`v${snap.version.replace(/\./g, "\\.")}`));
+      assert.ok(fs.readFileSync(first.htmlPath, "utf8").includes(`v${snap.version}`), "the generated page names the plugin version");
 
       const second = await ensureDashboard({ root });
       assert.equal(second.generated, false, "an existing dashboard is never overwritten by the setup");
