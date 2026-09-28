@@ -1,22 +1,34 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 import {
   analyzeIssueBody,
   attributeVersion,
   buildLedger,
   classifyVersionMentions,
+  cli,
   compareVersions,
+  defaultRunner,
+  detectRepo,
   extractChecklistBoxes,
   formatReport,
   hasCitation,
   hasExplicitBlocker,
+  issueCitationMentions,
+  ledgerFindingCodes,
+  normalizeResult,
   normalizeVersion,
   parseArgs,
   parseChecklistLine,
+  parseRepoFromRemoteUrl,
   REPO_ROOT,
   readCanvasVersion,
+  readIssueFromBodyFile,
   readTrainVersions,
+  releaseClaimMarkers,
   toBaselines,
 } from "../tools/issue-ledger.mjs";
 
@@ -45,6 +57,16 @@ describe("line classifiers", () => {
     assert.equal(hasExplicitBlocker("Blocked on #91"), true);
     assert.equal(hasExplicitBlocker("blocked by https://example.com/ticket"), true);
     assert.equal(hasExplicitBlocker("waiting on #91"), false);
+  });
+
+  it("detects issue citations for optional live validation", () => {
+    assert.deepEqual(issueCitationMentions("Blocked on #299 and see #145."), [299, 145]);
+    assert.deepEqual(issueCitationMentions("No issue here."), []);
+  });
+
+  it("detects release claim markers before closure", () => {
+    assert.equal(releaseClaimMarkers("<!-- release-claim train=none -->").length, 1);
+    assert.equal(releaseClaimMarkers("<!-- release-claim train=none --><!-- release-claim train=plugin version=v2.7 -->").length, 2);
   });
 
   it("parses checkbox lines and superseded version mentions", () => {
@@ -88,6 +110,18 @@ describe("issue body analysis", () => {
   it("flags boxes that still name a superseded version", () => {
     const analyzed = analyzeIssueBody("- [ ] release link points at v2.5", "2.6.0");
     assert.equal(analyzed.counts.supersededVersionMentions, 1);
+  });
+
+  it("flags duplicate release-claim markers as their own closure finding", () => {
+    const analyzed = analyzeIssueBody(
+      "<!-- release-claim train=none -->\n<!-- release-claim train=plugin version=v2.7 -->\n- [x] Evidence in `README.md`",
+      "2.7.0",
+    );
+    assert.equal(analyzed.counts.duplicateReleaseClaimMarkers, 2);
+    assert.deepEqual(analyzed.findings.duplicateReleaseClaimMarkers, [
+      "<!-- release-claim train=none -->",
+      "<!-- release-claim train=plugin version=v2.7 -->",
+    ]);
   });
 });
 
@@ -202,6 +236,27 @@ describe("train baselines are read from the files the pipelines own", () => {
         "attribution rule needs revisiting rather than silently mis-attributing tags",
     );
   });
+
+  it("falls back to the extension package when VERSION is absent", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue-ledger-version-"));
+    const pkg = path.join(dir, ".github", "extensions", "srs-navigator");
+    fs.mkdirSync(pkg, { recursive: true });
+    fs.writeFileSync(path.join(pkg, "package.json"), JSON.stringify({ version: "9.8.7" }));
+    try {
+        assert.equal(readCanvasVersion(dir), "9.8.7");
+    } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns null when no canvas version source exists", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue-ledger-no-version-"));
+    try {
+        assert.equal(readCanvasVersion(dir), null);
+    } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 // Regression guard for the defect found on 2026-08-07 (#156): six live issue bodies were
@@ -268,5 +323,215 @@ describe("argument parsing", () => {
 
   it("rejects non-numeric issue identifiers", () => {
     assert.throws(() => parseArgs(["abc"]), /invalid issue number/);
+  });
+
+  it("accepts a local body file for offline reconciliation", () => {
+    const args = parseArgs([
+      "--body-file",
+      "issue.md",
+      "--issue-number",
+      "145",
+      "--title",
+      "Reconcile ledger",
+      "--repo",
+      "owner/repo",
+    ]);
+    assert.equal(path.basename(args.bodyFile), "issue.md");
+    assert.equal(args.issueNumber, 145);
+    assert.equal(args.title, "Reconcile ledger");
+  });
+
+  it("rejects an invalid offline issue number", () => {
+    assert.throws(() => parseArgs(["--body-file", "issue.md", "--issue-number", "-1"]), /non-negative integer/);
+  });
+
+  it("accepts citation validation as an explicit gate option", () => {
+    const args = parseArgs(["69", "--validate-citations"]);
+    assert.equal(args.validateCitations, true);
+  });
+});
+
+describe("offline body-file ledgers", () => {
+  it("builds a ledger from a local body without calling gh", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue-ledger-body-"));
+    const file = path.join(dir, "145.md");
+    fs.writeFileSync(file, "- [x] Evidence in `evals/tools/issue-ledger.mjs`\n- [ ] Blocked on #299 pending coordinator post.\n");
+    try {
+      const issue = readIssueFromBodyFile(file, 145, "Reconcile #145", "owner/repo");
+      assert.equal(issue.number, 145);
+      assert.equal(issue.title, "Reconcile #145");
+      assert.equal(issue.url, "https://github.com/owner/repo/issues/145");
+      assert.match(issue.body, /Blocked on #299/);
+
+      const record = buildLedger({
+        root: REPO_ROOT,
+        repo: "owner/repo",
+        bodyFile: file,
+        issueNumber: 145,
+        title: "Reconcile #145",
+        issues: [],
+      }, () => {
+        throw new Error("gh should not be called for --body-file");
+      });
+      assert.equal(record.ok, true, formatReport(record));
+      assert.equal(record.issues[0].counts.total, 2);
+      assert.equal(record.issues[0].counts.checked, 1);
+      assert.equal(record.issues[0].counts.openWithoutBlocker, 0);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("can validate cited issues and report dangling citations", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue-ledger-citations-"));
+    const file = path.join(dir, "145.md");
+    fs.writeFileSync(file, "- [ ] Blocked on #299 pending coordinator post.\n- [x] Evidence in #404 and `evals/tools/issue-ledger.mjs`.\n");
+    const run = (_command, args) => {
+      const number = Number(args[2]);
+      if (number === 299) {
+        return {
+          status: 0,
+          stdout: JSON.stringify({ number, title: "Coordinator", url: "https://github.com/owner/repo/issues/299", body: "- [x] ok in #145" }),
+          stderr: "",
+        };
+      }
+      return { status: 1, stdout: "", stderr: "not found" };
+    };
+
+    try {
+      const record = buildLedger({
+        root: REPO_ROOT,
+        repo: "owner/repo",
+        bodyFile: file,
+        issueNumber: 145,
+        title: "Reconcile #145",
+        issues: [],
+        validateCitations: true,
+      }, run);
+      assert.equal(record.ok, false);
+      assert.deepEqual(record.issues[0].findings.danglingIssueCitations, ["#404"]);
+      assert.ok(ledgerFindingCodes(record).includes("dangling-issue-citation"));
+      assert.match(formatReport(record), /dangling issue citations: 1/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("runs the body-file CLI without fetching an issue", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue-ledger-cli-"));
+    const file = path.join(dir, "145.md");
+    fs.writeFileSync(file, "- [x] Evidence in `evals/tools/issue-ledger.mjs`\n");
+    let stdout = "";
+    let stderr = "";
+    try {
+      const status = cli([
+        "--body-file",
+        file,
+        "--issue-number",
+        "145",
+        "--title",
+        "Reconcile #145",
+        "--repo",
+        "owner/repo",
+        "--json",
+        "-",
+        "--quiet",
+      ], {
+        stdout: { write: (chunk) => { stdout += chunk; } },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+        run: () => {
+          throw new Error("gh should not be called");
+        },
+      });
+      assert.equal(status, 0, stderr);
+      assert.equal(stderr, "");
+      assert.equal(JSON.parse(stdout).issues[0].number, 145);
+
+      stderr = "";
+      assert.equal(cli(["145", "--body-file", file], {
+        stdout: { write() {} },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+      }), 1);
+      assert.match(stderr, /cannot be combined/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("writes CLI JSON to a file and reports CLI argument/build errors", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "issue-ledger-cli-json-"));
+    const body = path.join(dir, "145.md");
+    const json = path.join(dir, "ledger.json");
+    fs.writeFileSync(body, "- [x] Evidence in `evals/tools/issue-ledger.mjs`\n");
+    let stderr = "";
+    try {
+      assert.equal(cli([
+        "--body-file",
+        body,
+        "--issue-number",
+        "145",
+        "--repo",
+        "owner/repo",
+        "--json",
+        json,
+        "--quiet",
+      ], {
+        stdout: { write() {} },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+      }), 0, stderr);
+      assert.equal(JSON.parse(fs.readFileSync(json, "utf8")).issues[0].number, 145);
+
+      stderr = "";
+      assert.equal(cli(["--repo"], {
+        stdout: { write() {} },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+      }), 1);
+      assert.match(stderr, /needs a value/);
+
+      stderr = "";
+      assert.equal(cli(["--help"], {
+        stdout: { write() {} },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+      }), 0);
+      assert.match(stderr, /Usage:/);
+
+      stderr = "";
+      assert.equal(cli([], {
+        stdout: { write() {} },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+      }), 1);
+      assert.match(stderr, /Usage:/);
+
+      stderr = "";
+      assert.equal(cli(["999", "--repo", "owner/repo"], {
+        stdout: { write() {} },
+        stderr: { write: (chunk) => { stderr += chunk; } },
+        run: () => ({ status: 1, stdout: "", stderr: "not found" }),
+      }), 1);
+      assert.match(stderr, /failed to read #999/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("process and repository helpers", () => {
+  it("normalizes spawned process errors and runs a simple command", () => {
+    assert.deepEqual(normalizeResult({ error: new Error("missing"), stdout: "", stderr: "" }), {
+      status: 127,
+      stdout: "",
+      stderr: "missing",
+    });
+    const result = defaultRunner(process.execPath, ["-e", "process.stdout.write('ok')"], { cwd: REPO_ROOT });
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, "ok");
+  });
+
+  it("parses GitHub remotes and handles an undetectable repository", () => {
+    assert.equal(parseRepoFromRemoteUrl("git@github.com:owner/repo.git"), "owner/repo");
+    assert.equal(parseRepoFromRemoteUrl("https://github.com/owner/repo"), "owner/repo");
+    assert.equal(parseRepoFromRemoteUrl("not a remote"), null);
+    assert.equal(detectRepo(REPO_ROOT, () => ({ status: 0, stdout: "git@github.com:owner/repo.git\n", stderr: "" })), "owner/repo");
+    assert.equal(detectRepo(REPO_ROOT, () => ({ status: 1, stdout: "", stderr: "" })), null);
   });
 });

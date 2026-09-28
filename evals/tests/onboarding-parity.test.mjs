@@ -21,6 +21,56 @@ const docsHtml = fs.readFileSync(path.join(REPO_ROOT, "docs", "docs.html"), "utf
 const readme = fs.readFileSync(path.join(REPO_ROOT, "README.md"), "utf8");
 const indexHtml = fs.readFileSync(path.join(REPO_ROOT, "docs", "index.html"), "utf8");
 
+function stripTags(html) {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function docsQuickStartSteps(html = docsHtml) {
+  const start = html.slice(
+    html.indexOf('id="start"'),
+    html.indexOf("</section>", html.indexOf('id="start"')),
+  );
+  return [...start.matchAll(/<div class="qs-step">([\s\S]*?)<\/div>/g)].map((match) => {
+    const block = match[1];
+    return {
+      label: stripTags(block.match(/<span class="qs-label">([\s\S]*?)<\/span>/)?.[1] ?? ""),
+      text: stripTags(block),
+    };
+  });
+}
+
+function readmeQuickStartSteps(markdown = readme) {
+  const start = markdown.slice(
+    markdown.indexOf("## Quick start"),
+    markdown.indexOf("## Full example"),
+  );
+  return [...start.matchAll(/(?:^|\n)\d+\.\s+\*\*([^*]+)\*\*([\s\S]*?)(?=\n\d+\.\s+\*\*|\n## |\s*$)/g)].map((match) => ({
+    label: match[1].replace(/:$/, "").trim(),
+    text: match[0].replace(/\s+/g, " ").trim(),
+  }));
+}
+
+function assertQuickStartSuccessChecks(steps, surface) {
+  assert.equal(steps.length, 3, `${surface} must keep the three-step quick start`);
+  for (const step of steps) {
+    assert.match(
+      step.text,
+      /Success check:/i,
+      `${surface} step "${step.label}" must state an observable success check`,
+    );
+  }
+  assert.match(
+    steps[2].text,
+    /renders an interactive graph/i,
+    `${surface} final step must end in a concretely described rendered graph`,
+  );
+  assert.match(
+    steps[2].text,
+    /CP[\s\S]*CN[\s\S]*FR[\s\S]*NFR/i,
+    `${surface} final graph success check must name CP, CN, FR and NFR nodes`,
+  );
+}
+
 describe("onboarding quick-start agrees with the README on the canvas install (CP-B)", () => {
   test("README still documents the canvas as a separate install", () => {
     assert.match(
@@ -43,6 +93,19 @@ describe("onboarding quick-start agrees with the README on the canvas install (C
         "leads to a missing-canvas dead end at `/live`",
     );
   });
+
+  test("README and docs quick starts give every step an observable success check", () => {
+    assertQuickStartSuccessChecks(readmeQuickStartSteps(), "README.md");
+    assertQuickStartSuccessChecks(docsQuickStartSteps(), "docs/docs.html");
+  });
+
+  test("negative control: removing one success check fails the quick-start contract", () => {
+    const steps = docsQuickStartSteps(docsHtml.replace(/<strong>Success check:<\/strong>/, "<strong>Check:<\/strong>"));
+    assert.throws(
+      () => assertQuickStartSuccessChecks(steps, "mutated docs/docs.html"),
+      /must state an observable success check/,
+    );
+  });
 });
 
 describe("docs/index.html states the current skill count (CP-D)", () => {
@@ -56,4 +119,3 @@ describe("docs/index.html states the current skill count (CP-D)", () => {
     );
   });
 });
-
