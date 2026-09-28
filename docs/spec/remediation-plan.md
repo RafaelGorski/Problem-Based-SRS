@@ -216,7 +216,39 @@ so "exit 0" is not the same claim as "no drift".
 - **#318** — Ledger reconciliation is issue metadata. The rendered evidence it cites was captured by #305, #308, #142 and #314.
 - **#149** — Batch closure is an accounting action over evidence captured elsewhere. Every visual artifact it cites was produced by an upstream issue and is attached by reference.
 
-## 5. Supersession map
+## 5. Sub-issue index
+
+Each root issue below has one tracking sub-issue carrying this plan's executable steps,
+acceptance criteria and verification evidence. Each is linked natively as a GitHub
+sub-issue of its main issue.
+
+| Wave | Main issue | Tracking sub-issue |
+|---:|---|---|
+| 0 | #292 — Make the default runner green and deterministic on a clean checkout | #322 |
+| 0 | #293 — Make every published surface state the shipped version, count and contrast | #323 |
+| 0 | #308 — Make install-to-first-graph executable in one pass on a clean machine | #324 |
+| 1 | #294 — Restore the model-behavior proof so the anti-drift claim is exercised | #325 |
+| 1 | #297 — Execute the closure-gate mutation matrix and prove each failure mode | #326 |
+| 1 | #300 — Capture and store the parsed registry before-state, dated before any re-crawl | #327 |
+| 1 | #305 — Render /live from the published archive and capture provenance with the screenshot | #328 |
+| 1 | #306 — Restate every canvas release claim to v1.1.5 and republish archive-derived evidence | #329 |
+| 2 | #138 — Prove /live provenance from the current published canvas archive | #330 |
+| 2 | #139 — Reconcile live release claims with published releases | #331 |
+| 2 | #301 — Verify the re-crawl by parsed content rather than by exit code | #332 |
+| 2 | #309 — Pre-register the adoption contract: threshold, window and outcome rule | #333 |
+| 2 | #316 — Reconcile the weekly release report against what actually shipped | #334 |
+| 3 | #142 — Run one external /live adoption experiment and record outcome | #335 |
+| 3 | #302 — Prove the re-crawl republished current content, with the stale-content canary | #336 |
+| 4 | #140 — Coordinate the skills.sh registry refresh and parsed-content verification | #337 |
+| 4 | #311 — Record the participant outcome against the pre-registered threshold | #338 |
+| 4 | #313 — Gate the announcement on verified surface version parity | #339 |
+| 4 | #315 — Reconcile the announcement across plugin, extension, and companion-app releases | #340 |
+| 5 | #314 — Publish the announcement once every surface agrees, at the versions actually published | #341 |
+| 6 | #318 — Reconcile the batch against live evidence immediately before closure | #342 |
+| 7 | #149 — Close the release, registry, adoption, and ledger batch only on live evidence | #343 |
+| 8 | #319 — Close last, on a green ledger and a green runner in the same session | #344 |
+
+## 6. Supersession map
 
 Executing this plan **reduces** the backlog. Each root below is the evidence of record for
 its theme; the issues beside it restate the same work from an earlier pass and should be
@@ -242,7 +274,7 @@ without a named replacement.
 **Net effect:** 23 tracking sub-issues added, 29 existing issues
 superseded — a net reduction of 6 once the plan is executed.
 
-## 6. Closure rules for this batch
+## 7. Closure rules for this batch
 
 1. **No box ticks without a citation.** Every ticked acceptance box names a command and an
    artifact (`NFR.02`).
@@ -256,7 +288,7 @@ superseded — a net reduction of 6 once the plan is executed.
 7. **Restating a target is not evidence the target was met.** Marker restatement never
    ticks an acceptance box.
 
-## 7. Immediate next action
+## 8. Immediate next action
 
 **Review and merge PR #320.** It is non-draft, `MERGEABLE`, has all checks green, and
 carries wave 0 in full — the deterministic runner, the onboarding-parity fix, the version
