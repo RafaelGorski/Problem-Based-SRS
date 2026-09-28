@@ -52,6 +52,28 @@ Every issue below closes on evidence from this runner.
 It carries the fix for waves 0's three issues and has been reviewed by nobody. Until it
 lands, waves 1–8 cannot start. This is the single highest-value action in the plan.
 
+### F6 — The published dashboard advertises a green verdict the runner contradicts
+
+Found by executing this plan's own app verification track on 2026-09-28
+(`npx playwright test --project=site` → 18 passed, 1 failed, 7 screenshots written).
+
+The landing badge screenshots as **v2.7.0**. One click away, `docs/skills-health.html`
+reads **Problem-Based SRS v2.6.0 · SRS Navigator v1.1.3 · generated 2026-08-15** and
+reports **Verdict: Passed — 1299 tests, 1299 passing, 0 failing**. The same day's run of
+the same suite exits 1 at **1,287 / 1,299 with 12 failures**.
+
+So the dashboard is not merely stale on version: it is a **committed artifact asserting a
+green verdict that the command it names does not currently produce**. It is also one of the
+three tracked files a local run rewrites, so the committed copy is a snapshot of a run
+nobody can reproduce today. The single failing site test —
+`the dashboard names the same version as the site badge` — is the existing guard, already
+red, for exactly this.
+
+This is the strongest available argument for wave 0: a reader checking whether the project
+works is shown a green dashboard, and the dashboard is wrong. #293 owns the fix, and
+its acceptance criteria now require the stored verdict to agree with the runner that
+produced it.
+
 ## 3. Dependency-ordered sequence
 
 ### Wave 0 — Baseline green
@@ -171,6 +193,18 @@ Run from `.github/extensions/srs-navigator`:
 npx playwright test --project=site      # docs site and landing page
 npx playwright test --project=canvas    # the SRS Navigator graph
 ```
+
+**This track was executed on 2026-09-28, not merely specified.** `--project=site` resolved
+19 tests in 2 files and `--project=canvas` 22 tests in 1 file; the site run finished
+18 passed / 1 failed in 16.4s and wrote seven PNGs to `test-results/`:
+`landing-version-badge.png`, `skills-health-dashboard.png`, `landing-install.png`,
+`landing-health-link.png`, `landing-health-link-narrow.png`, `landing-live-demo.png` and
+`landing-live-demo-reduced.png`. Two of those screenshots are the evidence for F6 above.
+The harness therefore produces attachable evidence today, before any issue in this plan is
+worked — which is what makes the acceptance boxes checkable rather than aspirational.
+
+`test-results/` is git-ignored by design, so captures are attached to issues rather than
+committed.
 
 For any claim about a **published** release, boot the canvas from the extracted archive
 rather than from the checkout, and attach the PNG together with its `provenance.json`:

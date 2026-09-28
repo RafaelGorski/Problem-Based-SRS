@@ -25,7 +25,7 @@ The system shall state, on every published surface, the plugin and canvas versio
 
 The version, skill count and node count a visitor reads differ between README, the documentation site and the landing page, so no published number can be cited as the shipped number. Separately, the skip link — the first control a keyboard user reaches — renders below the WCAG AA contrast floor.
 
-**Observed on 2026-09-28:** `README.md#L3` badges 2.6.0 after v2.7 shipped; `docs/docs.html` repeats 2.6.0 at lines 13 and 22; `docs/index.html#L103` says "Ten AgentSkills" although one skill ships; the generated dashboard still reads 2.6.0 / 1.1.3 against a published 2.7.0 / 1.1.5, which is what today's canvas e2e failure reports. `docs/assets/site.css#L114-L117` renders the skip link as `--ink-heading` on `--primary`, measured at 2.39:1 against a 4.5:1 AA floor.
+**Observed on 2026-09-28:** `README.md#L3` badges 2.6.0 after v2.7 shipped; `docs/docs.html` repeats 2.6.0 at lines 13 and 22; `docs/index.html#L103` says "Ten AgentSkills" although one skill ships; the generated dashboard still reads 2.6.0 / 1.1.3 against a published 2.7.0 / 1.1.5, which is what today's canvas e2e failure reports. `docs/assets/site.css#L114-L117` renders the skip link as `--ink-heading` on `--primary`, measured at 2.39:1 against a 4.5:1 AA floor. Confirmed visually on 2026-09-28 by running `npx playwright test --project=site` (18 passed, 1 failed): the landing badge screenshots as **v2.7.0** while the dashboard one click away reads **v2.6.0 / v1.1.3, generated 2026-08-15** — and advertises **Passed, 1299 tests, 0 failing**, a verdict the same day's runner contradicts at 1,287 / 1,299 with 12 failures. The one failing site test is exactly `the dashboard names the same version as the site badge`.
 
 ## Acceptance Criteria
 
@@ -34,6 +34,7 @@ The version, skill count and node count a visitor reads differ between README, t
 - [ ] The landing page states the shipped skill count (one consolidated skill), and the node count agrees with `.spec/crm-system.json`
 - [ ] The focused skip link measures **>= 4.5:1** against its background, asserted by a test rather than by inspection
 - [ ] A deliberate mutation of any single version token fails the parity test (negative-test the guard)
+- [ ] The committed dashboard's verdict agrees with the runner that produced it — no stored green verdict survives a red run
 
 ## Verification
 
