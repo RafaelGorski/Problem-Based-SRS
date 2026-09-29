@@ -1,6 +1,6 @@
 {
   "schema": "skills-health/1",
-  "generatedAt": "2026-09-28T08:41:43.8039806Z",
+  "generatedAt": "2026-09-29T19:00:18.8465622Z",
   "repo": "RafaelGorski/Problem-Based-SRS",
   "version": "2.7.0",
   "canvasVersion": "1.1.5",
@@ -10,11 +10,11 @@
     "suitesRun": 4,
     "suitesFailed": 0,
     "suitesSkipped": 2,
-    "tests": 1370,
-    "pass": 1370,
+    "tests": 1386,
+    "pass": 1386,
     "fail": 0,
     "skipped": 0,
-    "durationSeconds": 87.6
+    "durationSeconds": 120.9
   },
   "suites": [
     {
@@ -25,29 +25,29 @@
       "pass": 1,
       "fail": 0,
       "skipped": 0,
-      "seconds": 0.2,
+      "seconds": 0.6,
       "reason": ""
     },
     {
       "name": "Canvas extension",
       "state": "passed",
       "command": "npm test",
-      "tests": 307,
-      "pass": 307,
+      "tests": 308,
+      "pass": 308,
       "fail": 0,
       "skipped": 0,
-      "seconds": 1.5,
+      "seconds": 2.7,
       "reason": ""
     },
     {
       "name": "Skill evals",
       "state": "passed",
       "command": "pwsh evals/scripts/run-tests.ps1",
-      "tests": 1021,
-      "pass": 1021,
+      "tests": 1036,
+      "pass": 1036,
       "fail": 0,
       "skipped": 0,
-      "seconds": 18.3,
+      "seconds": 35,
       "reason": ""
     },
     {
@@ -58,7 +58,7 @@
       "pass": 41,
       "fail": 0,
       "skipped": 0,
-      "seconds": 67.4,
+      "seconds": 82.3,
       "reason": ""
     },
     {
