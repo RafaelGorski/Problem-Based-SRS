@@ -11,7 +11,7 @@ const BASE_ISSUES = new Map([
   [502, "- [x] Supporting proof recorded in `README.md`"],
 ]);
 
-function fixtureRunner(bodies) {
+export function fixtureRunner(bodies) {
   return (_command, args) => {
     const number = Number(args[2]);
     if (!bodies.has(number)) {
@@ -107,8 +107,8 @@ export function greenFixtureResult() {
   };
 }
 
-export function mutationMatrix() {
-  return MUTATIONS.map((mutation) => {
+export function mutationMatrix(mutations = MUTATIONS) {
+  return mutations.map((mutation) => {
     const result = mutation.run();
     return {
       name: mutation.name,
@@ -154,9 +154,11 @@ export function formatMutationMatrixTranscript({ green = greenFixtureResult(), r
   ].join("\n");
 }
 
-export function cli(io = { stdout: process.stdout, stderr: process.stderr }) {
-  const green = greenFixtureResult();
-  const results = mutationMatrix();
+export function cli(
+  io = { stdout: process.stdout, stderr: process.stderr },
+  evidence = { green: greenFixtureResult(), results: mutationMatrix() },
+) {
+  const { green, results } = evidence;
   const validation = validateMutationMatrix(results);
   io.stdout.write(`${formatMutationMatrixTranscript({ green, results })}\n`);
   /* node:coverage ignore next 4 */

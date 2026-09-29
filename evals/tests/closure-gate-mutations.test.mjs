@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   formatMutationMatrixTranscript,
+  fixtureRunner,
   greenFixtureResult,
   cli,
   mutationMatrix,
@@ -65,6 +66,20 @@ describe("closure gate mutation matrix (#297)", () => {
     assert.match(transcript, /failure=bad-mutation passed unexpectedly/);
   });
 
+  it("covers defensive fixture and mutation success paths", () => {
+    const missing = fixtureRunner(new Map())("gh", ["issue", "view", "777"]);
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /issue #777 not found/);
+
+    const results = mutationMatrix([{
+      name: "unexpected-pass",
+      expectedCode: "expected-code",
+      run: () => ({ ok: true, codes: [] }),
+    }]);
+    assert.equal(results[0].exit, 0);
+    assert.equal(results[0].ok, true);
+  });
+
   it("exposes a CLI that prints the same transcript", () => {
     let stdout = "";
     let stderr = "";
@@ -91,5 +106,31 @@ describe("closure gate mutation matrix (#297)", () => {
       process.stdout.write = originalWrite;
     }
     assert.match(stdout, /matrix=passed/);
+  });
+
+  it("returns failure for a broken green fixture or mutation matrix", () => {
+    let stderr = "";
+    const io = {
+      stdout: { write: () => {} },
+      stderr: { write: (chunk) => { stderr += chunk; } },
+    };
+    assert.equal(cli(io, {
+      green: { ok: false, codes: ["green-failure"] },
+      results: mutationMatrix(),
+    }), 1);
+    assert.match(stderr, /green fixture failed/);
+
+    stderr = "";
+    assert.equal(cli(io, {
+      green: { ok: true, codes: [] },
+      results: [{
+        name: "unexpected-pass",
+        expectedCode: "expected-code",
+        exit: 0,
+        ok: true,
+        codes: [],
+      }],
+    }), 1);
+    assert.equal(stderr, "");
   });
 });
