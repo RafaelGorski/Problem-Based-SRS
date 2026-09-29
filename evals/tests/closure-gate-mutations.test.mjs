@@ -20,6 +20,7 @@ describe("closure gate mutation matrix (#297)", () => {
     const results = mutationMatrix();
     const validation = validateMutationMatrix(results);
     assert.equal(validation.ok, true, validation.failures.join("\n"));
+    assert.equal(validateMutationMatrix().ok, true);
     assert.deepEqual(results.map((result) => result.name), [
       "open-box-without-blocker",
       "ticked-box-without-citation",
@@ -74,6 +75,21 @@ describe("closure gate mutation matrix (#297)", () => {
     assert.equal(exit, 0);
     assert.equal(stderr, "");
     assert.match(stdout, /mutation=open-box-without-blocker/);
+    assert.match(stdout, /matrix=passed/);
+  });
+
+  it("uses the process streams by default", () => {
+    const originalWrite = process.stdout.write;
+    let stdout = "";
+    process.stdout.write = (chunk) => {
+      stdout += chunk;
+      return true;
+    };
+    try {
+      assert.equal(cli(), 0);
+    } finally {
+      process.stdout.write = originalWrite;
+    }
     assert.match(stdout, /matrix=passed/);
   });
 });
