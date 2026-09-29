@@ -2,9 +2,11 @@
   "targetChannel": "",
   "intendedAudience": "",
   "publicPostUrl": "",
+  "publicationAt": "",
   "beforeState": "",
   "afterState": "",
   "releasedEvidence": "",
+  "contractCreatedAt": "",
   "observationStart": "",
   "observationEnd": "",
   "signal": "An external opt-in confirmation containing a redacted artifact or transcript showing /problem-based-srs invoked from the released version",
@@ -16,6 +18,12 @@
     "collaborator",
     "test",
     "repository automation"
+  ],
+  "nonQualifyingSignals": [
+    "impressions",
+    "clicks",
+    "stars",
+    "repository-owner activity"
   ],
   "readingAtStart": "",
   "readingAtEnd": "",

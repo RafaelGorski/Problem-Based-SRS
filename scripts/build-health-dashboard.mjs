@@ -114,7 +114,8 @@ export function buildSnapshot(results, root = REPO_ROOT) {
     version,
     canvasVersion,
     overall: {
-      state: failed.length ? "failed" : "passed",
+      // A run in which no suite executed proves nothing, so it must not read as a pass.
+      state: failed.length ? "failed" : ran.length ? "passed" : "not-run",
       suites: suites.length,
       suitesRun: ran.length,
       suitesFailed: failed.length,
@@ -133,7 +134,7 @@ export function buildSnapshot(results, root = REPO_ROOT) {
 const esc = (v) =>
   String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const STATE_LABEL = { passed: "Passed", failed: "Failed", skipped: "Skipped", ok: "OK", watch: "Watch", over: "Over" };
+const STATE_LABEL = { passed: "Passed", failed: "Failed", skipped: "Skipped", "not-run": "Not run", ok: "OK", watch: "Watch", over: "Over" };
 
 /**
  * Render the dashboard HTML. Self-contained: no build step, no JS required.
@@ -252,7 +253,23 @@ ${budgetRows}
 }
 
 /**
- * Write both artifacts and return their paths.
+ * Strip the fields that change on every run (wall-clock stamp and timings), so two runs
+ * from the same commit can be compared on what they actually observed (FR.05.1.2).
+ * @param {object} snap
+ */
+export function stableSnapshot(snap) {
+  const { generatedAt, ...rest } = snap;
+  return {
+    ...rest,
+    overall: { ...rest.overall, durationSeconds: undefined },
+    suites: (rest.suites ?? []).map((s) => ({ ...s, seconds: undefined })),
+  };
+}
+
+/**
+ * Write both artifacts and return their paths. When the tracked snapshot already records
+ * the same results (ignoring timestamps and durations), both files are left untouched so a
+ * repeat run leaves the working tree clean.
  * @param {object} results
  * @param {{root?:string,outDir?:string}} [opts]
  */
@@ -263,9 +280,20 @@ export function writeDashboard(results, opts = {}) {
   const snapshot = buildSnapshot(results, root);
   const jsonPath = path.join(outDir, "skills-health.json");
   const htmlPath = path.join(outDir, "skills-health.html");
+  let previous = null;
+  try {
+    previous = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+  } catch {
+    previous = null;
+  }
+  const unchanged =
+    previous !== null &&
+    fs.existsSync(htmlPath) &&
+    JSON.stringify(stableSnapshot(previous)) === JSON.stringify(stableSnapshot(snapshot));
+  if (unchanged) return { snapshot: previous, jsonPath, htmlPath, unchanged: true };
   fs.writeFileSync(jsonPath, JSON.stringify(snapshot, null, 2) + "\n", "utf8");
   fs.writeFileSync(htmlPath, renderDashboard(snapshot), "utf8");
-  return { snapshot, jsonPath, htmlPath };
+  return { snapshot, jsonPath, htmlPath, unchanged: false };
 }
 
 function parseArgs(argv) {
@@ -287,7 +315,8 @@ if (invokedDirectly) {
     process.exit(2);
   }
   const results = JSON.parse(fs.readFileSync(args.results, "utf8"));
-  const { snapshot, jsonPath, htmlPath } = writeDashboard(results, { outDir: args.outDir });
+  const { snapshot, jsonPath, htmlPath, unchanged } = writeDashboard(results, { outDir: args.outDir });
+  if (unchanged) console.log("Dashboard unchanged (same results as the tracked snapshot); files left untouched.");
   console.log(`Skills Health Dashboard -> ${htmlPath}`);
   console.log(`Snapshot                -> ${jsonPath}`);
   console.log(

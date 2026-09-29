@@ -62,6 +62,14 @@ export function versionMentions(text) {
   return [...String(text ?? "").matchAll(/\bv(\d+\.\d+(?:\.\d+)?)\b/g)].map((m) => m[1]);
 }
 
+export function issueCitationMentions(text) {
+  return [...String(text ?? "").matchAll(/#(\d{2,})\b/g)].map((m) => Number(m[1]));
+}
+
+export function releaseClaimMarkers(text) {
+  return [...String(text ?? "").matchAll(/<!--\s*release-claim\b[\s\S]*?-->/gi)].map((m) => m[0]);
+}
+
 /**
  * The version baselines a mention can be measured against, as a flat list.
  *
@@ -121,9 +129,14 @@ export function hasExplicitBlocker(text) {
 }
 
 /** Build the classified box record shared by both the line-anchored and collapsed-body paths. */
-function classifyBox(checked, text, baselines) {
+function classifyBox(checked, text, baselines, options = {}) {
   const mentions = versionMentions(text);
   const { superseded, unattributed } = classifyVersionMentions(text, baselines);
+  const issueCitations = issueCitationMentions(text);
+  const knownIssues =
+    options.knownIssues === undefined
+      ? null
+      : new Set([...options.knownIssues].map((number) => Number(number)));
   return {
     checked,
     text,
@@ -132,15 +145,19 @@ function classifyBox(checked, text, baselines) {
     versionMentions: mentions,
     supersededVersions: superseded,
     unattributedVersions: unattributed,
+    issueCitations,
+    danglingIssueCitations: knownIssues
+      ? issueCitations.filter((number) => !knownIssues.has(number))
+      : [],
   };
 }
 
-export function parseChecklistLine(line, baselines) {
+export function parseChecklistLine(line, baselines, options = {}) {
   const m = /^\s*-\s\[( |x|X)\]\s+(.*)\s*$/.exec(line);
   if (!m) return null;
   const checked = m[1].toLowerCase() === "x";
   const text = m[2];
-  return classifyBox(checked, text, baselines);
+  return classifyBox(checked, text, baselines, options);
 }
 
 // Matches a checklist marker anywhere in the body, not anchored to the start of a line. Issue
@@ -171,15 +188,18 @@ export function extractChecklistBoxes(body) {
   });
 }
 
-export function analyzeIssueBody(body, baselines) {
+export function analyzeIssueBody(body, baselines, options = {}) {
+  const releaseClaims = releaseClaimMarkers(body);
   const raw = extractChecklistBoxes(body);
-  const boxes = raw.map((b) => classifyBox(b.checked, b.text, baselines));
+  const boxes = raw.map((b) => classifyBox(b.checked, b.text, baselines, options));
   const checked = boxes.filter((b) => b.checked);
   const open = boxes.filter((b) => !b.checked);
   const openWithoutBlocker = open.filter((b) => !b.hasExplicitBlocker);
   const tickedWithoutCitation = checked.filter((b) => !b.hasCitation);
   const supersededVersionMentions = boxes.flatMap((b) => b.supersededVersions);
   const unattributedVersionMentions = boxes.flatMap((b) => b.unattributedVersions);
+  const danglingIssueCitations = boxes.flatMap((b) => b.danglingIssueCitations);
+  const duplicateReleaseClaimMarkers = releaseClaims.length > 1 ? releaseClaims : [];
   // Every checklist marker found by CHECKLIST_MARKER is attributed to exactly one box above, so
   // there is currently no code path that drops a marker silently. This channel exists so a future
   // change that narrows extraction (e.g. to skip markers inside fenced code) has somewhere to
@@ -196,6 +216,8 @@ export function analyzeIssueBody(body, baselines) {
       tickedWithoutCitation: tickedWithoutCitation.length,
       supersededVersionMentions: supersededVersionMentions.length,
       unattributedVersionMentions: unattributedVersionMentions.length,
+      danglingIssueCitations: danglingIssueCitations.length,
+      duplicateReleaseClaimMarkers: duplicateReleaseClaimMarkers.length,
       unparseable: unparseable.length,
     },
     findings: {
@@ -203,6 +225,8 @@ export function analyzeIssueBody(body, baselines) {
       tickedWithoutCitation: tickedWithoutCitation.map((b) => b.text),
       supersededVersionMentions,
       unattributedVersionMentions,
+      danglingIssueCitations: danglingIssueCitations.map((number) => `#${number}`),
+      duplicateReleaseClaimMarkers,
       unparseable,
     },
   };
@@ -269,9 +293,30 @@ export function buildLedger(options, run = defaultRunner) {
   const trainVersions = readTrainVersions(options.root);
   const currentVersion = trainVersions.plugin;
   const repo = options.repo || detectRepo(options.root, run);
-  const issues = options.issues.map((n) => {
-    const issue = fetchIssue(n, repo, run, options.root);
-    const analysis = analyzeIssueBody(issue.body, trainVersions);
+  const fetchedIssues = options.bodyFile
+    ? [readIssueFromBodyFile(options.bodyFile, options.issueNumber, options.title, repo)]
+    : options.issues.map((n) => fetchIssue(n, repo, run, options.root));
+  const knownIssues = new Set(fetchedIssues.map((issue) => Number(issue.number)));
+
+  if (options.validateCitations) {
+    const cited = new Set(fetchedIssues.flatMap((issue) => issueCitationMentions(issue.body)));
+    for (const number of cited) {
+      if (knownIssues.has(number)) continue;
+      try {
+        fetchIssue(number, repo, run, options.root);
+        knownIssues.add(number);
+      } catch {
+        // Leave the citation out of knownIssues; the analyzer reports it as dangling below.
+      }
+    }
+  }
+
+  const issues = fetchedIssues.map((issue) => {
+    const analysis = analyzeIssueBody(
+      issue.body,
+      trainVersions,
+      options.validateCitations ? { knownIssues } : {},
+    );
     return {
       number: issue.number,
       title: issue.title,
@@ -290,7 +335,10 @@ export function buildLedger(options, run = defaultRunner) {
       acc.tickedWithoutCitation += issue.counts.tickedWithoutCitation;
       acc.supersededVersionMentions += issue.counts.supersededVersionMentions;
       acc.unattributedVersionMentions += issue.counts.unattributedVersionMentions;
+      acc.danglingIssueCitations += issue.counts.danglingIssueCitations ?? 0;
+      acc.duplicateReleaseClaimMarkers += issue.counts.duplicateReleaseClaimMarkers ?? 0;
       acc.unparseable += issue.counts.unparseable ?? 0;
+      if (issue.counts.total === 0) acc.emptyLedgers += 1;
       return acc;
     },
     {
@@ -302,7 +350,10 @@ export function buildLedger(options, run = defaultRunner) {
       tickedWithoutCitation: 0,
       supersededVersionMentions: 0,
       unattributedVersionMentions: 0,
+      danglingIssueCitations: 0,
+      duplicateReleaseClaimMarkers: 0,
       unparseable: 0,
+      emptyLedgers: 0,
     },
   );
 
@@ -317,19 +368,50 @@ export function buildLedger(options, run = defaultRunner) {
   // Unattributed mentions are reported, never failed: a version no train claims is a
   // comparison that did not run, not a stale claim.
   record.ok =
+    totals.emptyLedgers === 0 &&
     totals.openWithoutBlocker === 0 &&
     totals.tickedWithoutCitation === 0 &&
     totals.supersededVersionMentions === 0 &&
+    totals.danglingIssueCitations === 0 &&
+    totals.duplicateReleaseClaimMarkers === 0 &&
     totals.unparseable === 0;
   return record;
 }
 
+export function ledgerFindingCodes(record) {
+  const totals = record.totals ?? {};
+  return [
+    [(totals.emptyLedgers ?? 0) > 0, "empty-acceptance-ledger"],
+    [(totals.openWithoutBlocker ?? 0) > 0, "open-box-without-blocker"],
+    [(totals.tickedWithoutCitation ?? 0) > 0, "ticked-box-without-citation"],
+    [(totals.supersededVersionMentions ?? 0) > 0, "superseded-version-claim"],
+    [(totals.danglingIssueCitations ?? 0) > 0, "dangling-issue-citation"],
+    [(totals.duplicateReleaseClaimMarkers ?? 0) > 0, "duplicate-release-claim-marker"],
+    [(totals.unparseable ?? 0) > 0, "unparseable-checklist"],
+  ].filter(([present]) => present).map(([, code]) => code);
+}
+
+export function readIssueFromBodyFile(file, number = 0, title = null, repo = null) {
+  const body = fs.readFileSync(path.resolve(file), "utf8");
+  return {
+    number,
+    title: title ?? `Body file ${path.basename(file)}`,
+    url: repo && number ? `https://github.com/${repo}/issues/${number}` : path.resolve(file),
+    body,
+  };
+}
+
 export const USAGE = `Usage: node evals/tools/issue-ledger.mjs <issue-number...> [options]
+       node evals/tools/issue-ledger.mjs --body-file <file> --issue-number <n> [options]
 
 Options:
   --repo <owner/repo>  GitHub repository (default: inferred from remote.origin.url)
   --root <dir>         repository root (default: this repository)
   --json <file>        write JSON output ("-" for stdout)
+  --body-file <file>   analyze a local issue body markdown file instead of calling gh
+  --issue-number <n>   issue number used with --body-file (default: 0)
+  --title <title>      issue title used with --body-file
+  --validate-citations verify issue citations resolve before passing the ledger
   --quiet              suppress human-readable output
   --help, -h           show this help`;
 
@@ -339,6 +421,10 @@ export function parseArgs(argv) {
     repo: null,
     root: REPO_ROOT,
     json: null,
+    bodyFile: null,
+    issueNumber: 0,
+    title: null,
+    validateCitations: false,
     quiet: false,
     help: false,
   };
@@ -352,6 +438,13 @@ export function parseArgs(argv) {
     if (arg === "--repo") out.repo = value(arg, argv[++i]);
     else if (arg === "--root") out.root = path.resolve(value(arg, argv[++i]));
     else if (arg === "--json") out.json = value(arg, argv[++i]);
+    else if (arg === "--body-file") out.bodyFile = path.resolve(value(arg, argv[++i]));
+    else if (arg === "--issue-number") {
+      const number = Number(value(arg, argv[++i]));
+      if (!Number.isInteger(number) || number < 0) throw new Error("issue-ledger: --issue-number must be a non-negative integer");
+      out.issueNumber = number;
+    } else if (arg === "--title") out.title = value(arg, argv[++i]);
+    else if (arg === "--validate-citations") out.validateCitations = true;
     else if (arg === "--quiet") out.quiet = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else if (arg.startsWith("-")) throw new Error(`issue-ledger: unknown option ${arg}`);
@@ -381,7 +474,10 @@ export function formatReport(record) {
         `  ticked without citation: ${issue.counts.tickedWithoutCitation}`,
         `  superseded version mentions: ${issue.counts.supersededVersionMentions}`,
         `  unattributed version mentions: ${issue.counts.unattributedVersionMentions ?? 0}`,
+        `  dangling issue citations: ${issue.counts.danglingIssueCitations ?? 0}`,
+        `  duplicate release-claim markers: ${issue.counts.duplicateReleaseClaimMarkers ?? 0}`,
         `  unparseable: ${issue.counts.unparseable ?? 0}`,
+        ...(issue.counts.total === 0 ? ["  empty acceptance ledger: yes"] : []),
       ].join("\n");
     }),
     "",
@@ -389,7 +485,10 @@ export function formatReport(record) {
     `flags: ${record.totals.openWithoutBlocker} open-without-blocker, ` +
       `${record.totals.tickedWithoutCitation} ticked-without-citation, ` +
       `${record.totals.supersededVersionMentions} superseded-version-mentions, ` +
-      `${record.totals.unparseable ?? 0} unparseable`,
+      `${record.totals.danglingIssueCitations ?? 0} dangling-issue-citations, ` +
+      `${record.totals.duplicateReleaseClaimMarkers ?? 0} duplicate-release-claim-markers, ` +
+      `${record.totals.unparseable ?? 0} unparseable, ` +
+      `${record.totals.emptyLedgers ?? 0} empty acceptance ledgers`,
     `not compared: ${record.totals.unattributedVersionMentions ?? 0} version mention(s) claimed by no train`,
     "",
     record.ok ? "RESULT: ledger is consistent" : "RESULT: ledger has drift to reconcile",
@@ -408,7 +507,12 @@ export function cli(argv = process.argv.slice(2), io = {}) {
     return 1;
   }
 
-  if (opts.help || opts.issues.length === 0) {
+  if (opts.bodyFile && opts.issues.length > 0) {
+    err.write("issue-ledger: --body-file cannot be combined with issue numbers\n");
+    return 1;
+  }
+
+  if (opts.help || (!opts.bodyFile && opts.issues.length === 0)) {
     err.write(`${USAGE}\n`);
     return opts.help ? 0 : 1;
   }

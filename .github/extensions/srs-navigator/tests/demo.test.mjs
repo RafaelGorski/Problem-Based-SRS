@@ -74,6 +74,10 @@ test.describe('the /live demo — default motion preference', () => {
 
   test('the control pauses it', async ({ page }) => {
     await reachTheFigure(page);
+    // Bring the control on screen *before* waiting for playback. Otherwise the click's
+    // own auto-scroll can move the video across the observer's threshold, pausing it
+    // just before the click lands — and the click then resumes it instead.
+    await page.locator(TOGGLE).scrollIntoViewIfNeeded();
     await expect.poll(() => isPaused(page), { timeout: 15000 }).toBe(false);
     await page.locator(TOGGLE).click();
     await expect.poll(() => isPaused(page)).toBe(true);
