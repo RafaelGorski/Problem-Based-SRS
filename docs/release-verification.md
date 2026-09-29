@@ -208,9 +208,26 @@ delete the tag **first**, because `bump-version.mjs` skips any version whose tag
 would otherwise walk past the stranded version forever:
 
 ```bash
-git push --delete origin vX.Y.Z
+gh release view vX.Y.Z                           # must FAIL: no release behind the tag
+git ls-remote --tags origin refs/tags/vX.Y.Z     # must list the tag: it is an orphan
+git push --delete origin vX.Y.Z                  # only when both checks above hold
 gh workflow run release-canvas.yml
 ```
+
+Never delete a tag that has a published release. The whole recovery is rehearsed offline,
+against a throwaway bare repository, by:
+
+```bash
+node evals/tools/recovery-rehearsal.mjs --json recovery-rehearsal.json
+```
+
+It records the version, origin tags, and releases before any mutation; strands the next
+version (tag pushed, no release) and shows `bump-version.mjs` would skip it; shows
+`check-distribution.mjs` reporting `release-tag-without-release` for that state; refuses to
+delete the published tag; deletes only the orphan; and shows the version is publishable
+again and the finding clears. Every git command is recorded with its exit code and the
+resulting origin tags. It exits `0` only when all six checks hold, and it never contacts the
+real remote — so it proves the runbook, not the state of GitHub.
 
 ### Verifying the published canvas archive
 
