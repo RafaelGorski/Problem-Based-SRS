@@ -25,7 +25,7 @@ function parseReport(issue) {
     inferredPeriod: !stated,
     rows: Object.fromEntries(rows.map((row) => [
       row[1].toLowerCase(),
-      { latest: row[2] === "none" ? null : row[2], planned: row[3] === "n/a" ? null : row[3], ready: row[4] === "Yes" },
+      { latest: row[2].toLowerCase() === "none" ? null : row[2], planned: row[3].toLowerCase() === "n/a" ? null : row[3], ready: row[4].toLowerCase() === "yes" },
     ])),
     createdAt: created.toISOString(),
   };

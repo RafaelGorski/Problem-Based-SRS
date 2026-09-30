@@ -69,6 +69,7 @@ describe("weekly release reconciliation", () => {
     assert.match(reconcileWeeklyReport(issue, [future, ...releases.slice(0, 1), releases[2]]).discrepancies[0], /latest published v2\.7/);
     assert.match(reconcileWeeklyReport(issue, [{ ...releases[1], name: "srs-navigator 2.7" }, releases[0], releases[2]]).discrepancies[0], /latest published v2\.7/);
     assert.match(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v1.1.5 | Yes", "n/a | Yes") }, releases).discrepancies[0], /ready without a planned tag/);
+    assert.match(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v1.1.5 | Yes", "N/A | YES") }, releases).discrepancies[0], /ready without a planned tag/);
     assert.throws(() => reconcileWeeklyReport({ ...issue, body: `${issue.body}\n| Canvas | v1.1.4 | v1.1.5 | Yes | repeated |` }, releases), /exactly one/);
   });
 
