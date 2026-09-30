@@ -63,6 +63,12 @@ scheduled dispatch still runs.
 New reports name the ISO week and its exact Monday 00:00:00 through Sunday 23:59:59
 UTC bounds in both the issue body and JSON artifact. Reconcile published releases
 against that historical window, not against the versions currently on `main`.
+The following Thursday's report workflow reconciles the previous completed ISO week
+using every page of published GitHub releases, then comments the dated result on the
+previous report issue (including discrepancies). For an older report, run
+`node scripts/reconcile-weekly-report.mjs <issue-number>`; its output identifies an
+inferred period for legacy reports and exits nonzero on unsupported release claims
+or omitted releases.
 
 The two trains differ on what "ready" means:
 
