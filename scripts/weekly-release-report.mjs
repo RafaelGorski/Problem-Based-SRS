@@ -107,6 +107,24 @@ function formatDateInZone(date, timeZone = REPORT_TIMEZONE) {
   return `${map.year}-${map.month}-${map.day}`;
 }
 
+export function isoWeekPeriod(date) {
+  const monday = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
+  const thursday = new Date(monday);
+  thursday.setUTCDate(thursday.getUTCDate() + 3);
+  const year = thursday.getUTCFullYear();
+  const firstThursday = new Date(Date.UTC(year, 0, 4));
+  firstThursday.setUTCDate(firstThursday.getUTCDate() + 3 - (firstThursday.getUTCDay() + 6) % 7);
+  const week = 1 + Math.round((thursday - firstThursday) / (7 * 86400000));
+  const sunday = new Date(monday);
+  sunday.setUTCDate(sunday.getUTCDate() + 6);
+  return {
+    isoWeek: `${year}-W${String(week).padStart(2, "0")}`,
+    periodStart: monday.toISOString(),
+    periodEnd: `${sunday.toISOString().slice(0, 10)}T23:59:59Z`,
+  };
+}
+
 function newestRelease(releases, train) {
   return releases.find((release) => releaseTrain(release) === train) ?? null;
 }
@@ -201,10 +219,11 @@ function markdownLinesForFiles(files) {
   return files.map((file) => `- \`${file}\``);
 }
 
-export function buildReportMarkdown({ reportDate, plugin, canvas }) {
+export function buildReportMarkdown({ reportDate, isoWeek, periodStart, periodEnd, plugin, canvas }) {
   const lines = [
     `# Weekly release report — ${reportDate}`,
     "",
+    ...(isoWeek ? [`**Report period:** ${isoWeek} · ${periodStart} through ${periodEnd} (UTC).`, ""] : []),
     `Review this before ${RELEASE_TIME_BRT} if you want to adjust today's release. ` +
       `The scheduled release still runs at ${RELEASE_TIME_BRT} even if approval does not arrive in time.`,
     "",
@@ -283,6 +302,7 @@ export async function collectWeeklyReleaseReport({
   const payload = {
     generatedAt: now.toISOString(),
     reportDate,
+    ...isoWeekPeriod(now),
     reportTitle: `Weekly release report for ${reportDate}`,
     plugin: {
       ...pluginStatus,
