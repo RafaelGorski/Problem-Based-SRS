@@ -45,6 +45,20 @@ do not create one before the window closes.
 Repository activity, maintainers, bots, and automation do not count unless the frozen
 eligibility definition explicitly says otherwise.
 
+To reproduce the classification from a recorded run, use:
+
+```bash
+node evals/tools/score-adoption-observations.mjs adoption-observations.json
+```
+
+The command prints the contract ID, classification, qualifying count, and any reasons. It
+exits non-zero for an invalid/frozen-contract mismatch, an unfinished window, or an
+inconclusive record. A complete `zero` result exits zero: negative outcomes are valid
+measurements, not retries. The scorer rejects a stored outcome that disagrees with its
+recalculation; attach its JSON output alongside the schema-backed observations under
+#142. The command cannot verify human eligibility or the content behind a digest; those
+still require the referenced redacted evidence and reviewer confirmation.
+
 ## Validate the contract
 
 The repository's contract validator checks completeness before publication; it does not

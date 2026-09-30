@@ -87,5 +87,7 @@ describe("adoption experiment preregistration guard", () => {
     assert.match(guide, /`blocked` when the contract is not frozen or the observation window is not complete/);
     assert.match(guide, /Do not extend the window/);
     assert.ok(schema.properties.outcome.properties.classification.enum.includes("inconclusive"));
+    assert.match(guide, /evals\/tools\/score-adoption-observations\.mjs adoption-observations\.json/);
+    assert.match(guide, /complete `zero` result exits zero/);
   });
 });
