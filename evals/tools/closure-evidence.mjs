@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Report-only guard for release-claiming issue closure.
+ * Read-only gate for release-claiming issue closure.
  *
  * The tool reads explicitly supplied issue records and the published release list. It never
  * writes to GitHub: a claim is clean only when its machine-readable train/version marker is
@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { classifyBatchVerdict, classifyIssueVerdict } from "../lib/closure-verdict.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..", "..");
@@ -81,6 +82,14 @@ export function assessClaims({ issues = [], releases = [], prospective = [] } = 
   const findings = [];
   const checked = [];
 
+  if (issues.length === 0 && prospectiveSet.size === 0) {
+    findings.push({
+      issue: null,
+      id: "issue-set-empty",
+      detail: "no issues were supplied; an empty batch cannot prove a clean closure verdict",
+    });
+  }
+
   for (const issue of issues) {
     const number = Number(issue.number);
     const state = String(issue.state ?? "").toLowerCase();
@@ -93,27 +102,48 @@ export function assessClaims({ issues = [], releases = [], prospective = [] } = 
     // indistinguishable from one that looked and found nothing wrong; this loop no longer
     // produces the first kind for any supplied issue.
     if (prospectiveSet.size > 0 && !isProspectiveTarget) continue;
-    if (isProspectiveTarget && state !== "open") {
-      findings.push({ issue: number, id: "issue-state-indeterminate", detail: "prospective claims must be open issues" });
+    if (!["open", "closed"].includes(state) || (isProspectiveTarget && state !== "open")) {
+      findings.push({
+        issue: number,
+        id: "issue-state-indeterminate",
+        detail: isProspectiveTarget
+          ? "prospective claims must be open issues"
+          : "issue state must be open or closed",
+      });
+      checked.push({ issue: number, state, claim: null, verdict: "undecidable" });
       continue;
     }
 
     const claim = parseClaim(issue.body);
-    checked.push({ issue: number, state, claim });
     if (!claim.ok) {
+      checked.push({ issue: number, state, claim, verdict: "undecidable" });
       findings.push({ issue: number, id: "release-claim-indeterminate", detail: claim.reason });
       continue;
     }
-    if (claim.noRelease) continue;
+    if (claim.noRelease) {
+      checked.push({
+        issue: number,
+        state,
+        claim,
+        verdict: classifyIssueVerdict({ claim, state, prospective: isProspectiveTarget }),
+      });
+      continue;
+    }
     // A release must actually exist only when the issue is being closed on the claim: a
     // prospective target (about to close) or an issue already closed under audit. An open issue
     // examined in audit mode carries a well-formed marker but has not been closed on it yet, so
     // it is not held to the publication requirement — only to carrying a marker the gate can
     // read, which is what the loop above already enforced by reaching this point.
     const requiresPublished = isProspectiveTarget || state === "closed";
-    if (!requiresPublished) continue;
     const matches = published.filter((release) => release.tag === claim.tag && release.train === claim.train);
-    if (matches.length === 0) {
+    const verdict = classifyIssueVerdict({
+      claim,
+      state,
+      prospective: isProspectiveTarget,
+      releasePublished: matches.length > 0,
+    });
+    checked.push({ issue: number, state, claim, verdict });
+    if (requiresPublished && matches.length === 0) {
       findings.push({
         issue: number,
         id: "release-claim-unpublished",
@@ -127,8 +157,10 @@ export function assessClaims({ issues = [], releases = [], prospective = [] } = 
       findings.push({ issue: number, id: "issue-unreadable", detail: `issue #${number} was not supplied` });
     }
   }
+  const verdict = classifyBatchVerdict({ findings, checked });
   return {
-    ok: findings.length === 0,
+    ok: verdict !== "undecidable",
+    verdict,
     mode: prospectiveSet.size ? "prospective" : "audit",
     evaluated: checked.length,
     checked,
@@ -178,35 +210,37 @@ export function readLive(issueNumbers) {
 }
 
 export function formatReport(result) {
-  const lines = [`# Closure evidence (${result.mode})`, ""];
-  if (result.ok) lines.push("Every checked release claim has a matching published release.", "");
+  const lines = [`# Closure evidence (${result.mode})`, "", `Verdict: ${result.verdict}`, ""];
+  if (result.ok) lines.push("Every checked release claim has a determinate closure verdict.", "");
   else {
     lines.push(`${result.findings.length} finding(s).`, "");
-    for (const finding of result.findings) lines.push(`- **#${finding.issue}** ${finding.id}: ${finding.detail}`);
+    for (const finding of result.findings) {
+      const subject = finding.issue === null ? "batch" : `#${finding.issue}`;
+      lines.push(`- **${subject}** ${finding.id}: ${finding.detail}`);
+    }
     lines.push("");
   }
   return lines.join("\n");
 }
 
 export function main(argv = []) {
-  const options = parseArgs(argv);
-  const liveIssueNumbers = options.issueNumbers.length ? options.issueNumbers : options.prospective;
-  const input = options.fixture ? readFixture(options.fixture) : readLive(liveIssueNumbers);
-  const issues = options.prospective.length
-    ? input.issues.filter((issue) => options.prospective.includes(Number(issue.number)))
-    : input.issues;
-  const result = assessClaims({ issues, releases: input.releases, prospective: options.prospective });
-  console.log(options.json ? JSON.stringify(result, null, 2) : formatReport(result));
-  return result.ok ? 0 : 1;
+  try {
+    const options = parseArgs(argv);
+    const liveIssueNumbers = options.issueNumbers.length ? options.issueNumbers : options.prospective;
+    const input = options.fixture ? readFixture(options.fixture) : readLive(liveIssueNumbers);
+    const issues = options.prospective.length
+      ? input.issues.filter((issue) => options.prospective.includes(Number(issue.number)))
+      : input.issues;
+    const result = assessClaims({ issues, releases: input.releases, prospective: options.prospective });
+    console.log(options.json ? JSON.stringify(result, null, 2) : formatReport(result));
+    return result.verdict === "undecidable" ? 1 : 0;
+  } catch (error) {
+    console.error(error.message);
+    console.log("Verdict: undecidable");
+    return 1;
+  }
 }
 
 const invokedDirectly =
   process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
-if (invokedDirectly) {
-  try {
-    process.exit(main(process.argv.slice(2)));
-  } catch (error) {
-    console.error(error.message);
-    process.exit(2);
-  }
-}
+if (invokedDirectly) process.exit(main(process.argv.slice(2)));

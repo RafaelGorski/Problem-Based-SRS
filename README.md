@@ -1,6 +1,6 @@
 # Problem-Based SRS
 
-[![Version 2.6.0](https://img.shields.io/badge/version-2.6.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases)
+[![Version 2.7.0](https://img.shields.io/badge/version-2.7.0-green.svg)](https://github.com/RafaelGorski/Problem-Based-SRS/releases)
 [![Skills Health](https://img.shields.io/badge/skills%20health-dashboard-brightgreen.svg)](https://rafaelgorski.github.io/Problem-Based-SRS/skills-health.html)
 [![AgentSkills](https://img.shields.io/badge/AgentSkills-Open%20Standard-blue)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -109,21 +109,25 @@ This prevents "everything is P1" by grounding priority in the problem's actual i
 
 ## Quick start
 
-**Install** (ask your AI assistant):
+Install both Copilot surfaces before opening the Navigator:
 
-```
-Install the Problem-Based SRS skills from RafaelGorski/Problem-Based-SRS into .github/skills/
-```
+1. Install the methodology skill with `npx skills add RafaelGorski/Problem-Based-SRS` (requires Node.js and npm).
+2. In Copilot, install the canvas extension for your user profile:
 
-For Claude Code, use `.claude/skills/` instead. Skills must go in the agent-specific directory, not a `skills/` folder at the repo root.
+   ```js
+   install_extension({
+     url: "https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator",
+     scope: "user"
+   })
+   ```
 
-**Run** your first session:
+3. Ask Copilot to verify that `problem-based-srs` is discoverable and `srs-navigator` is available, then run `/live` to open the graph. With no project specification, the Navigator offers its demo and learn-from-codebase paths.
 
-```
-/problem-based-srs
-```
+To start the methodology directly, run `/problem-based-srs` and describe your project.
 
-Describe your situation. The AI handles the rest:
+For Claude Code, install the methodology plugin using the Claude Code steps below; the SRS Navigator canvas is GitHub Copilot-only.
+
+Describe your situation to begin the methodology:
 
 ```
 I need requirements for an inventory management system.
