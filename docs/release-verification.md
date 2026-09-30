@@ -263,9 +263,10 @@ node scripts/check-distribution.mjs --strict
 
 `registry-diff.mjs` compares parsed `observations.registry` fields and reports added,
 removed, and changed values without depending on raw line order. `unchanged` is not proof of
-a refresh: when stale content is unchanged, the stale-content canary stays raised. `unverified`
-means a listing or skill page was unreadable, partial, duplicated, or absent; it can never be
-read as a clean result. Even a `changed` diff does not submit the request or prove the desired
+a refresh: when stale listing or skill content is unchanged, the stale-content canary stays
+raised and the command exits non-zero. `unverified` means a listing or skill page was
+unreadable, partial, duplicated, or absent; it also exits non-zero. Any remaining registry
+finding exits non-zero. Even a `changed` diff does not submit the request or prove the desired
 state—inspect `remainingFindings`, retain both snapshots and timestamps, and verify the live
 listing and skill page before closing the external work.
 

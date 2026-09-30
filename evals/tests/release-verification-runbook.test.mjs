@@ -94,8 +94,8 @@ describe("the runbook is somewhere a maintainer can actually read it", () => {
     );
     assert.ok(beforeAt >= 0 && afterAt > beforeAt && diffAt > afterAt);
     assert.match(runbook, /added,\s+removed,\s+and changed values/);
-    assert.match(runbook, /stale-content canary stays raised/);
-    assert.match(runbook, /`unverified`\s+means a listing or skill page was unreadable/);
+    assert.match(runbook, /stale-content canary stays\s+raised and the command exits non-zero/);
+    assert.match(runbook, /`unverified`\s+means a listing or skill page was\s+unreadable/);
     assert.match(runbook, /does not submit the request or prove the desired\s+state/);
   });
 

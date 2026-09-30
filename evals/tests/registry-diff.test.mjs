@@ -184,6 +184,19 @@ describe("parsed registry snapshot comparison", () => {
       snapshot({ findings: [{ id: "registry-skill-stale" }] }),
     );
     assert.equal(staleOnlyAfter.staleContentCanary, true);
+
+    const staleListing = snapshot({
+      findings: [{ id: "registry-listing-drift" }],
+      observations: {
+        registry: {
+          listing: { advertisedNames: ["problem-based-srs", "retired-skill"] },
+        },
+      },
+    });
+    const unchangedListing = compareRegistrySnapshots(staleListing, structuredClone(staleListing));
+    assert.equal(unchangedListing.verdict, "unchanged");
+    assert.equal(unchangedListing.staleContentCanary, true);
+    assert.deepEqual(unchangedListing.remainingFindings, ["registry-listing-drift"]);
   });
 
   it("treats unreadable, partial, missing, empty, and duplicate observations as unverified", () => {
@@ -372,6 +385,30 @@ describe("registry diff command", () => {
     const good = snapshot();
     const unknown = snapshot({
       observations: { registry: { listing: { status: "unreadable" } } },
+    });
+
+    it("fails when a readable fetch still serves the old listing or leaves drift", () => {
+      const stale = snapshot({
+        findings: [{ id: "registry-listing-drift" }],
+        observations: {
+          registry: { listing: { advertisedNames: ["problem-based-srs", "retired-skill"] } },
+        },
+      });
+      const files = tempSnapshots(stale, structuredClone(stale));
+      try {
+        const { io, output } = capture();
+        assert.equal(cli([files.beforeFile, files.afterFile], io), 1);
+        assert.match(output.stdout, /"staleContentCanary": true/);
+        fs.writeFileSync(files.afterFile, JSON.stringify(snapshot({
+          findings: [{ id: "registry-skill-stale" }],
+        })));
+        assert.equal(cli([files.beforeFile, files.afterFile], io), 1);
+        assert.match(output.stdout, /"remainingFindings": \[\s*"registry-skill-stale"/);
+        fs.writeFileSync(files.afterFile, JSON.stringify(snapshot()));
+        assert.equal(cli([files.beforeFile, files.afterFile], io), 0);
+      } finally {
+        files.cleanup();
+      }
     });
     const files = tempSnapshots(good, unknown);
     try {

@@ -150,7 +150,9 @@ export function compareRegistrySnapshots(beforeSummary, afterSummary) {
     clearedFindings: [...new Set(clearedFindings)].sort(),
     staleContentCanary:
       !hasChanges &&
-      (beforeFindings.includes("registry-skill-stale") || afterFindings.includes("registry-skill-stale")),
+      ["registry-listing-drift", "registry-skill-stale"].some(
+        (id) => beforeFindings.includes(id) || afterFindings.includes(id),
+      ),
   };
 }
 
@@ -188,7 +190,8 @@ export function cli(argv = process.argv.slice(2), io = {}) {
     const after = JSON.parse(fs.readFileSync(files[1], "utf8"));
     const result = compareRegistrySnapshots(before, after);
     out.write(`${JSON.stringify(result, null, 2)}\n`);
-    return result.verdict === "unverified" ? 1 : 0;
+    return result.verdict === "unverified" || result.staleContentCanary ||
+      result.remainingFindings.length > 0 ? 1 : 0;
   } catch (error) {
     err.write(`registry-diff: ${error.message}\n`);
     return 1;
