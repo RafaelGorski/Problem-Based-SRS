@@ -59,5 +59,28 @@ jobs:
             gh issue create --title "$REPORT_TITLE" --body-file release-report.md
           fi
 
+      - name: Reconcile the previous completed week against published releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=0
+          node scripts/reconcile-weekly-report.mjs --previous > reconciliation.json || status=$?
+          if [ ! -s reconciliation.json ]; then
+            echo "::error::No reconciliation evidence was produced."
+            exit 1
+          fi
+          number=$(node -e "const r=require('./reconciliation.json'); process.stdout.write(new URL(r.issue).pathname.split('/').at(-1))")
+          {
+            printf 'Release-record reconciliation from [workflow run](%s/%s/actions/runs/%s):\n\n' \
+              "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
+            echo '```json'
+            cat reconciliation.json
+            echo '```'
+          } > reconciliation.md
+          gh issue comment "$number" --body-file reconciliation.md
+          cat reconciliation.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
       - name: Publish the report summary
+        if: always()
         run: cat release-report.md >> "$GITHUB_STEP_SUMMARY"

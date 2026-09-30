@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Problem-Based SRS adoption observation record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractId", "cohortId", "contractSnapshot", "publishedAssets", "observations"],
+  "properties": {
+    "contractId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier copied unchanged from the frozen #185 contract."
+    },
+    "cohortId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Non-identifying cohort label copied from the frozen contract."
+    },
+    "contractSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cohortSize",
+        "eligibility",
+        "signal",
+        "threshold",
+        "exclusions",
+        "observationStart",
+        "observationEnd",
+        "preregisteredAt"
+      ],
+      "properties": {
+        "cohortSize": { "type": "integer", "minimum": 1 },
+        "eligibility": { "type": "string", "minLength": 1 },
+        "signal": { "type": "string", "minLength": 1 },
+        "threshold": { "const": 1 },
+        "exclusions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "observationStart": { "type": "string", "format": "date-time", "pattern": "Z$" },
+        "observationEnd": { "type": "string", "format": "date-time", "pattern": "Z$" },
+        "preregisteredAt": { "type": "string", "format": "date-time", "pattern": "Z$" }
+      }
+    },
+    "publishedAssets": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["surface", "tag", "sha256"],
+        "properties": {
+          "surface": { "enum": ["plugin", "canvas"] },
+          "tag": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "participantId",
+          "observedAt",
+          "eligible",
+          "startedAt",
+          "finishedAt",
+          "firstTraceAt",
+          "liveOpenedAt",
+          "installDurationSeconds",
+          "firstTraceDurationSeconds",
+          "liveOpened",
+          "signalObserved",
+          "abandonmentReason",
+          "evidenceSha256"
+        ],
+        "properties": {
+          "participantId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "description": "Opaque random label, never a name, username, email, or account ID."
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "eligible": { "type": "boolean" },
+          "startedAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
+          "finishedAt": { "type": ["string", "null"], "format": "date-time", "pattern": "Z$" },
+          "firstTraceAt": { "type": ["string", "null"], "format": "date-time", "pattern": "Z$" },
+          "liveOpenedAt": { "type": ["string", "null"], "format": "date-time", "pattern": "Z$" },
+          "installDurationSeconds": { "type": ["number", "null"], "minimum": 0 },
+          "firstTraceDurationSeconds": { "type": ["number", "null"], "minimum": 0 },
+          "liveOpened": { "type": "boolean" },
+          "signalObserved": { "type": "boolean" },
+          "abandonmentReason": { "type": ["string", "null"] },
+            "evidenceSha256": {
+            "type": ["string", "null"],
+            "pattern": "^[a-f0-9]{64}$"
+          }
+          }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "qualifyingSignalCount", "scoredAt"],
+      "properties": {
+          "classification": { "enum": ["positive", "zero", "inconclusive"] },
+          "qualifyingSignalCount": { "type": "integer", "minimum": 0 },
+          "scoredAt": { "type": "string", "format": "date-time", "pattern": "Z$" }
+      }
+    }
+  }
+}

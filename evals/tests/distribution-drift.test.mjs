@@ -23,6 +23,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -658,12 +659,12 @@ describe("a dangling link the manifest has already moved past", () => {
   const link = (version, tag) =>
     `[${version}]: https://github.com/RafaelGorski/Problem-Based-SRS/releases/tag/${tag}`;
 
-  const summaryFor = (tagLinks, manifestVersion = "2.6.0") =>
+  const summaryFor = (tagLinks, manifestVersion = "2.6.0", publishedReleases = PUBLISHED_RELEASES) =>
     summarize({
       listing: { skills: ["problem-based-srs"], declaredCount: 1, url: REGISTRY_URL },
       repoSkills: ["problem-based-srs"],
       tagLinks,
-      publishedReleases: PUBLISHED_RELEASES,
+      publishedReleases,
       manifestVersion,
       canvasVersion: "1.1.0",
     });
@@ -776,12 +777,15 @@ describe("a dangling link the manifest has already moved past", () => {
   });
 
   it("holds for the links this repository ships today", () => {
+    const localTags = execFileSync("git", ["tag", "--list"], { cwd: repoRoot, encoding: "utf8" })
+      .trim().split(/\r?\n/).filter(Boolean);
     const summary = summaryFor(
       advertisedTagLinks([
         { file: "README.md", text: README },
         { file: "CHANGELOG.md", text: CHANGELOG },
       ]),
       JSON.parse(read(".claude-plugin/plugin.json")).version,
+      localTags.map((tag) => ({ tag, name: tag })),
     );
     assert.equal(
       summary.findings.filter((f) => f.id === "stranded-release-link").length,
