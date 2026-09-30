@@ -41,12 +41,22 @@ describe("weekly release reconciliation", () => {
     assert.equal(reconcileWeeklyReport(issue, [...releases, { ...added, published_at: "2026-09-28T00:00:00Z" }]).status, "reconciled");
   });
 
+  it("rejects an older published tag misrepresented as latest at the report timestamp", () => {
+    const newerPlugin = { ...releases[1], tag_name: "v2.8", published_at: "2026-09-20T00:00:00Z" };
+    const result = reconcileWeeklyReport(issue, [...releases, newerPlugin]);
+    assert.equal(result.status, "discrepancies");
+    assert.ok(result.discrepancies.some((item) => /plugin: reported latest v2\.7, but latest published at report time was v2\.8/.test(item)));
+    const missing = reconcileWeeklyReport(issue, releases.filter((release) => release.tag_name !== "v2.7"));
+    assert.ok(missing.discrepancies.some((item) => /plugin: reported latest v2\.7, but latest published at report time was none/.test(item)));
+  });
+
   it("rejects reports that misstate published releases or their reporting period", () => {
     const period = "**Report period:** 2026-W39 · 2026-09-21T00:00:00.000Z through 2026-09-27T23:59:59Z (UTC)";
     assert.equal(reconcileWeeklyReport({ ...issue, body: `${period}\n${issue.body}` }, releases).inferredPeriod, false);
-    assert.match(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v2.7 | v2.7", "v2.9 | v2.7") }, releases).discrepancies[0], /latest published v2\.9/);
+    assert.ok(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v2.7 | v2.7", "v2.9 | v2.7") }, releases).discrepancies.some((item) => /latest published v2\.9/.test(item)));
     assert.throws(() => reconcileWeeklyReport({ ...issue, created_at: "not-a-date" }, releases), /creation timestamp/);
     assert.throws(() => reconcileWeeklyReport({ ...issue, body: `**Report period:** 2026-W38 · 2026-09-21T00:00:00.000Z through 2026-09-27T23:59:59Z (UTC)\n${issue.body}` }, releases), /disagrees/);
+    assert.throws(() => reconcileWeeklyReport({ ...issue, body: `**Report period:** broken\n${issue.body}` }, releases), /malformed UTC period/);
     assert.throws(() => reconcileWeeklyReport({ ...issue, body: "No train table" }, releases), /train row/);
   });
 
@@ -66,11 +76,12 @@ describe("weekly release reconciliation", () => {
 
   it("refuses unsupported latest tags, ready targets without tags, and ambiguous train tables", () => {
     const future = { ...releases[1], published_at: "2026-09-26T00:00:00Z" };
-    assert.match(reconcileWeeklyReport(issue, [future, ...releases.slice(0, 1), releases[2]]).discrepancies[0], /latest published v2\.7/);
-    assert.match(reconcileWeeklyReport(issue, [{ ...releases[1], name: "srs-navigator 2.7" }, releases[0], releases[2]]).discrepancies[0], /latest published v2\.7/);
+    assert.ok(reconcileWeeklyReport(issue, [future, ...releases.slice(0, 1), releases[2]]).discrepancies.some((item) => /latest published v2\.7/.test(item)));
+    assert.ok(reconcileWeeklyReport(issue, [{ ...releases[1], name: "srs-navigator 2.7" }, releases[0], releases[2]]).discrepancies.some((item) => /latest published v2\.7/.test(item)));
     assert.match(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v1.1.5 | Yes", "n/a | Yes") }, releases).discrepancies[0], /ready without a planned tag/);
     assert.match(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v1.1.5 | Yes", "N/A | YES") }, releases).discrepancies[0], /ready without a planned tag/);
     assert.throws(() => reconcileWeeklyReport({ ...issue, body: `${issue.body}\n| Canvas | v1.1.4 | v1.1.5 | Yes | repeated |` }, releases), /exactly one/);
+    assert.throws(() => reconcileWeeklyReport({ ...issue, body: `${issue.body}\n| Canvas | wrong | v1.1.5 | Yes | invalid |` }, releases), /exactly one/);
   });
 
   it("exercises the CLI contract without network calls", () => {

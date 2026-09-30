@@ -9,14 +9,16 @@ import { isoWeekPeriod } from "./weekly-release-report.mjs";
 const REPO = "RafaelGorski/Problem-Based-SRS";
 
 function parseReport(issue) {
+  const trainRows = issue.body.match(/^\|\s*(?:Plugin|Canvas)\s*\|.*$/gim) ?? [];
   const rows = [...issue.body.matchAll(/^\|\s*(Plugin|Canvas)\s*\|\s*(v[\d.]+|none)\s*\|\s*(v[\d.]+|n\/a)\s*\|\s*(Yes|No)\s*\|/gim)];
-  if (rows.length !== 2 || new Set(rows.map((row) => row[1].toLowerCase())).size !== 2) {
+  if (rows.length !== 2 || trainRows.length !== 2 || new Set(rows.map((row) => row[1].toLowerCase())).size !== 2) {
     throw new Error("Report must have exactly one plugin and one canvas train row.");
   }
   const created = new Date(issue.created_at);
   if (Number.isNaN(created.getTime())) throw new Error("Report has no valid creation timestamp.");
   const period = isoWeekPeriod(created);
   const stated = issue.body.match(/^\*\*Report period:\*\*\s*(\d{4}-W\d{2})\s*·\s*(\S+)\s+through\s+(\S+)\s+\(UTC\)/m);
+  if (issue.body.includes("**Report period:**") && !stated) throw new Error("Report has a malformed UTC period.");
   if (stated && [period.isoWeek, period.periodStart, period.periodEnd].some((value, i) => value !== stated[i + 1])) {
     throw new Error("Report's stated UTC period disagrees with its creation week.");
   }
@@ -38,8 +40,19 @@ export function reconcileWeeklyReport(issue, releases, repo = REPO) {
   const discrepancies = [];
   const start = Date.parse(period.periodStart);
   const end = Date.parse(period.periodEnd) + 1000;
+  const published = releases.filter((release) => !release.draft && release.published_at).map((release) => {
+    const timestamp = Date.parse(release.published_at);
+    if (!Number.isFinite(timestamp)) throw new Error(`Release ${release.tag_name} has an invalid published_at timestamp.`);
+    return { release, timestamp, train: releaseTrain(release) };
+  });
   for (const train of ["plugin", "canvas"]) {
     const { latest, planned, ready } = rows[train];
+    const latestAtReport = published
+      .filter((item) => item.train === train && item.timestamp <= Date.parse(createdAt))
+      .sort((a, b) => b.timestamp - a.timestamp)[0]?.release ?? null;
+    if (latest !== (latestAtReport?.tag_name ?? null)) {
+      discrepancies.push(`${train}: reported latest ${latest ?? "none"}, but latest published at report time was ${latestAtReport?.tag_name ?? "none"} (${latestAtReport?.html_url ?? "no release"})`);
+    }
     if (latest) {
       const release = releases.find((item) => item.tag_name === latest && !item.draft);
       if (!release || releaseTrain(release) !== train || Date.parse(release.published_at) > Date.parse(createdAt)) {
@@ -50,12 +63,8 @@ export function reconcileWeeklyReport(issue, releases, repo = REPO) {
     }
     if (ready && !planned) discrepancies.push(`${train}: ready without a planned tag`);
   }
-  for (const release of releases) {
-    if (release.draft || !release.published_at) continue;
-    const published = Date.parse(release.published_at);
-    if (!Number.isFinite(published)) throw new Error(`Release ${release.tag_name} has an invalid published_at timestamp.`);
-    if (published < start || published >= end) continue;
-    const train = releaseTrain(release);
+  for (const { release, timestamp, train } of published) {
+    if (timestamp < start || timestamp >= end) continue;
     if (train === "unknown") {
       discrepancies.push(`Unclassified release ${release.tag_name} published ${release.published_at}`);
       continue;
