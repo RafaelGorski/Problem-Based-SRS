@@ -96,26 +96,26 @@ export function selectPreviousReport(issues, now) {
   return matches[0];
 }
 
-function main(argv) {
+export function runReconciliation(argv, { api = ghJson, now = new Date(), write = console.log } = {}) {
   if (argv.length !== 1 || (argv[0] !== "--previous" && !/^\d+$/.test(argv[0]))) {
     throw new Error("Usage: node scripts/reconcile-weekly-report.mjs <report-issue-number|--previous>");
   }
   const number = argv[0] === "--previous"
-    ? selectPreviousReport(ghJson(["api", "--paginate", "--slurp", `repos/${REPO}/issues?state=all&per_page=100`]).flat(), new Date()).number
+    ? selectPreviousReport(api(["api", "--paginate", "--slurp", `repos/${REPO}/issues?state=all&per_page=100`]).flat(), now).number
     : argv[0];
-  const issue = ghJson(["api", `repos/${REPO}/issues/${number}`]);
-  const pages = ghJson(["api", "--paginate", "--slurp", `repos/${REPO}/releases?per_page=100`]);
+  const issue = api(["api", `repos/${REPO}/issues/${number}`]);
+  const pages = api(["api", "--paginate", "--slurp", `repos/${REPO}/releases?per_page=100`]);
   if (!Array.isArray(pages) || pages.some((page) => !Array.isArray(page))) {
     throw new Error("Release census is not a paginated array.");
   }
   const result = reconcileWeeklyReport(issue, pages.flat());
-  console.log(JSON.stringify(result, null, 2));
-  if (result.discrepancies.length) process.exitCode = 1;
+  write(JSON.stringify(result, null, 2));
+  return result.discrepancies.length ? 1 : 0;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    main(process.argv.slice(2));
+    process.exitCode = runReconciliation(process.argv.slice(2));
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;

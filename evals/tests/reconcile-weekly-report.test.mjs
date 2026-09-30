@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { reconcileWeeklyReport, selectPreviousReport } from "../../scripts/reconcile-weekly-report.mjs";
+import { reconcileWeeklyReport, runReconciliation, selectPreviousReport } from "../../scripts/reconcile-weekly-report.mjs";
 
 const issue = {
   html_url: "https://github.com/RafaelGorski/Problem-Based-SRS/issues/289",
@@ -62,6 +62,32 @@ describe("weekly release reconciliation", () => {
     assert.throws(() => reconcileWeeklyReport(issue, [{ ...releases[0], published_at: "invalid" }]), /invalid published_at/);
     assert.ok(reconcileWeeklyReport(issue, [{ ...releases[0], name: "" }]).discrepancies.some((item) => /Unclassified/.test(item)));
     assert.match(reconcileWeeklyReport(issue, [{ ...releases[0], tag_name: "v1.1.6" }]).discrepancies.at(-1), /omitted/);
+  });
+
+  it("refuses unsupported latest tags, ready targets without tags, and ambiguous train tables", () => {
+    const future = { ...releases[1], published_at: "2026-09-26T00:00:00Z" };
+    assert.match(reconcileWeeklyReport(issue, [future, ...releases.slice(0, 1), releases[2]]).discrepancies[0], /latest published v2\.7/);
+    assert.match(reconcileWeeklyReport(issue, [{ ...releases[1], name: "srs-navigator 2.7" }, releases[0], releases[2]]).discrepancies[0], /latest published v2\.7/);
+    assert.match(reconcileWeeklyReport({ ...issue, body: issue.body.replace("v1.1.5 | Yes", "n/a | Yes") }, releases).discrepancies[0], /ready without a planned tag/);
+    assert.throws(() => reconcileWeeklyReport({ ...issue, body: `${issue.body}\n| Canvas | v1.1.4 | v1.1.5 | Yes | repeated |` }, releases), /exactly one/);
+  });
+
+  it("exercises the CLI contract without network calls", () => {
+    const prior = { ...issue, number: 289, title: "Weekly release report for 2026-09-24" };
+    const calls = [];
+    const api = (args) => {
+      calls.push(args.join(" "));
+      if (args.at(-1).includes("/issues?")) return [[prior]];
+      if (args[1]?.includes("/issues/289")) return prior;
+      return [releases];
+    };
+    const output = [];
+    assert.equal(runReconciliation(["--previous"], { api, now: new Date("2026-10-01T15:00:00Z"), write: (line) => output.push(JSON.parse(line)) }), 0);
+    assert.equal(output[0].status, "reconciled");
+    assert.ok(calls.some((call) => call.includes("per_page=100")));
+    assert.equal(runReconciliation(["289"], { api: (args) => args[1]?.includes("/issues/") ? prior : [[...releases, { ...releases[0], tag_name: "v1.1.6" }]], write() {} }), 1);
+    assert.throws(() => runReconciliation(["bogus"], { api }), /Usage/);
+    assert.throws(() => runReconciliation(["289"], { api: (args) => args[1]?.includes("/issues/") ? prior : {} }), /paginated array/);
   });
 
   it("keeps prior-week reconciliation and issue evidence in the scheduled workflow", () => {
