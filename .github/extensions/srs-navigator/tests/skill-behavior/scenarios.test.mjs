@@ -50,7 +50,7 @@ for (const modelId of resolveModelList()) {
   const provider = detectProvider(modelId);
   const keyPresent = hasKey(provider);
 
-  describe(`SRS skill behavior :: ${modelId}`, () => {
+  describe(`SRS skill behavior :: ${PROVIDERS[provider].label}/${modelId}`, () => {
     if (!keyPresent) {
       it(`skipped — ${PROVIDERS[provider].envKey} is unset`, { skip: true }, () => {});
       return;

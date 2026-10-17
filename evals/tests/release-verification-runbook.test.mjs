@@ -61,17 +61,42 @@ describe("the runbook is somewhere a maintainer can actually read it", () => {
     assert.ok(fs.existsSync(path.join(repoRoot, "docs/release-verification.md")));
   });
 
-  describe("release-claim closure is guarded by report-only evidence", () => {
-    it("documents the marker, offline fixture, prospective mode, and no-mutation contract", () => {
+  describe("release-claim closure is a required, read-only gate", () => {
+    it("documents the verdict contract, mutation boundary, fixture, and prospective mode", () => {
       assert.match(runbook, /evals\/tools\/closure-evidence\.mjs/);
       assert.match(runbook, /closure-2026-08-04\.json/);
       assert.match(runbook, /--prospective/);
-      assert.match(runbook, /report-only/);
+      assert.match(runbook, /Required release-claim closure gate/);
+      assert.doesNotMatch(runbook, /report-only/);
+      assert.match(runbook, /`claim`, `non-claim`, or `undecidable`/);
+      assert.match(runbook, /non-zero only for `undecidable`/);
+      assert.match(runbook, /do not close an issue unless\s+the command exits zero/i);
+      assert.match(runbook, /empty batch is also undecidable/);
       assert.match(runbook, /never edits or closes an issue/);
       assert.match(runbook, /stays open until the\s+claim is backed by the\s+release surface/);
       assert.match(runbook, /release-claim train=plugin version=v2\.6/);
       assert.match(runbook, /release-claim train=canvas version=v1\.1\.1/);
     });
+  });
+
+  it("documents the guarded issue creator and the duplicate regression case", () => {
+    assert.match(runbook, /evals\/tools\/subissue-guard\.mjs/);
+    assert.match(runbook, /both the parent and its open siblings/);
+    assert.match(runbook, /#142 \/ #389 duplicate/);
+    assert.match(runbook, /No issue should be created by bypassing this check/);
+  });
+
+  it("compares saved registry observations semantically without claiming an external refresh", () => {
+    const beforeAt = runbook.indexOf("node scripts/check-distribution.mjs --json > distribution-before.json");
+    const afterAt = runbook.indexOf("node scripts/check-distribution.mjs --json > distribution-after.json");
+    const diffAt = runbook.indexOf(
+      "node evals/tools/registry-diff.mjs distribution-before.json distribution-after.json",
+    );
+    assert.ok(beforeAt >= 0 && afterAt > beforeAt && diffAt > afterAt);
+    assert.match(runbook, /added,\s+removed,\s+and changed values/);
+    assert.match(runbook, /stale-content canary stays\s+raised and the command exits non-zero/);
+    assert.match(runbook, /`unverified`\s+means a listing or skill page was\s+unreadable/);
+    assert.match(runbook, /does not submit the request or prove the desired\s+state/);
   });
 
   it("is reachable from the policy document rather than duplicating it", () => {

@@ -42,6 +42,8 @@ import {
   runPreflight,
   sha256,
 } from "../tools/release-preflight.mjs";
+import { pluginReleaseTag } from "../../scripts/check-distribution.mjs";
+import { readPluginVersion } from "../../scripts/release-train.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
@@ -926,8 +928,10 @@ describe("as a real command", () => {
 
 describe("against this repository", () => {
   it("classifies the manifest's own tag as the plugin train", () => {
+    const tag = pluginReleaseTag(readPluginVersion(repoRoot));
+    assert.ok(tag, "the current manifest version must resolve to a plugin tag");
     const record = runPreflight({
-      tag: "v2.6",
+      tag,
       root: repoRoot,
       suites: false,
       against: "HEAD",

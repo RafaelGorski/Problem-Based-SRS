@@ -67,10 +67,18 @@ jobs:
         working-directory: .github/extensions/srs-navigator
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SRS_SKILL_BEHAVIOR_MODELS: claude-3-5-haiku-latest
         run: npm run test:skill-behavior 2>&1 | tee skill-behavior.log
 
-      # The log is the only record of *why* a behavioral scenario failed: the model's
-      # trace is not reproducible from the exit code.
+      - name: Publish executed-scenario summary
+        if: always()
+        working-directory: .github/extensions/srs-navigator
+        env:
+          SRS_SKILL_BEHAVIOR_PROVIDER: Anthropic
+          SRS_SKILL_BEHAVIOR_MODEL: claude-3-5-haiku-latest
+        run: node scripts/write-skill-behavior-summary.mjs skill-behavior.log
+
+      # The uploaded TAP log preserves the model's scenario traces, including failures.
       - name: Upload run log
         if: always()
         uses: actions/upload-artifact@v4

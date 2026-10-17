@@ -3,7 +3,15 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { assessClaims, parseClaim, parseArgs, readFixture } from "../tools/closure-evidence.mjs";
+import {
+  assessClaims,
+  formatReport,
+  main,
+  parseClaim,
+  parseArgs,
+  readFixture,
+} from "../tools/closure-evidence.mjs";
+import { classifyBatchVerdict, classifyIssueVerdict } from "../lib/closure-verdict.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const fixture = readFixture(path.join(root, "evals/fixtures/closure-2026-08-04.json"));
@@ -35,10 +43,174 @@ describe("release claim markers", () => {
   });
 });
 
-describe("closure evidence is report-only and deterministic", () => {
+describe("closure verdict classification", () => {
+  it("returns only claim, non-claim, or undecidable for every state", () => {
+    const claim = parseClaim("<!-- release-claim train=plugin version=v2.6 -->");
+    const nonClaim = parseClaim("<!-- release-claim train=none -->");
+    assert.equal(classifyIssueVerdict({ claim, state: "open" }), "claim");
+    assert.equal(
+      classifyIssueVerdict({ claim, state: "open", prospective: true, releasePublished: true }),
+      "claim",
+    );
+    assert.equal(classifyIssueVerdict({ claim, state: "closed", releasePublished: true }), "claim");
+    assert.equal(
+      classifyIssueVerdict({ claim, state: "closed", releasePublished: false }),
+      "undecidable",
+    );
+    assert.equal(
+      classifyIssueVerdict({ claim, state: "open", prospective: true }),
+      "undecidable",
+    );
+    assert.equal(classifyIssueVerdict({ claim: { ok: false }, state: "open" }), "undecidable");
+    assert.equal(classifyIssueVerdict({ claim: nonClaim, state: "open" }), "non-claim");
+    assert.equal(classifyIssueVerdict({ claim, state: "unknown" }), "undecidable");
+    assert.equal(classifyIssueVerdict(), "undecidable");
+  });
+
+  it("reduces a non-empty assessment to exactly one batch verdict", () => {
+    assert.equal(classifyBatchVerdict({ findings: [{}], checked: [] }), "undecidable");
+    assert.equal(classifyBatchVerdict({ findings: [], checked: [{ verdict: "claim" }] }), "claim");
+    assert.equal(classifyBatchVerdict({ findings: [], checked: [{ verdict: "non-claim" }] }), "non-claim");
+    assert.equal(classifyBatchVerdict(), "undecidable");
+  });
+
+  it("classifies #139's explicit no-release marker as a non-claim", () => {
+    const result = assessClaims({
+      issues: [{ number: 139, state: "open", body: "<!-- release-claim train=none -->" }],
+      releases: [],
+    });
+    assert.equal(result.verdict, "non-claim");
+    assert.equal(result.checked[0].verdict, "non-claim");
+    assert.equal(result.ok, true);
+  });
+
+  it("refuses an empty issue batch instead of returning a vacuous clean verdict", () => {
+    const result = assessClaims({ issues: [], releases: [] });
+    assert.equal(result.verdict, "undecidable");
+    assert.equal(result.ok, false);
+    assert.equal(result.findings[0].id, "issue-set-empty");
+    assert.match(formatReport(result), /Verdict: undecidable[\s\S]*\*\*batch\*\*/);
+  });
+
+  it("marks a requested prospective issue missing from the query as undecidable", () => {
+    const result = assessClaims({ issues: [], releases: [], prospective: [209] });
+    assert.equal(result.verdict, "undecidable");
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.findings, [{
+      issue: 209,
+      id: "issue-unreadable",
+      detail: "issue #209 was not supplied",
+    }]);
+  });
+
+  it("marks records with an unknown state undecidable", () => {
+    const result = assessClaims({
+      issues: [{ number: 207, state: "unknown", body: "<!-- release-claim train=none -->" }],
+      releases: [],
+    });
+    assert.equal(result.verdict, "undecidable");
+    assert.equal(result.checked[0].verdict, "undecidable");
+    assert.equal(result.findings[0].id, "issue-state-indeterminate");
+  });
+
+  it("does not treat a closed issue as a prospective open issue", () => {
+    const result = assessClaims({
+      issues: [{
+        number: 208,
+        state: "closed",
+        body: "<!-- release-claim train=plugin version=v2.6 -->",
+      }],
+      releases: [],
+      prospective: [208],
+    });
+    assert.equal(result.verdict, "undecidable");
+    assert.equal(result.findings[0].id, "issue-state-indeterminate");
+    assert.match(result.findings[0].detail, /must be open/);
+  });
+
+  it("returns a stable verdict and fails only when the verdict is undecidable", () => {
+    const closedClaim = {
+      number: 206,
+      state: "closed",
+      body: "<!-- release-claim train=plugin version=v2.6 -->",
+    };
+    const withRelease = {
+      issues: [closedClaim],
+      releases: [{ tagName: "v2.6", name: "Version 2.6", isDraft: false, isPrerelease: false }],
+    };
+    assert.deepEqual(assessClaims(withRelease), assessClaims(withRelease));
+    assert.equal(assessClaims(withRelease).verdict, "claim");
+    assert.equal(assessClaims({ issues: [closedClaim], releases: [] }).verdict, "undecidable");
+
+    const output = [];
+    const originalLog = console.log;
+    console.log = (message) => output.push(String(message));
+    try {
+      assert.equal(main(["--fixture", path.join(root, "evals/fixtures/closure-2026-08-04.json")]), 1);
+    } finally {
+      console.log = originalLog;
+    }
+    assert.match(output.join("\n"), /Verdict: undecidable/);
+  });
+
+  it("exits successfully for a determinate non-claim fixture", () => {
+    const temp = fs.mkdtempSync(path.join(root, "evals", "fixtures", "closure-nonclaim-"));
+    const file = path.join(temp, "fixture.json");
+    const output = [];
+    const originalLog = console.log;
+    try {
+      fs.writeFileSync(
+        file,
+        JSON.stringify({
+          issues: [{ number: 139, state: "open", body: "<!-- release-claim train=none -->" }],
+          releases: [],
+        }),
+      );
+      console.log = (message) => output.push(String(message));
+      assert.equal(main(["--fixture", file, "--json"]), 0);
+      fs.writeFileSync(
+        file,
+        JSON.stringify({
+          issues: [{
+            number: 139,
+            state: "open",
+            body: "<!-- release-claim train=plugin version=v2.7 -->",
+          }],
+          releases: [],
+        }),
+      );
+      assert.equal(main(["--fixture", file, "--json"]), 0);
+    } finally {
+      console.log = originalLog;
+      fs.rmSync(temp, { recursive: true, force: true });
+    }
+    assert.match(output.join("\n"), /"verdict": "non-claim"/);
+    assert.match(output.join("\n"), /"verdict": "claim"/);
+  });
+
+  it("reports command errors as an undecidable verdict", () => {
+    const output = [];
+    const errors = [];
+    const originalLog = console.log;
+    const originalError = console.error;
+    console.log = (message) => output.push(String(message));
+    console.error = (message) => errors.push(String(message));
+    try {
+      assert.equal(main(["--not-an-option"]), 1);
+    } finally {
+      console.log = originalLog;
+      console.error = originalError;
+    }
+    assert.match(errors.join("\n"), /unknown option/);
+    assert.deepEqual(output, ["Verdict: undecidable"]);
+  });
+});
+
+describe("closure evidence is deterministic", () => {
   it("replays the four closed-but-unpublished claims from the recorded fixture", () => {
     const result = assessClaims(fixture);
     assert.equal(result.ok, false);
+    assert.equal(result.verdict, "undecidable");
     assert.deepEqual(result.findings.map((f) => f.issue), [89, 90, 129, 130]);
   });
   it("evaluates open issues in prospective mode", () => {
@@ -118,7 +290,8 @@ describe("audit and prospective verdicts agree on identical input (#172)", () =>
 
   it("reports how many claims were actually evaluated, so a clean run over zero is not silent", () => {
     const result = assessClaims({ issues: [], releases: [] });
-    assert.equal(result.ok, true);
+    assert.equal(result.ok, false);
+    assert.equal(result.verdict, "undecidable");
     assert.equal(result.evaluated, 0);
   });
 

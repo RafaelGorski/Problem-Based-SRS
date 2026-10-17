@@ -19,9 +19,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { hasLedgerDrift } from "../lib/issue-ledger-verdict.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(__dirname, "..", "..");
+export { hasLedgerDrift };
 
 export function normalizeResult(result) {
   if (result.error) {
@@ -316,17 +318,14 @@ export function buildLedger(options, run = defaultRunner) {
   };
   // Unattributed mentions are reported, never failed: a version no train claims is a
   // comparison that did not run, not a stale claim.
-  record.ok =
-    totals.openWithoutBlocker === 0 &&
-    totals.tickedWithoutCitation === 0 &&
-    totals.supersededVersionMentions === 0 &&
-    totals.unparseable === 0;
+  record.ok = !hasLedgerDrift(totals);
   return record;
 }
 
 export const USAGE = `Usage: node evals/tools/issue-ledger.mjs <issue-number...> [options]
 
 Options:
+  --issue <number>      add one issue to the ledger (repeatable)
   --repo <owner/repo>  GitHub repository (default: inferred from remote.origin.url)
   --root <dir>         repository root (default: this repository)
   --json <file>        write JSON output ("-" for stdout)
@@ -349,7 +348,13 @@ export function parseArgs(argv) {
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === "--repo") out.repo = value(arg, argv[++i]);
+    if (arg === "--issue") {
+      const number = value(arg, argv[++i]);
+      if (!/^\d+$/.test(number) || Number(number) < 1) {
+        throw new Error("issue-ledger: issue number must be a positive integer");
+      }
+      out.issues.push(Number(number));
+    } else if (arg === "--repo") out.repo = value(arg, argv[++i]);
     else if (arg === "--root") out.root = path.resolve(value(arg, argv[++i]));
     else if (arg === "--json") out.json = value(arg, argv[++i]);
     else if (arg === "--quiet") out.quiet = true;

@@ -17,37 +17,22 @@ An interactive force-directed graph visualization for **Problem-Based SRS** spec
 
 ## Installation
 
-### Method 1: Install from Gist (Recommended)
+### Method 1: Install from the repository (Recommended)
 
-If this extension has been shared as a gist, you can install it directly in the GitHub Copilot app:
+Install the published repository-folder extension in the GitHub Copilot app:
 
-1. Open the **GitHub Copilot** app (desktop or CLI)
-2. Open the **Command Palette** (Ctrl+Shift+P / Cmd+Shift+P)
-3. Search for **"Install extension from gist…"**
-4. Paste the gist URL when prompted
-5. Choose the installation scope:
-   - **Project** — installs to `.github/extensions/srs-navigator/` in your repo (shared with team)
-   - **User** — installs to `~/.copilot/extensions/srs-navigator/` (personal, all projects)
-   - **Session** — installs for the current session only (temporary)
-6. The extension loads automatically — no restart needed
-
-Alternatively, ask the Copilot agent directly:
-
-```
-Install the SRS Navigator extension from gist: <gist-url>
+```js
+install_extension({
+  url: "https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator",
+  scope: "user"
+})
 ```
 
-### Method 2: Install via `install_extension` Tool
+Choose `project` instead of `user` to share the extension with the current repository, or `session` for a temporary install. The extension loads automatically.
 
-In any Copilot CLI session, use the `install_extension` tool:
+### Method 2: Install from a Gist
 
-```
-install_extension({ url: "<gist-url-or-repo-folder-url>", scope: "user" })
-```
-
-Supported URL formats:
-- **Gist URL**: `https://gist.github.com/<user>/<gist-id>`
-- **Repo folder URL**: `https://github.com/RafaelGorski/Problem-Based-SRS/tree/main/.github/extensions/srs-navigator`
+If your team has shared a gist instead, open the Copilot app's **Command Palette** (Ctrl+Shift+P / Cmd+Shift+P), choose **Install extension from gist…**, paste its URL, and select the installation scope.
 
 ### Method 3: Copy into Your Repository
 
@@ -95,12 +80,9 @@ Share the srs-navigator extension as a gist
 
 ## Verifying Installation
 
-After installing, verify the extension loaded:
+After installing both surfaces for the one-pass Copilot path, verify that `problem-based-srs` is discoverable and `srs-navigator` is listed as an available canvas. Then ask Copilot to open `/live`; with no `.spec/` file, the Navigator offers the demo and learn-from-codebase paths.
 
-1. Open a Copilot session in the project
-2. The agent should list `srs-navigator` as an available canvas
-3. Ask the agent: *"Open the SRS Navigator canvas"*
-4. The canvas panel should appear with the demo CRM System specification
+For a canvas-only install, the extension can still be verified by asking the agent to list available canvases and open `srs-navigator`.
 
 If the canvas doesn't appear, check:
 - Run `extensions_manage({ operation: "list" })` to see loaded extensions

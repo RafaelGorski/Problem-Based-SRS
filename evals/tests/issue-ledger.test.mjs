@@ -4,9 +4,11 @@ import assert from "node:assert/strict";
 import {
   analyzeIssueBody,
   attributeVersion,
+  buildLedger,
   classifyVersionMentions,
   compareVersions,
   extractChecklistBoxes,
+  hasLedgerDrift,
   hasCitation,
   hasExplicitBlocker,
   normalizeVersion,
@@ -14,6 +16,7 @@ import {
   parseChecklistLine,
   readCanvasVersion,
   readTrainVersions,
+  REPO_ROOT,
   toBaselines,
 } from "../tools/issue-ledger.mjs";
 
@@ -85,6 +88,62 @@ describe("issue body analysis", () => {
   it("flags boxes that still name a superseded version", () => {
     const analyzed = analyzeIssueBody("- [ ] release link points at v2.5", "2.6.0");
     assert.equal(analyzed.counts.supersededVersionMentions, 1);
+  });
+
+  it("flips the ledger verdict for each closure-gate mutation", () => {
+    const baseline = analyzeIssueBody("- [x] verified in #397", {
+      plugin: "2.7.0",
+      canvas: "1.1.5",
+    });
+    assert.equal(hasLedgerDrift(baseline.counts), false);
+
+    const mutations = [
+      ["open box without blocker", "- [ ] still pending", "openWithoutBlocker"],
+      ["ticked box without citation", "- [x] completed", "tickedWithoutCitation"],
+      ["stale version claim", "- [ ] release remains v2.6", "supersededVersionMentions"],
+    ];
+    for (const [label, body, counter] of mutations) {
+      const analyzed = analyzeIssueBody(body, { plugin: "2.7.0", canvas: "1.1.5" });
+      assert.equal(analyzed.counts[counter], 1, `${label} must be detected`);
+      assert.equal(hasLedgerDrift(analyzed.counts), true, `${label} must block a clean verdict`);
+    }
+    assert.equal(
+      hasLedgerDrift({ ...baseline.counts, unparseable: 1 }),
+      true,
+      "an unparseable checklist must not be treated as a clean ledger",
+    );
+  });
+});
+
+describe("ledger construction applies the closure drift verdict", () => {
+  it("marks clean issue evidence green and meaningful drift red", () => {
+    const run = (_command, args) => {
+      const issueNumber = Number(args[2]);
+      const body = issueNumber === 139 ? "- [x] verified in #397" : "- [ ] still pending";
+      return {
+        status: 0,
+        stdout: JSON.stringify({
+          number: issueNumber,
+          title: `Issue ${issueNumber}`,
+          url: `https://github.com/RafaelGorski/Problem-Based-SRS/issues/${issueNumber}`,
+          body,
+        }),
+        stderr: "",
+      };
+    };
+    const options = {
+      root: REPO_ROOT,
+      repo: "RafaelGorski/Problem-Based-SRS",
+      issues: [],
+    };
+
+    const clean = buildLedger({ ...options, issues: [139] }, run);
+    const drifted = buildLedger({ ...options, issues: [140] }, run);
+
+    assert.equal(clean.ok, true);
+    assert.equal(clean.totals.openWithoutBlocker, 0);
+    assert.equal(drifted.ok, false);
+    assert.equal(drifted.totals.openWithoutBlocker, 1);
   });
 });
 
@@ -228,6 +287,14 @@ describe("argument parsing", () => {
     assert.equal(args.repo, "owner/repo");
     assert.equal(args.json, "-");
     assert.equal(args.quiet, true);
+  });
+
+  it("accepts the explicit --issue form and rejects invalid issue values", () => {
+    assert.deepEqual(parseArgs(["--issue", "139"]).issues, [139]);
+    assert.deepEqual(parseArgs(["--issue", "139", "--issue", "140"]).issues, [139, 140]);
+    assert.throws(() => parseArgs(["--issue"]), /needs a value/);
+    assert.throws(() => parseArgs(["--issue", "0"]), /positive integer/);
+    assert.throws(() => parseArgs(["--issue", "abc"]), /positive integer/);
   });
 
   it("rejects non-numeric issue identifiers", () => {

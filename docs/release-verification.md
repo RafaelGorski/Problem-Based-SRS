@@ -14,7 +14,7 @@ which tag, what the distribution monitor reports) and links back to this file fo
 - [Plugin train — cutting `vX.Y`](#plugin-train--cutting-vxy)
 - [Canvas train — cutting `vX.Y.Z`](#canvas-train--cutting-vxyz)
 - [Refreshing the skills.sh listing](#refreshing-the-skillssh-listing)
-- [Release-claim closure evidence](#release-claim-closure-evidence)
+- [Required release-claim closure gate](#required-release-claim-closure-gate)
 - [Issue-ledger drift guard for sequenced closure](#issue-ledger-drift-guard-for-sequenced-closure)
 - [Proving `/live` in the app itself](#proving-live-in-the-app-itself)
 - [Deriving an evidence pack](#deriving-an-evidence-pack)
@@ -60,6 +60,15 @@ The normal release rhythm is now:
 
 The report is informational, not a gate. If no approval arrives before 16:00 BRT, the
 scheduled dispatch still runs.
+New reports name the ISO week and its exact Monday 00:00:00 through Sunday 23:59:59
+UTC bounds in both the issue body and JSON artifact. Reconcile published releases
+against that historical window, not against the versions currently on `main`.
+The following Thursday's report workflow reconciles the previous completed ISO week
+using every page of published GitHub releases, then comments the dated result on the
+previous report issue (including discrepancies). For an older report, run
+`node scripts/reconcile-weekly-report.mjs <issue-number>`; its output identifies an
+inferred period for legacy reports and exits nonzero on unsupported release claims
+or omitted releases.
 
 The two trains differ on what "ready" means:
 
@@ -257,24 +266,36 @@ node scripts/check-distribution.mjs --json > distribution-before.json
 # Manual action: submit/refresh the repository on skills.sh and wait for its crawl.
 
 node scripts/check-distribution.mjs --json > distribution-after.json
+node evals/tools/registry-diff.mjs distribution-before.json distribution-after.json
 node scripts/check-distribution.mjs --strict
 ```
 
+`registry-diff.mjs` compares parsed `observations.registry` fields and reports added,
+removed, and changed values without depending on raw line order. `unchanged` is not proof of
+a refresh: when stale listing or skill content is unchanged, the stale-content canary stays
+raised and the command exits non-zero. `unverified` means a listing or skill page was
+unreadable, partial, duplicated, or absent; it also exits non-zero. Any remaining registry
+finding exits non-zero. Even a `changed` diff does not submit the request or prove the desired
+state—inspect `remainingFindings`, retain both snapshots and timestamps, and verify the live
+listing and skill page before closing the external work.
+
 ---
 
-## Release-claim closure evidence
+## Required release-claim closure gate
 
 An issue that claims a published release stays open until the claim is backed by the
-release surface. The marker is deliberately machine-readable and train-specific:
+release surface. Running this gate is a required closure step: a non-zero result means the
+issue must remain open. The command is read-only and never edits or closes an issue. The
+marker is deliberately machine-readable and train-specific:
 
 ```text
 <!-- release-claim train=plugin version=v2.6 -->
 <!-- release-claim train=canvas version=v1.1.1 -->
 ```
 
-The check is report-only. It reads explicitly supplied issue records and non-draft,
-non-prerelease releases; it never edits or closes an issue. Replay a captured state offline,
-or audit live issue numbers through the GitHub CLI:
+It reads explicitly supplied issue records and non-draft, non-prerelease releases. Replay a
+captured state offline, audit live issue numbers, or check open issues immediately before
+closure through the GitHub CLI:
 
 ```bash
 node evals/tools/closure-evidence.mjs --fixture evals/fixtures/closure-2026-08-04.json
@@ -282,14 +303,18 @@ node evals/tools/closure-evidence.mjs 137 138
 node evals/tools/closure-evidence.mjs --prospective 137 138
 ```
 
-Use `--prospective` for open issues before closure. A missing, duplicate, malformed, or
-ambiguous marker is indeterminate and fails the report; a network/API failure also fails
-instead of looking like a clean verdict. External publication remains a maintainer action,
-so a failing report is a blocker rather than evidence to record as complete.
+Use `--prospective` for open issues before closure. The output gives exactly one batch
+verdict: `claim`, `non-claim`, or `undecidable`. An explicit `train=none` marker is a
+non-claim. A prospective claim is closure-ready only when its train-specific published
+release exists; a missing, duplicate, malformed, ambiguous, unpublished, or unreadable claim
+is `undecidable`. An empty batch is also undecidable, never a vacuous pass. Exit status is
+zero for `claim` or `non-claim` and non-zero only for `undecidable`; command/API errors also
+report `undecidable`. Do not close an issue unless the command exits zero. External
+publication remains a maintainer action.
 
-Read the after-run output separately from its exit code. `--strict` exits zero when there
-are no **error** findings, but warnings and notices intentionally do not fail it. Record
-these observations alongside the JSON:
+The distribution check has a separate contract: `check-distribution.mjs --strict` exits zero
+when there are no **error** findings, while warnings and notices intentionally do not fail
+it. Record these observations alongside its JSON:
 
 - whether the page publishes a description, and if so whether it matches
   `skills/problem-based-srs/SKILL.md`;
@@ -323,6 +348,24 @@ node evals/tools/issue-ledger.mjs 69 89 90 91 92 104 105 107 108 --json issue-le
 
 It reports; it does not edit. Reconciliation remains a human judgement. The guard exists so a
 body drifting away from its evidence is detected by command rather than discovered in review.
+
+---
+
+## Preventing duplicate sub-issues
+
+Use the guarded creator rather than opening child issues directly. It fetches the paginated
+open-issue list and compares the proposed title, after case/punctuation/article normalization
+and near-match detection, with both the parent and its open siblings. A collision stops before
+any create request:
+
+```bash
+node evals/tools/subissue-guard.mjs --parent 142 \
+  --title "Run One External /live Adoption Experiment And The Outcome"
+```
+
+Only pass `--create` after the guard reports no collision. The creator adds the canonical
+`[sub of #N]` prefix and parent reference; the guard is covered by an offline regression
+case replaying the #142 / #389 duplicate. No issue should be created by bypassing this check.
 
 ---
 
